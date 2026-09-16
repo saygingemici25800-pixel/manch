@@ -1,6 +1,6 @@
 // Tek font tanım dosyası (next/font "font definitions file" kalıbı).
 // Her font tek instance; @theme'deki --font-display / --font-ui / --font-pixel bu değişkenleri tüketir.
-import { Modak, Mouse_Memoirs, Press_Start_2P, Silkscreen } from "next/font/google";
+import { Modak, Mouse_Memoirs, Silkscreen } from "next/font/google";
 
 export const modak = Modak({
   weight: "400",
@@ -16,27 +16,12 @@ export const mouseMemoirs = Mouse_Memoirs({
   variable: "--font-mouse-memoirs",
 });
 
-// Kural 18 sonucu (2026-09-17): Silkscreen'de ğ ş ı Ğ Ş İ yok (latin-ext dilimi 18 glyph),
-// Press Start 2P 12/12 TR karakteri kapsıyor → font-pixel = Press Start 2P.
-export const pressStart = Press_Start_2P({
-  weight: "400",
-  subsets: ["latin", "latin-ext"],
-  display: "swap",
-  variable: "--font-press-start",
-});
-
-// Silkscreen sadece /lab karşılaştırması için (font-pixel-alt); preload edilmez.
+// Kural 18 (karar 2026-09-17): Silkscreen ğşıĞŞİ içermez → font-pixel SADECE İngilizce metinlerde (tape/marquee).
 export const silkscreen = Silkscreen({
-  weight: "400",
+  weight: ["400", "700"],
   subsets: ["latin", "latin-ext"],
   display: "swap",
-  preload: false,
   variable: "--font-silkscreen",
 });
 
-export const fontVariables = [
-  modak.variable,
-  mouseMemoirs.variable,
-  pressStart.variable,
-  silkscreen.variable,
-].join(" ");
+export const fontVariables = [modak.variable, mouseMemoirs.variable, silkscreen.variable].join(" ");

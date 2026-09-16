@@ -14,17 +14,9 @@ export const colors = {
 export type ColorToken = keyof typeof colors;
 
 export const fonts = [
-  { token: "display", label: "Modak", cssVar: "--font-modak", className: "font-display" },
-  { token: "ui", label: "Mouse Memoirs", cssVar: "--font-mouse-memoirs", className: "font-ui" },
-  { token: "pixel", label: "Press Start 2P", cssVar: "--font-press-start", className: "font-pixel" },
+  { token: "display", label: "Modak", cssVar: "--font-modak", className: "font-display", enOnly: false },
+  { token: "ui", label: "Mouse Memoirs", cssVar: "--font-mouse-memoirs", className: "font-ui", enOnly: false },
+  { token: "pixel", label: "Silkscreen", cssVar: "--font-silkscreen", className: "font-pixel", enOnly: true },
 ] as const;
-
-// Kural 18: elenen aday (ğşıĞŞİ yok) — sadece /lab karşılaştırması
-export const pixelFallbackFont = {
-  token: "pixel-alt",
-  label: "Silkscreen",
-  cssVar: "--font-silkscreen",
-  className: "font-pixel-alt",
-} as const;
 
 export const trTestChars = "ğüşıöçĞÜŞİÖÇ";

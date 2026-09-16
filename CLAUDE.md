@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 2 tamamlandı** — Faz 3 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 Faz 2 (`pnpm build` + lint temiz; `/tr`, `/en`, `/tr/lab`, `/en/lab` SSG; headless Chromium ile lab render + GlyphCheck doğrulandı)
+- Aktif faz: **Faz 3 tamamlandı** — Faz 4 için kullanıcı onayı bekleniyor
+- Son başarılı build: 2026-09-17 Faz 3 (`pnpm build` + lint temiz; prod'da `/lab` 404 (Kural 23); Playwright kabul testi geçti)
 - Preview URL: —
-- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · Silkscreen görünümü tercih edilirse sadece EN tape metinlerinde kullanılabilir (Kural 18, planlayıcı kararı) · `/lab` production'da erişilebilir (noindex) — Faz 9'da kaldırılsın mı? · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak)
+- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · `text-stroke-fill` utility'si Faz 4'te açılacak (karar 2026-09-17) · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak) · CursorTrail/Juggle malzeme ikonları geçici (renkli daire/kare) — gerçek SVG ikonlar Faz 7 · CursorTrail şu an sadece `/lab`'da mount; Faz 4'te layout'a taşınacak · Playwright kabul script'i scratchpad'de (`faz3.mjs`), repoya `scripts/` altında eklenmesi Faz 8'de değerlendirilsin
 
 ---
 
@@ -56,11 +56,15 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 15. Sayfa içi linklerde `next/link` değil `@/i18n/navigation`'daki `Link` / `useRouter` / `redirect` kullan — locale prefix'i otomatik.
 16. `[locale]` altındaki her server component'te `setRequestLocale(locale)` çağır; aksi halde statik render bozulur.
 17. Menü ürün modeli: `name` ve `desc` `Localized` (`{tr,en}`), `ingredients` `Record<Locale,string[]>`. Teyit edilmemiş ürünlerde `unconfirmed: true`.
-18. `font-pixel` sırası: Silkscreen → TR karakter desteği zayıfsa Press Start 2P → o da yetmezse `font-pixel` **sadece İngilizce metinlerde** (tape/marquee) kullanılır, `font-ui`'ye düşülmez.
+18. `font-pixel` = **Silkscreen** (karar 2026-09-17). ğşıĞŞİ içermediği için **sadece İngilizce metinlerde** (tape/marquee) kullanılır; TR metne asla uygulanmaz, `font-ui`'ye de düşülmez. Press Start 2P projeden kaldırıldı.
 19. Modak / Mouse Memoirs'ta eksik TR karakter varsa fallback zinciri `@theme` font token'ında tanımlanır (`--font-display: var(--font-modak), <fallback>, ...`); `/lab` sayfasında eksik karakterler görünür şekilde işaretlenir.
 20. Git kimliği repo-local: `Webber Digital <saygingemici25800@gmail.com>` (karar 2026-09-17).
 21. Yeni bir font eklerken TR kapsamını `latin-ext` etiketine güvenmeden doğrula: build sonrası `.next/static/media/*.woff2` dosyalarında cmap union'ı (fontTools) **ve** `/lab` GlyphCheck. Fontlar tek dosyada: `src/styles/fonts.ts`; token listesi `src/styles/tokens.ts` `globals.css` ile senkron tutulur.
 22. Tailwind v4: renkler `@theme`, next/font değişkenlerini tüketen font tokenları `@theme inline`. Özel sınıflar `@utility` ile; `max-md:` karşılığı utility içinde `@media (width < 48rem)`.
+23. `/[locale]/lab` sadece development: sayfa başında `if (process.env.NODE_ENV === "production") notFound()`. Production build'de lab 404 döner; lab doğrulaması `next dev` ile yapılır.
+24. Smooth scroll: **`lenis/react`** (`<ReactLenis root options={{ autoRaf:false }}>` + `useLenis`) — manuel `new Lenis()` değil. Gerekçe: `useLenis` context'i Marquee/JellyWave'in scroll `velocity` okuması için hazır; instance lifecycle'ı React'e bağlı; raf yine README'deki gibi `gsap.ticker`'a bağlanır (`lenis.on("scroll", ScrollTrigger.update)`, `lagSmoothing(0)`). Sistem reduced-motion'ı Lenis kendisi izler; lab override'ı için `lerp` elle 1 yapılır.
+25. React Compiler lint kuralları aktif (`react-hooks/refs`, `react-hooks/immutability`): `ref.current`'i render'da **ve render'da çağrılan closure'larda** (`contextSafe(...)` dahil) okuma → GSAP hedefini `useGSAP({ scope })` selector'ıyla ver (`".wrap"`, `"path"`); dinamik element için `createElement(as, { ref })` değil `const Tag = as; <Tag ref={ref}>`; kütüphane nesnesi mutasyonunu (`lenis.options.x = …`) modül-seviyesi helper fonksiyona taşı.
+26. Her motion primitive `useReducedMotion()` okur (`src/lib/hooks/useReducedMotion.ts` = sistem tercihi ∨ `useMotionStore.forceReduced`), `true` ise GSAP kurmadan statik render eder. GSAP eklentileri sadece `src/lib/gsap.ts` üzerinden import edilir (tek `registerPlugin`).
 
 ---
 
@@ -163,18 +167,18 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 
 ### Faz 2 — Tasarım Sistemi
 - [x] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
-- [x] next/font: Modak, Mouse Memoirs, **Press Start 2P** (latin-ext) — Silkscreen ğşıĞŞİ içermediği için `font-pixel-alt`'a düştü, sadece `/lab`'da *(revize: 2026-09-17, Kural 18)*
+- [x] next/font: Modak, Mouse Memoirs, Silkscreen (latin-ext) — Silkscreen ğşıĞŞİ içermez, sadece EN metinlerde (Kural 18; Press Start 2P denendi ve karar ile kaldırıldı) *(revize: 2026-09-17)*
 - [x] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
 - [x] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
-- [x] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi (`noindex`), ekran görüntüsü `docs/screens/faz-2-lab.png`
+- [x] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
 - [x] ✅ Kabul: lab sayfası doğru render, build temiz
 
 ### Faz 3 — Motion Primitive'leri
-- [ ] R19 SmoothScroll provider
-- [ ] R6 RollText · R7 BlobButton · R14 Marquee · SplitReveal (char/line mask)
-- [ ] R9 JellyWave · R8 CursorTrail · R18 Juggle
-- [ ] Hepsi `/lab`'da demo, reduced-motion testi
-- [ ] ✅ Kabul: console temiz, sayfa değişiminde memory leak yok (cleanup)
+- [x] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
+- [x] R6 RollText · R7 BlobButton · R14 Marquee (scroll hızıyla `timeScale`) · SplitReveal (chars / lines `mask`, `autoSplit`) — `src/components/motion/`
+- [x] R9 JellyWave (Lenis `velocity` → `quickTo scaleY`) · R8 CursorTrail (hover+fine pointer, `data-cursor-hide`) · R18 Juggle (`--juggle-scale`)
+- [x] Hepsi `/lab` "Motion" bölümünde demo; `useReducedMotion` hook + Zustand override ile emülasyon toggle'ı; `ScrollTrigger.getAll().length` göstergesi *(revize: 2026-09-17)*
+- [x] ✅ Kabul: Playwright (headless Chromium) — console 0 hata/uyarı; ST sayısı 2 → reduced'da 0 → 2; `/tr/lab`↔`/en/lab` ×10 ve `/tr/lab`↔`/tr` ×10 sonrası hep 2 (leak yok). `docs/screens/faz-3-lab.png`, `faz-3-motion.webm`
 
 ### Faz 4 — Global Layout
 - [ ] R1 Preloader (ilk yükleme, sessionStorage ile 1 kez)
@@ -238,6 +242,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 1 | `pnpm add` sonrası `ERR_PNPM_IGNORED_BUILDS` (@swc/core, @parcel/watcher) | pnpm 11 postinstall script'lerini varsayılan olarak engelliyor; scaffold `pnpm-workspace.yaml`'a placeholder yazmış | Her ikisi de `false` yapıldı (Next kendi SWC binary'sini getiriyor). Build etkilenmedi |
 | 2026-09-17 | 2 | Silkscreen TR karakter desteği zayıf: `ğ ş ı Ğ Ş İ` yok (fontTools ile `.next/static/media/*.woff2` cmap union'ı; latin-ext dilimi sadece 18 glyph) | Google Fonts "latin-ext" etiketi tam kapsama garantisi vermiyor | Kural 18 uygulandı: `font-pixel` = **Press Start 2P** (12/12 TR ✓). Silkscreen `font-pixel-alt` olarak sadece `/lab`'da, `preload: false`. Modak ve Mouse Memoirs 12/12 ✓ — fallback zinciri yine de tanımlı (Kural 19) |
 | 2026-09-17 | 2 | Sistemde fontTools yok; glyph kapsamı doğrulanamıyordu | macOS python3'te fontTools/brotli yok | Scratchpad'e `pip --target` ile kuruldu; `/lab`'daki `GlyphCheck` (canvas ölçümü) tarayıcı tarafında aynı testi yapar (Kural 21) |
+| 2026-09-17 | 3 | `pnpm lint` 4 hata: `react-hooks/refs` (BlobButton `contextSafe` closure'ları + SplitReveal `createElement(as,{ref})`), `react-hooks/immutability` (SmoothScroll `lenis.options.lerp =`) | `eslint-config-next@16` React Compiler kurallarını açıyor; `ref.current`'i render sırasında çağrılan fonksiyonlara vermek ve dış nesne mutasyonu yasak | Kural 25: GSAP hedefleri `scope` selector'ı (`.wrap`, `path`) ile; dinamik tag `createElement` değil JSX `<Tag ref>`; Lenis mutasyonu modül-seviyesi `applyLerp()` helper'ına taşındı |
 
 ---
 

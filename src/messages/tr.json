@@ -6,7 +6,8 @@
   "Home": {
     "eyebrow": "United Chill Burger Zone",
     "tagline": "Handmade Hits Different",
-    "switchLocale": "English"
+    "switchLocale": "English",
+    "lab": "Lab"
   },
   "Nav": {
     "home": "Ana Sayfa",
@@ -77,7 +78,6 @@
     "utilities": "Utility'ler",
     "patterns": "Desenler",
     "sample": "ğüşıöçĞÜŞİÖÇ MANCH Smash'leniyor",
-    "pixelAltNote": "yedek aday (Kural 18)",
     "glyphCheck": "TR glyph testi — {chars}",
     "glyphChecking": "ölçülüyor…",
     "glyphOk": "tamam",
@@ -85,6 +85,27 @@
     "glyphNotLoaded": "yüklenemedi",
     "grainSample": "Grain .06",
     "placeholderBerry": "Berry placeholder",
-    "placeholderSky": "Sky placeholder"
+    "placeholderSky": "Sky placeholder",
+    "enOnly": "yalnızca EN metinlerde (tape/marquee)",
+    "navOtherLocale": "English lab",
+    "navHome": "Ana sayfa",
+    "motion": "Motion"
+  },
+  "Motion": {
+    "rmToggle": "Reduced motion",
+    "on": "AÇIK",
+    "off": "KAPALI",
+    "emulated": "emülasyon",
+    "stCount": "ScrollTrigger: {n}",
+    "rollA": "Sipariş Ver",
+    "rollB": "Menü",
+    "blob": "SİPARİŞ VER",
+    "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE",
+    "marqueeNote": "yalnızca EN (Kural 18) · scroll ile hızlanır",
+    "splitChars": "HANDMADE HITS DIFFERENT",
+    "splitLines": "Smash sesi mutfaktan, ilk ısırık masadan. Aç değiliz. Sadece takıntılıyız. Hazır soslara biraz uzağız.",
+    "jellyNote": "scroll hızı → scaleY",
+    "jellyText": "Yer çekimi onaylı cheese pull.",
+    "cursorNote": "sadece desktop (hover + fine pointer); butonlarda data-cursor-hide ile gizlenir"
   }
 }

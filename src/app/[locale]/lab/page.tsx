@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import CheckerBand from "@/components/ui/CheckerBand";
 import GlyphCheck from "@/components/ui/GlyphCheck";
 import KraftCard from "@/components/ui/KraftCard";
 import Placeholder from "@/components/ui/Placeholder";
 import TileWall from "@/components/ui/TileWall";
+import MotionLab from "./MotionLab";
+import { Link } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { getProduct } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { site } from "@/lib/site";
-import { colors, fonts, pixelFallbackFont, trTestChars } from "@/styles/tokens";
+import { colors, fonts, trTestChars } from "@/styles/tokens";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -39,15 +43,20 @@ function Section({
 }
 
 export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
+  // Kural 23: /lab sadece development'ta; production'da 404
+  if (process.env.NODE_ENV === "production") notFound();
+
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Lab");
   const berry = getProduct("berry-manch");
   const loc = locale as Locale;
+  const otherLocale = routing.locales.find((l) => l !== locale) ?? locale;
 
-  const glyphFamilies = [...fonts, pixelFallbackFont].map((f) => ({
+  const glyphFamilies = fonts.map((f) => ({
     label: f.label,
     cssVar: f.cssVar,
+    note: f.enOnly ? t("enOnly") : undefined,
   }));
 
   return (
@@ -55,6 +64,10 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
       <header className="flex flex-col gap-[0.5vw] max-md:gap-[2vw]">
         <h1 className="heading180 text-berry">{t("title")}</h1>
         <p className="text40 text-berry-dk">{t("subtitle")}</p>
+        <nav className="flex gap-[1.5vw] max-md:gap-[4vw] text-[1vw] max-md:text-[3.5vw] uppercase tracking-wide underline underline-offset-4">
+          <Link href="/lab" locale={otherLocale} data-testid="nav-other-locale">{t("navOtherLocale")}</Link>
+          <Link href="/" data-testid="nav-home">{t("navHome")}</Link>
+        </nav>
       </header>
 
       {/* ---------- Renkler ---------- */}
@@ -76,11 +89,11 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
       {/* ---------- Fontlar ---------- */}
       <Section id="fonts" title={t("fonts")}>
         <div className="flex flex-col gap-[3vw] max-md:gap-[8vw]">
-          {[...fonts, pixelFallbackFont].map((f) => (
+          {fonts.map((f) => (
             <div key={f.token} className="flex flex-col gap-[0.6vw] max-md:gap-[2vw]">
               <p className="text-[1vw] max-md:text-[3.5vw] uppercase tracking-wide text-berry">
                 {f.label} · <code className="font-pixel">{f.className}</code>
-                {f.token === "pixel-alt" && <> · {t("pixelAltNote")}</>}
+                {f.enOnly && <> · {t("enOnly")}</>}
               </p>
               {sizes.map((s) => (
                 <p key={s} className={`${f.className} ${s} leading-none text-ink break-words [overflow-wrap:anywhere]`}>
@@ -179,6 +192,11 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
             </div>
           </div>
         </div>
+      </Section>
+
+      {/* ---------- Motion (Faz 3) ---------- */}
+      <Section id="motion" title={t("motion")}>
+        <MotionLab />
       </Section>
     </main>
   );

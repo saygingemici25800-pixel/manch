@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 /* ---------- Renk tokenları (src/styles/tokens.ts ile senkron) ---------- */
 @theme {
@@ -17,12 +18,11 @@
 
 /* ---------- Font tokenları — next/font değişkenleri <html>'de tanımlı, bu yüzden inline ----------
    Kural 19: her tokenda fallback zinciri.
-   Kural 18 sonucu: Silkscreen ğşıĞŞİ içermiyor → pixel = Press Start 2P (12/12 TR), Silkscreen sadece -alt. */
+   Kural 18 (karar 2026-09-17): pixel = Silkscreen, ğşıĞŞİ içermediği için SADECE İngilizce metinlerde (tape/marquee). */
 @theme inline {
   --font-display: var(--font-modak), "Arial Black", Impact, sans-serif;
   --font-ui: var(--font-mouse-memoirs), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --font-pixel: var(--font-press-start), "Courier New", monospace;
-  --font-pixel-alt: var(--font-silkscreen), var(--font-press-start), "Courier New", monospace;
+  --font-pixel: var(--font-silkscreen), "Courier New", monospace;
 }
 
 /* ---------- Temel ---------- */

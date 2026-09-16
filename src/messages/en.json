@@ -6,7 +6,8 @@
   "Home": {
     "eyebrow": "United Chill Burger Zone",
     "tagline": "Handmade Hits Different",
-    "switchLocale": "Türkçe"
+    "switchLocale": "Türkçe",
+    "lab": "Lab"
   },
   "Nav": {
     "home": "Home",
@@ -77,7 +78,6 @@
     "utilities": "Utilities",
     "patterns": "Patterns",
     "sample": "ğüşıöçĞÜŞİÖÇ MANCH Smash'leniyor",
-    "pixelAltNote": "fallback candidate (Rule 18)",
     "glyphCheck": "TR glyph test — {chars}",
     "glyphChecking": "measuring…",
     "glyphOk": "ok",
@@ -85,6 +85,27 @@
     "glyphNotLoaded": "not loaded",
     "grainSample": "Grain .06",
     "placeholderBerry": "Berry placeholder",
-    "placeholderSky": "Sky placeholder"
+    "placeholderSky": "Sky placeholder",
+    "enOnly": "EN-only text (tape/marquee)",
+    "navOtherLocale": "Türkçe lab",
+    "navHome": "Home",
+    "motion": "Motion"
+  },
+  "Motion": {
+    "rmToggle": "Reduced motion",
+    "on": "ON",
+    "off": "OFF",
+    "emulated": "emulated",
+    "stCount": "ScrollTrigger: {n}",
+    "rollA": "Order Now",
+    "rollB": "Menu",
+    "blob": "ORDER NOW",
+    "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE",
+    "marqueeNote": "EN only (Rule 18) · speeds up with scroll",
+    "splitChars": "HANDMADE HITS DIFFERENT",
+    "splitLines": "Smash from the kitchen, first bite from the table. Not hungry. Just obsessed. We like our sauces handmade.",
+    "jellyNote": "scroll velocity → scaleY",
+    "jellyText": "Gravity approved cheese pull.",
+    "cursorNote": "desktop only (hover + fine pointer); hidden over data-cursor-hide elements"
   }
 }

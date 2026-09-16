@@ -28,6 +28,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       >
         {t("switchLocale")}
       </Link>
+      {process.env.NODE_ENV !== "production" && (
+        <Link href="/lab" data-testid="nav-lab" className="text-[1.1vw] underline underline-offset-4 max-md:text-[3.5vw]">
+          {t("lab")}
+        </Link>
+      )}
     </main>
   );
 }

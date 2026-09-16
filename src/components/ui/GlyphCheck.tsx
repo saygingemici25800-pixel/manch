@@ -6,6 +6,8 @@ import clsx from "clsx";
 interface Family {
   label: string;
   cssVar: string;
+  /** ör. "yalnızca EN" — eksik glyph bilinçli kabul edildi */
+  note?: string;
 }
 
 interface Props {
@@ -14,7 +16,7 @@ interface Props {
   labels: { checking: string; ok: string; missing: string; notLoaded: string };
 }
 
-type Row = { label: string; status: "checking" | "notLoaded" | "done"; missing: string[] };
+type Row = { label: string; note?: string; status: "checking" | "notLoaded" | "done"; missing: string[] };
 
 /** next/font değişkeninden gerçek family adını çek: `'__Modak_abc', '__Modak_Fallback_abc'` → `__Modak_abc` */
 function primaryFamily(cssVar: string): string | null {
@@ -42,7 +44,7 @@ function hasGlyph(ctx: CanvasRenderingContext2D, fam: string, ch: string): boole
 
 export default function GlyphCheck({ families, chars, labels }: Props) {
   const [rows, setRows] = useState<Row[]>(() =>
-    families.map((f) => ({ label: f.label, status: "checking", missing: [] })),
+    families.map((f) => ({ label: f.label, note: f.note, status: "checking", missing: [] })),
   );
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function GlyphCheck({ families, chars, labels }: Props) {
       for (const f of families) {
         const fam = primaryFamily(f.cssVar);
         if (!fam) {
-          next.push({ label: f.label, status: "notLoaded", missing: [] });
+          next.push({ label: f.label, note: f.note, status: "notLoaded", missing: [] });
           continue;
         }
         try {
@@ -66,11 +68,11 @@ export default function GlyphCheck({ families, chars, labels }: Props) {
         }
         // Kontrol karakteri: "A" yoksa font hiç yüklenmemiştir
         if (!hasGlyph(ctx, fam, "A")) {
-          next.push({ label: f.label, status: "notLoaded", missing: [] });
+          next.push({ label: f.label, note: f.note, status: "notLoaded", missing: [] });
           continue;
         }
         const missing = [...chars].filter((ch) => !hasGlyph(ctx, fam, ch));
-        next.push({ label: f.label, status: "done", missing });
+        next.push({ label: f.label, note: f.note, status: "done", missing });
       }
       if (!cancelled) setRows(next);
     })();
@@ -83,7 +85,8 @@ export default function GlyphCheck({ families, chars, labels }: Props) {
   return (
     <ul className="flex flex-col gap-[0.5vw] max-md:gap-[2vw] text-[1.1vw] max-md:text-[3.8vw] uppercase tracking-wide">
       {rows.map((r) => {
-        const bad = r.status === "notLoaded" || r.missing.length > 0;
+        // note varsa eksik glyph bilinçli kabul: sarı yerine paper ton
+        const bad = r.status === "notLoaded" || (r.missing.length > 0 && !r.note);
         return (
           <li key={r.label} className="flex flex-wrap items-center gap-[0.8vw] max-md:gap-[2.5vw]">
             <span className="w-[10vw] max-md:w-full font-display normal-case tracking-normal">{r.label}</span>
@@ -101,6 +104,9 @@ export default function GlyphCheck({ families, chars, labels }: Props) {
             </span>
             {r.missing.length > 0 && (
               <span className="font-pixel text-berry">{r.missing.join(" ")}</span>
+            )}
+            {r.note && r.missing.length > 0 && (
+              <span className="rounded-full bg-paper px-[0.9vw] py-[0.2vw] max-md:px-[3vw] max-md:py-[1vw] text-berry-dk">{r.note}</span>
             )}
           </li>
         );
