@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Renk tokenları, fontlar (Modak / Mouse Memoirs / Silkscreen) ve utility'ler
+   (heading180, text40, text-stroke-small, grain) Faz 2'de @theme ile eklenecek. */
+
+html,
+body {
+  min-height: 100%;
+}

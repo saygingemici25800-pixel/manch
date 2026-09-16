@@ -1,0 +1,72 @@
+{
+  "Meta": {
+    "title": "MANCH — United Chill Burger Zone",
+    "description": "Fethiye'de el yapımı smash burger. Handmade Hits Different."
+  },
+  "Home": {
+    "eyebrow": "United Chill Burger Zone",
+    "tagline": "Handmade Hits Different",
+    "switchLocale": "English"
+  },
+  "Nav": {
+    "home": "Ana Sayfa",
+    "menu": "Menü",
+    "about": "Hakkımızda",
+    "zone": "Zone",
+    "location": "Konum",
+    "contact": "İletişim",
+    "burgers": "Burgerler",
+    "menuButton": "Menü",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "est": "EST. 2026 — FETHİYE, TÜRKİYE"
+  },
+  "Preloader": {
+    "line1": "BRIOCHE KIZARIYOR…",
+    "line2": "KÖFTE SMASH'LENİYOR…",
+    "line3": "CHEDDAR ERİYOR…"
+  },
+  "Transition": {
+    "word": "MANCHING…",
+    "titleFlipping": "Smash'leniyor",
+    "titleServing": "Servis"
+  },
+  "Voice": {
+    "smashSound": "Smash sesi mutfaktan, ilk ısırık masadan.",
+    "obsessed": "Aç değiliz. Sadece takıntılıyız.",
+    "handmadeSauce": "Hazır soslara biraz uzağız.",
+    "cheesePull": "Yer çekimi onaylı cheese pull.",
+    "flavorLevels": "Lezzet seviyesi biraz kontrolden çıkmış olabilir.",
+    "habitLoading": "MANCH alışkanlığı yükleniyor…",
+    "layers": "Smash'inin katmanlarıyla tanış. Hepsi el yapımı.",
+    "tiramisu": "Tiramisu konusunda biraz iddialıyız.",
+    "classicTag": "Tarzına yakışan smash!",
+    "wall": "THE BURGER YOU'LL CRAVE AGAIN"
+  },
+  "Common": {
+    "orderNow": "Sipariş Ver",
+    "products": "{count, plural, =1 {# ürün} other {# ürün}}",
+    "quickDetails": "Hızlı Detaylar",
+    "addToCart": "Sepete Ekle",
+    "todo": "Yakında"
+  },
+  "Cart": {
+    "added": "SEPETE EKLENDİ",
+    "title": "Sepet",
+    "empty": "Sepetin boş.",
+    "checkout": "Siparişi Tamamla"
+  },
+  "Cookie": {
+    "text": "Çerezleri lezzet için kullanıyoruz.",
+    "later": "SONRA",
+    "okay": "TAMAM!"
+  },
+  "Modal": {
+    "close": "ANLADIM & KAPAT"
+  },
+  "Footer": {
+    "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
+    "rights": "© 2026 MANCH — TÜM HAKLARI SAKLIDIR",
+    "credit": "Designed & developed by Webber Digital"
+  }
+}

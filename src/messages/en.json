@@ -1,0 +1,72 @@
+{
+  "Meta": {
+    "title": "MANCH — United Chill Burger Zone",
+    "description": "Handmade smash burgers in Fethiye. Handmade Hits Different."
+  },
+  "Home": {
+    "eyebrow": "United Chill Burger Zone",
+    "tagline": "Handmade Hits Different",
+    "switchLocale": "Türkçe"
+  },
+  "Nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "about": "About",
+    "zone": "Zone",
+    "location": "Location",
+    "contact": "Contact",
+    "burgers": "Burgers",
+    "menuButton": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "est": "EST. 2026 — FETHİYE, TÜRKİYE"
+  },
+  "Preloader": {
+    "line1": "TOASTING THE BRIOCHE…",
+    "line2": "SMASHING THE PATTY…",
+    "line3": "MELTING THE CHEDDAR…"
+  },
+  "Transition": {
+    "word": "MANCHING…",
+    "titleFlipping": "Flipping",
+    "titleServing": "Serving"
+  },
+  "Voice": {
+    "smashSound": "Smash from the kitchen, first bite from the table.",
+    "obsessed": "Not hungry. Just obsessed.",
+    "handmadeSauce": "We like our sauces handmade.",
+    "cheesePull": "Gravity approved cheese pull.",
+    "flavorLevels": "Flavor levels may have gotten a little out of control.",
+    "habitLoading": "MANCH habit: loading…",
+    "layers": "Meet the layers of your smash. Handmade in every layer.",
+    "tiramisu": "We take tiramisu seriously.",
+    "classicTag": "A smash that suits your style!",
+    "wall": "THE BURGER YOU'LL CRAVE AGAIN"
+  },
+  "Common": {
+    "orderNow": "Order Now",
+    "products": "{count, plural, =1 {# item} other {# items}}",
+    "quickDetails": "Quick Details",
+    "addToCart": "Add to Cart",
+    "todo": "Coming soon"
+  },
+  "Cart": {
+    "added": "ADDED TO CART",
+    "title": "Cart",
+    "empty": "Your cart is empty.",
+    "checkout": "Checkout"
+  },
+  "Cookie": {
+    "text": "We use cookies for flavor.",
+    "later": "LATER",
+    "okay": "OKAY!"
+  },
+  "Modal": {
+    "close": "ACKNOWLEDGE & CLOSE"
+  },
+  "Footer": {
+    "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
+    "rights": "© 2026 MANCH — ALL RIGHTS RESERVED",
+    "credit": "Designed & developed by Webber Digital"
+  }
+}
