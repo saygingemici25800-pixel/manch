@@ -68,5 +68,23 @@
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
     "rights": "© 2026 MANCH — ALL RIGHTS RESERVED",
     "credit": "Designed & developed by Webber Digital"
+  },
+  "Lab": {
+    "title": "LAB",
+    "subtitle": "Design system preview",
+    "colors": "Colors",
+    "fonts": "Fonts",
+    "utilities": "Utilities",
+    "patterns": "Patterns",
+    "sample": "ğüşıöçĞÜŞİÖÇ MANCH Smash'leniyor",
+    "pixelAltNote": "fallback candidate (Rule 18)",
+    "glyphCheck": "TR glyph test — {chars}",
+    "glyphChecking": "measuring…",
+    "glyphOk": "ok",
+    "glyphMissing": "missing",
+    "glyphNotLoaded": "not loaded",
+    "grainSample": "Grain .06",
+    "placeholderBerry": "Berry placeholder",
+    "placeholderSky": "Sky placeholder"
   }
 }

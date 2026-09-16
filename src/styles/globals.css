@@ -1,9 +1,87 @@
 @import "tailwindcss";
 
-/* Renk tokenları, fontlar (Modak / Mouse Memoirs / Silkscreen) ve utility'ler
-   (heading180, text40, text-stroke-small, grain) Faz 2'de @theme ile eklenecek. */
+/* ---------- Renk tokenları (src/styles/tokens.ts ile senkron) ---------- */
+@theme {
+  --color-berry: #7a1f4b;
+  --color-berry-dk: #4e1030;
+  --color-sky: #c4e4f3;
+  --color-tile: #8fc3d6;
+  --color-cream: #f4eee6;
+  --color-paper: #e9dcc6;
+  --color-pink: #e9a3b8;
+  --color-mustard: #f6c343;
+  --color-ink: #1b1b1b;
 
-html,
+  --ease-jelly: cubic-bezier(0.4, 1.6, 0.7, 0.95);
+}
+
+/* ---------- Font tokenları — next/font değişkenleri <html>'de tanımlı, bu yüzden inline ----------
+   Kural 19: her tokenda fallback zinciri.
+   Kural 18 sonucu: Silkscreen ğşıĞŞİ içermiyor → pixel = Press Start 2P (12/12 TR), Silkscreen sadece -alt. */
+@theme inline {
+  --font-display: var(--font-modak), "Arial Black", Impact, sans-serif;
+  --font-ui: var(--font-mouse-memoirs), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-pixel: var(--font-press-start), "Courier New", monospace;
+  --font-pixel-alt: var(--font-silkscreen), var(--font-press-start), "Courier New", monospace;
+}
+
+/* ---------- Temel ---------- */
+html {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
 body {
   min-height: 100%;
+  font-family: var(--font-ui);
+}
+
+/* ---------- Utility'ler ---------- */
+
+/* 180px @1920 → 9.375vw · mobilde 16vw */
+@utility heading180 {
+  font-family: var(--font-display);
+  font-size: 9.375vw;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  @media (width < 48rem) {
+    font-size: 16vw;
+  }
+}
+
+/* 40px @1920 → 2.083vw · mobilde 6vw */
+@utility text40 {
+  font-family: var(--font-ui);
+  font-size: 2.083vw;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  @media (width < 48rem) {
+    font-size: 6vw;
+  }
+}
+
+/* Dolgusuz, ince konturlu metin (nav logo, vurgu). Renk currentColor'dan gelir. */
+@utility text-stroke-small {
+  -webkit-text-stroke-width: 0.06em;
+  -webkit-text-stroke-color: currentColor;
+  -webkit-text-fill-color: transparent;
+  paint-order: stroke fill;
+}
+
+/* Film grain overlay (.06). Uygulandığı kutuya ::after ile biner, tıklamayı engellemez. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 240px 240px;
+  }
 }

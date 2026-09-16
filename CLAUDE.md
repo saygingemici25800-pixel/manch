@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 1 tamamlandı** — Faz 2 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 (`pnpm build` temiz, `/tr` + `/en` SSG, lint temiz, prod server ile HTTP doğrulandı)
+- Aktif faz: **Faz 2 tamamlandı** — Faz 3 için kullanıcı onayı bekleniyor
+- Son başarılı build: 2026-09-17 Faz 2 (`pnpm build` + lint temiz; `/tr`, `/en`, `/tr/lab`, `/en/lab` SSG; headless Chromium ile lab render + GlyphCheck doğrulandı)
 - Preview URL: —
-- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` şu an tüm mesajları client'a gönderiyor, Faz 8'de namespace bazlı daralt · `not-found.tsx` `[locale]` altında yok (Faz 6)
+- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · Silkscreen görünümü tercih edilirse sadece EN tape metinlerinde kullanılabilir (Kural 18, planlayıcı kararı) · `/lab` production'da erişilebilir (noindex) — Faz 9'da kaldırılsın mı? · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak)
 
 ---
 
@@ -56,6 +56,11 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 15. Sayfa içi linklerde `next/link` değil `@/i18n/navigation`'daki `Link` / `useRouter` / `redirect` kullan — locale prefix'i otomatik.
 16. `[locale]` altındaki her server component'te `setRequestLocale(locale)` çağır; aksi halde statik render bozulur.
 17. Menü ürün modeli: `name` ve `desc` `Localized` (`{tr,en}`), `ingredients` `Record<Locale,string[]>`. Teyit edilmemiş ürünlerde `unconfirmed: true`.
+18. `font-pixel` sırası: Silkscreen → TR karakter desteği zayıfsa Press Start 2P → o da yetmezse `font-pixel` **sadece İngilizce metinlerde** (tape/marquee) kullanılır, `font-ui`'ye düşülmez.
+19. Modak / Mouse Memoirs'ta eksik TR karakter varsa fallback zinciri `@theme` font token'ında tanımlanır (`--font-display: var(--font-modak), <fallback>, ...`); `/lab` sayfasında eksik karakterler görünür şekilde işaretlenir.
+20. Git kimliği repo-local: `Webber Digital <saygingemici25800@gmail.com>` (karar 2026-09-17).
+21. Yeni bir font eklerken TR kapsamını `latin-ext` etiketine güvenmeden doğrula: build sonrası `.next/static/media/*.woff2` dosyalarında cmap union'ı (fontTools) **ve** `/lab` GlyphCheck. Fontlar tek dosyada: `src/styles/fonts.ts`; token listesi `src/styles/tokens.ts` `globals.css` ile senkron tutulur.
+22. Tailwind v4: renkler `@theme`, next/font değişkenlerini tüketen font tokenları `@theme inline`. Özel sınıflar `@utility` ile; `max-md:` karşılığı utility içinde `@media (width < 48rem)`.
 
 ---
 
@@ -157,12 +162,12 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: `pnpm build` temiz, `/tr` ve `/en` açılıyor
 
 ### Faz 2 — Tasarım Sistemi
-- [ ] Tailwind v4 `@theme`: renk tokenları, font değişkenleri
-- [ ] next/font: Modak, Mouse Memoirs, Silkscreen (latin-ext)
-- [ ] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
-- [ ] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder`
-- [ ] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi
-- [ ] ✅ Kabul: lab sayfası doğru render, build temiz
+- [x] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
+- [x] next/font: Modak, Mouse Memoirs, **Press Start 2P** (latin-ext) — Silkscreen ğşıĞŞİ içermediği için `font-pixel-alt`'a düştü, sadece `/lab`'da *(revize: 2026-09-17, Kural 18)*
+- [x] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
+- [x] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
+- [x] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi (`noindex`), ekran görüntüsü `docs/screens/faz-2-lab.png`
+- [x] ✅ Kabul: lab sayfası doğru render, build temiz
 
 ### Faz 3 — Motion Primitive'leri
 - [ ] R19 SmoothScroll provider
@@ -231,6 +236,8 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 1 | `create-next-app` kökte kendi `CLAUDE.md` dosyasını oluşturdu (içeriği `@AGENTS.md`) ve taşınacak dosyayla çakıştı | Next 16 scaffold'u agent yönergesi için `AGENTS.md` + ona işaret eden `CLAUDE.md` üretiyor | Scaffold'un `CLAUDE.md` dosyası silindi, proje dokümanı köke taşındı; `AGENTS.md` içeriği `CLAUDE.md` sonuna referans olarak eklendi (Kural 13) |
 | 2026-09-17 | 1 | Faz tanımı `middleware` diyor; Next 16'da `middleware.ts` **deprecated** (`node_modules/next/dist/docs/.../proxy.md`) | Sürüm farkı (15 → 16) | `src/proxy.ts` yazıldı, next-intl `createMiddleware` default export olarak verildi. Build çıktısında `ƒ Proxy (Middleware)` görünüyor (Kural 14) |
 | 2026-09-17 | 1 | `pnpm add` sonrası `ERR_PNPM_IGNORED_BUILDS` (@swc/core, @parcel/watcher) | pnpm 11 postinstall script'lerini varsayılan olarak engelliyor; scaffold `pnpm-workspace.yaml`'a placeholder yazmış | Her ikisi de `false` yapıldı (Next kendi SWC binary'sini getiriyor). Build etkilenmedi |
+| 2026-09-17 | 2 | Silkscreen TR karakter desteği zayıf: `ğ ş ı Ğ Ş İ` yok (fontTools ile `.next/static/media/*.woff2` cmap union'ı; latin-ext dilimi sadece 18 glyph) | Google Fonts "latin-ext" etiketi tam kapsama garantisi vermiyor | Kural 18 uygulandı: `font-pixel` = **Press Start 2P** (12/12 TR ✓). Silkscreen `font-pixel-alt` olarak sadece `/lab`'da, `preload: false`. Modak ve Mouse Memoirs 12/12 ✓ — fallback zinciri yine de tanımlı (Kural 19) |
+| 2026-09-17 | 2 | Sistemde fontTools yok; glyph kapsamı doğrulanamıyordu | macOS python3'te fontTools/brotli yok | Scratchpad'e `pip --target` ile kuruldu; `/lab`'daki `GlyphCheck` (canvas ölçümü) tarayıcı tarafında aynı testi yapar (Kural 21) |
 
 ---
 

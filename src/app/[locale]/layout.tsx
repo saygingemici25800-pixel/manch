@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { fontVariables } from "@/styles/fonts";
 import "@/styles/globals.css";
 
 export function generateStaticParams() {
@@ -31,8 +32,8 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang={locale} className={`${fontVariables} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-cream text-ink font-ui">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
