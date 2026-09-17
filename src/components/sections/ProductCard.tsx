@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
+import Image from "next/image";
 import Placeholder from "@/components/ui/Placeholder";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
@@ -13,9 +14,11 @@ interface Props {
   product: Product;
   /** verilirse görsel + isim tıklanabilir → detay modalı */
   onSelect?: (slug: string) => void;
+  /** fold üstü kartlar: LCP için eager */
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, onSelect }: Props) {
+export default function ProductCard({ product, onSelect, priority }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Product");
   const tc = useTranslations("Common");
@@ -30,11 +33,15 @@ export default function ProductCard({ product, onSelect }: Props) {
     >
       {/* görsel */}
       <div
-        className={clsx("relative flex h-[19vw] max-md:h-[60vw] items-center justify-center overflow-hidden bg-cream", onSelect && "cursor-pointer")}
+        className={clsx("relative flex h-[19vw] max-md:h-[60vw] items-center justify-center overflow-hidden", product.image ? "bg-berry" : "bg-cream", onSelect && "cursor-pointer")}
         onClick={onSelect ? () => onSelect(product.slug) : undefined}
       >
-        <div className="h-[80%] w-[70%] transition-transform duration-500 ease-[var(--ease-jelly)] group-hover:rotate-6 group-hover:scale-105">
-          <Placeholder tone={product.image ? "berry" : "sky"} label={name} ratio="1/1" className="h-full w-full" />
+        <div className="relative h-[86%] w-[80%] transition-transform duration-500 ease-[var(--ease-jelly)] group-hover:rotate-6 group-hover:scale-105">
+          {product.image ? (
+            <Image src={product.image} alt={name} fill priority={priority} sizes="(max-width: 768px) 80vw, 26vw" className={product.image.endsWith(".png") ? "object-contain" : "rounded-[1vw] max-md:rounded-[3vw] object-cover"} />
+          ) : (
+            <Placeholder tone="sky" label={name} ratio="1/1" className="h-full w-full" />
+          )}
         </div>
         {product.tags.length > 0 && (
           <ul className="absolute left-[1vw] top-[1vw] max-md:left-[3vw] max-md:top-[3vw] flex gap-[0.4vw] max-md:gap-[1.5vw]">
@@ -74,7 +81,7 @@ export default function ProductCard({ product, onSelect }: Props) {
               )}
             </h3>
             <p className="mt-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">
-              {product.price !== null ? `${product.price} ₺` : t("priceTodo")}
+              {product.price !== null ? `${product.price} TL` : t("priceTodo")}
             </p>
           </div>
           <button

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
+import Logo from "@/components/ui/Logo";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTransitionStore } from "@/lib/transition-store";
 import { markCover, markServing, pathChangedSinceCover } from "@/lib/transition-title";
@@ -93,8 +94,9 @@ export default function PageTransition() {
             <path d={FLAT_BOTTOM} fill={fill} />
           </svg>
         ))}
-        <div className="word absolute inset-0 grid place-items-center font-display text-[7vw] max-md:text-[16vw] leading-none text-berry opacity-0">
-          {t("word")}
+        <div className="word absolute inset-0 flex flex-col items-center justify-center gap-[1.5vw] max-md:gap-[5vw] text-berry opacity-0">
+          <Logo className="h-[4vw] max-md:h-[10vw] w-auto" />
+          <span className="font-display text-[5vw] max-md:text-[13vw] leading-none">{t("word")}</span>
         </div>
       </div>
     </div>

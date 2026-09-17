@@ -32,7 +32,9 @@ export default function InfoModal() {
             <dt className="text-berry">{t("address")}</dt>
             <dd>{site.address.full}</dd>
             <dt className="text-berry">{t("phone")}</dt>
-            <dd>{site.contact.phone ?? tc("todo")}</dd>
+            <dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
+            <dt className="text-berry">{t("email")}</dt>
+            <dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
             <dt className="text-berry">{t("hours")}</dt>
             <dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
             <dt className="text-berry">Instagram</dt>

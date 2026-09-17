@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 7 tamamlandı** — Faz 8 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 Faz 7 (`pnpm build` + lint temiz; Lighthouse A11y 100 / SEO 100 ×3; `scripts/lab-check.mjs` 94/94)
+- Aktif faz: **İçerik commit'i (Faz 7.5) tamamlandı** — Faz 8 için kullanıcı onayı bekleniyor
+- Son başarılı build: 2026-09-17 İçerik commit'i (`pnpm build` + lint temiz; Lighthouse A11y 100 / SEO 100 ×3; `scripts/lab-check.mjs` geçti)
 - Preview URL: —
-- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG (favicon/OG/nav şu an Modak "M"/"MANCH") · domain (`site.url` = manch.tr varsayımı, `NEXT_PUBLIC_SITE_URL`) · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · WhatsApp checkout `site.contact.whatsapp` null → disabled · InfoModal'da telefon/saat "Yakında" · `CookieBanner` component'i duruyor ama layout'ta **mount edilmiyor** (analytics planı yok, karar 2026-09-17) — analytics gelirse Faz 7'de consent ile geri al · Hero: CSS katmanlı burger (`HeroBurger`), gerçek fotoğraf **Faz 7'de `next/image`** · Zone/Misu görselleri Placeholder · Instagram grid: **Faz 7'de elle 6 görsel** `public/images/`, API yok (karar 2026-09-17) · Zone CTA sepet→WhatsApp kalır; dış sipariş linki gelirse InfoModal'a buton (karar 2026-09-17) · SmashAnatomy katmanları CSS şekil, burger kesit PNG'leri (`/burgers/*.png`) gelince değişecek · Google Maps `maps?q=` URL'i; Place ID Faz 7'de kontrol, yoksa `maps/search` kalır (karar 2026-09-17) · Malzeme ikonları (marul/domates/peynir/köfte) Faz 7'de **berry tek çizgi line-art SVG** olarak çizilecek; şimdilik renkli daire/kare (karar 2026-09-17)
+- Açık TODO'lar: çalışma saatleri · **orijinal fotoğraflar istenecek** (kaynaklar ekran görüntüsü, 749–1222 px; hero 1104×1476) · **maskot vektör/orijinal istenecek** (`misu-miyu.png` basılı menüden 472×270) · Guacamole Burger + Corn Ribs/Tenders/Arancini/Fries/Soslar fotoğrafı yok (Placeholder) · iç mekan / zone galerisi fotoğrafı yok (Placeholder) · logo SVG potrace izi (orijinal vektör gelince `public/logo/*.svg` + `ui/logo-*.tsx` yeniden üretilir) · domain (`site.url` = manch.tr varsayımı, `NEXT_PUBLIC_SITE_URL`) · renk kodlarının logodan teyidi · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (Faz 8) · next/image `sizes` denetimi + AVIF (Faz 8) · `CookieBanner` mount edilmiyor · Google Place ID · Crispy Triangle fiyatı menüde yok (`price: null`) · manifest 192px ikon
 
 ---
 
@@ -79,6 +79,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 38. SEO dosya kuralları (Next 16 `file-conventions/metadata`): `app/sitemap.ts` + `app/robots.ts` + `app/manifest.ts` **kök `app/`'ta** (layout gerektirmez); `alternates.languages` sitemap'te de metadata'da da `{ tr, en, "x-default" }`. Sayfa metadata'sı `src/lib/seo.ts#pageMetadata` ile (canonical `/${locale}${path}`, hreflang, OG, Twitter); `metadataBase` = `site.url` (`NEXT_PUBLIC_SITE_URL`, TODO domain). Title şablonu layout'ta `%s | MANCH`, sayfalar kısa başlık verir, ana sayfa `absolute`.
 39. `next/og` (`ImageResponse`): `app/[locale]/opengraph-image.tsx` Node runtime'da, `params.locale` alır; font **TTF/OTF/WOFF** (woff2 yok) → `src/assets/fonts/Modak-Regular.ttf` (OFL) `readFile(join(process.cwd(), …))` ile. İkonlar `app/icon.tsx` (`generateImageMetadata` → `/icon/32`, `/icon/512`) + `app/apple-icon.tsx` (180); logo gelince PNG/SVG ile değişir.
 40. Erişilebilirlik: metin renginde opaklık yok (`text-berry-dk/70`, `opacity-60` yasak) — tam palet rengi; ölçülen tüm çiftler ≥ 4.5:1 (berry/cream 8.6, berry/pink 4.9, berry/tile 5.2, ink/mustard 10.5, mustard/berry 6.0). `:focus-visible` global hardal halka (mustard zeminde berry-dk); skip link `#main` (her sayfada `<main id="main">`). Dialog'lar `role=dialog aria-modal` + `aria-label`/`aria-labelledby`.
+41. Görsel pipeline (`scripts/content/`, scratchpad `pip --target` ile PIL/numpy/onnxruntime/rembg 2.0.50/pymatting/potracer — proje bağımlılığı değil, Python 3.9): kaynaklar `docs/source/` (commit'te), kesitler: **kaynak ön-temizlik** (magenta kağıt + beyaz/mavimsi ok/derz → karo rengi, matting'den önce) → `rembg` **isnet-general-use** + alpha matting → en büyük bağlı bileşen → `trim_cold_bottom` (en geniş satırın altındaki soğuk satırlar) → %6 pad, kare 1200 PNG + 600 WebP `public/burgers/<slug>.png`; fotoğraflar uzun kenar 1600 jpg+webp `public/images/`. Kontak tablosu `docs/screens/icerik-burgers.png` ile göz kontrolü zorunlu. Yeni fotoğraf gelince aynı script.
+42. Logo: `public/logo/logo-manch.svg` / `logo-menu.svg` / `logo-m.svg` basılı menüden potrace izi (`fill="currentColor"`); React'te `ui/logo-manch.tsx`, `ui/logo-menu.tsx`, `ui/logo-m.ts` **otomatik üretilir** (script), elle düzenlenmez; `ui/Logo.tsx` sarmalar. OG/ikonlar bu path'leri Satori `<svg>` ile çizer; OG'deki burger `readFile` → data URI (ağ yok). Orijinal vektör logo gelince yalnızca SVG dosyaları + üretilen component'ler değişir.
 
 ---
 
@@ -237,6 +239,16 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] `scripts/lighthouse.mjs` (playwright-core Chromium CDP + lighthouse 13) → `docs/screens/faz-7-lighthouse.json`
 - [x] ✅ Kabul: Lighthouse `/tr` `/tr/menu` `/tr/contact` **A11y 100 / SEO 100** (wordmark SVG'ye alınınca 96 → 100); sitemap.xml + robots.txt + manifest + ikonlar + OG 200; `/tr` `/en` `/tr/menu` head'inde canonical + hreflang + og:image + JSON-LD; `scripts/lab-check.mjs` 94/94, console 0. `docs/screens/faz-7-og.png`, `faz-7-icons.png`, `faz-7-lighthouse.json`
 
+### İçerik commit'i (Faz 7.5) — `docs/prompts/icerik-commit.md`
+- [x] Kaynaklar `docs/source/` (11 ekran görüntüsü, 749–1222 px; commit'te), `docs/_in/` silindi
+- [x] `public/burgers/*.png|webp` ×7 (rembg isnet + kaynak ön-temizlik + soğuk alt kesim, Kural 41), `public/images/{hero-cook,crispy-triangle,tiramisu}.{jpg,webp}`, `misu-miyu.png`; kontak `docs/screens/icerik-burgers.png`
+- [x] Logo: `public/logo/logo-manch|menu|m.svg` (potrace) + üretilen `ui/logo-*.tsx` (Kural 42); Nav, Footer, Preloader, PageTransition, OG, ikonlar, `/menu` başlığı
+- [x] `src/data/menu.ts` basılı menüden: 6 kategori, 25 ürün, fiyatlar; eski tahmini ürünler silindi; `featured` 6
+- [x] `site.ts`: telefon, WhatsApp, e-posta, Facebook, menü alt başlığı; JSON-LD telephone/email/sameAs; messages'ta `[TODO]` kalmadı
+- [x] Sepet: satır + genel toplam, WhatsApp mesajında tutar, checkout aktif; Contact/Location tel:/mailto: linkleri
+- [x] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot)
+- [x] ✅ Kabul: build + lint temiz; lab-check 96/96, console 0; Lighthouse A11y 100 / SEO 100 ×3; `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png`
+
 ### Faz 8 — Performans & QA
 - [ ] next/image AVIF/WebP, lazy, sizes
 - [ ] GSAP eklentilerini dinamik import et, bundle analizi
@@ -277,6 +289,13 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 7 | `/tr/menu` head'inde `og:image` yok; title şablonu uygulanmıyor ("Menü") | Sayfa `openGraph` nesnesi üst segmentinkini bütünüyle ezer (dosya-kural görseli dahil); layout'ta `title.template` `pageMetadata` spread'inden önce yazılıp `absolute` ile eziliyordu | `pageMetadata` `openGraph.images` açıkça verir; layout'ta şablon en sonda (Kural 38) |
 | 2026-09-17 | 7 | Lighthouse: canonical "invalid" (SEO 92), footer wordmark kontrast (berry/berry-dk), nav logo + harita butonu `label-content-name-mismatch`, ProductModal kapalıyken `aria-dialog-name` (A11y 93–96) | canonical `manch.tr` iken ölçüm `localhost`; dekoratif dev yazı aria-hidden olsa da axe kontrast sayıyor; `aria-label` görünen metni içermiyordu; `aria-labelledby` hedefi kapalıyken DOM'da yok | LH build'i `NEXT_PUBLIC_SITE_URL=http://localhost:3100` ile; wordmark transparent fill + stroke; logo `aria-label="MANCH — Ana Sayfa"`, harita butonlarında `aria-label` yok (içerik adı verir); modal kapalıyken `aria-label` (Kural 40) |
 | 2026-09-17 | 7 | `chrome-launcher` import edilemiyor (`ERR_MODULE_NOT_FOUND`) | pnpm strict: lighthouse'un bağımlılığı hoist edilmiyor | Playwright Chromium `--remote-debugging-port` ile açılıp Lighthouse'a `port` verildi (`scripts/lighthouse.mjs`) |
+| 2026-09-17 | 7.5 | Sistemde `rembg`/`PIL`/`numpy`/`onnxruntime`/`potrace` yok (sadece Python 3.9.6) | Homebrew Python yok; sistem pip 21 | Scratchpad'e `pip --target` (rembg 2.0.50 py3.9 uyumlu, model `~/.u2net/isnet-general-use.onnx` mevcuttu). Kural 41 |
+| 2026-09-17 | 7.5 | Kesitlerde bordo kağıt artıkları (fig-jam, morel, chicken) ve beyaz ok kalıntısı (truffle) | Alpha matting artıkları burgere bağladı; global renk filtresi gölgeli kağıdı (RGB ≈ 55/23/12) patty kahvesinden ayıramıyor | Bölgesel `FIXES` (G/R < 0.47 koyu kırmızı, dış bölgelerde) + en büyük bileşen; kontak tablosuyla göz kontrolü |
+| 2026-09-17 | 7.5 | Maskot kesiti "Tiramisu … 360 TL" satırını aldı | Bölge üst sınırı yüksek | Bölge `0.755H`'den başlatıldı |
+| 2026-09-17 | 7.5 | `apple-icon.tsx` `SIZE` tanımsız, `InstagramGrid` `as const` union'da `cutout` yok, Footer `site` kullanılmıyor | Regex tabanlı toplu düzenleme async fonksiyonu kaçırdı; literal union tipi | Tek tek düzeltildi; toplu regex düzenlemelerinden sonra `pnpm build` şart (Kural 2) |
+| 2026-09-17 | 7.5 | OG görseli burger'ı `site.url` üzerinden `<img>` ile çekecekti | `manch.tr` build/preview'da erişilemez | `readFile` → base64 data URI (Kural 42) |
+| 2026-09-17 | 7.5 | Bölgesel koyu-kırmızı filtresi ekmek/köfte gölgesini de yedi (chicken, morel) | Çıktı üzerinde renk filtresi: gölgeli kağıt ile patty kahvesi ayrılamıyor | Pipeline v2: filtre **kaynakta**, matting'den önce (kağıt/ok → karo rengi) + en geniş satırın altındaki "soğuk" satırları kes (`trim_cold_bottom`). Kural 41 güncellendi |
+| 2026-09-17 | 7.5 | Dev console: "Image … detected as LCP, add loading=eager" ×7 | Test akışı sayfayı anında sona kaydırıyor → Next dev heuristiği rastgele görseli LCP sayıyor | Fold-üstü görseller `priority` (hero, ilk 3 kart, modal, kapaklar); lab-check bu dev uyarısını filtreler (prod'da yok). Gerçek LCP ölçümü Faz 8 Lighthouse Performance'ta |
 
 ---
 

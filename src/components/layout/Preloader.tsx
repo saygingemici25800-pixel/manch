@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { site } from "@/lib/site";
+import Logo from "@/components/ui/Logo";
 
 const KEY = "manch-preloaded";
 const DURATION = 1.8; // karar 2026-09-17: 1.8 s + 0.6 s çıkış
@@ -91,7 +92,7 @@ export default function Preloader() {
       aria-live="polite"
       className="fixed inset-0 z-95 flex flex-col items-center justify-center gap-[2vw] max-md:gap-[6vw] bg-berry text-cream"
     >
-      <p className="font-display text-[9vw] max-md:text-[22vw] leading-none text-mustard">{site.name}</p>
+      <Logo label={site.name} className="h-[7vw] max-md:h-[16vw] w-auto text-mustard" />
       <p className="text40 text-[1.6vw] max-md:text-[5vw] text-cream" aria-label={lines[msg]}>
         {lines[msg]}
       </p>

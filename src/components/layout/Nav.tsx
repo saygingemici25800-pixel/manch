@@ -6,6 +6,7 @@ import { useLenis } from "lenis/react";
 import clsx from "clsx";
 import TransitionLink from "@/components/motion/TransitionLink";
 import RollText from "@/components/motion/RollText";
+import Logo from "@/components/ui/Logo";
 import { usePathname } from "@/i18n/navigation";
 import { site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
@@ -70,9 +71,9 @@ export default function Nav() {
         href="/"
         data-cursor-hide
         aria-label={`${site.name} — ${t("home")}`}
-        className="text-stroke-fill font-display text-[2.6vw] max-md:text-[8vw] leading-none text-mustard transition-transform duration-300 hover:scale-105 [--stroke-color:var(--color-berry)]"
+        className="block transition-transform duration-300 hover:scale-105"
       >
-        {site.name}
+        <Logo className="h-[2.2vw] max-md:h-[7vw] w-auto" />
       </TransitionLink>
 
       <nav className="flex items-center gap-[0.8vw] max-md:gap-[2.5vw]">

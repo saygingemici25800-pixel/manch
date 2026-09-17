@@ -1,8 +1,7 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { LOGO_M_PATH, LOGO_M_VIEWBOX } from "@/components/ui/logo-m";
 
-// Logo SVG gelene kadar: berry zemin, Modak "M". 32 (favicon) + 512 (manifest). TODO: logo
+// Berry zemin + wordmark'ın "M" harfi (potrace ile basılı menüden). 32 (favicon) + 512 (manifest).
 export function generateImageMetadata() {
   return [
     { id: "32", size: { width: 32, height: 32 }, contentType: "image/png" },
@@ -12,13 +11,15 @@ export function generateImageMetadata() {
 
 export default async function Icon({ id }: { id: Promise<string | number> }) {
   const px = Number(await id);
-  const modak = await readFile(join(process.cwd(), "src/assets/fonts/Modak-Regular.ttf"));
+  const SIZE = px;
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#7A1F4B", color: "#F6C343", fontFamily: "Modak", fontSize: px * 0.78, borderRadius: px * 0.2 }}>
-        M
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#7A1F4B", borderRadius: SIZE * 0.2 }}>
+        <svg viewBox={LOGO_M_VIEWBOX} width={SIZE * 0.62} height={SIZE * 0.62 * (480 / 376)}>
+          <path fill="#F6C343" fillRule="evenodd" d={LOGO_M_PATH} />
+        </svg>
       </div>
     ),
-    { width: px, height: px, fonts: [{ name: "Modak", data: modak, style: "normal", weight: 400 }] },
+    { width: px, height: px },
   );
 }

@@ -14,7 +14,8 @@
       "title": "HANDMADE HITS DIFFERENT",
       "sub": "Fethiye'nin smash burger zone'u. Smash sesi mutfaktan, ilk ısırık masadan.",
       "badge": "MISU & MIYU · MANCH'İN YÜZLERİ · ",
-      "imageAlt": "[TODO] Hero görseli — smash burger"
+      "imageAlt": "MANCH mutfağı — ızgarada smash köfte",
+      "burgerAlt": "Classic Manch Burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
@@ -46,24 +47,25 @@
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "Tarihi çarşının ortasında mavi karo duvarlar, pembe dama kağıtlar ve lezzet seviyesi biraz kontrolden çıkmış burgerler. Just another chill lunch.",
-      "imageAlt": "[TODO] MANCH iç mekan fotoğrafı"
+      "imageAlt": "MANCH iç mekan fotoğrafı (yakında)"
     },
     "misu": {
       "title": "Aç değiliz. Sadece takıntılıyız.",
       "body": "Misu ve Miyu MANCH'in yüzleri: burgerini tutan, tiramisu konusunda biraz iddialı iki karakter.",
-      "tape": "THE SWEETEST WORK IN PROGRESS"
+      "tape": "THE SWEETEST WORK IN PROGRESS",
+      "imageAlt": "Misu & Miyu ızgara başında"
     },
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 KARE",
-      "alts": "[TODO] Berry Manch|[TODO] Cheese pull|[TODO] Tiramisu|[TODO] Karo duvar|[TODO] Crispy tenders|[TODO] Misu & Miyu",
+      "alts": "Mutfakta smash|Classic Manch Burger|Crispy Triangle|Fig Jam Burger|Tiramisu servisi|Truffle Manch Burger",
       "cta": "@manch.tr'yi takip et"
     },
     "location": {
       "eyebrow": "KONUM",
       "title": "Bizi bul.",
       "hours": "Saatler",
-      "hoursSoon": "[TODO] Yakında",
+      "hoursSoon": "Yakında",
       "phone": "Telefon",
       "directions": "Yol tarifi",
       "contact": "İletişim",
@@ -83,7 +85,8 @@
     "menuButton": "Menü",
     "openMenu": "Menüyü aç",
     "closeMenu": "Menüyü kapat",
-    "est": "EST. 2026 — FETHİYE, TÜRKİYE"
+    "est": "EST. 2026 — FETHİYE, TÜRKİYE",
+    "logoAlt": "MANCH"
   },
   "Preloader": {
     "line1": "BRIOCHE KIZARIYOR…",
@@ -112,9 +115,10 @@
     "products": "{count, plural, =1 {# ürün} other {# ürün}}",
     "quickDetails": "Hızlı Detaylar",
     "addToCart": "Sepete Ekle",
-    "todo": "[TODO] Yakında",
+    "todo": "Yakında",
     "close": "Kapat",
-    "skipToContent": "İçeriğe atla"
+    "skipToContent": "İçeriğe atla",
+    "priceOnRequest": "Fiyat için sor"
   },
   "Cart": {
     "added": "SEPETE EKLENDİ",
@@ -126,9 +130,10 @@
     "less": "Azalt",
     "more": "Artır",
     "remove": "Kaldır",
-    "priceTodo": "[TODO] fiyat",
+    "priceTodo": "Fiyat için sor",
     "waIntro": "Merhaba MANCH! Sipariş vermek istiyorum:",
-    "checkoutSoon": "[TODO] WhatsApp sipariş hattı yakında — numara eklendiğinde buton aktif olur."
+    "total": "Toplam",
+    "waTotal": "Toplam: {total} TL"
   },
   "Cookie": {
     "text": "Çerezleri lezzet için kullanıyoruz.",
@@ -142,7 +147,8 @@
     "address": "Adres",
     "phone": "Telefon",
     "hours": "Saatler",
-    "reservation": "[TODO] Rezervasyon için Instagram DM (telefon yakında)."
+    "reservation": "Rezervasyon için ara ya da WhatsApp'tan yaz.",
+    "email": "E-posta"
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -198,7 +204,7 @@
     "resetPreloader": "Preloader + çerezi sıfırla"
   },
   "Product": {
-    "priceTodo": "[TODO] fiyat",
+    "priceTodo": "Fiyat için sor",
     "time": "Süre",
     "minutes": "{n} dk",
     "bun": "Ekmek",
@@ -225,7 +231,8 @@
     "categories": "Kategoriler",
     "filters": "Filtreler",
     "empty": "Bu filtrede ürün yok.",
-    "activeCategory": "Aktif kategori"
+    "activeCategory": "Aktif kategori",
+    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI"
   },
   "About": {
     "metaTitle": "Hakkımızda",
@@ -247,7 +254,7 @@
       "eyebrow": "ZONE",
       "title": "Mavi karo, pembe dama",
       "counter": "4 KARE",
-      "alts": "[TODO] Karo duvar|[TODO] Tepsi & dama kağıt|[TODO] Sos sıkılan brioche|[TODO] Tezgah"
+      "alts": "Karo duvar (yakında)|Tepsi & dama kağıt (yakında)|Sos sıkılan brioche (yakında)|Tezgah (yakında)"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",

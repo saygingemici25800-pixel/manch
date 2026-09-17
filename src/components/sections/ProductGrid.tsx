@@ -11,9 +11,11 @@ import ProductCard from "./ProductCard";
 interface Props {
   products: Product[];
   onSelect?: (slug: string) => void;
+  /** ilk 3 kart fold üstü → priority */
+  eager?: boolean;
 }
 
-export default function ProductGrid({ products, onSelect }: Props) {
+export default function ProductGrid({ products, onSelect, eager }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   // Kural 36: dizi kimliği yerine kararlı anahtar
@@ -35,8 +37,8 @@ export default function ProductGrid({ products, onSelect }: Props) {
 
   return (
     <div ref={root} className="grid grid-cols-3 max-md:grid-cols-1 gap-[2vw] max-md:gap-[6vw]">
-      {products.map((p) => (
-        <ProductCard key={p.slug} product={p} onSelect={onSelect} />
+      {products.map((p, i) => (
+        <ProductCard key={p.slug} product={p} onSelect={onSelect} priority={eager && i < 3} />
       ))}
     </div>
   );

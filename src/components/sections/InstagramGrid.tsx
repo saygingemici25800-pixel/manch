@@ -1,10 +1,20 @@
 import { getTranslations } from "next-intl/server";
 import RollText from "@/components/motion/RollText";
-import Placeholder from "@/components/ui/Placeholder";
+import Image from "next/image";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { site } from "@/lib/site";
 
-/** Instagram grid — 6 statik görsel (şimdilik Placeholder) + @manch.tr CTA. */
+// 3 fotoğraf + 3 kesit (sky zemin); her kare @manch.tr'ye link
+const SHOTS: { src: string; cutout?: boolean }[] = [
+  { src: "/images/hero-cook.jpg" },
+  { src: "/burgers/classic-manch.png", cutout: true },
+  { src: "/images/crispy-triangle.jpg" },
+  { src: "/burgers/fig-jam.png", cutout: true },
+  { src: "/images/tiramisu.jpg" },
+  { src: "/burgers/truffle-manch.png", cutout: true },
+];
+
+/** Instagram grid — 6 görsel + @manch.tr CTA. */
 export default async function InstagramGrid() {
   const t = await getTranslations("Home.insta");
   const labels = t("alts").split("|");
@@ -12,10 +22,17 @@ export default async function InstagramGrid() {
     <section className="bg-cream px-[2.5vw] py-[8vw] max-md:px-[5vw] max-md:py-[16vw]">
       <SectionHeader eyebrow={t("eyebrow")} title={site.social.instagramHandle} counter={t("counter")} className="mb-[3vw] max-md:mb-[8vw]" />
       <ul className="grid grid-cols-3 max-md:grid-cols-2 gap-[1.5vw] max-md:gap-[3vw]">
-        {labels.slice(0, 6).map((label, i) => (
-          <li key={label}>
-            {/* TODO: gerçek görseller /images/ (Faz 8 next/image) */}
-            <Placeholder tone={i % 2 ? "sky" : "berry"} label={label} ratio="1/1" />
+        {SHOTS.map((shot, i) => (
+          <li key={shot.src}>
+            <a href={site.social.instagram} target="_blank" rel="noopener noreferrer" data-cursor-hide className="group relative block aspect-square overflow-hidden rounded-[1vw] max-md:rounded-[3vw] bg-sky">
+              <Image
+                src={shot.src}
+                alt={labels[i] ?? ""}
+                fill
+                sizes="(max-width: 768px) 45vw, 30vw"
+                className={shot.cutout ? "object-contain p-[8%] transition-transform duration-500 ease-[var(--ease-jelly)] group-hover:rotate-3 group-hover:scale-105" : "object-cover transition-transform duration-500 group-hover:scale-105"}
+              />
+            </a>
           </li>
         ))}
       </ul>

@@ -3,7 +3,8 @@ import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { pageMetadata } from "@/lib/seo";
-import SectionHeader from "@/components/ui/SectionHeader";
+import LogoMenu from "@/components/ui/logo-menu";
+import { site } from "@/lib/site";
 import { categories, products } from "@/data/menu";
 import MenuClient from "./MenuClient";
 
@@ -21,7 +22,11 @@ export default async function MenuPage({ params }: PageProps<"/[locale]/menu">) 
 
   return (
     <main id="main" className="bg-cream px-[2.5vw] pb-[8vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[16vw] max-md:pt-[24vw]">
-      <SectionHeader eyebrow={t("eyebrow")} title={t("title")} counter={tc("products", { count: products.length })} className="mb-[2vw] max-md:mb-[6vw]" />
+      <header className="mb-[2vw] max-md:mb-[6vw] flex flex-col items-center gap-[0.8vw] max-md:gap-[3vw] text-center">
+        <LogoMenu className="h-[7vw] max-md:h-[18vw] w-auto text-berry" label={t("title")} />
+        <p className="font-pixel text-[0.9vw] max-md:text-[3vw] uppercase tracking-[0.3em] text-berry">{site.menuTagline}</p>
+        <p className="font-pixel text-[0.8vw] max-md:text-[2.8vw] uppercase tracking-widest text-berry-dk">{tc("products", { count: products.length })}</p>
+      </header>
       {/* Kural 34: useSearchParams → Suspense */}
       <Suspense fallback={<div aria-hidden="true" className="h-[40vw] max-md:h-[120vw]" />}>
         <MenuClient categories={categories} products={products} />

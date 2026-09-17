@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
+import Image from "next/image";
 import ProductGrid from "@/components/sections/ProductGrid";
 import type { Category, Product, Tag } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
@@ -121,10 +122,17 @@ export default function MenuClient({ categories, products }: Props) {
 
       {blocks.length === 0 && <p className="text40 text-[1.4vw] max-md:text-[4.5vw] text-berry-dk">{t("empty")}</p>}
 
-      {blocks.map(({ category, items }) => (
+      {blocks.map(({ category, items }, bi) => (
         <section key={category.id} id={`cat-${category.id}`} data-testid="menu-category" className="scroll-mt-[10vw] max-md:scroll-mt-[26vw] flex flex-col gap-[1.5vw] max-md:gap-[5vw]">
-          <h2 className="font-display text-[2.6vw] max-md:text-[8vw] leading-none text-berry">{category.name[locale]}</h2>
-          <ProductGrid products={items} onSelect={open} />
+          <div className="flex items-center gap-[1.2vw] max-md:gap-[3vw]">
+            {category.cover && (
+              <span className="relative h-[4.5vw] w-[4.5vw] max-md:h-[14vw] max-md:w-[14vw] shrink-0 overflow-hidden rounded-[1vw] max-md:rounded-[3vw]">
+                <Image src={category.cover} alt="" fill loading="eager" sizes="(max-width: 768px) 14vw, 4.5vw" className="object-cover" />
+              </span>
+            )}
+            <h2 className="font-display text-[2.6vw] max-md:text-[8vw] leading-none text-berry">{category.name[locale]}</h2>
+          </div>
+          <ProductGrid products={items} onSelect={open} eager={bi === 0} />
         </section>
       ))}
 

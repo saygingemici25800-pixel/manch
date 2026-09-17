@@ -8,6 +8,7 @@ export const site = {
   legalName: "MANCH",
   tagline: "United Chill Burger Zone",
   taglineAlt: "Handmade Hits Different",
+  menuTagline: "BURGER . FRIES . ATIŞTIRMALIK . TATLI",
   hashtags: ["#Manch", "#HandmadeHitsDifferent", "#Fethiye"],
   est: 2026,
   // Yaz 2026 açılış — brief: Haziran teaser, Temmuz başı açık
@@ -25,18 +26,19 @@ export const site = {
   social: {
     instagram: "https://www.instagram.com/manch.tr/",
     instagramHandle: "@manch.tr",
-    facebook: null as string | null, // TODO: bio'daki link
+    facebook: "https://www.facebook.com/manch.tr/" as string | null,
   },
 
   contact: {
-    phone: null as string | null, // TODO
-    whatsapp: null as string | null, // TODO: E.164 formatında, ör. "+90..."
-    email: null as string | null, // TODO
+    phone: "+90 505 497 07 48" as string | null,
+    phoneDisplay: "0505 497 07 48",
+    whatsapp: "+905054970748" as string | null, // E.164 → wa.me/905054970748
+    email: "manch.burger.coffee@gmail.com" as string | null,
   },
 
   hours: null as
     | ReadonlyArray<{ days: string; open: string; close: string }>
-    | null, // TODO
+    | null, // TODO: çalışma saatleri
 
   orderUrl: null as string | null, // TODO: sipariş linki (Getir/Yemeksepeti/WhatsApp)
 

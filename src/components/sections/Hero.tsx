@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import JellyWave from "@/components/motion/JellyWave";
 import SplitReveal from "@/components/motion/SplitReveal";
+import Image from "next/image";
+import Float from "@/components/motion/Float";
 import Placeholder from "@/components/ui/Placeholder";
-import HeroBurger from "./HeroBurger";
 import { site } from "@/lib/site";
 
 /** R9 — tam ekran görsel (şimdilik Placeholder), hardal Modak char reveal, dönen Misu&Miyu rozeti, jelly dalga. */
@@ -11,14 +12,26 @@ export default async function Hero() {
   const badge = t("badge");
   return (
     <section data-nav-dark className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-berry text-cream">
-      {/* TODO(Faz 7): gerçek görsel /images/hero-smash.jpg next/image ile; şimdilik CSS katmanlı burger (karar 2026-09-17) */}
-      <div aria-hidden="true" className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,.04)_0_1.2vw,transparent_1.2vw_2.4vw)]" />
-      <div className="absolute left-1/2 top-[52%] max-md:top-[38%] -translate-x-1/2 -translate-y-1/2 max-md:h-[70vw]">
-        <HeroBurger />
-      </div>
+      {/* arka plan fotoğrafı + koyu berry gradient (%40) */}
+      <Image
+        src="/images/hero-cook.jpg"
+        alt={t("imageAlt")}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-[60%_30%]"
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(78,16,48,.35)_0%,rgba(78,16,48,.4)_45%,rgba(122,31,75,.85)_100%)]" />
+
+      {/* kesit burger — desktop, Float ile */}
+      <Float duration={4.2} className="absolute right-[6vw] top-[22vh] z-1 max-md:hidden">
+        <div className="relative h-[34vw] w-[34vw] drop-shadow-[0_2vw_3vw_rgba(78,16,48,.6)]">
+          <Image src="/burgers/classic-manch.png" alt={t("burgerAlt")} fill sizes="34vw" className="object-contain" />
+        </div>
+      </Float>
 
       {/* dönen rozet */}
-      <div className="absolute right-[4vw] top-[8vw] max-md:right-[5vw] max-md:top-[26vw] grid h-[14vw] w-[14vw] max-md:h-[34vw] max-md:w-[34vw] place-items-center">
+      <div className="absolute left-[4vw] top-[9vw] max-md:left-auto max-md:right-[5vw] max-md:top-[26vw] z-1 grid h-[12vw] w-[12vw] max-md:h-[30vw] max-md:w-[30vw] place-items-center">
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full animate-[spin_16s_linear_infinite] motion-reduce:animate-none" aria-hidden="true">
           <defs><path id="hero-ring" d="M50 50 m-38 0 a38 38 0 1 1 76 0 a38 38 0 1 1 -76 0" /></defs>
           <text className="fill-mustard font-pixel text-[7.2px] uppercase tracking-[0.18em]"><textPath href="#hero-ring">{badge}{badge}</textPath></text>

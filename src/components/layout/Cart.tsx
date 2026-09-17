@@ -65,9 +65,15 @@ export default function Cart() {
     };
   }, [lastAdded, locale, bounce]);
 
+  const total = lines.reduce((sum, l) => sum + (getProduct(l.slug)?.price ?? 0) * l.qty, 0);
   const message = [
     t("waIntro"),
-    ...lines.map((l) => `• ${l.qty}× ${getProduct(l.slug)?.name[locale] ?? l.slug}`),
+    ...lines.map((l) => {
+      const p = getProduct(l.slug);
+      const price = p?.price !== null && p?.price !== undefined ? ` — ${p.price * l.qty} TL` : "";
+      return `• ${l.qty}× ${p?.name[locale] ?? l.slug}${price}`;
+    }),
+    t("waTotal", { total }),
   ].join("\n");
   const waUrl = buildWaUrl(message);
 
@@ -139,7 +145,7 @@ export default function Cart() {
               <li key={l.slug} className="flex items-center justify-between gap-[1vw] border-b border-berry/15 pb-[0.8vw] max-md:pb-[3vw]">
                 <div className="flex flex-col">
                   <span className="text40 text-[1.2vw] max-md:text-[4.2vw]">{p?.name[locale] ?? l.slug}</span>
-                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price ?? t("priceTodo")}</span>
+                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price !== null && p?.price !== undefined ? `${p.price * l.qty} TL` : t("priceTodo")}</span>
                 </div>
                 <div className="flex items-center gap-[0.6vw] max-md:gap-[2vw]">
                   <button type="button" aria-label={t("less")} onClick={() => setQty(l.slug, l.qty - 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-berry text-cream">−</button>
@@ -153,6 +159,12 @@ export default function Cart() {
         </ul>
 
         <div className="flex flex-col gap-[0.6vw] max-md:gap-[2vw]">
+          {lines.length > 0 && (
+            <p data-testid="cart-total" className="flex items-baseline justify-between border-t border-berry/15 pt-[0.8vw] max-md:pt-[3vw] text40 text-[1.2vw] max-md:text-[4.2vw]">
+              <span>{t("total")}</span>
+              <span className="font-display text-[1.8vw] max-md:text-[6vw]">{total} TL</span>
+            </p>
+          )}
           {waUrl && lines.length > 0 ? (
             <a
               href={waUrl}
@@ -174,9 +186,6 @@ export default function Cart() {
             >
               {lines.length === 0 ? t("checkout") : `${t("checkout")} · ${tc("todo")}`}
             </button>
-          )}
-          {!site.contact.whatsapp && lines.length > 0 && (
-            <p className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{t("checkoutSoon")}</p>
           )}
         </div>
       </div>

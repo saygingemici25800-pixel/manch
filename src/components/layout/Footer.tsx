@@ -1,10 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import Juggle from "@/components/motion/Juggle";
 import IngredientIcon, { INGREDIENTS } from "@/components/ui/IngredientIcon";
+import Logo from "@/components/ui/Logo";
 import RollText from "@/components/motion/RollText";
 import SplitReveal from "@/components/motion/SplitReveal";
 import TransitionLink from "@/components/motion/TransitionLink";
-import { site } from "@/lib/site";
 
 const LINKS = [
   { key: "home", href: "/" },
@@ -37,12 +37,8 @@ export default async function Footer() {
         </div>
       </div>
 
-      {/* dev wordmark: dekoratif, konturlu SVG metin (axe kontrast denetimi dışında, Kural 40) */}
-      <svg aria-hidden="true" viewBox="0 0 1000 200" className="mt-[2vw] max-md:mt-[8vw] block w-[95vw] max-md:w-[140vw] select-none overflow-visible">
-        <text x="0" y="175" fill="none" stroke="var(--color-berry)" strokeWidth="6" style={{ fontFamily: "var(--font-display)", fontSize: 230 }}>
-          {site.name}
-        </text>
-      </svg>
+      {/* dev wordmark: gerçek logo, dekoratif */}
+      <Logo className="mt-[2vw] max-md:mt-[8vw] block w-[95vw] max-md:w-[140vw] h-auto text-berry select-none" />
 
       <div className="mt-[1.5vw] max-md:mt-[5vw] flex flex-wrap items-center justify-between gap-[1vw] max-md:gap-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw] text-cream">
         <span>{t("rights")}</span>

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
 import RollText from "@/components/motion/RollText";
 import KraftCard from "@/components/ui/KraftCard";
+import Image from "next/image";
 import Placeholder from "@/components/ui/Placeholder";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
@@ -43,14 +44,20 @@ export default function ProductModal({ product, onClose }: Props) {
       >
         {product && (
           <KraftCard tilt={-0.8} className="grid grid-cols-[1fr_1.2fr] max-md:grid-cols-1 gap-[2vw] max-md:gap-[5vw]">
-            <Placeholder tone={product.image ? "berry" : "sky"} label={product.name[locale]} ratio="1/1" className="w-full self-start" />
+            {product.image ? (
+              <div className={clsx("relative aspect-square w-full self-start overflow-hidden rounded-[1vw] max-md:rounded-[3vw]", product.image.endsWith(".png") && "bg-berry")}>
+                <Image src={product.image} alt={product.name[locale]} fill priority sizes="(max-width: 768px) 84vw, 22vw" className={product.image.endsWith(".png") ? "object-contain p-[4%]" : "object-cover"} />
+              </div>
+            ) : (
+              <Placeholder tone="sky" label={product.name[locale]} ratio="1/1" className="w-full self-start" />
+            )}
             <div className="flex flex-col gap-[1vw] max-md:gap-[3.5vw]">
               <div className="flex items-start justify-between gap-[1vw]">
                 <h2 id="product-title" className="font-display text-[2.6vw] max-md:text-[8vw] leading-none">{product.name[locale]}</h2>
                 <button type="button" data-cursor-hide data-testid="product-close" onClick={onClose} aria-label={tc("close")} className="text40 text-[1.1vw] max-md:text-[4vw] underline underline-offset-4">✕</button>
               </div>
               <p className="text40 text-[1.2vw] max-md:text-[4.2vw] normal-case tracking-normal">{product.desc[locale]}</p>
-              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} ₺` : t("priceTodo")}</p>
+              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} TL` : t("priceTodo")}</p>
 
               <h3 className="mt-[0.5vw] font-display text-[1.3vw] max-md:text-[5vw]">{t("ingredients")}</h3>
               <ul className="flex flex-col gap-[0.2vw] max-md:gap-[1vw] text40 text-[1.05vw] max-md:text-[3.8vw]">

@@ -19,7 +19,7 @@ export default function LayoutLab() {
     <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">
       <button type="button" data-cursor-hide data-testid="lab-transition" onClick={() => trigger(null)} className={btn}>{t("trigger")}</button>
       <TransitionLink href="/" data-cursor-hide data-testid="lab-tl-home" className={btn}>{t("tlHome")}</TransitionLink>
-      <button type="button" data-cursor-hide data-testid="lab-add-cart" onClick={() => add("classic-manch-burger")} className={btn}>{t("addTest")}</button>
+      <button type="button" data-cursor-hide data-testid="lab-add-cart" onClick={() => add("classic-manch")} className={btn}>{t("addTest")}</button>
       <button type="button" data-cursor-hide data-testid="lab-open-cart" onClick={() => setCartOpen(true)} className={btn}>{t("openCart")}</button>
       <button type="button" data-cursor-hide data-testid="lab-open-info" onClick={() => setInfoOpen(true)} className={btn}>{t("openInfo")}</button>
       <button

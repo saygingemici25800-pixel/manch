@@ -28,7 +28,7 @@ export default function Location() {
           </address>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
             <dt className="text-mustard">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : t("hoursSoon")}</dd>
-            <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ?? tc("todo")}</dd>
+            <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
           </dl>
           <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">
             <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className="group rounded-full bg-mustard px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-ink transition-[transform] duration-300 hover:scale-105">

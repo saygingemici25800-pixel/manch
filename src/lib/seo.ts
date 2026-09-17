@@ -56,6 +56,7 @@ export function restaurantJsonLd(locale: Locale) {
     sameAs: [site.social.instagram, site.social.facebook].filter(Boolean),
   };
   if (site.contact.phone) data.telephone = site.contact.phone;
+  if (site.contact.email) data.email = site.contact.email;
   if (site.hours) {
     data.openingHoursSpecification = site.hours.map((h) => ({
       "@type": "OpeningHoursSpecification",

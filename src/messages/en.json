@@ -14,7 +14,8 @@
       "title": "HANDMADE HITS DIFFERENT",
       "sub": "Fethiye's smash burger zone. Smash from the kitchen, first bite from the table.",
       "badge": "MISU & MIYU · THE FACES OF MANCH · ",
-      "imageAlt": "[TODO] Hero image — smash burger"
+      "imageAlt": "MANCH kitchen — smash patties on the grill",
+      "burgerAlt": "Classic Manch Burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
@@ -46,24 +47,25 @@
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "In the heart of the old bazaar: blue tile walls, pink checkered paper and burgers with flavor levels slightly out of control. Just another chill lunch.",
-      "imageAlt": "[TODO] MANCH interior photo"
+      "imageAlt": "MANCH interior photo (coming soon)"
     },
     "misu": {
       "title": "Not hungry. Just obsessed.",
       "body": "Misu and Miyu are the faces of MANCH: two characters holding your burger and taking tiramisu very seriously.",
-      "tape": "THE SWEETEST WORK IN PROGRESS"
+      "tape": "THE SWEETEST WORK IN PROGRESS",
+      "imageAlt": "Misu & Miyu at the grill"
     },
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 SHOTS",
-      "alts": "[TODO] Berry Manch|[TODO] Cheese pull|[TODO] Tiramisu|[TODO] Tile wall|[TODO] Crispy tenders|[TODO] Misu & Miyu",
+      "alts": "Smashing in the kitchen|Classic Manch Burger|Crispy Triangle|Fig Jam Burger|Tiramisu service|Truffle Manch Burger",
       "cta": "Follow @manch.tr"
     },
     "location": {
       "eyebrow": "LOCATION",
       "title": "Find us.",
       "hours": "Hours",
-      "hoursSoon": "[TODO] Coming soon",
+      "hoursSoon": "Coming soon",
       "phone": "Phone",
       "directions": "Directions",
       "contact": "Contact",
@@ -83,7 +85,8 @@
     "menuButton": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "est": "EST. 2026 — FETHİYE, TÜRKİYE"
+    "est": "EST. 2026 — FETHİYE, TÜRKİYE",
+    "logoAlt": "MANCH"
   },
   "Preloader": {
     "line1": "TOASTING THE BRIOCHE…",
@@ -112,9 +115,10 @@
     "products": "{count, plural, =1 {# item} other {# items}}",
     "quickDetails": "Quick Details",
     "addToCart": "Add to Cart",
-    "todo": "[TODO] Coming soon",
+    "todo": "Coming soon",
     "close": "Close",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "priceOnRequest": "Ask for price"
   },
   "Cart": {
     "added": "ADDED TO CART",
@@ -126,9 +130,10 @@
     "less": "Decrease",
     "more": "Increase",
     "remove": "Remove",
-    "priceTodo": "[TODO] price",
+    "priceTodo": "Ask for price",
     "waIntro": "Hi MANCH! I'd like to order:",
-    "checkoutSoon": "[TODO] WhatsApp ordering coming soon — the button activates once the number is added."
+    "total": "Total",
+    "waTotal": "Total: {total} TL"
   },
   "Cookie": {
     "text": "We use cookies for flavor.",
@@ -142,7 +147,8 @@
     "address": "Address",
     "phone": "Phone",
     "hours": "Hours",
-    "reservation": "[TODO] For reservations: Instagram DM (phone coming soon)."
+    "reservation": "Call or WhatsApp us for reservations.",
+    "email": "Email"
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -198,7 +204,7 @@
     "resetPreloader": "Reset preloader + cookie"
   },
   "Product": {
-    "priceTodo": "[TODO] price",
+    "priceTodo": "Ask for price",
     "time": "Time",
     "minutes": "{n} min",
     "bun": "Bun",
@@ -225,7 +231,8 @@
     "categories": "Categories",
     "filters": "Filters",
     "empty": "No items for this filter.",
-    "activeCategory": "Active category"
+    "activeCategory": "Active category",
+    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI"
   },
   "About": {
     "metaTitle": "About",
@@ -247,7 +254,7 @@
       "eyebrow": "ZONE",
       "title": "Blue tile, pink checker",
       "counter": "4 SHOTS",
-      "alts": "[TODO] Tile wall|[TODO] Tray & checkered paper|[TODO] Sauce on brioche|[TODO] Counter"
+      "alts": "Tile wall (coming soon)|Tray & checkered paper (coming soon)|Sauce on brioche (coming soon)|Counter (coming soon)"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",
