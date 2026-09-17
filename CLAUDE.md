@@ -30,13 +30,23 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 1 tamamlandı + eski depodan devralma yapıldı (2026-09-18).** Sıradaki: Faz 2 (Tasarım Sistemi) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
-- Son başarılı build: 2026-09-18 devralma sonrası (`pnpm build` + `pnpm lint` temiz; 3 rota: `/_not-found`, `/tr`, `/en` + `ƒ Proxy`)
+- Aktif faz: **Faz 2 tamamlandı.** Sıradaki: Faz 3 (Motion Primitive'leri) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Son başarılı build: 2026-09-18 Faz 2 kapanış (`pnpm build` + `pnpm lint` temiz; 5 rota: `/_not-found`, `/tr`, `/en`, `/tr/lab`, `/en/lab` + `ƒ Proxy`)
 - Dal: **`faz-1-yeniden`** — proje bu dalda sıfırdan kuruldu. Eski tam proje `main` + `yedek/faz-1-9` dalı + `yedek-faz-9` etiketinde.
 - **Canlı: https://manch-eight.vercel.app — `origin/main` = `e05f994`, 2026-09-18'de push edildi, deploy yeşil, `scripts/smoke.mjs` 10/10 ✓ 0 uyarı.** Vercel `NEXT_PUBLIC_SITE_URL` ayarlı.
 - **Devralınanlar (main → faz-1-yeniden):** `public/` (32 dosya: 7 burger kesiti PNG+WebP, 6 malzeme ikonu, 3 fotoğraf JPG+WebP, maskot, 4 logo) · `src/data/menu.ts` (6 kategori, **25 ürün, 24'ünde gerçek fiyat 35–790 TL**) · `src/lib/site.ts` (**telefon, WhatsApp, e-posta, Facebook dolu**; `hours` + `orderUrl` hâlâ null) · `src/messages/{tr,en}.json` (19 namespace, 216 anahtar, simetrik) · `src/assets/fonts/Modak-Regular.ttf` (OG için, Kural 39) · **KURALLAR 49 madde + HATA GÜNLÜĞÜ 39 satır**.
 - **Devralınmayanlar (Faz 2+ kodu, yeniden yazılacak):** `src/components/**`, `src/styles/{fonts,tokens}.ts`, `src/lib/{seo,gsap,*-store}.ts`, `src/i18n/client-messages.ts`, `src/app/{icon,apple-icon,manifest,robots,sitemap}`, `[locale]/opengraph-image.tsx`, `scripts/**` (lab-check, lighthouse, bundle-report, smoke, content pipeline) — hepsi `main`'de duruyor, ilgili fazda oradan referans alınabilir.
-- Açık TODO'lar: **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** (Guacamole, 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · iç mekan/zone galerisi fotoğrafı yok · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- **RENK TEYİDİ (2026-09-18) — 9 tokendan yalnızca 3'ü doğrulanabildi:**
+  - `public/logo/*.svg` **renk taşımıyor** (`fill="currentColor"`, potrace izi — Kural 42). `public/logo/logo-manch.png` ise `photos_logo.py` içinde `BERRY = (0x7A,0x1F,0x4B)` ile boyanarak üretilmiş → **döngüsel kanıt, teyit sayılmaz**.
+  - Tek bağımsız kaynak **`docs/source/menu-print.png`** (düz renkli tasarım dosyası, fotoğraf değil).
+  - `berry #7a1f4b` → menü baskısında wordmark **#6A1F3B** (%45.9). Fark: R −16, B −16 — baskı daha koyu/şaraba yakın. **KARAR BEKLİYOR, değiştirilmedi.**
+  - `sky #c4e4f3` → mavi burger filigranı **~#C7E0F2**. Fark ihmal edilebilir ✓
+  - `cream #f4eee6` → menü zemini **#FEF8F3**. Ölçülen daha açık/pembemsi. **KARAR BEKLİYOR.**
+  - `tile #8fc3d6` → yalnızca fotoğrafta var (~#84A8BA, ışık bağımlı) — **teyit edilemez**.
+  - `berry-dk` · `paper` · `pink` · `mustard` · `ink` → **hiçbir kaynakta yok, teyit edilemez.**
+  - Kesin teyit için gereken: **orijinal vektör logo** (AI/SVG) veya marka kılavuzu.
+- **Kararlar (2026-09-18, kullanıcı):** ① Smash Anatomy (R15) **kalıyor** — 8 katman tepeden çekilip şeffaf zemine alınacak; görseller gelene kadar placeholder ile çalışılır. ② Instagram grid **kalıyor** — 6 gerçek 1:1 fotoğraf gelecek. ③ 25 ürünün açıklamaları TR+EN yeniden yazılacak; **metinler dışarıdan gelir, Claude üretmez**.
+- Açık TODO'lar: **8 katman fotoğrafı** (Smash Anatomy, tepeden, şeffaf zemin) · **Instagram için 6 adet 1:1 fotoğraf** · **25 ürün açıklaması TR+EN** (dışarıdan) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** (Guacamole, 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · iç mekan/zone galerisi fotoğrafı yok · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -193,12 +203,12 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: `pnpm build` temiz, `/tr` ve `/en` açılıyor
 
 ### Faz 2 — Tasarım Sistemi
-- [ ] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
-- [ ] next/font: Modak, Mouse Memoirs, **Press Start 2P** (`font-pixel`, 12/12 TR ✓) — Silkscreen ğşıĞŞİ içermediği için `font-pixel-alt` olarak sadece `/lab`'da, `preload: false` (Kural 18) *(revize: 2026-09-17, 2026-09-18)*
-- [ ] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
-- [ ] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
-- [ ] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
-- [ ] ✅ Kabul: lab sayfası doğru render, build temiz
+- [x] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
+- [x] next/font: Modak, Mouse Memoirs, **Press Start 2P** (`font-pixel`, 12/12 TR ✓) — Silkscreen ğşıĞŞİ içermediği için `font-pixel-alt` olarak sadece `/lab`'da, `preload: false` (Kural 18) *(revize: 2026-09-17, 2026-09-18)*
+- [x] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
+- [x] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
+- [x] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
+- [x] ✅ Kabul: `pnpm build` + `pnpm lint` temiz; `/tr/lab` + `/en/lab` dev'de 200, **prod'da 404** (Kural 23 doğrulandı); TR kapsamı **iki bağımsız yöntemle** ✓ — fontTools cmap union (Modak 442 glyph, Mouse Memoirs 354, Press Start 2P 616; üçü de 12/12) **ve** `/lab` GlyphCheck canvas ölçümü (üçü de 12/12); konsol 0 hata; 1440 ve 375'te yatay taşma yok. `docs/screens/faz-2-lab.png`, `faz-2-lab-mobile.png` *(revize: 2026-09-18)*
 
 ### Faz 3 — Motion Primitive'leri
 - [ ] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
@@ -328,6 +338,8 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-18 | 1 | `pnpm create next-app` boş olmayan klasöre kurulmuyor (kökte `CLAUDE.md` varken hata) | scaffold'un `validFiles` listesinde `.git` ve `docs` var, `CLAUDE.md` yok | `CLAUDE.md` scaffold öncesi geçici olarak `docs/` içine alındı, sonra köke geri taşındı — orijinal Faz 1 başlangıç durumu zaten böyleydi (Faz 1, madde 2) |
 | 2026-09-18 | 1 | CLAUDE.md'yi script ile güncellerken **dosya ikizlendi** ve protokol bölümü bozuldu (aynı kök neden iki kez) | `str.index("## 🧠 HATA GÜNLÜĞÜ")` protokolün 1. maddesindeki **alıntıyı** yakaladı → dilim sınırları ters döndü (`b < a`) → `s[:a] + s[b:]` aradaki metni iki kez yazdı; ilk denemede aynı şey `## 📍 DURUM` ile oldu | Satır başına çapalı regex + `assert a < b` + yazım sonrası grep doğrulaması (Kural 49); dosya `yedek/faz-1-9` dalından geri alınıp yeniden yazıldı |
 | 2026-09-18 | 1 | `ERR_PNPM_IGNORED_BUILDS` tekrar (@parcel/watcher, @swc/core) | pnpm 11 postinstall script'lerini engelliyor; Next 16 scaffold'u `pnpm-workspace.yaml`'a bu kez `sharp: false` + `unrs-resolver: false` yazıyor | Dört paket de `allowBuilds`'te `false`; build etkilenmedi |
+| 2026-09-18 | 2 | `/lab` GlyphCheck **üç fontta da "12/12 eksik"** dedi; oysa fontTools ve sayfanın kendisi karakterlerin var olduğunu gösteriyordu | Canvas `ctx.font` **CSS değişkeni çözmez** — `48px var(--font-modak), monospace` geçersiz shorthand, atama sessizce yok sayılıyor; iki çizim de varsayılan fontla yapılınca pikseller eşitleniyor ve her karakter "fallback'e düştü" sayılıyor | Aile adı `getComputedStyle(document.documentElement).getPropertyValue(cssVar)` ile çözülür; ayrıca next/font değişkeni `"X", "X Fallback"` şeklinde ve fallback (yerel Arial türevi) TR karakterleri **içerir** → yalnızca **ilk** aile kullanılır, yoksa ölçüm yanlış "var" derdi |
+| 2026-09-18 | 2 | Düzeltmeden sonra Modak "ölçülemedi", diğer ikisi doğru | Kapı `ctx.font` geri okumasını ham karşılaştırıyordu; tarayıcı **tek kelimelik** aile adının tırnaklarını düşürüyor (`"Modak"` → `Modak`), çok kelimeliyi koruyor (`"Mouse Memoirs"`) | Karşılaştırma normalize edildi (tırnak sil + küçük harf). Genel kural: `ctx.font` geri okuması normalize edilmeden karşılaştırılmaz |
 
 ---
 

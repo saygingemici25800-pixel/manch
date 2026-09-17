@@ -171,12 +171,14 @@
     "grainSample": "Grain .06",
     "placeholderBerry": "Berry placeholder",
     "placeholderSky": "Sky placeholder",
-    "enOnly": "EN-only text (tape/marquee)",
+    "enOnly": "Press Start 2P — all 12 Turkish characters (Rule 18)",
     "navOtherLocale": "Türkçe lab",
     "navHome": "Home",
     "motion": "Motion",
     "layout": "Layout",
-    "pin": "Pin test (R15)"
+    "pin": "Pin test (R15)",
+    "glyphs": "Turkish glyph test",
+    "glyphsNote": "Canvas measurement: a character that falls back to another font counts as missing (Rule 21)."
   },
   "Motion": {
     "rmToggle": "Reduced motion",

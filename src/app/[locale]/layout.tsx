@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { routing } from "@/i18n/routing";
+import { fontVariables } from "@/styles/fonts";
 import "@/styles/globals.css";
 
 type Props = {
@@ -36,7 +37,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={fontVariables}>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}

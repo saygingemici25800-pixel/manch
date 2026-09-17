@@ -171,12 +171,14 @@
     "grainSample": "Grain .06",
     "placeholderBerry": "Berry placeholder",
     "placeholderSky": "Sky placeholder",
-    "enOnly": "yalnızca EN metinlerde (tape/marquee)",
+    "enOnly": "Press Start 2P — 12/12 TR karakteri (Kural 18)",
     "navOtherLocale": "English lab",
     "navHome": "Ana sayfa",
     "motion": "Motion",
     "layout": "Layout",
-    "pin": "Pin testi (R15)"
+    "pin": "Pin testi (R15)",
+    "glyphs": "TR karakter testi",
+    "glyphsNote": "Canvas ölçümü: karakter fallback fonta düşüyorsa eksik sayılır (Kural 21)."
   },
   "Motion": {
     "rmToggle": "Reduced motion",
