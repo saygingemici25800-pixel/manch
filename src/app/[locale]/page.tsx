@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { featured, menu } from "@/data/menu";
+import { getFeatured, products } from "@/data/menu";
 import { site } from "@/lib/site";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -10,18 +10,17 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale); // Kural 16
 
   const t = await getTranslations("Home");
-  const tc = await getTranslations("Common");
 
   return (
     <main>
-      <h1>{t("heroTitle")}</h1>
-      <p>{t("heroLead")}</p>
-      <p>{tc("tagline")}</p>
+      <h1>{t("hero.title")}</h1>
+      <p>{t("hero.sub")}</p>
+      <p>{t("tagline")}</p>
       <p>
-        {site.address.full} · {site.name}
+        {site.address.full} · {site.contact.phoneDisplay}
       </p>
       <p>
-        {menu.length} ürün · {featured.length} imza ürün · {locale}
+        {products.length} ürün · {getFeatured().length} imza ürün · {locale}
       </p>
     </main>
   );

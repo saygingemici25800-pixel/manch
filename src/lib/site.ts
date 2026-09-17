@@ -1,26 +1,18 @@
-import type { Locale } from "@/i18n/routing";
-
-/** Iki dilli metin. Kural 6: marka sabitleri sadece bu dosyada. */
-export type Localized = Record<Locale, string>;
+// Tüm marka sabitleri burada. Başka yerde sabit metin/adres/telefon yazma (Kural 6).
+// `null` olan alanlar TODO — kullanıcıdan gelecek.
 
 export const site = {
   name: "MANCH",
-  /** TODO: domain yok — Faz 9'da NEXT_PUBLIC_SITE_URL ile gelir. */
-  url: "https://manch.tr",
-  category: {
-    tr: "Smash Burger / Fast Food",
-    en: "Smash Burger / Fast Food",
-  } satisfies Localized,
-  tagline: {
-    tr: "United Chill Burger Zone",
-    en: "United Chill Burger Zone",
-  } satisfies Localized,
-  taglineAlt: {
-    tr: "Handmade Hits Different",
-    en: "Handmade Hits Different",
-  } satisfies Localized,
-  wallQuote: "THE BURGER YOU'LL CRAVE AGAIN",
-  foundedYear: 2026,
+  // TODO: gerçek domain (Cloudflare DNS, Faz 9). Vercel preview'da NEXT_PUBLIC_SITE_URL ile ezilir.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://manch.tr",
+  legalName: "MANCH",
+  tagline: "United Chill Burger Zone",
+  taglineAlt: "Handmade Hits Different",
+  menuTagline: "BURGER . FRIES . ATIŞTIRMALIK . TATLI",
+  hashtags: ["#Manch", "#HandmadeHitsDifferent", "#Fethiye"],
+  est: 2026,
+  // Yaz 2026 açılış — brief: Haziran teaser, Temmuz başı açık
+  openingLabel: "2026",
 
   address: {
     street: "Çarşı Cd. 21/b",
@@ -28,29 +20,39 @@ export const site = {
     city: "Fethiye",
     postalCode: "48300",
     country: "TR",
-    full: "Çarşı Cd. 21/b, Fethiye 48300",
+    full: "Çarşı Cd. 21/b, Fethiye 48300 (Paspatur)",
   },
-
-  /** TODO: telefon, saatler ve siparis linki marka tarafindan verilecek. */
-  phone: null as string | null,
-  whatsapp: null as string | null,
-  email: null as string | null,
-  /** TODO: haftalik calisma saatleri. */
-  hours: null as null | Record<string, string>,
 
   social: {
     instagram: "https://www.instagram.com/manch.tr/",
-    /** TODO: Facebook sayfa linki bio'dan alinacak. */
-    facebook: null as string | null,
+    instagramHandle: "@manch.tr",
+    facebook: "https://www.facebook.com/manch.tr/" as string | null,
   },
+
+  contact: {
+    phone: "+90 505 497 07 48" as string | null,
+    phoneDisplay: "0505 497 07 48",
+    whatsapp: "+905054970748" as string | null, // E.164 → wa.me/905054970748
+    email: "manch.burger.coffee@gmail.com" as string | null,
+  },
+
+  hours: null as
+    | ReadonlyArray<{ days: string; open: string; close: string }>
+    | null, // TODO: çalışma saatleri
+
+  orderUrl: null as string | null, // TODO: sipariş linki (Getir/Yemeksepeti/WhatsApp)
 
   mascots: {
-    names: ["Misu", "Miyu"] as const,
-    label: { tr: "MANCH'in yüzleri", en: "The faces of MANCH" } satisfies Localized,
+    names: ["Misu", "Miyu"],
+    label: "Misu & Miyu",
   },
 
-  /** TODO: Webber Digital URL. */
-  credit: { name: "Webber Digital", url: null as string | null },
+  wallQuote: "THE BURGER YOU'LL CRAVE AGAIN",
+
+  credit: {
+    label: "Webber Digital",
+    url: null as string | null, // TODO
+  },
 } as const;
 
 export type Site = typeof site;

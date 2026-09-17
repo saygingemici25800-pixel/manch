@@ -19,11 +19,11 @@ export async function generateMetadata({
   params,
 }: Omit<Props, "children">): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Home" });
+  const t = await getTranslations({ locale, namespace: "Meta" });
 
   return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
+    title: t("title"),
+    description: t("description"),
   };
 }
 

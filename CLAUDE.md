@@ -30,11 +30,14 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 1 tamamlandı.** Sıradaki: Faz 2 (Tasarım Sistemi) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
-- Son başarılı build: 2026-09-18 Faz 1 kapanış (`pnpm build` + `pnpm lint` temiz; 3 rota: `/_not-found`, `/tr`, `/en` + `ƒ Proxy`)
-- Dal: **`faz-1-yeniden`** — proje bu dalda sıfırdan kuruldu (2026-09-18). Önceki Faz 1–9 çalışması `main` dalında, ayrıca `yedek/faz-1-9` dalı + `yedek-faz-9` etiketinde duruyor. Canlı https://manch-eight.vercel.app hâlâ `origin/main`'den besleniyor. **Uyarı: `main`, `origin/main`'in 3 commit önünde (push'lanmamış).**
-- İlk ölçüm (iskelet ana sayfa): First Load JS **175 kB gz** (7 chunk), HTML 7.6 kB. Faz 8 hedefi ≤ 200 kB gz (Kural 46).
-- Açık TODO'lar: telefon · çalışma saatleri · sipariş/WhatsApp numarası · Facebook linki · domain (`site.url` şimdilik `https://manch.tr` varsayımı) · fiyatlar (`price: null`) · fotoğraflar (`image: null` → Placeholder) · logo SVG · renk kodlarının logodan teyidi · Webber Digital URL · Truffle Smash / Chicken Sandwich / içecekler `unconfirmed: true`
+- Aktif faz: **Faz 1 tamamlandı + eski depodan devralma yapıldı (2026-09-18).** Sıradaki: Faz 2 (Tasarım Sistemi) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Son başarılı build: 2026-09-18 devralma sonrası (`pnpm build` + `pnpm lint` temiz; 3 rota: `/_not-found`, `/tr`, `/en` + `ƒ Proxy`)
+- Dal: **`faz-1-yeniden`** — proje bu dalda sıfırdan kuruldu. Eski tam proje `main` + `yedek/faz-1-9` dalı + `yedek-faz-9` etiketinde.
+- **Canlı: https://manch-eight.vercel.app — `origin/main` = `e05f994`, 2026-09-18'de push edildi, deploy yeşil, `scripts/smoke.mjs` 10/10 ✓ 0 uyarı.** Vercel `NEXT_PUBLIC_SITE_URL` ayarlı.
+- **Devralınanlar (main → faz-1-yeniden):** `public/` (32 dosya: 7 burger kesiti PNG+WebP, 6 malzeme ikonu, 3 fotoğraf JPG+WebP, maskot, 4 logo) · `src/data/menu.ts` (6 kategori, **25 ürün, 24'ünde gerçek fiyat 35–790 TL**) · `src/lib/site.ts` (**telefon, WhatsApp, e-posta, Facebook dolu**; `hours` + `orderUrl` hâlâ null) · `src/messages/{tr,en}.json` (19 namespace, 216 anahtar, simetrik) · `src/assets/fonts/Modak-Regular.ttf` (OG için, Kural 39) · **KURALLAR 49 madde + HATA GÜNLÜĞÜ 39 satır**.
+- **Devralınmayanlar (Faz 2+ kodu, yeniden yazılacak):** `src/components/**`, `src/styles/{fonts,tokens}.ts`, `src/lib/{seo,gsap,*-store}.ts`, `src/i18n/client-messages.ts`, `src/app/{icon,apple-icon,manifest,robots,sitemap}`, `[locale]/opengraph-image.tsx`, `scripts/**` (lab-check, lighthouse, bundle-report, smoke, content pipeline) — hepsi `main`'de duruyor, ilgili fazda oradan referans alınabilir.
+- Açık TODO'lar: **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** (Guacamole, 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · iç mekan/zone galerisi fotoğrafı yok · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
 
@@ -57,7 +60,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 15. Sayfa içi linklerde `next/link` değil `@/i18n/navigation`'daki `Link` / `useRouter` / `redirect` kullan — locale prefix'i otomatik.
 16. `[locale]` altındaki her server component'te `setRequestLocale(locale)` çağır; aksi halde statik render bozulur.
 17. Menü ürün modeli: `name` ve `desc` `Localized` (`{tr,en}`), `ingredients` `Record<Locale,string[]>`. Teyit edilmemiş ürünlerde `unconfirmed: true`.
-18. `font-pixel` = **Silkscreen** (karar 2026-09-17). ğşıĞŞİ içermediği için **sadece İngilizce metinlerde** (tape/marquee) kullanılır; TR metne asla uygulanmaz, `font-ui`'ye de düşülmez. Press Start 2P projeden kaldırıldı.
+18. `font-pixel` = **Press Start 2P** (karar 2026-09-17, çelişki 2026-09-18'de kapatıldı). Gerekçe: Silkscreen'in latin-ext dilimi `ğ ş ı Ğ Ş İ` içermiyor (hata günlüğü, Faz 2), Press Start 2P 12/12 TR karakteri veriyor → pixel font **TR metinlerde de** güvenle kullanılır. Silkscreen yalnızca `font-pixel-alt` olarak `/lab`'da karşılaştırma amaçlı kalır (`preload: false`).
 19. Modak / Mouse Memoirs'ta eksik TR karakter varsa fallback zinciri `@theme` font token'ında tanımlanır (`--font-display: var(--font-modak), <fallback>, ...`); `/lab` sayfasında eksik karakterler görünür şekilde işaretlenir.
 20. Git kimliği repo-local: `Webber Digital <saygingemici25800@gmail.com>` (karar 2026-09-17).
 21. Yeni bir font eklerken TR kapsamını `latin-ext` etiketine güvenmeden doğrula: build sonrası `.next/static/media/*.woff2` dosyalarında cmap union'ı (fontTools) **ve** `/lab` GlyphCheck. Fontlar tek dosyada: `src/styles/fonts.ts`; token listesi `src/styles/tokens.ts` `globals.css` ile senkron tutulur.
@@ -67,7 +70,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 25. React Compiler lint kuralları aktif (`react-hooks/refs`, `react-hooks/immutability`, `react-hooks/set-state-in-effect`): effect içinde **senkron `setState` yok** (türetilmiş değer kullan ya da `setTimeout(fn, 0)` ile ertele, cleanup'ta temizle); closure'larda `ref.current` **okumak da yazmak da** yasak — closure'larda `document.title =` gibi global mutasyon ve modül-seviyesi `let` ataması da yasak → hepsi ayrı modülde plain fonksiyon (`src/lib/transition-title.ts`), closure sadece çağırır; `ref.current`'i render'da **ve render'da çağrılan closure'larda** (`contextSafe(...)` dahil) okuma → GSAP hedefini `useGSAP({ scope })` selector'ıyla ver (`".wrap"`, `"path"`); dinamik element için `createElement(as, { ref })` değil `const Tag = as; <Tag ref={ref}>`; kütüphane nesnesi mutasyonunu (`lenis.options.x = …`) modül-seviyesi helper fonksiyona taşı.
 26. Her motion primitive `useReducedMotion()` okur (`src/lib/hooks/useReducedMotion.ts` = sistem tercihi ∨ `useMotionStore.forceReduced`), `true` ise GSAP kurmadan statik render eder. GSAP eklentileri sadece `src/lib/gsap.ts` üzerinden import edilir (tek `registerPlugin`).
 27. CursorTrail: `data-cursor-hide` **sadece açıkça işaretlenen** elementlerde (BlobButton, hap butonlar, nav). Otomatik `button, a` selector'ı yok — her yeni etkileşimli bileşen kendi karar verir (karar 2026-09-17).
-28. Marquee metinleri iki dilde de İngilizce (`Motion.marqueeItems` / `Home.marquee*` tr.json'da da EN) — Kural 18'in sonucu (karar 2026-09-17).
+28. Marquee metinleri iki dilde de İngilizce (`Motion.marqueeItems` / `Home.marquee*` tr.json'da da EN). **Not (2026-09-18):** bu Kural 18'in eski (Silkscreen) halinin sonucuydu; Press Start 2P TR karakterleri desteklediği için artık teknik zorunluluk değil, marka sesi tercihi — istenirse TR marquee metni yazılabilir.
 29. PageTransition: React `<ViewTransition>` / View Transitions API **kullanılmıyor** — snapshot crossfade'i canlı GSAP path morph'u ve "eski sayfayı perde kapanana kadar tut" akışını veremez. Yol: `TransitionLink` (next-intl `Link` + `onNavigate` → `preventDefault`) → `useTransitionStore.trigger(href)` → perde kapanır → `router.push` → `usePathname` değişince perde açılır; 4 s fallback. Reduced motion / hash / aynı sayfa: normal navigasyon. Tüm iç linkler `TransitionLink`.
 30. `persist` (localStorage) store'ları SSR'da boş; badge/sayaç gibi çıktılar `useHydrated()` sonrası render edilir (hydration uyuşmazlığı yok). Preloader `sessionStorage`, cookie `localStorage` sadece effect'te okunur.
 31. Koşullu `null` render eden client component'te `useGSAP({ scope })` kullanma: ref effect içinde okunur, yoksa erken çıkılır, hedefler element olarak verilir. Aksi halde bağımlılık değişince "Invalid scope" uyarısı.
@@ -148,7 +151,7 @@ Fethiye'deki smash burger markası **MANCH** için animasyon ağırlıklı, iki 
 berry #7A1F4B · berry-dk #4E1030 · sky #C4E4F3 · tile #8FC3D6
 cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 ```
-**Fontlar:** Modak (`font-display`) · Mouse Memoirs (`font-ui`, uppercase, tracking-wide) · Silkscreen (`font-pixel`, tape/aksan). TR karakterleri test et.
+**Fontlar:** Modak (`font-display`) · Mouse Memoirs (`font-ui`, uppercase, tracking-wide) · **Press Start 2P** (`font-pixel`, tape/aksan — Kural 18). TR karakterleri test et (Kural 21).
 **Utility'ler:** `heading180`, `text40`, `text-stroke-small`
 **Desenler:** bordo-beyaz dama · pembe dama kağıt · mavi karo duvar · kraft menü kartı · Misu&Miyu line-art tepsi deseni · grain (.06)
 
@@ -191,7 +194,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 
 ### Faz 2 — Tasarım Sistemi
 - [ ] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
-- [ ] next/font: Modak, Mouse Memoirs, Silkscreen (latin-ext) — Silkscreen ğşıĞŞİ içermez, sadece EN metinlerde (Kural 18; Press Start 2P denendi ve karar ile kaldırıldı) *(revize: 2026-09-17)*
+- [ ] next/font: Modak, Mouse Memoirs, **Press Start 2P** (`font-pixel`, 12/12 TR ✓) — Silkscreen ğşıĞŞİ içermediği için `font-pixel-alt` olarak sadece `/lab`'da, `preload: false` (Kural 18) *(revize: 2026-09-17, 2026-09-18)*
 - [ ] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
 - [ ] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
 - [ ] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
