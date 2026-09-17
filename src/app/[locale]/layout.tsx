@@ -4,7 +4,6 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import Cart from "@/components/layout/Cart";
-import CookieBanner from "@/components/layout/CookieBanner";
 import Footer from "@/components/layout/Footer";
 import InfoModal from "@/components/layout/InfoModal";
 import MenuOverlay from "@/components/layout/MenuOverlay";
@@ -54,7 +53,6 @@ export default async function LocaleLayout({
             {children}
             <Footer />
             <Cart />
-            <CookieBanner />
             <InfoModal />
           </SmoothScroll>
         </NextIntlClientProvider>

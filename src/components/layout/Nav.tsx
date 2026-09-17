@@ -75,9 +75,9 @@ export default function Nav() {
       </TransitionLink>
 
       <nav className="flex items-center gap-[0.8vw] max-md:gap-[2.5vw]">
-        {/* TODO(Faz 6): /menu sayfası gelince href="/menu" */}
+        {/* karar 2026-09-17: şimdilik #hits; Faz 6'da /menu */}
         <TransitionLink
-          href="/"
+          href="/#hits"
           data-cursor-hide
           className={clsx(
             "group max-md:hidden rounded-full px-[1.6vw] py-[0.6vw] text40 text-[1.1vw] transition-[transform,background-color,color] duration-300 hover:scale-105 hover:bg-ink hover:text-cream",

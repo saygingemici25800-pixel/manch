@@ -1,36 +1,34 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
+import Handmade from "@/components/sections/Handmade";
+import Hero from "@/components/sections/Hero";
+import InstagramGrid from "@/components/sections/InstagramGrid";
+import Location from "@/components/sections/Location";
+import MarqueeBand from "@/components/sections/MarqueeBand";
+import MisuMiyu from "@/components/sections/MisuMiyu";
+import SmashAnatomy from "@/components/sections/SmashAnatomy";
+import TheHits from "@/components/sections/TheHits";
+import Zone from "@/components/sections/Zone";
 import { Link } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
-import { site } from "@/lib/site";
 
-// Faz 1 placeholder — gerçek Hero ve section'lar Faz 5'te gelir.
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations("Home");
-  const otherLocale = routing.locales.find((l) => l !== locale) ?? locale;
-
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-[1.5vw] px-[2.5vw] py-[4vw] text-center max-md:gap-[5vw] max-md:px-[6vw] max-md:py-[12vw]">
-      <p className="text-[1.1vw] uppercase tracking-wide max-md:text-[3.5vw]">
-        {t("eyebrow")}
-      </p>
-      <h1 className="text-[8vw] leading-none max-md:text-[18vw]">
-        {site.name}
-      </h1>
-      <p className="text-[2vw] max-md:text-[5vw]">{t("tagline")}</p>
-      <p className="text-[1.2vw] max-md:text-[3.8vw]">{site.address.full}</p>
-      <Link
-        href="/"
-        locale={otherLocale}
-        className="text-[1.1vw] underline underline-offset-4 max-md:text-[3.5vw]"
-      >
-        {t("switchLocale")}
-      </Link>
+    <main>
+      <Hero />
+      <MarqueeBand />
+      <TheHits />
+      <SmashAnatomy />
+      <Handmade />
+      <Zone />
+      <MisuMiyu />
+      <InstagramGrid />
+      <Location />
       {process.env.NODE_ENV !== "production" && (
-        <Link href="/lab" data-testid="nav-lab" className="text-[1.1vw] underline underline-offset-4 max-md:text-[3.5vw]">
-          {t("lab")}
+        // dev: lab-check round-trip testi için
+        <Link href="/lab" data-testid="nav-lab" className="sr-only focus:not-sr-only">
+          lab
         </Link>
       )}
     </main>

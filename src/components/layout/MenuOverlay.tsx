@@ -18,7 +18,7 @@ const LINKS = [
   { key: "contact", href: "/contact" },
 ] as const;
 
-/** R5 — Tam ekran menü: bg-berry/30 + backdrop-blur, Modak linkler line-mask ile, ESC / focus trap / scroll kilidi. */
+/** R5 — Tam ekran menü: bg-berry-dk/60 + backdrop-blur (karar 2026-09-17), Modak linkler line-mask ile, ESC / focus trap / scroll kilidi. */
 export default function MenuOverlay() {
   const t = useTranslations("Nav");
   const open = useUiStore((s) => s.menuOpen);
@@ -36,7 +36,7 @@ export default function MenuOverlay() {
       aria-label={t("menuButton")}
       data-state={open ? "open" : "closed"}
       className={clsx(
-        "fixed inset-0 z-70 flex flex-col justify-between bg-berry/30 px-[2.5vw] pb-[2vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[6vw] max-md:pt-[24vw] backdrop-blur-md transition-[opacity,visibility] duration-500",
+        "fixed inset-0 z-70 flex flex-col justify-between bg-berry-dk/60 px-[2.5vw] pb-[2vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[6vw] max-md:pt-[24vw] backdrop-blur-md transition-[opacity,visibility] duration-500",
         open ? "visible opacity-100" : "invisible opacity-0",
       )}
     >

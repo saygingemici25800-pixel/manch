@@ -7,7 +7,68 @@
     "eyebrow": "United Chill Burger Zone",
     "tagline": "Handmade Hits Different",
     "switchLocale": "Türkçe",
-    "lab": "Lab"
+    "lab": "Lab",
+    "hero": {
+      "title": "HANDMADE HITS DIFFERENT",
+      "sub": "Fethiye's smash burger zone. Smash from the kitchen, first bite from the table.",
+      "badge": "MISU & MIYU · THE FACES OF MANCH · ",
+      "imageAlt": "Smash burger — hero image (coming soon)"
+    },
+    "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
+    "hits": {
+      "eyebrow": "THE HITS",
+      "title": "Crowd Favourites"
+    },
+    "anatomy": {
+      "eyebrow": "SMASH ANATOMY",
+      "title": "Meet the layers of your smash. Handmade in every layer.",
+      "layers": {
+        "bunTop": "Butter brioche",
+        "sauce": "Manch sauce",
+        "cheddar": "Cheddar",
+        "patty1": "Smash patty",
+        "patty2": "Smash patty",
+        "pickle": "Pickles",
+        "lettuce": "Lettuce",
+        "bunBottom": "Brioche"
+      }
+    },
+    "handmade": {
+      "eyebrow": "HANDMADE",
+      "title": "We like our sauces handmade.",
+      "body": "Roasted pepper sauce, berry sauce — all made in the MANCH kitchen. Butter brioche, daily patties, gravity-approved cheddar.",
+      "cardTitle": "Why different?",
+      "points": "Homemade sauces|Butter brioche, baked daily|120 g beef patty, smashed|Real mascarpone tiramisu"
+    },
+    "zone": {
+      "eyebrow": "PASPATUR, FETHİYE",
+      "title": "UNITED CHILL BURGER ZONE",
+      "body": "In the heart of the old bazaar: blue tile walls, pink checkered paper and burgers with flavor levels slightly out of control. Just another chill lunch.",
+      "imageAlt": "MANCH interior (coming soon)"
+    },
+    "misu": {
+      "title": "Not hungry. Just obsessed.",
+      "body": "Misu and Miyu are the faces of MANCH: two characters holding your burger and taking tiramisu very seriously.",
+      "tape": "THE SWEETEST WORK IN PROGRESS"
+    },
+    "insta": {
+      "eyebrow": "INSTAGRAM",
+      "counter": "6 SHOTS",
+      "alts": "Berry Manch|Cheese pull|Tiramisu|Tile wall|Crispy tenders|Misu & Miyu",
+      "cta": "Follow @manch.tr"
+    },
+    "location": {
+      "eyebrow": "LOCATION",
+      "title": "Find us.",
+      "hours": "Hours",
+      "hoursSoon": "Coming soon",
+      "phone": "Phone",
+      "directions": "Directions",
+      "contact": "Contact",
+      "loadMap": "Load map",
+      "mapTitle": "MANCH — Google Maps",
+      "mapNote": "Google Maps loads on click"
+    }
   },
   "Nav": {
     "home": "Home",
@@ -104,7 +165,8 @@
     "navOtherLocale": "Türkçe lab",
     "navHome": "Home",
     "motion": "Motion",
-    "layout": "Layout"
+    "layout": "Layout",
+    "pin": "Pin test (R15)"
   },
   "Motion": {
     "rmToggle": "Reduced motion",
@@ -130,5 +192,23 @@
     "openCart": "Open cart",
     "openInfo": "Open InfoModal",
     "resetPreloader": "Reset preloader + cookie"
+  },
+  "Product": {
+    "priceTodo": "price soon",
+    "time": "Time",
+    "minutes": "{n} min",
+    "bun": "Bun",
+    "patty": "Patty",
+    "spice": "Spice",
+    "spiceLevel": {
+      "mild": "Mild",
+      "medium": "Medium",
+      "hot": "Hot"
+    },
+    "tags": {
+      "spicy": "Spicy",
+      "new": "New",
+      "signature": "Signature"
+    }
   }
 }

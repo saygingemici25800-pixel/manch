@@ -8,6 +8,7 @@ import Placeholder from "@/components/ui/Placeholder";
 import TileWall from "@/components/ui/TileWall";
 import LayoutLab from "./LayoutLab";
 import MotionLab from "./MotionLab";
+import PinTest from "./PinTest";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getProduct } from "@/data/menu";
@@ -198,6 +199,11 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
       {/* ---------- Motion (Faz 3) ---------- */}
       <Section id="motion" title={t("motion")}>
         <MotionLab />
+      </Section>
+
+      {/* ---------- Pin testi (Faz 5, R15 izole) ---------- */}
+      <Section id="pin" title={t("pin")}>
+        <PinTest />
       </Section>
 
       {/* ---------- Layout (Faz 4) ---------- */}

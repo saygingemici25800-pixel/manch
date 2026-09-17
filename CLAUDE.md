@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 4 tamamlandı** — Faz 5 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 Faz 4 (`pnpm build` + lint temiz; prod `/tr` 200 / `/lab` 404; `scripts/lab-check.mjs` 31/31)
+- Aktif faz: **Faz 5 tamamlandı** — Faz 6 için kullanıcı onayı bekleniyor
+- Son başarılı build: 2026-09-17 Faz 5 (`pnpm build` + lint temiz; prod `/tr` 200 / `/lab` 404; `scripts/lab-check.mjs` 48/48)
 - Preview URL: —
-- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · Nav "BURGERS" hap butonu ve overlay/footer'daki `/menu` `/about` `/contact` linkleri Faz 6'ya kadar 404 (BURGERS geçici olarak `/`) · WhatsApp checkout `site.contact.whatsapp` null → disabled · InfoModal'da telefon/saat "Yakında" · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak) · Malzeme ikonları (marul/domates/peynir/köfte) Faz 7'de **berry tek çizgi line-art SVG** olarak çizilecek; şimdilik renkli daire/kare (karar 2026-09-17)
+- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · Nav "BURGERS" hap butonu ve overlay/footer'daki `/menu` `/about` `/contact` linkleri Faz 6'ya kadar 404 (BURGERS → `/#hits`) · WhatsApp checkout `site.contact.whatsapp` null → disabled · InfoModal'da telefon/saat "Yakında" · `CookieBanner` component'i duruyor ama layout'ta **mount edilmiyor** (analytics planı yok, karar 2026-09-17) — analytics gelirse Faz 7'de consent ile geri al · Nav BURGERS → `/#hits` (Faz 6'da `/menu`) · Hero/Zone/Instagram/Misu görselleri Placeholder — gerçek fotoğraflar gelince `next/image` (Faz 8) · SmashAnatomy katmanları CSS şekil, burger kesit PNG'leri (`/burgers/*.png`) gelince değişecek · Google Maps embed API key'siz `maps?q=` URL'i (Faz 7'de Place ID ile teyit) · Malzeme ikonları (marul/domates/peynir/köfte) Faz 7'de **berry tek çizgi line-art SVG** olarak çizilecek; şimdilik renkli daire/kare (karar 2026-09-17)
 
 ---
 
@@ -70,6 +70,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 29. PageTransition: React `<ViewTransition>` / View Transitions API **kullanılmıyor** — snapshot crossfade'i canlı GSAP path morph'u ve "eski sayfayı perde kapanana kadar tut" akışını veremez. Yol: `TransitionLink` (next-intl `Link` + `onNavigate` → `preventDefault`) → `useTransitionStore.trigger(href)` → perde kapanır → `router.push` → `usePathname` değişince perde açılır; 4 s fallback. Reduced motion / hash / aynı sayfa: normal navigasyon. Tüm iç linkler `TransitionLink`.
 30. `persist` (localStorage) store'ları SSR'da boş; badge/sayaç gibi çıktılar `useHydrated()` sonrası render edilir (hydration uyuşmazlığı yok). Preloader `sessionStorage`, cookie `localStorage` sadece effect'te okunur.
 31. Koşullu `null` render eden client component'te `useGSAP({ scope })` kullanma: ref effect içinde okunur, yoksa erken çıkılır, hedefler element olarak verilir. Aksi halde bağımlılık değişince "Invalid scope" uyarısı.
+32. Pinned section'lar (R15): Lenis `root` modu native scroll kullanır (body'de transform yok) → `ScrollTrigger` `pin: true` **varsayılan `pinType` ("fixed") ile** çalışır; `pinType: "transform"` gerekmez (izole test `/lab#pin`, 1440 + 375, 2026-09-17). Pin edilen element `overflow-hidden` + `h-[100svh]`; ScrollTrigger `scrub` ile timeline. `ScrollTrigger.normalizeScroll` kullanma (Lenis ile çakışır). Hash navigasyonu (`/#zone`): pin spacer mount'tan sonra eklendiği için Next'in hash scroll'u kısa düşer → `LenisTicker` pathname değişince 60 ms sonra `ScrollTrigger.refresh()` + `scrollIntoView` yapar.
+33. Ana sayfa kart girişleri tek `ScrollTrigger.batch` ile (`ProductGrid`), kart içinde SplitText yok; SplitText sadece section başlıklarında. Section id'leri: `#hits` `#zone` `#location` (`scroll-mt-[6vw]`).
 
 ---
 
@@ -196,16 +198,17 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: `scripts/lab-check.mjs` 31/31 ✓, console 0 — perde + title (`Smash'leniyor` → `Servis` → başlık), preloader 1 kez, nav gizlen/göster/invert, cart persist, ESC/focus, mobil 375 overlay + drawer. `docs/screens/faz-4-desktop.png`, `faz-4-mobile.png`, `faz-4-transition.webm`
 
 ### Faz 5 — Ana Sayfa
-- [ ] Hero (R9)
-- [ ] Marquee (R14)
-- [ ] The Hits: 6 imza ürün (R10 + R11)
-- [ ] Smash Anatomy (R15)
-- [ ] Handmade hikayesi ("Hazır soslara biraz uzağız")
-- [ ] United Chill Burger Zone (R13, "THE BURGER YOU'LL CRAVE AGAIN")
-- [ ] Misu & Miyu bölümü (idle animasyon)
-- [ ] Instagram grid (6 statik + @manch.tr CTA)
-- [ ] Konum (harita embed, saatler TODO)
-- [ ] ✅ Kabul: desktop + mobil scroll akışı kusursuz
+- [x] R15 pinned izole test `/lab#pin` (`PinTest.tsx`): Lenis root + `pin: true` varsayılan pinType ✓ 1440/375 → Kural 32 *(revize: 2026-09-17)*
+- [x] Hero (R9) — `sections/Hero.tsx`: SplitReveal chars, dönen rozet (SVG textPath, CSS spin), JellyWave, tam ekran Placeholder, `data-nav-dark`
+- [x] Marquee (R14) — `sections/MarqueeBand.tsx` (2 bant, EN)
+- [x] The Hits: 6 imza ürün (R10 + R11) — `ui/SectionHeader.tsx`, `sections/TheHits.tsx` `#hits`, `ProductGrid.tsx` (tek `ScrollTrigger.batch`), `ProductCard.tsx` (2×12 dama hover jelly, quick details, + → cart); `menu.ts` `featured`
+- [x] Smash Anatomy (R15) — `sections/SmashAnatomy.tsx` pinned scrub, 8 katman + etiket
+- [x] Handmade hikayesi — `sections/Handmade.tsx` (SplitReveal + KraftCard)
+- [x] United Chill Burger Zone (R13) — `sections/Zone.tsx` `#zone`: dalgalı üst kenar, TileWall, duvar yazısı, `OrderCta` (blob → sepet), `motion/Parallax.tsx`
+- [x] Misu & Miyu — `sections/MisuMiyu.tsx` + `motion/Float.tsx` (idle)
+- [x] Instagram grid — `sections/InstagramGrid.tsx` (6 Placeholder + @manch.tr CTA)
+- [x] Konum — `sections/Location.tsx` `#location`: adres, saatler "Yakında", yol tarifi, tıkla-yükle Google Maps iframe (lazy), `data-nav-dark`
+- [x] ✅ Kabul: `scripts/lab-check.mjs` **48/48 ✓, console 0** — anchor'lar overlay'den (aynı sayfa hash + lab→perde→`#location`), anatomy pinned 1440 + 375, kartlar batch giriş, quick details, kart + → sepet, harita tıkla-yükle, mobil yatay taşma yok, ana sayfa ST sayısı 17 sabit. `docs/screens/faz-5-desktop-full.png`, `faz-5-mobile-full.png`, `faz-5-scroll.webm`
 
 ### Faz 6 — İç Sayfalar
 - [ ] `/menu`: sticky kategori sekmeleri, filtre (spicy/new/signature), tüm kartlar, ürün detay modalı (kraft kart malzeme listesi)

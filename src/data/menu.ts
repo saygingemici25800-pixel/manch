@@ -35,6 +35,8 @@ export interface Product {
   };
   /** İsim / varlık Instagram'dan teyit edilmedi */
   unconfirmed?: boolean;
+  /** Ana sayfa "The Hits" (6 ürün) */
+  featured?: boolean;
 }
 
 export const categories: Category[] = [
@@ -52,6 +54,7 @@ const NONE: Localized = { tr: "—", en: "—" };
 export const products: Product[] = [
   {
     slug: "classic-manch-burger",
+    featured: true,
     category: "smash-burgers",
     name: { tr: "Classic Manch Burger", en: "Classic Manch Burger" },
     desc: { tr: "Tarzına yakışan smash!", en: "A smash that suits your style!" },
@@ -66,6 +69,7 @@ export const products: Product[] = [
   },
   {
     slug: "berry-manch",
+    featured: true,
     category: "smash-burgers",
     name: { tr: "Berry Manch", en: "Berry Manch" },
     desc: { tr: "Yoğun, dengeli ve özgün bir lezzet.", en: "Rich, balanced and one of a kind." },
@@ -80,6 +84,7 @@ export const products: Product[] = [
   },
   {
     slug: "koz-biberli-smash",
+    featured: true,
     category: "smash-burgers",
     name: { tr: "Köz Biberli Smash", en: "Roasted Pepper Smash" },
     desc: { tr: "Köz biber sosunu MANCH mutfağında kendimiz hazırlıyoruz.", en: "Roasted pepper sauce, made in the MANCH kitchen." },
@@ -95,6 +100,7 @@ export const products: Product[] = [
   {
     // TODO: isim teyit (postta truffle görseli var)
     slug: "truffle-smash",
+    featured: true,
     category: "smash-burgers",
     name: { tr: "Truffle Smash", en: "Truffle Smash" },
     desc: { tr: "Trüf aromalı smash.", en: "Truffle-scented smash." },
@@ -110,6 +116,7 @@ export const products: Product[] = [
   },
   {
     slug: "crispy-chicken-tenders",
+    featured: true,
     category: "chicken",
     name: { tr: "Crispy Chicken Tenders", en: "Crispy Chicken Tenders" },
     desc: { tr: "Otlu dip sos ile.", en: "With herb dip." },
@@ -151,6 +158,7 @@ export const products: Product[] = [
   },
   {
     slug: "tiramisu",
+    featured: true,
     category: "desserts",
     name: { tr: "Tiramisu", en: "Tiramisu" },
     desc: { tr: "Gerçek mascarpone, ipeksi krema.", en: "Real mascarpone, silky cream." },
@@ -177,6 +185,10 @@ export const products: Product[] = [
 
 export function getProduct(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
+}
+
+export function getFeatured(): Product[] {
+  return products.filter((p) => p.featured);
 }
 
 export function getProductsByCategory(category: CategoryId): Product[] {

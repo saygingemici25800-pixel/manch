@@ -9,7 +9,7 @@ import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { site } from "@/lib/site";
 
 const KEY = "manch-preloaded";
-const DURATION = 2.4;
+const DURATION = 1.8; // karar 2026-09-17: 1.8 s + 0.6 s çıkış
 
 /**
  * R1 — İlk yükleme: berry zemin, 3 dönen mesaj, ilerleme çubuğu. sessionStorage ile oturumda 1 kez.
@@ -62,7 +62,7 @@ export default function Preloader() {
           }
           gsap.to(el, {
             yPercent: -100,
-            duration: 0.8,
+            duration: 0.6,
             ease: "power4.inOut",
             onComplete: () => setVisible(false),
           });

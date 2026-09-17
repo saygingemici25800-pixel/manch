@@ -11,4 +11,9 @@ gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase);
 export const JELLY_EASE = "jelly";
 if (!CustomEase.get(JELLY_EASE)) CustomEase.create(JELLY_EASE, "0.4,1.6,0.7,0.95");
 
+// Dev/QA: lab-check ana sayfada ScrollTrigger sayısını okur
+if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+  (window as Window & { __ST_COUNT?: () => number }).__ST_COUNT = () => ScrollTrigger.getAll().length;
+}
+
 export { gsap, ScrollTrigger, SplitText, CustomEase };
