@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { BlobButton } from "@/components/motion/BlobButton";
-import { CursorTrail } from "@/components/motion/CursorTrail";
 import { JellyWave } from "@/components/motion/JellyWave";
 import { Juggle } from "@/components/motion/Juggle";
 import { Marquee } from "@/components/motion/Marquee";
@@ -73,7 +72,6 @@ export function MotionLab() {
 
   return (
     <div className="flex flex-col gap-[1.2vw] max-md:gap-[4vw]">
-      <CursorTrail />
 
       {/* ---- kontrol paneli ---- */}
       <div className="flex flex-wrap items-center gap-[0.8vw] border border-berry p-[1vw] max-md:gap-[2vw] max-md:p-[3vw]">
@@ -157,7 +155,7 @@ export function MotionLab() {
       </Box>
 
       {/* ---- 9 CursorTrail ---- */}
-      <Box id="d-cursor" title="9 · R8 CursorTrail" note="Sadece masaüstü (hover + fine pointer) ve reduced-motion kapalıyken.">
+      <Box id="d-cursor" title="9 · R8 CursorTrail (layout'ta mount)" note="Sadece masaüstü (hover + fine pointer) ve reduced-motion kapalıyken.">
         <p className="font-ui text-[1vw] text-ink max-md:text-[3.2vw]">
           fine pointer: <b data-testid="fine-pointer">{fine ? "evet" : "hayır"}</b> · aktif:{" "}
           <b data-testid="cursor-active">{fine && !reduced ? "evet" : "hayır"}</b> — aşağıdaki

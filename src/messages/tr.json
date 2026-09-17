@@ -234,7 +234,8 @@
     "filters": "Filtreler",
     "empty": "Bu filtrede ürün yok.",
     "activeCategory": "Aktif kategori",
-    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI"
+    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI",
+    "disclaimer": "Menü ve fiyatlar örnek amaçlıdır, değişebilir."
   },
   "About": {
     "metaTitle": "Hakkımızda",

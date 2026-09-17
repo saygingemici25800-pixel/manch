@@ -53,9 +53,33 @@ const BRIOCHE: Localized = { tr: "El yapımı brioche", en: "Handmade brioche" }
 const DOUBLE: Localized = { tr: "2 × 60 g dana", en: "2 × 60 g beef" };
 const CHICKEN: Localized = { tr: "Çıtır tavuk", en: "Crispy chicken" };
 const NONE: Localized = { tr: "—", en: "—" };
-const SERVED: Localized = {
-  tr: "El yapımı brioche ekmeği, el yapımı patates kızartması ile servis edilir.",
-  en: "Handmade brioche bun, served with handmade fries.",
+/** Ürün açıklamaları — müşteri tarafından verilen taslak metinler (2026-09-18). */
+const DESC: Record<string, Localized> = {
+  "classic-manch": { tr: "Tarzına yakışan smash. Fazlası yok, eksiği hiç yok.", en: "The smash that suits you. Nothing extra, nothing missing." },
+  "truffle-manch": { tr: "Trüf konusunda ölçüyü biraz kaçırdık. Pişman değiliz.", en: "We may have overdone the truffle. No regrets." },
+  "chilli-manch": { tr: "Acı değil, karakter. Yine de su bulundur.", en: "Not spicy, characterful. Still, keep water nearby." },
+  "fig-jam": { tr: "İncir reçeliyle burger mi olur diyenler buraya.", en: "Fig jam on a burger? Sit down, we'll explain." },
+  "manch-tiftik": { tr: "Saatlerce pişen tiftik kaburga. Sabrın tadı bu.", en: "Short rib, pulled after hours of patience. Worth the wait." },
+  "guacamole": { tr: "Avokado burada süs değil, ana karakter.", en: "The avocado isn't a garnish here. It's the lead." },
+  "morel": { tr: "Kuzugöbeği mantarı. Menünün en sessiz, en iddialı ürünü.", en: "Morel mushrooms. The quietest, boldest thing on the menu." },
+  "chicken-manch": { tr: "Çıtır dışı, sulu içi. Tavuk tarafının en iyisi.", en: "Crispy outside, juicy inside. Team chicken's finest." },
+  "ranch-sauce": { tr: "Klasik ranch. Çıtır olan her şeyin yanına.", en: "Classic ranch. Goes with anything crispy." },
+  "garlic-aioli": { tr: "Sarımsak konusunda çekingen değiliz.", en: "We're not shy about garlic." },
+  "manch-sauce": { tr: "Tarifini sormayın. Mutfakta kendimiz yapıyoruz.", en: "Don't ask for the recipe. We make it in house." },
+  "truffle-aioli": { tr: "Patatesi ciddiye alanlar için.", en: "For people who take fries seriously." },
+  "chilli-aioli": { tr: "Tatlı başlar, ateşli biter.", en: "Starts sweet, ends warm." },
+  "roquefort-aioli": { tr: "Rokfor sevenler bilir. Sevmeyenler denememiştir.", en: "Roquefort lovers know. The rest haven't tried it." },
+  "extra-tiftik": { tr: "Burgerine saatlerce pişmiş tiftik kaburga ekle.", en: "Add slow-cooked pulled short rib." },
+  "extra-smash": { tr: "Bir köfte daha. Kimse yargılamıyor.", en: "One more patty. Nobody's judging." },
+  "extra-truffle-parmesan": { tr: "Trüf ve parmesan. Patatesin üst sınıfa geçişi.", en: "Truffle and parmesan. Fries, upgraded." },
+  "extra-cheddar": { tr: "Bir dilim daha cheddar. Yer çekimi onaylı.", en: "One more slice of cheddar. Gravity approved." },
+  "classic-fries": { tr: "El yapımı, çıtır kenarlı. Paylaşmayı planlama.", en: "Handmade, crisp at the edges. Don't plan on sharing." },
+  "truffle-fries": { tr: "Patates mi trüf mü, karar veremeyeceksin.", en: "Fries or truffle? You won't decide." },
+  "corn-ribs": { tr: "Mısır, ama alıştığın gibi değil.", en: "Corn, but not the way you know it." },
+  "chicken-tenders": { tr: "Çıtırlık seviyesi biraz kontrolden çıkmış olabilir.", en: "Crispiness levels may have gotten out of control." },
+  "mushroom-arancini": { tr: "Altı adet mantarlı arancini. Beşte durabilirsin. Duramazsın.", en: "Six mushroom arancini. You could stop at five. You won't." },
+  "crispy-triangle": { tr: "Basılı menüde yok, Instagram'da efsane.", en: "Not on the printed menu. A legend online." },
+  "tiramisu": { tr: "Tiramisu konusunda biraz iddialıyız. Gerçek mascarpone.", en: "We take tiramisu seriously. Real mascarpone." },
 };
 
 const burger = (
@@ -64,12 +88,12 @@ const burger = (
   price: number,
   tr: string[],
   en: string[],
-  opts: { tags?: Tag[]; image?: boolean; time?: number; spice?: Spice; featured?: boolean; desc?: Localized; patty?: Localized } = {},
+  opts: { tags?: Tag[]; image?: boolean; time?: number; spice?: Spice; featured?: boolean; patty?: Localized } = {},
 ): Product => ({
   slug,
   category: "burgers",
   name: { tr: name, en: name },
-  desc: opts.desc ?? SERVED,
+  desc: DESC[slug],
   ingredients: { tr, en },
   price,
   tags: opts.tags ?? [],
@@ -83,7 +107,6 @@ const simple = (
   category: CategoryId,
   name: Localized,
   price: number | null,
-  desc: Localized,
   ingredients: Record<Locale, string[]> = { tr: [], en: [] },
   image: string | null = null,
   time = 5,
@@ -91,7 +114,7 @@ const simple = (
   slug,
   category,
   name,
-  desc,
+  desc: DESC[slug],
   ingredients,
   price,
   tags: [],
@@ -104,7 +127,7 @@ export const products: Product[] = [
   burger("classic-manch", "Classic Manch Burger", 570,
     ["2 adet 60 gr burger köftesi", "Manch sos", "Iceberg marul", "Salatalık turşusu", "Cheddar peyniri"],
     ["2 × 60 g smash patties", "Manch sauce", "Iceberg lettuce", "Pickled cucumber", "Cheddar"],
-    { tags: ["signature"], featured: true, desc: { tr: "Tarzına yakışan smash! El yapımı brioche + el yapımı patates kızartması ile.", en: "A smash that suits your style. Handmade brioche + handmade fries." } }),
+    { tags: ["signature"], featured: true }),
   burger("truffle-manch", "Truffle Manch Burger", 730,
     ["2 adet 60 gr burger köftesi", "Truffle aioli", "Çıtır soğan", "Cheddar peyniri"],
     ["2 × 60 g smash patties", "Truffle aioli", "Crispy onions", "Cheddar"],
@@ -135,33 +158,32 @@ export const products: Product[] = [
     { patty: CHICKEN, time: 12 }),
 
   // ---------- SOSLAR ----------
-  simple("ranch-sauce", "sauces", { tr: "Ranch Sauce", en: "Ranch Sauce" }, 40, { tr: "Ekstra sos.", en: "Extra sauce." }),
-  simple("garlic-aioli", "sauces", { tr: "Sarımsaklı Aioli", en: "Garlic Aioli" }, 40, { tr: "Ekstra sos.", en: "Extra sauce." }),
-  simple("manch-sauce", "sauces", { tr: "Manch Sos", en: "Manch Sauce" }, 40, { tr: "Evin sosu. Hazır soslara biraz uzağız.", en: "The house sauce. We like our sauces handmade." }),
-  simple("truffle-aioli", "sauces", { tr: "Trüf Aioli", en: "Truffle Aioli" }, 45, { tr: "Ekstra sos.", en: "Extra sauce." }),
-  simple("chilli-aioli", "sauces", { tr: "Chilli Aioli", en: "Chilli Aioli" }, 45, { tr: "Ekstra sos.", en: "Extra sauce." }),
-  simple("roquefort-aioli", "sauces", { tr: "Rokfor Aioli", en: "Roquefort Aioli" }, 45, { tr: "Ekstra sos.", en: "Extra sauce." }),
+  simple("ranch-sauce", "sauces", { tr: "Ranch Sauce", en: "Ranch Sauce" }, 40),
+  simple("garlic-aioli", "sauces", { tr: "Sarımsaklı Aioli", en: "Garlic Aioli" }, 40),
+  simple("manch-sauce", "sauces", { tr: "Manch Sos", en: "Manch Sauce" }, 40),
+  simple("truffle-aioli", "sauces", { tr: "Trüf Aioli", en: "Truffle Aioli" }, 45),
+  simple("chilli-aioli", "sauces", { tr: "Chilli Aioli", en: "Chilli Aioli" }, 45),
+  simple("roquefort-aioli", "sauces", { tr: "Rokfor Aioli", en: "Roquefort Aioli" }, 45),
 
   // ---------- EXTRAS ----------
-  simple("extra-tiftik", "extras", { tr: "Tiftik Kaburga", en: "Pulled Short Rib" }, 180, { tr: "Burgerine ekle.", en: "Add to your burger." }),
-  simple("extra-smash", "extras", { tr: "Smash Et", en: "Extra Smash Patty" }, 180, { tr: "Burgerine ekle.", en: "Add to your burger." }),
-  simple("extra-truffle-parmesan", "extras", { tr: "Truffle Parmesan", en: "Truffle Parmesan" }, 90, { tr: "Burgerine ekle.", en: "Add to your burger." }),
-  simple("extra-cheddar", "extras", { tr: "Cheddar", en: "Cheddar" }, 35, { tr: "Burgerine ekle.", en: "Add to your burger." }),
+  simple("extra-tiftik", "extras", { tr: "Tiftik Kaburga", en: "Pulled Short Rib" }, 180),
+  simple("extra-smash", "extras", { tr: "Smash Et", en: "Extra Smash Patty" }, 180),
+  simple("extra-truffle-parmesan", "extras", { tr: "Truffle Parmesan", en: "Truffle Parmesan" }, 90),
+  simple("extra-cheddar", "extras", { tr: "Cheddar", en: "Cheddar" }, 35),
 
   // ---------- FRIES ----------
-  simple("classic-fries", "fries", { tr: "Classic Manch Fries", en: "Classic Manch Fries" }, 160, { tr: "El yapımı patates kızartması.", en: "Handmade fries." }, { tr: ["Patates"], en: ["Potatoes"] }, null, 6),
-  simple("truffle-fries", "fries", { tr: "Truffle Manch Fries", en: "Truffle Manch Fries" }, 260, { tr: "El yapımı patates, trüf ve parmesan.", en: "Handmade fries, truffle and parmesan." }, { tr: ["Patates", "Trüf", "Parmesan"], en: ["Potatoes", "Truffle", "Parmesan"] }, null, 7),
+  simple("classic-fries", "fries", { tr: "Classic Manch Fries", en: "Classic Manch Fries" }, 160, { tr: ["Patates"], en: ["Potatoes"] }, null, 6),
+  simple("truffle-fries", "fries", { tr: "Truffle Manch Fries", en: "Truffle Manch Fries" }, 260, { tr: ["Patates", "Trüf", "Parmesan"], en: ["Potatoes", "Truffle", "Parmesan"] }, null, 7),
 
   // ---------- ATIŞTIRMALIKLAR ----------
-  simple("corn-ribs", "snacks", { tr: "Corn Ribs", en: "Corn Ribs" }, 290, { tr: "Garlic aioli ile servis edilir.", en: "Served with garlic aioli." }, { tr: ["Mısır", "Garlic aioli"], en: ["Corn", "Garlic aioli"] }, null, 8),
-  simple("chicken-tenders", "snacks", { tr: "Crispy Chicken Tenders", en: "Crispy Chicken Tenders" }, 290, { tr: "Ranch aioli ile servis edilir.", en: "Served with ranch aioli." }, { tr: ["Çıtır tavuk", "Ranch aioli"], en: ["Crispy chicken", "Ranch aioli"] }, null, 8),
+  simple("corn-ribs", "snacks", { tr: "Corn Ribs", en: "Corn Ribs" }, 290, { tr: ["Mısır", "Garlic aioli"], en: ["Corn", "Garlic aioli"] }, null, 8),
+  simple("chicken-tenders", "snacks", { tr: "Crispy Chicken Tenders", en: "Crispy Chicken Tenders" }, 290, { tr: ["Çıtır tavuk", "Ranch aioli"], en: ["Crispy chicken", "Ranch aioli"] }, null, 8),
   simple("mushroom-arancini", "snacks", { tr: "6 Mantarlı Arancini", en: "Six-Mushroom Arancini" }, 360,
-    { tr: "Parmesan peyniri ile servis edilir. Kültür, shiitake, morel, portobello, istiridye ve trüf mantarı içermektedir. Porsiyonda 2 adet bulunur.", en: "Served with parmesan. Button, shiitake, morel, portobello, oyster and truffle mushrooms. Two per portion." },
     { tr: ["Kültür mantarı", "Shiitake", "Morel", "Portobello", "İstiridye mantarı", "Trüf", "Parmesan"], en: ["Button mushroom", "Shiitake", "Morel", "Portobello", "Oyster mushroom", "Truffle", "Parmesan"] }, null, 10),
-  simple("crispy-triangle", "snacks", { tr: "Crispy Triangle", en: "Crispy Triangle" }, null, { tr: "Good things come in triangles. Parmesan ve dip sos ile.", en: "Good things come in triangles. With parmesan and dip." }, { tr: ["Çıtır üçgen", "Parmesan", "Dip sos"], en: ["Crispy triangles", "Parmesan", "Dip"] }, "/images/crispy-triangle.jpg", 8),
+  simple("crispy-triangle", "snacks", { tr: "Crispy Triangle", en: "Crispy Triangle" }, null, { tr: ["Çıtır üçgen", "Parmesan", "Dip sos"], en: ["Crispy triangles", "Parmesan", "Dip"] }, "/images/crispy-triangle.jpg", 8),
 
   // ---------- TATLI ----------
-  simple("tiramisu", "dessert", { tr: "Tiramisu", en: "Tiramisu" }, 360, { tr: "Tiramisu konusunda biraz iddialıyız. Gerçek mascarpone.", en: "We take tiramisu seriously. Real mascarpone." }, { tr: ["Mascarpone", "Kahve", "Kakao"], en: ["Mascarpone", "Coffee", "Cocoa"] }, "/images/tiramisu.jpg", 2),
+  simple("tiramisu", "dessert", { tr: "Tiramisu", en: "Tiramisu" }, 360, { tr: ["Mascarpone", "Kahve", "Kakao"], en: ["Mascarpone", "Coffee", "Cocoa"] }, "/images/tiramisu.jpg", 2),
 ];
 
 export function getProduct(slug: string): Product | undefined {

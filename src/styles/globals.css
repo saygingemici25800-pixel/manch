@@ -49,6 +49,12 @@ body {
   outline-color: var(--color-berry-dk);
 }
 
+/* Preloader ilerleme çubuğu — GSAP'sız (Kural 46) */
+@keyframes preload-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 /* ---------- Utility'ler (Kural 8: vw tabanlı + max-md karşılığı, Kural 22) ---------- */
 
 /* 180px @1920 → 9.375vw · mobilde 16vw */

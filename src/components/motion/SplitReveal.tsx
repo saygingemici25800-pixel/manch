@@ -11,6 +11,12 @@ type Props = {
   as?: "h1" | "h2" | "h3" | "p" | "span" | "div";
   /** chars = harf harf (kısa başlık) · lines = satır maskesi (paragraf). */
   type?: "chars" | "lines";
+  /**
+   * "scroll" (varsayılan): ScrollTrigger ile, Kural 50 fold kuralına tabi.
+   * "mount": mount anında hemen oynar, ScrollTrigger kurulmaz — talep üzerine açılan
+   * overlay/modal içeriği için (tetikleyici kaçırma riski yok, Kural 50 istisnası).
+   */
+  trigger?: "scroll" | "mount";
   stagger?: number;
   duration?: number;
   className?: string;
@@ -30,6 +36,7 @@ export function SplitReveal({
   children,
   as = "p",
   type = "lines",
+  trigger = "scroll",
   stagger = 0.06,
   duration = 0.8,
   className,
@@ -43,8 +50,8 @@ export function SplitReveal({
       const el = ref.current;
       if (!el || reduced) return;
 
-      // Kural 50: fold üstü → dokunma, zaten görünür.
-      if (el.getBoundingClientRect().top < window.innerHeight) return;
+      // Kural 50: scroll modunda fold üstü → dokunma, zaten görünür.
+      if (trigger === "scroll" && el.getBoundingClientRect().top < window.innerHeight) return;
 
       const split = new g.SplitText(el, { type, mask: type, autoSplit: true });
       const targets = type === "chars" ? split.chars : split.lines;
@@ -58,7 +65,9 @@ export function SplitReveal({
         duration,
         stagger,
         ease: "power3.out",
-        scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        ...(trigger === "scroll"
+          ? { scrollTrigger: { trigger: el, start: "top 88%", once: true } }
+          : {}),
       });
 
       return () => {
@@ -67,7 +76,7 @@ export function SplitReveal({
         split.revert();
       };
     },
-    [reduced, type, stagger, duration],
+    [reduced, type, trigger, stagger, duration],
   );
 
   // Kural 25: dinamik etiket `createElement(as, { ref })` değil, JSX değişkeniyle.

@@ -12,7 +12,7 @@ export default async function HomePage({ params }: Props) {
   const t = await getTranslations("Home");
 
   return (
-    <main>
+    <main id="main" className="px-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pt-[24vw]">
       <h1>{t("hero.title")}</h1>
       <p>{t("hero.sub")}</p>
       <p>{t("tagline")}</p>

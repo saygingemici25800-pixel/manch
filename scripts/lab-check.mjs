@@ -119,6 +119,137 @@ t("cleanup · ST sayısı 6 gezinmede sabit", stable, `[${counts.join(", ")}]`);
 const demos = await p.evaluate(() => document.querySelectorAll("[data-demo]").length);
 t("demo bloğu sayısı", demos === 11, `${demos} blok`);
 
+// ============================ FAZ 4 — GLOBAL LAYOUT ============================
+{
+  // --- R1 Preloader: ilk ziyarette çıkar, ikincide çıkmaz (sessionStorage)
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const q = await ctx.newPage();
+  await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  const seenFirst = await q.locator("[data-preloader]").count();
+  t("Preloader · ilk ziyarette görünür", seenFirst === 1, `adet=${seenFirst}`);
+  await q.waitForTimeout(3200);
+  const goneAfter = await q.locator("[data-preloader]").count();
+  t("Preloader · süre sonunda kalkar", goneAfter === 0);
+
+  // aynı oturumda ikinci ziyaret (sessionStorage aynı context'te paylaşılır)
+  await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await q.waitForTimeout(500);
+  const second = await q.locator("[data-preloader]").count();
+  t("Preloader · ikinci ziyarette ÇIKMAZ", second === 0, `adet=${second}`);
+  const ss = await q.evaluate(() => sessionStorage.getItem("manch-preloaded"));
+  t("Preloader · sessionStorage yazıldı", ss === "1", `manch-preloaded=${ss}`);
+
+  // --- R4 Nav: scroll aşağı gizlenir, yukarı görünür
+  // NOT: ana sayfa Faz 4'te henüz iskelet (yükseklik ≈ viewport) → scroll edilemiyor.
+  // Nav testi uzun sayfada (/tr/lab) koşar. Faz 5'te ana sayfaya taşınabilir.
+  await q.goto(URL, { waitUntil: "domcontentloaded" });
+  await q.waitForSelector("#motion");
+  await q.evaluate(() => window.scrollTo(0, 0));
+  await q.waitForTimeout(800);
+  const navTop0 = await q.evaluate(() => document.querySelector("header")?.getBoundingClientRect().top ?? 999);
+  await q.mouse.wheel(0, 900);
+  await q.waitForTimeout(1200);
+  const navTop1 = await q.evaluate(() => document.querySelector("header")?.getBoundingClientRect().top ?? 999);
+  await q.mouse.wheel(0, -400);
+  await q.waitForTimeout(1200);
+  const navTop2 = await q.evaluate(() => document.querySelector("header")?.getBoundingClientRect().top ?? 999);
+  t("Nav · aşağı scroll'da gizlenir", navTop1 < navTop0, `${Math.round(navTop0)} → ${Math.round(navTop1)}`);
+  t("Nav · yukarı scroll'da geri gelir", navTop2 > navTop1, `${Math.round(navTop1)} → ${Math.round(navTop2)}`);
+
+  // --- R5 MenuOverlay: aç / ESC ile kapan
+  await q.evaluate(() => window.scrollTo(0, 0));
+  await q.waitForTimeout(600);
+  await q.locator("header button").last().click();
+  await q.waitForTimeout(900);
+  const overlayOpen = await q.evaluate(() => {
+    const d = document.querySelector("#menu-overlay");
+    return { state: d?.getAttribute("data-state"), links: d?.querySelectorAll("a").length ?? 0,
+             lock: document.documentElement.style.overflow };
+  });
+  t("MenuOverlay · açıldı + scroll kilidi", overlayOpen.state === "open" && overlayOpen.links >= 3 && overlayOpen.lock === "hidden", JSON.stringify(overlayOpen));
+  await q.keyboard.press("Escape");
+  await q.waitForTimeout(700);
+  const lockAfter = await q.evaluate(() => document.documentElement.style.overflow);
+  t("MenuOverlay · ESC kapatır + kilit kalkar", lockAfter !== "hidden", `overflow="${lockAfter}"`);
+
+  // --- R12 Cart: ekle → toast → rozet → drawer → WhatsApp linki
+  await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await q.waitForTimeout(800);
+  await q.evaluate(() => {
+    const s = window.__CART__;
+    s.getState().clear();
+    s.getState().add("classic-manch", 2);
+    s.getState().add("tiramisu", 1);
+  });
+  await q.waitForTimeout(900);
+  const toast = await q.locator("[data-testid=cart-toast]").count();
+  t("Cart · sepete ekleyince toast çıkar", toast === 1, `adet=${toast}`);
+  const badge = await q.locator("[data-testid=cart-count]").first().textContent().catch(() => null);
+  t("Cart · rozet sayısı 3", (badge ?? "").trim() === "3", `rozet="${badge}"`);
+
+  await q.locator("[data-testid=cart-button]").click();
+  await q.waitForTimeout(900);
+  const drawer = await q.evaluate(() => {
+    const d = document.querySelector("[data-testid=cart-drawer]");
+    return { open: !!d, lines: document.querySelectorAll("[data-testid=cart-drawer] li").length,
+             total: document.querySelector("[data-testid=cart-total]")?.textContent?.trim() };
+  });
+  t("Cart · drawer açıldı, 2 satır", drawer.open && drawer.lines === 2, JSON.stringify(drawer));
+  // 2×570 + 1×360 = 1500 TL
+  t("Cart · genel toplam 1500 TL", (drawer.total ?? "").includes("1500"), `toplam="${drawer.total}"`);
+
+  const waHref = await q.locator("[data-testid=checkout]").getAttribute("href");
+  const waOk = waHref && waHref.startsWith("https://wa.me/905054970748?text=");
+  const waMsg = waHref ? decodeURIComponent(waHref.split("text=")[1] ?? "") : "";
+  t("Cart · WhatsApp linki doğru numaraya", !!waOk, waHref?.slice(0, 46));
+  t("Cart · mesajda ürün + adet + tutar var",
+    /Classic Manch Burger/.test(waMsg) && /2/.test(waMsg) && /1500/.test(waMsg),
+    waMsg.replace(/\n/g, " | ").slice(0, 110));
+
+  // --- Cart persist (Kural 30): yeniden yükle, satırlar dursun
+  await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  // CookieBanner 1.2 s gecikmeyle açılır → payla bekle (yoksa yarış)
+  await q.waitForTimeout(2600);
+  const persisted = await q.evaluate(() => window.__CART__.getState().lines.length);
+  t("Cart · localStorage persist", persisted === 2, `satır=${persisted}`);
+
+  // --- R16 CookieBanner + R17 InfoModal
+  const cookie = await q.locator("[data-testid=cookie-banner]").count();
+  t("CookieBanner · görünür", cookie === 1, `adet=${cookie}`);
+  await q.evaluate(() => window.__UI__.getState().setInfoOpen(true));
+  await q.waitForTimeout(700);
+  const infoState = () => q.evaluate(() => document.querySelector("[aria-labelledby=info-title]")?.getAttribute("data-state"));
+  t("InfoModal · açılır", (await infoState()) === "open");
+  await q.keyboard.press("Escape");
+  await q.waitForTimeout(600);
+  t("InfoModal · ESC kapatır", (await infoState()) === "closed");
+
+  // --- R18 Footer
+  const footer = await q.evaluate(() => {
+    const f = document.querySelector("footer");
+    return { found: !!f, links: f?.querySelectorAll("a").length ?? 0, dark: f?.hasAttribute("data-nav-dark") };
+  });
+  t("Footer · render + linkler", footer.found && footer.links >= 4, JSON.stringify(footer));
+
+  // --- R2/R3 PageTransition + dinamik title
+  await q.evaluate(() => window.__UI__.getState().closeAll());
+  await q.waitForTimeout(300);
+  const titleBefore = await q.title();
+  await q.evaluate(() => window.__TRANSITION__.getState().trigger(null));
+  await q.waitForTimeout(500);
+  const mid = await q.evaluate(() => ({
+    phase: document.querySelector("[data-transition]")?.getAttribute("data-transition"),
+    title: document.title,
+  }));
+  t("PageTransition · perde kapanıyor", ["cover", "covering", "covered"].includes(mid.phase ?? ""), `phase=${mid.phase}`);
+  t("R3 · title 'Smash'leniyor' oldu", mid.title !== titleBefore && /\|/.test(mid.title), `"${mid.title}"`);
+  await q.waitForTimeout(3000);
+  const endPhase = await q.evaluate(() => document.querySelector("[data-transition]")?.getAttribute("data-transition"));
+  t("PageTransition · idle'a döner", endPhase === "idle", `phase=${endPhase}`);
+
+  await ctx.close();
+}
+
 console.log("\n=== GEÇTİ ===");
 ok.forEach((x) => console.log("  ✓ " + x));
 if (bad.length) { console.log("\n=== KALDI ==="); bad.forEach((x) => console.log("  ✗ " + x)); }

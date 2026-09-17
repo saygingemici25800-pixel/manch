@@ -234,7 +234,8 @@
     "filters": "Filters",
     "empty": "No items for this filter.",
     "activeCategory": "Active category",
-    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI"
+    "subtitle": "BURGER . FRIES . ATIŞTIRMALIK . TATLI",
+    "disclaimer": "Menu and prices are provisional and subject to change."
   },
   "About": {
     "metaTitle": "About",

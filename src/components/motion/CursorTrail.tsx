@@ -117,3 +117,6 @@ export function CursorTrail() {
     </div>
   );
 }
+
+// next/dynamic ssr:false ile yüklenir (LayoutDeferred)
+export default CursorTrail;
