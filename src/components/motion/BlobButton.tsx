@@ -2,8 +2,7 @@
 
 import { useRef, type ReactNode } from "react";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useGsapModule } from "@/lib/hooks/useLazyGsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 
 /** Aynı komut yapısına sahip iki blob (GSAP `attr.d` ile sayı sayı tween'lenir). */
@@ -50,21 +49,28 @@ export default function BlobButton({ children, className, onClick, ariaLabel }: 
   const root = useRef<HTMLButtonElement>(null);
   const reduced = useReducedMotion();
 
-  const { contextSafe } = useGSAP({ scope: root });
+  const g = useGsapModule();
 
-  // Kural 25: ref.current değil scope selector'ları (".wrap", "path")
-  const wobble = contextSafe(() => {
-    if (reduced) return;
-    const tl = gsap.timeline({ overwrite: "auto" });
-    tl.to("path", { attr: { d: WOBBLE }, duration: 0.35, ease: "sine.inOut" })
-      .to("path", { attr: { d: REST }, duration: 0.5, ease: "elastic.out(1, 0.5)" }, ">")
-      .to(".wrap", { scale: 1.05, duration: 0.3, ease: "power2.out" }, 0);
-  });
+  // Kural 25/46: handler'da ref okumak serbest; modül henüz yoksa animasyonsuz (hover rengi CSS'te)
+  const wobble = () => {
+    const gsap = g.current?.gsap;
+    const el = root.current;
+    if (reduced || !gsap || !el) return;
+    const path = el.querySelector("path");
+    const wrap = el.querySelector(".wrap");
+    gsap
+      .timeline({ overwrite: "auto" })
+      .to(path, { attr: { d: WOBBLE }, duration: 0.35, ease: "sine.inOut" })
+      .to(path, { attr: { d: REST }, duration: 0.5, ease: "elastic.out(1, 0.5)" }, ">")
+      .to(wrap, { scale: 1.05, duration: 0.3, ease: "power2.out" }, 0);
+  };
 
-  const settle = contextSafe(() => {
-    if (reduced) return;
-    gsap.to(".wrap", { scale: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-  });
+  const settle = () => {
+    const gsap = g.current?.gsap;
+    const el = root.current;
+    if (reduced || !gsap || !el) return;
+    gsap.to(el.querySelector(".wrap"), { scale: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+  };
 
   return (
     <button

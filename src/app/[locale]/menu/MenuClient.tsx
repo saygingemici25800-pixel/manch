@@ -127,12 +127,13 @@ export default function MenuClient({ categories, products }: Props) {
           <div className="flex items-center gap-[1.2vw] max-md:gap-[3vw]">
             {category.cover && (
               <span className="relative h-[4.5vw] w-[4.5vw] max-md:h-[14vw] max-md:w-[14vw] shrink-0 overflow-hidden rounded-[1vw] max-md:rounded-[3vw]">
-                <Image src={category.cover} alt="" fill loading="eager" sizes="(max-width: 768px) 14vw, 4.5vw" className="object-cover" />
+                <Image src={category.cover} alt="" fill sizes="(max-width: 768px) 14vw, 4.5vw" className="object-cover" />
               </span>
             )}
             <h2 className="font-display text-[2.6vw] max-md:text-[8vw] leading-none text-berry">{category.name[locale]}</h2>
           </div>
-          <ProductGrid products={items} onSelect={open} eager={bi === 0} />
+          {/* Kural 45: priority yalnızca filtresiz ilk blokun ilk kartında — filtre değişince kart sırası değişir, preload boşa düşer */}
+          <ProductGrid products={items} onSelect={open} eager={bi === 0 && filter === null} />
         </section>
       ))}
 

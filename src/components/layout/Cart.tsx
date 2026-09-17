@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useGsapModule } from "@/lib/hooks/useLazyGsap";
 import { getProduct } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { site } from "@/lib/site";
@@ -43,12 +42,14 @@ export default function Cart() {
 
   const count = lines.reduce((n, l) => n + l.qty, 0);
 
-  // toast + rozet bounce
-  const { contextSafe } = useGSAP({ scope: root });
-  const bounce = contextSafe(() => {
-    if (reduced) return;
-    gsap.fromTo(".badge", { scale: 1.6 }, { scale: 1, duration: 0.6, ease: "elastic.out(1, 0.4)" });
-  });
+  // toast + rozet bounce (gsap lazy; yoksa sadece toast)
+  const g = useGsapModule();
+  const bounce = () => {
+    const gsap = g.current?.gsap;
+    const badge = root.current?.querySelector(".badge");
+    if (reduced || !gsap || !badge) return;
+    gsap.fromTo(badge, { scale: 1.6 }, { scale: 1, duration: 0.6, ease: "elastic.out(1, 0.4)" });
+  };
   useEffect(() => {
     if (!lastAdded) return;
     const p = getProduct(lastAdded.slug);
@@ -63,7 +64,8 @@ export default function Cart() {
       window.clearTimeout(show);
       window.clearTimeout(hide);
     };
-  }, [lastAdded, locale, bounce]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastAdded, locale]);
 
   const total = lines.reduce((sum, l) => sum + (getProduct(l.slug)?.price ?? 0) * l.qty, 0);
   const message = [

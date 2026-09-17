@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 interface Props {
   children: ReactNode;
@@ -17,8 +16,8 @@ export default function Parallax({ children, amount = -16, className }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced) return;
       gsap.fromTo(
         ".inner",
@@ -26,7 +25,8 @@ export default function Parallax({ children, amount = -16, className }: Props) {
         { yPercent: amount / 2, ease: "none", scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: true } },
       );
     },
-    { scope: root, dependencies: [reduced, amount], revertOnUpdate: true },
+    [reduced, amount],
+    root,
   );
 
   return (

@@ -2,9 +2,8 @@
 
 import { useRef, type ReactNode } from "react";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 interface Props {
   /** her biri bir malzeme ikonu */
@@ -20,8 +19,8 @@ export default function Juggle({ children, className }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced || !root.current) return;
       const scale = parseFloat(getComputedStyle(root.current).getPropertyValue("--juggle-scale")) || 1;
       gsap.utils.toArray<HTMLElement>(".item").forEach((el, i) => {
@@ -35,7 +34,8 @@ export default function Juggle({ children, className }: Props) {
           .to(el, { scaleY: 0.85, scaleX: 1.12, duration: 0.08, yoyo: true, repeat: 1, ease: "power1.inOut" });
       });
     },
-    { scope: root, dependencies: [reduced], revertOnUpdate: true },
+    [reduced],
+    root,
   );
 
   return (

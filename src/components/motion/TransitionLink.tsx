@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { useTransitionStore } from "@/lib/transition-store";
 import { useUiStore } from "@/lib/ui-store";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useGsapReady } from "@/lib/motion-store";
 
 type Props = ComponentProps<typeof Link> & { locale?: Locale };
 
@@ -21,6 +22,7 @@ const TransitionLink = forwardRef<HTMLAnchorElement, Props>(function TransitionL
   const trigger = useTransitionStore((s) => s.trigger);
   const closeAll = useUiStore((s) => s.closeAll);
   const reduced = useReducedMotion();
+  const gsapReady = useGsapReady(); // Kural 46: gsap lazy yüklenmediyse normal navigasyon
 
   const target = typeof href === "string" ? href : (href.pathname ?? "/");
   const isHash = target.startsWith("#") || (target.startsWith(pathname) && target.includes("#"));
@@ -34,7 +36,7 @@ const TransitionLink = forwardRef<HTMLAnchorElement, Props>(function TransitionL
       onNavigate={(e) => {
         // next-intl'in onNavigate event tipinde defaultPrevented yok; dış handler önce çalışır
         onNavigate?.(e);
-        if (reduced || isHash || samePage) return;
+        if (reduced || !gsapReady || isHash || samePage) return;
         e.preventDefault();
         closeAll();
         trigger(target, locale);

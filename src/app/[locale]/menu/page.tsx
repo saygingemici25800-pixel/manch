@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { clientMessages } from "@/i18n/client-messages";
 import type { Locale } from "@/i18n/routing";
 import { pageMetadata } from "@/lib/seo";
 import LogoMenu from "@/components/ui/logo-menu";
@@ -17,10 +19,12 @@ export async function generateMetadata({ params }: Pick<PageProps<"/[locale]/men
 export default async function MenuPage({ params }: PageProps<"/[locale]/menu">) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const messages = clientMessages(await getMessages(), ["Menu"]);
   const t = await getTranslations("Menu");
   const tc = await getTranslations("Common");
 
   return (
+    <NextIntlClientProvider messages={messages}>
     <main id="main" className="bg-cream px-[2.5vw] pb-[8vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[16vw] max-md:pt-[24vw]">
       <header className="mb-[2vw] max-md:mb-[6vw] flex flex-col items-center gap-[0.8vw] max-md:gap-[3vw] text-center">
         <LogoMenu className="h-[7vw] max-md:h-[18vw] w-auto text-berry" label={t("title")} />
@@ -32,5 +36,6 @@ export default async function MenuPage({ params }: PageProps<"/[locale]/menu">) 
         <MenuClient categories={categories} products={products} />
       </Suspense>
     </main>
+    </NextIntlClientProvider>
   );
 }

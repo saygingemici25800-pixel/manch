@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { clientMessages } from "@/i18n/client-messages";
 import CheckerBand from "@/components/ui/CheckerBand";
 import GlyphCheck from "@/components/ui/GlyphCheck";
 import KraftCard from "@/components/ui/KraftCard";
@@ -48,6 +50,7 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
 
   const { locale } = await params;
   setRequestLocale(locale);
+  const messages = clientMessages(await getMessages(), ["Lab", "Motion", "LayoutLab", "Home", "Menu"]);
   const t = await getTranslations("Lab");
   const berry = getProduct("berry-manch");
   const loc = locale as Locale;
@@ -60,6 +63,7 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
   }));
 
   return (
+    <NextIntlClientProvider messages={messages}>
     <main id="main" className="flex flex-col gap-[5vw] max-md:gap-[14vw] px-[2.5vw] pb-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[10vw] max-md:pt-[24vw]">
       <header className="flex flex-col gap-[0.5vw] max-md:gap-[2vw]">
         <h1 className="heading180 text-berry">{t("title")}</h1>
@@ -209,5 +213,6 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
         <LayoutLab />
       </Section>
     </main>
+    </NextIntlClientProvider>
   );
 }

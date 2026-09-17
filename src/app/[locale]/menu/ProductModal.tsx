@@ -46,7 +46,7 @@ export default function ProductModal({ product, onClose }: Props) {
           <KraftCard tilt={-0.8} className="grid grid-cols-[1fr_1.2fr] max-md:grid-cols-1 gap-[2vw] max-md:gap-[5vw]">
             {product.image ? (
               <div className={clsx("relative aspect-square w-full self-start overflow-hidden rounded-[1vw] max-md:rounded-[3vw]", product.image.endsWith(".png") && "bg-berry")}>
-                <Image src={product.image} alt={product.name[locale]} fill priority sizes="(max-width: 768px) 84vw, 22vw" className={product.image.endsWith(".png") ? "object-contain p-[4%]" : "object-cover"} />
+                <Image src={product.image} alt={product.name[locale]} fill sizes="(max-width: 768px) 84vw, 22vw" className={product.image.endsWith(".png") ? "object-contain p-[4%]" : "object-cover"} />
               </div>
             ) : (
               <Placeholder tone="sky" label={product.name[locale]} ratio="1/1" className="w-full self-start" />

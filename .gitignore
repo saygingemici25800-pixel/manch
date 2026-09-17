@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# içerik pipeline sanal ortamı
+scripts/content/.venv
+
+# kesit deneme matrisi — sadece _old yedeği commit'te
+docs/screens/cutouts-compare/*
+!docs/screens/cutouts-compare/_old/

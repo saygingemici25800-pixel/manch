@@ -1,4 +1,6 @@
-import { setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
+import { clientMessages } from "@/i18n/client-messages";
 import Handmade from "@/components/sections/Handmade";
 import Hero from "@/components/sections/Hero";
 import InstagramGrid from "@/components/sections/InstagramGrid";
@@ -13,8 +15,10 @@ import { Link } from "@/i18n/navigation";
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const messages = clientMessages(await getMessages(), ["Home"]);
 
   return (
+    <NextIntlClientProvider messages={messages}>
     <main id="main">
       <Hero />
       <MarqueeBand />
@@ -32,5 +36,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </Link>
       )}
     </main>
+    </NextIntlClientProvider>
   );
 }

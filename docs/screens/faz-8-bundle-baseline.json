@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-17T11:17:20.848Z",
+  "base": "http://localhost:3100",
+  "rows": {
+    "/tr": {
+      "files": 14,
+      "rawKB": 767.8,
+      "transferKB": 767.8,
+      "biggest": [
+        "136ves227d9m_.js 224kB",
+        "1cvdpyx1-e4g-.js 162kB",
+        "2td1xfllqqrdt.js 125kB",
+        "0a7owxinmmu03.js 42kB",
+        "1k6aykx29-gdd.js 40kB"
+      ]
+    },
+    "/tr/menu": {
+      "files": 14,
+      "rawKB": 767.8,
+      "transferKB": 767.8,
+      "biggest": [
+        "136ves227d9m_.js 224kB",
+        "1cvdpyx1-e4g-.js 162kB",
+        "2td1xfllqqrdt.js 125kB",
+        "0a7owxinmmu03.js 42kB",
+        "1k6aykx29-gdd.js 40kB"
+      ]
+    },
+    "/tr/about": {
+      "files": 15,
+      "rawKB": 768.5,
+      "transferKB": 768.5,
+      "biggest": [
+        "136ves227d9m_.js 224kB",
+        "1cvdpyx1-e4g-.js 162kB",
+        "2td1xfllqqrdt.js 125kB",
+        "0a7owxinmmu03.js 42kB",
+        "1k6aykx29-gdd.js 40kB"
+      ]
+    },
+    "/tr/contact": {
+      "files": 16,
+      "rawKB": 773.8,
+      "transferKB": 773.8,
+      "biggest": [
+        "136ves227d9m_.js 224kB",
+        "1cvdpyx1-e4g-.js 162kB",
+        "2td1xfllqqrdt.js 125kB",
+        "0a7owxinmmu03.js 42kB",
+        "1k6aykx29-gdd.js 40kB"
+      ]
+    }
+  }
+}

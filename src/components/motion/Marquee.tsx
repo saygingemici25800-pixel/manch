@@ -2,10 +2,9 @@
 
 import { useRef } from "react";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
 import { useLenis } from "lenis/react";
-import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 interface Props {
   /** Kural 18: font-pixel → sadece İngilizce metin */
@@ -30,9 +29,12 @@ export default function Marquee({
   const tween = useRef<gsap.core.Tween | null>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  const gsapRef = useRef<typeof import("@/lib/gsap") | null>(null);
+  useLazyGsap(
+    (g) => {
       if (reduced) return;
+      gsapRef.current = g;
+      const { gsap } = g;
       tween.current = gsap.to(".track", {
         xPercent: -50 * direction,
         duration,
@@ -42,13 +44,15 @@ export default function Marquee({
       // direction -1: ters yönde başlat (xPercent 0 → +50 görünmesin diye -50'den başla)
       if (direction === -1) tween.current.progress(0.5);
     },
-    { scope: root, dependencies: [reduced, direction, duration], revertOnUpdate: true },
+    [reduced, direction, duration],
+    root,
   );
 
   // Scroll hızı → timeScale (1 … 5), bırakınca yumuşakça 1'e döner
   useLenis(({ velocity }) => {
     const t = tween.current;
-    if (!t || reduced) return;
+    const gsap = gsapRef.current?.gsap;
+    if (!t || !gsap || reduced) return;
     const boost = 1 + Math.min(Math.abs(velocity) / 12, 4);
     gsap.to(t, { timeScale: boost, duration: 0.25, overwrite: true, onComplete: () => {
       gsap.to(t, { timeScale: 1, duration: 1.2, ease: "power2.out", overwrite: true });

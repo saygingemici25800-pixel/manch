@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 
 /** R15 izole test: Lenis (root, native scroll) + ScrollTrigger.pin. pinType varsayılan ("fixed"). */
@@ -10,8 +9,8 @@ export default function PinTest({ pinType }: { pinType?: "fixed" | "transform" }
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced) return;
       gsap.timeline({
         scrollTrigger: {
@@ -27,7 +26,8 @@ export default function PinTest({ pinType }: { pinType?: "fixed" | "transform" }
         .to(".layer-b", { y: "14vw", ease: "none" }, 0)
         .to(".counter", { textContent: 100, snap: { textContent: 1 }, ease: "none" }, 0);
     },
-    { scope: root, dependencies: [reduced, pinType], revertOnUpdate: true },
+    [reduced, pinType],
+    root,
   );
 
   return (

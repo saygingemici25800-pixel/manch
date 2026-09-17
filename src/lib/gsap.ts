@@ -30,4 +30,9 @@ if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
     }));
 }
 
+// Lazy yüklendiğinde (Kural 46) — TransitionLink perde kararını buna göre verir
+if (typeof window !== "undefined") {
+  import("@/lib/motion-store").then((m) => m.useMotionStore.getState().setGsapReady());
+}
+
 export { gsap, ScrollTrigger, SplitText, CustomEase };

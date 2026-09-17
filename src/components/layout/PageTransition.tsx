@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 import Logo from "@/components/ui/Logo";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTransitionStore } from "@/lib/transition-store";
@@ -31,57 +30,71 @@ export default function PageTransition() {
   const phase = useTransitionStore((s) => s.phase);
   const setPhase = useTransitionStore((s) => s.setPhase);
 
-  const { contextSafe } = useGSAP({ scope: root });
+  // Kural 46: gsap lazy — cover/reveal fonksiyonları modül gelince kurulur; TransitionLink gsapReady olmadan perde açmaz
+  const api = useRef<{ cover: () => void; reveal: () => void } | null>(null);
+  useLazyGsap(
+    ({ gsap }) => {
+      const reveal = () => {
+        setPhase("reveal");
+        const restoreTitle = markServing(t("titleServing"));
+        gsap
+          .timeline({
+            onComplete: () => {
+              gsap.set(".layer path", { attr: { d: FLAT_BOTTOM } });
+              gsap.set(".stage", { autoAlpha: 0 });
+              setPhase("idle");
+              window.setTimeout(restoreTitle, 900);
+            },
+          })
+          .set(".layer path", { attr: { d: FULL_RECT } })
+          .to(".word", { autoAlpha: 0, y: -20, duration: 0.3, ease: "power2.in" }, 0)
+          .to(".layer path", { attr: { d: GONE_TOP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 }, 0.05);
+      };
+      const cover = () => {
+        setPhase("covering");
+        markCover(pathname, t("titleFlipping"));
+        gsap
+          .timeline({
+            onComplete: () => {
+              const { href, locale } = useTransitionStore.getState();
+              setPhase("covered");
+              if (href) router.push(href, { locale });
+              else window.setTimeout(reveal, 350); // demo: navigasyon yok
+            },
+          })
+          .set(".stage", { autoAlpha: 1 })
+          .set(".layer path", { attr: { d: FLAT_BOTTOM } })
+          .set(".word", { autoAlpha: 0, y: 20 })
+          .to(".layer path", { attr: { d: FULL_COVER_UP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 })
+          .to(".word", { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.35");
+      };
+      api.current = { cover, reveal };
+      return () => {
+        api.current = null;
+      };
+    },
+    [pathname, t, router, setPhase],
+    root,
+  );
 
-  const reveal = contextSafe(() => {
-    setPhase("reveal");
-    const restoreTitle = markServing(t("titleServing"));
-    gsap
-      .timeline({
-        onComplete: () => {
-          gsap.set(".layer path", { attr: { d: FLAT_BOTTOM } });
-          gsap.set(".stage", { autoAlpha: 0 });
-          setPhase("idle");
-          window.setTimeout(restoreTitle, 900);
-        },
-      })
-      .set(".layer path", { attr: { d: FULL_RECT } })
-      .to(".word", { autoAlpha: 0, y: -20, duration: 0.3, ease: "power2.in" }, 0)
-      .to(".layer path", { attr: { d: GONE_TOP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 }, 0.05);
-  });
-
-  const cover = contextSafe(() => {
-    setPhase("covering");
-    markCover(pathname, t("titleFlipping"));
-    gsap
-      .timeline({
-        onComplete: () => {
-          const { href, locale } = useTransitionStore.getState();
-          setPhase("covered");
-          if (href) router.push(href, { locale });
-          else window.setTimeout(reveal, 350); // demo: navigasyon yok
-        },
-      })
-      .set(".stage", { autoAlpha: 1 })
-      .set(".layer path", { attr: { d: FLAT_BOTTOM } })
-      .set(".word", { autoAlpha: 0, y: 20 })
-      .to(".layer path", { attr: { d: FULL_COVER_UP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 })
-      .to(".word", { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.35");
-  });
-
-  // trigger → cover (bir kez; cover() hemen "covering"e geçer)
+  // trigger → cover (bir kez; cover() hemen "covering"e geçer). Modül yoksa perdesiz devam: doğrudan push.
   useEffect(() => {
-    if (phase === "cover") cover();
-  }, [phase, cover]);
+    if (phase !== "cover") return;
+    if (api.current) api.current.cover();
+    else {
+      const { href, locale } = useTransitionStore.getState();
+      setPhase("idle");
+      if (href) router.push(href, { locale });
+    }
+  }, [phase, router, setPhase]);
 
   // pathname değişti (navigasyon bitti) → reveal; fallback: 4 s içinde değişmezse yine aç
   useEffect(() => {
     if (phase !== "covered" || !useTransitionStore.getState().href) return;
-    // Yeni sayfanın metadata title'ı bir sonraki frame'de yerleşir
     const delay = pathChangedSinceCover(pathname) ? 80 : FALLBACK_MS;
-    const id = window.setTimeout(reveal, delay);
+    const id = window.setTimeout(() => api.current?.reveal(), delay);
     return () => window.clearTimeout(id);
-  }, [phase, pathname, reveal]);
+  }, [phase, pathname]);
 
   return (
     <div ref={root} data-transition={phase} aria-hidden="true" className="contents">

@@ -2,10 +2,9 @@
 
 import { useRef } from "react";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
 import { useLenis } from "lenis/react";
-import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 interface Props {
   /** dolgu = bir sonraki section'ın rengi (CSS değeri) */
@@ -19,8 +18,8 @@ export default function JellyWave({ fill = "var(--color-cream)", className }: Pr
   const setScale = useRef<((v: number) => void) | null>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced || !root.current) return;
       gsap.set(root.current, { transformOrigin: "50% 100%" });
       setScale.current = gsap.quickTo(root.current, "scaleY", {
@@ -31,7 +30,7 @@ export default function JellyWave({ fill = "var(--color-cream)", className }: Pr
         setScale.current = null;
       };
     },
-    { dependencies: [reduced], revertOnUpdate: true },
+    [reduced],
   );
 
   useLenis(({ velocity }) => {

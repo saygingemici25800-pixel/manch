@@ -1,0 +1,444 @@
+{
+  "date": "2026-09-17T11:52:48.984Z",
+  "base": "http://localhost:3100",
+  "target": {
+    "accessibility": 95,
+    "seo": 95,
+    "performance": 90,
+    "lcp": 2500,
+    "cls": 0.1
+  },
+  "results": {
+    "mobile|nopreload|/tr": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1672,
+        "cls": 0,
+        "tbt": 30,
+        "fcp": 915,
+        "si": 2043,
+        "lcpElement": "main#main > section.relative > div.relative > h1.max-w-[80vw]"
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "interactive",
+          "score": 0.83
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|nopreload|/tr/menu": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1259,
+        "cls": 0,
+        "tbt": 20,
+        "fcp": 760,
+        "si": 896,
+        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|nopreload|/tr/contact": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 806,
+        "cls": 0,
+        "tbt": 7,
+        "fcp": 761,
+        "si": 761,
+        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 825,
+        "cls": 0,
+        "tbt": 12,
+        "fcp": 771,
+        "si": 3221,
+        "lcpElement": "main#main > section.relative > div.relative > h1.max-w-[80vw]"
+      },
+      "clsItems": [
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr/menu": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 979,
+        "cls": 0,
+        "tbt": 17,
+        "fcp": 760,
+        "si": 2756,
+        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
+      },
+      "clsItems": [
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr/contact": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 868,
+        "cls": 0,
+        "tbt": 16,
+        "fcp": 760,
+        "si": 3361,
+        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
+      },
+      "clsItems": [
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr",
+      "scores": {
+        "performance": 94,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1651,
+        "cls": 0,
+        "tbt": 40,
+        "fcp": 633,
+        "si": 633,
+        "lcpElement": "div.absolute > div.inner > div.relative > img.object-contain"
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "largest-contentful-paint",
+          "score": 0.75
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr/menu": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 97,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1023,
+        "cls": 0.006,
+        "tbt": 105,
+        "fcp": 699,
+        "si": 1019,
+        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
+      },
+      "clsItems": [
+        {
+          "node": "body.min-h-full > footer.relative",
+          "score": 0.006
+        }
+      ],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr/contact": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 665,
+        "cls": 0,
+        "tbt": 8,
+        "fcp": 620,
+        "si": 620,
+        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr",
+      "scores": {
+        "performance": 92,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 718,
+        "cls": 0,
+        "tbt": 20,
+        "fcp": 627,
+        "si": 3285,
+        "lcpElement": "div.absolute > div.inner > div.relative > img.object-contain"
+      },
+      "clsItems": [
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.2
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr/menu": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 92,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 842,
+        "cls": 0.006,
+        "tbt": 29,
+        "fcp": 620,
+        "si": 2856,
+        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
+      },
+      "clsItems": [
+        {
+          "node": "body.min-h-full > footer.relative",
+          "score": 0.006
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.31
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr/contact": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 91,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 736,
+        "cls": 0,
+        "tbt": 61,
+        "fcp": 621,
+        "si": 3495,
+        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
+      },
+      "clsItems": [
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        },
+        {
+          "node": "?",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.16
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    }
+  }
+}

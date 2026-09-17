@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 interface Props {
   children: ReactNode;
@@ -18,12 +17,13 @@ export default function Float({ children, duration = 3.2, delay = 0, className }
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced) return;
       gsap.to(".inner", { y: "-1.2vw", rotation: 2, duration, delay, ease: "sine.inOut", yoyo: true, repeat: -1 });
     },
-    { scope: root, dependencies: [reduced, duration, delay], revertOnUpdate: true },
+    [reduced, duration, delay],
+    root,
   );
 
   return (

@@ -1,0 +1,448 @@
+{
+  "date": "2026-09-17T11:21:21.331Z",
+  "base": "http://localhost:3100",
+  "target": {
+    "accessibility": 95,
+    "seo": 95,
+    "performance": 90,
+    "lcp": 2500,
+    "cls": 0.1
+  },
+  "results": {
+    "mobile|nopreload|/tr": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr",
+      "scores": {
+        "performance": 92,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 3122,
+        "cls": 0,
+        "tbt": 146,
+        "fcp": 919,
+        "si": 1650,
+        "lcpElement": null
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "largest-contentful-paint",
+          "score": 0.75
+        },
+        {
+          "id": "max-potential-fid",
+          "score": 0.59
+        },
+        {
+          "id": "interactive",
+          "score": 0.87
+        },
+        {
+          "id": "forced-reflow-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|nopreload|/tr/menu": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1518,
+        "cls": 0,
+        "tbt": 63,
+        "fcp": 761,
+        "si": 904,
+        "lcpElement": null
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|nopreload|/tr/contact": {
+      "form": "mobile",
+      "variant": "nopreload",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 816,
+        "cls": 0,
+        "tbt": 34,
+        "fcp": 761,
+        "si": 761,
+        "lcpElement": null
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 876,
+        "cls": 0,
+        "tbt": 78,
+        "fcp": 760,
+        "si": 3250,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "max-potential-fid",
+          "score": 0.73
+        },
+        {
+          "id": "forced-reflow-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr/menu": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1289,
+        "cls": 0,
+        "tbt": 43,
+        "fcp": 760,
+        "si": 2728,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "mobile|preloader|/tr/contact": {
+      "form": "mobile",
+      "variant": "preloader",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 810,
+        "cls": 0,
+        "tbt": 6,
+        "fcp": 767,
+        "si": 3288,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr",
+      "scores": {
+        "performance": 98,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 806,
+        "cls": 0,
+        "tbt": 102,
+        "fcp": 643,
+        "si": 783,
+        "lcpElement": null
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "max-potential-fid",
+          "score": 0.69
+        },
+        {
+          "id": "forced-reflow-insight",
+          "score": 0
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr/menu": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 736,
+        "cls": 0.006,
+        "tbt": 37,
+        "fcp": 610,
+        "si": 786,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "body.min-h-full > footer.relative",
+          "score": 0.006
+        }
+      ],
+      "failing": [
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|nopreload|/tr/contact": {
+      "form": "desktop",
+      "variant": "nopreload",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 732,
+        "cls": 0,
+        "tbt": 10,
+        "fcp": 627,
+        "si": 627,
+        "lcpElement": null
+      },
+      "clsItems": [],
+      "failing": [
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr",
+      "scores": {
+        "performance": 92,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 753,
+        "cls": 0,
+        "tbt": 45,
+        "fcp": 628,
+        "si": 3274,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.21
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr/menu": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr/menu",
+      "scores": {
+        "performance": 91,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 1088,
+        "cls": 0.006,
+        "tbt": 73,
+        "fcp": 620,
+        "si": 2862,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "body.min-h-full > footer.relative",
+          "score": 0.006
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.3
+        },
+        {
+          "id": "lcp-discovery-insight",
+          "score": 0
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    },
+    "desktop|preloader|/tr/contact": {
+      "form": "desktop",
+      "variant": "preloader",
+      "path": "/tr/contact",
+      "scores": {
+        "performance": 91,
+        "accessibility": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "lcp": 726,
+        "cls": 0,
+        "tbt": 13,
+        "fcp": 622,
+        "si": 3416,
+        "lcpElement": null
+      },
+      "clsItems": [
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        },
+        {
+          "node": "div.fixed > p.text40",
+          "score": 0
+        }
+      ],
+      "failing": [
+        {
+          "id": "speed-index",
+          "score": 0.18
+        },
+        {
+          "id": "network-dependency-tree-insight",
+          "score": 0
+        }
+      ]
+    }
+  }
+}

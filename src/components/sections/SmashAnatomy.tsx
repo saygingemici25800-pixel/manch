@@ -3,10 +3,9 @@
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
 import SplitReveal from "@/components/motion/SplitReveal";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 // üstten alta: brioche üst · sos · cheddar · köfte · köfte · turşu · marul · brioche alt
 const LAYERS = [
@@ -26,8 +25,8 @@ export default function SmashAnatomy() {
   const root = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       if (reduced) return;
       const n = LAYERS.length;
       const tl = gsap.timeline({
@@ -39,7 +38,8 @@ export default function SmashAnatomy() {
         tl.fromTo(`.label-${i}`, { autoAlpha: 0, x: i % 2 ? 20 : -20 }, { autoAlpha: 1, x: 0, ease: "none" }, 0.25 + (i / n) * 0.6);
       });
     },
-    { scope: root, dependencies: [reduced], revertOnUpdate: true },
+    [reduced],
+    root,
   );
 
   return (

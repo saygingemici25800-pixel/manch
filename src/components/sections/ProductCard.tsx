@@ -14,11 +14,11 @@ interface Props {
   product: Product;
   /** verilirse görsel + isim tıklanabilir → detay modalı */
   onSelect?: (slug: string) => void;
-  /** fold üstü kartlar: LCP için eager */
-  priority?: boolean;
+  /** "priority": LCP adayı ilk kart (preload). Diğerleri varsayılan (lazy) — `eager` de preload üretir (Kural 45) */
+  loadHint?: "priority";
 }
 
-export default function ProductCard({ product, onSelect, priority }: Props) {
+export default function ProductCard({ product, onSelect, loadHint }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Product");
   const tc = useTranslations("Common");
@@ -38,7 +38,7 @@ export default function ProductCard({ product, onSelect, priority }: Props) {
       >
         <div className="relative h-[86%] w-[80%] transition-transform duration-500 ease-[var(--ease-jelly)] group-hover:rotate-6 group-hover:scale-105">
           {product.image ? (
-            <Image src={product.image} alt={name} fill priority={priority} sizes="(max-width: 768px) 80vw, 26vw" className={product.image.endsWith(".png") ? "object-contain" : "rounded-[1vw] max-md:rounded-[3vw] object-cover"} />
+            <Image src={product.image} alt={name} fill priority={loadHint === "priority"} sizes="(max-width: 768px) 80vw, 26vw" className={product.image.endsWith(".png") ? "object-contain" : "rounded-[1vw] max-md:rounded-[3vw] object-cover"} />
           ) : (
             <Placeholder tone="sky" label={name} ratio="1/1" className="h-full w-full" />
           )}

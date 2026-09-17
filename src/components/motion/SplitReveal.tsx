@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap, SplitText } from "@/lib/gsap";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 
 interface Props {
@@ -32,8 +31,8 @@ export default function SplitReveal({
   const ref = useRef<HTMLParagraphElement>(null);
   const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap, SplitText }) => {
       if (reduced || !ref.current) return;
       const split = SplitText.create(ref.current, {
         type: mode === "lines" ? "lines" : "chars,words",
@@ -50,7 +49,7 @@ export default function SplitReveal({
       });
       return () => split.revert();
     },
-    { dependencies: [reduced, mode, text], revertOnUpdate: true },
+    [reduced, mode, text],
   );
 
   return (

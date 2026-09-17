@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import JellyWave from "@/components/motion/JellyWave";
-import SplitReveal from "@/components/motion/SplitReveal";
 import Image from "next/image";
 import Float from "@/components/motion/Float";
 import Placeholder from "@/components/ui/Placeholder";
@@ -18,7 +17,9 @@ export default async function Hero() {
         alt={t("imageAlt")}
         fill
         priority
-        sizes="100vw"
+        fetchPriority="high"
+        quality={70}
+        sizes="(max-width: 768px) 100vw, 100vw"
         className="object-cover object-[60%_30%]"
       />
       <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(78,16,48,.35)_0%,rgba(78,16,48,.4)_45%,rgba(122,31,75,.85)_100%)]" />
@@ -41,13 +42,10 @@ export default async function Hero() {
       </div>
 
       <div className="relative z-1 px-[2.5vw] pb-[7vw] max-md:px-[5vw] max-md:pb-[20vw] pt-[30vh]">
-        <SplitReveal
-          as="h1"
-          mode="chars"
-          text={t("title")}
-          start="top 100%"
-          className="max-w-[80vw] max-md:max-w-none font-display text-[9.5vw] max-md:text-[17vw] leading-[0.9] text-mustard [-webkit-text-stroke:0.02em_var(--color-berry-dk)]"
-        />
+        {/* Kural 47: hero H1 = LCP elementi → SplitText ile animasyonlanmaz (yeniden boyama LCP'yi animasyon sonuna kaydırıyordu) */}
+        <h1 className="max-w-[80vw] max-md:max-w-none font-display text-[9.5vw] max-md:text-[17vw] leading-[0.9] text-mustard [-webkit-text-stroke:0.02em_var(--color-berry-dk)]">
+          {t("title")}
+        </h1>
         <p className="mt-[1.5vw] max-md:mt-[5vw] text40 text-[1.4vw] max-md:text-[4.5vw] text-cream">{t("sub")}</p>
       </div>
 

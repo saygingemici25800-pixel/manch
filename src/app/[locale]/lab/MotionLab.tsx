@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
-import { ScrollTrigger } from "@/lib/gsap";
 import { useMotionStore } from "@/lib/motion-store";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import BlobButton from "@/components/motion/BlobButton";
@@ -21,7 +20,9 @@ function ScrollTriggerCount() {
   const t = useTranslations("Motion");
   const [n, setN] = useState<number | null>(null);
   useEffect(() => {
-    const tick = () => setN(ScrollTrigger.getAll().length);
+    // gsap lazy (Kural 46): sayaç modül yüklendikten sonra okur
+    const w = window as Window & { __ST_COUNT?: () => number };
+    const tick = () => setN(w.__ST_COUNT?.() ?? 0);
     tick();
     const id = window.setInterval(tick, 300);
     return () => window.clearInterval(id);

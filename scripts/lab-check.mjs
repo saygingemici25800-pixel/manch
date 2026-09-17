@@ -1,6 +1,6 @@
 // Lab kabul testi (Faz 3 + Faz 4). Dev server gerektirir:  PORT=3200 pnpm dev
 // Kullanım: node scripts/lab-check.mjs <çıktı-klasörü>   → png/webm + konsol raporu
-import { chromium } from "playwright-core";
+import { chromium, webkit } from "playwright-core";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -20,12 +20,21 @@ const attach = (page, tag) => {
     if (m.type() === "warning" && /Largest Contentful Paint/.test(m.text())) return;
     issues.push(`[${tag}] console.${m.type()}: ${m.text().slice(0, 300)}`);
   });
-  page.on("pageerror", (e) => issues.push(`[${tag}] pageerror: ${e.message.slice(0, 300)}`));
+  page.on("pageerror", (e) => {
+    // Next DEV araçlarının kendi ölçümü: catch-all 404 navigasyonunda performance.measure('CatchAll') negatif zaman damgası
+    // (uygulama kodu değil; prod'da dev araçları yok). Kural 45 notu.
+    if (/cannot have a negative time stamp/.test(e.message)) return;
+    issues.push(`[${tag}] pageerror: ${e.message.slice(0, 300)}`);
+  });
 };
 const stCount = async (page) => { await page.waitForSelector('[data-testid="st-count"]'); await page.waitForTimeout(600); return Number((await page.textContent('[data-testid="st-count"]')).match(/\d+/)[0]); };
 const waitPreloader = async (page) => { await page.waitForSelector("[data-preloader]", { state: "detached", timeout: 15000 }).catch(() => {}); };
 
-const browser = await chromium.launch();
+// BROWSER=webkit → Safari motoru (Faz 8 Kural 45); varsayılan chromium
+const ENGINE = process.env.BROWSER === "webkit" ? webkit : chromium;
+const IS_WEBKIT = process.env.BROWSER === "webkit";
+const browser = await ENGINE.launch();
+console.log(`engine: ${IS_WEBKIT ? "webkit" : "chromium"}`);
 
 // ===================== Faz 3: motion =====================
 {
@@ -341,7 +350,8 @@ const browser = await chromium.launch();
   check("title şablonu (/tr/menu → 'Menü | MANCH')", (await page.title()) === "Menü | MANCH", await page.title());
   // skip link + focus ring
   await page.goto(`${BASE}/tr`, { waitUntil: "networkidle" });
-  await page.keyboard.press("Tab"); await page.waitForTimeout(200);
+  // Safari/WebKit: Tab yalnızca form kontrollerini dolaşır, linkler Option+Tab ile (Kural 45)
+  await page.keyboard.press(IS_WEBKIT ? "Alt+Tab" : "Tab"); await page.waitForTimeout(200);
   check("skip link ilk Tab'da görünür", await page.evaluate(() => { const a = document.activeElement; return a?.getAttribute("href") === "#main" && a.getBoundingClientRect().width > 0; }));
   check("focus-visible mustard ring", await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor.replace(/\s/g, "") === "rgb(246,195,67)"), await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor));
   // [TODO] işaretleri görünüyor (placeholder içerik)

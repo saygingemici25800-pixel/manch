@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "@/lib/gsap";
+import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import IngredientIcon, { type Ingredient } from "@/components/ui/IngredientIcon";
 
@@ -30,8 +29,8 @@ export default function CursorTrail() {
   }, []);
 
   // Kural 31: koşullu null render → scope yok, ref effect içinde okunur
-  useGSAP(
-    () => {
+  useLazyGsap(
+    ({ gsap }) => {
       const el = root.current;
       if (!enabled || reduced || !el) return;
       const poly = el.querySelector<SVGPolylineElement>("polyline");
@@ -86,7 +85,7 @@ export default function CursorTrail() {
         document.documentElement.removeEventListener("mouseenter", onEnter);
       };
     },
-    { dependencies: [enabled, reduced], revertOnUpdate: true },
+    [enabled, reduced],
   );
 
   if (!enabled || reduced) return null;
