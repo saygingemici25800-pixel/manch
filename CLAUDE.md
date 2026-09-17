@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 9 tamamlandı** — tüm fazlar bitti; domain bağlanması bekleniyor
-- Son başarılı build: 2026-09-17 Faz 9 (`pnpm build` + lint temiz; temiz klon + `--frozen-lockfile` simülasyonu temiz; canlı smoke 10/10)
-- Preview URL: **https://manch-eight.vercel.app** (Vercel, auto-deploy · `origin main` = GitHub `saygingemici25800-pixel/manch`)
-- **Vercel env:** `NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app` (Production + Preview) eklenip redeploy edilmeli — yoksa canonical/hreflang/sitemap `https://manch.tr` gösterir. `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmez**.
+- Aktif faz: **Faz 9 tamamlandı — tüm fazlar (1–9) bitti.** Kalan: içerik TODO'ları + domain bağlama.
+- Son başarılı build: 2026-09-17 Faz 9 kapanış (`pnpm build` + lint temiz; temiz klon + `--frozen-lockfile` simülasyonu temiz; canlı smoke **10/10 ✓ 0 uyarı**)
+- Canlı URL: **https://manch-eight.vercel.app** (Vercel, auto-deploy · `origin main` = GitHub `saygingemici25800-pixel/manch`)
+- **Vercel env:** `NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app` ✓ ayarlı (Production + Preview). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmez** (ölçüm build'ine özel, Kural 43).
 - **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Project → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` kaydı `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel domain doğrulaması yeşil olsun · 4) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>` (canonical uyarısı kalkmalı)
 - Açık TODO'lar: çalışma saatleri · **orijinal fotoğraflar istenecek** (kaynaklar ekran görüntüsü, 749–1222 px; hero 1104×1476) · **maskot vektör/orijinal istenecek** (`misu-miyu.png` basılı menüden 472×270) · Guacamole Burger + Corn Ribs/Tenders/Arancini/Fries/Soslar fotoğrafı yok (Placeholder) · iç mekan / zone galerisi fotoğrafı yok (Placeholder) · logo SVG potrace izi (orijinal vektör gelince `public/logo/*.svg` + `ui/logo-*.tsx` yeniden üretilir) · domain yok — `site.url` varsayımı kalır, Faz 9'da `NEXT_PUBLIC_SITE_URL` (karar 2026-09-17) · renk kodlarının logodan teyidi · Webber Digital URL · `CookieBanner` mount edilmiyor · Google Place ID · Crispy Triangle fiyatı menüde yok (`price: null`)
 
@@ -271,11 +271,11 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 
 ### Faz 9 — Deploy
 - [x] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
-- [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL`** eklenecek (şu an tanımsız → canonical `https://manch.tr` varsayılanı) *(revize: 2026-09-17 — "env yok" yanlıştı)*
+- [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
 - [x] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
 - [x] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
 - [x] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
-- [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓**, 2 uyarı (canonical host, env eksik)
+- [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
 - [x] Preview/canlı URL DURUM'da
 - [ ] Domain (Cloudflare DNS) — TODO'daki adım listesi
 - [x] ✅ Kabul: production build Vercel'de yeşil (canlı: https://manch-eight.vercel.app)
