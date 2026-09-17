@@ -30,9 +30,11 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 8 tamamlandı** — Faz 9 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 Faz 8 (`pnpm build` + lint temiz; Lighthouse mobil preloader'sız perf 100 ×3, A11y/SEO 100; First Load 187.5 kB gz; lab-check chromium+webkit 96/96)
-- Preview URL: —
+- Aktif faz: **Faz 9 tamamlandı** — tüm fazlar bitti; domain bağlanması bekleniyor
+- Son başarılı build: 2026-09-17 Faz 9 (`pnpm build` + lint temiz; temiz klon + `--frozen-lockfile` simülasyonu temiz; canlı smoke 10/10)
+- Preview URL: **https://manch-eight.vercel.app** (Vercel, auto-deploy · `origin main` = GitHub `saygingemici25800-pixel/manch`)
+- **Vercel env:** `NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app` (Production + Preview) eklenip redeploy edilmeli — yoksa canonical/hreflang/sitemap `https://manch.tr` gösterir. `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmez**.
+- **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Project → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` kaydı `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel domain doğrulaması yeşil olsun · 4) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>` (canonical uyarısı kalkmalı)
 - Açık TODO'lar: çalışma saatleri · **orijinal fotoğraflar istenecek** (kaynaklar ekran görüntüsü, 749–1222 px; hero 1104×1476) · **maskot vektör/orijinal istenecek** (`misu-miyu.png` basılı menüden 472×270) · Guacamole Burger + Corn Ribs/Tenders/Arancini/Fries/Soslar fotoğrafı yok (Placeholder) · iç mekan / zone galerisi fotoğrafı yok (Placeholder) · logo SVG potrace izi (orijinal vektör gelince `public/logo/*.svg` + `ui/logo-*.tsx` yeniden üretilir) · domain yok — `site.url` varsayımı kalır, Faz 9'da `NEXT_PUBLIC_SITE_URL` (karar 2026-09-17) · renk kodlarının logodan teyidi · Webber Digital URL · `CookieBanner` mount edilmiyor · Google Place ID · Crispy Triangle fiyatı menüde yok (`price: null`)
 
 ---
@@ -86,6 +88,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 45. Safari/WebKit: Playwright `webkit-2359` kurulu; `BROWSER=webkit node scripts/lab-check.mjs` chromium koşusuna ek olarak çalıştırılır (backdrop-blur, svh/dvh, Lenis wheel, sticky sekme, PNG şeffaflık). Bulgular (2026-09-17): (1) WebKit'te `Tab` yalnızca form kontrollerini dolaşır, linkler **Option+Tab** — skip link testi webkit'te `Alt+Tab`; ürün hatası değil, Safari davranışı. (2) `next/image` `priority` **ve `loading="eager"`** ikisi de `<link rel=preload as=image>` üretir; WebKit preload adayı ile seçilen kaynağı eşleştiremeyince "preloaded but not used" uyarısı veriyor → `priority` yalnızca gerçek LCP adaylarında (hero fotoğrafı, `/menu` **filtresiz** ilk kart — filtreyle sıra değişince preload boşa düşer), diğer fold-üstü görseller varsayılan (lazy) kalır; `eager` kullanılmaz. (3) Next dev araçları catch-all 404 navigasyonunda `performance.measure('CatchAll')` negatif zaman damgası hatası atıyor (dev-only, uygulama kodu değil) → lab-check filtreler. Diğer 94 kontrol (backdrop-blur overlay, svh hero, Lenis wheel scroll, sticky sekme, PNG şeffaflık) chromium ile aynı.
 46. GSAP ilk yükleme JS'inde **yoktur**: `@/lib/gsap` (tek `registerPlugin` noktası) yalnızca `useLazyGsap` / `useGsapModule` (`src/lib/hooks/useLazyGsap.ts`) ile effect içinde `import()` edilir; hiçbir component `@/lib/gsap` veya `@gsap/react`'i statik import etmez (grep ile denetlenir). SSR içeriği olan primitive'ler (SplitReveal, Float, Parallax, Marquee, JellyWave, Juggle, SmashAnatomy, ProductGrid) normal render eder, animasyon modül gelince başlar. SSR'a gerek olmayan layout parçaları (CursorTrail, MenuOverlay, PageTransition) `LayoutDeferred` içinde `next/dynamic` `ssr:false`. Preloader GSAP kullanmaz (CSS keyframe + timer). `TransitionLink` `gsapReady` (motion-store) false iken perdesiz normal navigasyon yapar; PageTransition `api.current` yoksa doğrudan `router.push`. **First Load JS hedefi: ana sayfa ≤ 200 kB gzip** (karar 2026-09-17; Next'in kendi metriği de gzip'tir; React+Next çatısı tek başına ~112 kB gz). Ölçüm `scripts/bundle-report.mjs` (gerçek yükleme, `nomodule` polyfill hariç, gz sütunu esas).
 47. LCP: `/tr` mobil LCP elementi **hero H1**'dir (fotoğraf değil — `hero-cook.jpg` 750w WebP ≈ 36 KB, `priority` + `fetchPriority="high"` + `quality 70`). H1 **SplitText ile animasyonlanmaz** (statik `<h1>`): split → char span'ları → yeniden boyama LCP adayını animasyon sonuna (3.2 s) kaydırıyordu. Hero hareketi dekoratif elemanlarda (rozet spin, kesit Float). Karar (a) uygulandı (sizes/kalite/AVIF/fetchpriority); (b) (mobilde fotoğrafsız hero) gerekmedi. `next.config` `images.formats: ["image/avif","image/webp"]`, **`images.qualities: [70, 75]`** (kullanılan her `quality` listede olmalı, yoksa 400); `next/image` çıktıları prod'da `curl -H "Accept: image/avif"` ile doğrulanır (hero 640w, kesit 384/750w). Genel kural: LCP adayı olan başlık/görsel ilk boyamadan sonra DOM'u değişen bir animasyona sokulmaz.
+48. Deploy duman testi `scripts/smoke.mjs <url>`: sayfalar/sitemap/robots/OG 200, bilinmeyen yol 404, head'de canonical + hreflang + og:image + Restaurant JSON-LD. HTML attribute'larını **case-insensitive** ara (Next 16 `hrefLang` yazar). `canonical` host ölçülen host'tan farklıysa **uyarı** (env eksik), hata değil. Vercel'de `NEXT_PUBLIC_SITE_URL` ayarlanınca yeniden koşulur.
 
 ---
 
@@ -267,11 +270,15 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: mobil preloader'sız **perf 100/100/100**, LCP 1672/1259/806 ms, CLS 0; A11y/SEO 100; First Load 187.5 kB gz; lab-check chromium 96/96 + webkit 96/96, console temiz
 
 ### Faz 9 — Deploy
-- [ ] GitHub repo `manch` oluştur, push
-- [ ] Vercel'e bağla (auto-deploy), env yok
-- [ ] Preview URL'yi DURUM'a yaz
-- [ ] Domain (Cloudflare DNS) — TODO
-- [ ] ✅ Kabul: production build Vercel'de yeşil
+- [x] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
+- [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL`** eklenecek (şu an tanımsız → canonical `https://manch.tr` varsayılanı) *(revize: 2026-09-17 — "env yok" yanlıştı)*
+- [x] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
+- [x] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
+- [x] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
+- [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓**, 2 uyarı (canonical host, env eksik)
+- [x] Preview/canlı URL DURUM'da
+- [ ] Domain (Cloudflare DNS) — TODO'daki adım listesi
+- [x] ✅ Kabul: production build Vercel'de yeşil (canlı: https://manch-eight.vercel.app)
 
 ---
 
@@ -314,6 +321,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 8 | `/tr` mobil LCP 3.1–3.3 s (hedef < 2.5), FCP 0.9 s | LCP elementi hero H1; SplitText lazy gelince H1 char span'larına bölünüp yeniden boyanıyor → yeni LCP adayı animasyon sonunda | Hero H1 statik (Kural 47); LH 13'te element denetimi `lcp-breakdown-insight` (eski `largest-contentful-paint-element` yok) — `lighthouse.mjs` düzeltildi |
 | 2026-09-17 | 8 | `next/image` hero isteği 44 B döndü (400) — hero fotoğrafı prod'da kırıktı; console "quality 70 not configured in images.qualities" | Next 16'da `quality` prop'u `images.qualities` listesinde olmak zorunda (varsayılan `[75]`) | `next.config` `images.qualities: [70, 75]` (Kural 47). lab-check console filtresi bunu yakaladı — görsel istek durumu da kabul kriteri oldu |
 | 2026-09-17 | 8 | WebKit: `preloaded but not used` (fig-jam/classic 384w); Chromium: `Performance.measure('CatchAll') negative time stamp` pageerror | `loading="eager"` de preload üretiyor (WebKit aday uyuşmazlığı); ikincisi Next dev araçlarının 404 catch-all ölçümü | `eager` kaldırıldı, `priority` sadece LCP adaylarında; dev-only pageerror belgeli filtre (Kural 45) |
+| 2026-09-17 | 9 | `smoke.mjs` canlıda "hreflang yok" dedi; oysa 3 alternate link doğru üretiliyor | Next 16 metadata çıktısı **`hrefLang`** (camelCase) yazıyor; regex `hreflang="` arıyordu (HTML'de attribute adı büyük/küçük harf duyarsız, regex değil) | Regex `/hrefLang="…"/i` (case-insensitive) — ürün hatası değil, test hatası (Kural 48) |
 
 ---
 

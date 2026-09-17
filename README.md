@@ -34,3 +34,12 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## MANCH — ortam değişkenleri
+
+| Değişken | Nerede | Not |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Vercel Production + Preview | Canonical / hreflang / sitemap / OG mutlak adresleri (Kural 38). Ayarlı değilse `https://manch.tr` varsayılanı kullanılır. |
+| `NEXT_PUBLIC_ALLOW_NOPRELOAD` | **yalnızca yerel ölçüm build'i** | `?nopreload=1` ile preloader'ı atlar (Kural 43). **Prod'da/Vercel'de tanımlanmaz** — tanımlanırsa ziyaretçi preloader'ı URL ile atlayabilir. |
+
+Şablon: `.env.example`. Deploy sonrası duman testi: `node scripts/smoke.mjs https://<host>`.
