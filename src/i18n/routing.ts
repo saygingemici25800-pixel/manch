@@ -1,8 +1,11 @@
 import { defineRouting } from "next-intl/routing";
 
-export const routing = defineRouting({
-  locales: ["tr", "en"],
-  defaultLocale: "tr",
-});
+export const locales = ["tr", "en"] as const;
+export type Locale = (typeof locales)[number];
 
-export type Locale = (typeof routing.locales)[number];
+export const routing = defineRouting({
+  locales,
+  defaultLocale: "tr",
+  // Varsayilan dil de URL'de gorunur: /tr ve /en.
+  localePrefix: "always",
+});

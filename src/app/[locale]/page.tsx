@@ -1,41 +1,28 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
-import { clientMessages } from "@/i18n/client-messages";
-import Handmade from "@/components/sections/Handmade";
-import Hero from "@/components/sections/Hero";
-import InstagramGrid from "@/components/sections/InstagramGrid";
-import Location from "@/components/sections/Location";
-import MarqueeBand from "@/components/sections/MarqueeBand";
-import MisuMiyu from "@/components/sections/MisuMiyu";
-import SmashAnatomy from "@/components/sections/SmashAnatomy";
-import TheHits from "@/components/sections/TheHits";
-import Zone from "@/components/sections/Zone";
-import { Link } from "@/i18n/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default async function HomePage({ params }: PageProps<"/[locale]">) {
+import { featured, menu } from "@/data/menu";
+import { site } from "@/lib/site";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export default async function HomePage({ params }: Props) {
   const { locale } = await params;
-  setRequestLocale(locale);
-  const messages = clientMessages(await getMessages(), ["Home"]);
+  setRequestLocale(locale); // Kural 16
+
+  const t = await getTranslations("Home");
+  const tc = await getTranslations("Common");
 
   return (
-    <NextIntlClientProvider messages={messages}>
-    <main id="main">
-      <Hero />
-      <MarqueeBand />
-      <TheHits />
-      <SmashAnatomy />
-      <Handmade />
-      <Zone />
-      <MisuMiyu />
-      <InstagramGrid />
-      <Location />
-      {process.env.NODE_ENV !== "production" && (
-        // dev: lab-check round-trip testi için
-        <Link href="/lab" data-testid="nav-lab" className="sr-only focus:not-sr-only">
-          lab
-        </Link>
-      )}
+    <main>
+      <h1>{t("heroTitle")}</h1>
+      <p>{t("heroLead")}</p>
+      <p>{tc("tagline")}</p>
+      <p>
+        {site.address.full} · {site.name}
+      </p>
+      <p>
+        {menu.length} ürün · {featured.length} imza ürün · {locale}
+      </p>
     </main>
-    </NextIntlClientProvider>
   );
 }

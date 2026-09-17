@@ -1,108 +1,11 @@
 @import "tailwindcss";
-@import "lenis/dist/lenis.css";
 
-/* ---------- Renk tokenları (src/styles/tokens.ts ile senkron) ---------- */
-@theme {
-  --color-berry: #7a1f4b;
-  --color-berry-dk: #4e1030;
-  --color-sky: #c4e4f3;
-  --color-tile: #8fc3d6;
-  --color-cream: #f4eee6;
-  --color-paper: #e9dcc6;
-  --color-pink: #e9a3b8;
-  --color-mustard: #f6c343;
-  --color-ink: #1b1b1b;
+/* Faz 2'de marka renkleri, fontlari ve utility'leri buraya gelecek. */
 
-  --ease-jelly: cubic-bezier(0.4, 1.6, 0.7, 0.95);
-}
-
-/* ---------- Font tokenları — next/font değişkenleri <html>'de tanımlı, bu yüzden inline ----------
-   Kural 19: her tokenda fallback zinciri.
-   Kural 18 (karar 2026-09-17): pixel = Silkscreen, ğşıĞŞİ içermediği için SADECE İngilizce metinlerde (tape/marquee). */
-@theme inline {
-  --font-display: var(--font-modak), "Arial Black", Impact, sans-serif;
-  --font-ui: var(--font-mouse-memoirs), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --font-pixel: var(--font-silkscreen), "Courier New", monospace;
-}
-
-/* ---------- Temel ---------- */
 html {
-  background: var(--color-cream);
-  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  min-height: 100%;
-  font-family: var(--font-ui);
-}
-
-/* Erişilebilirlik: klavye odağı hardal halka (Kural 40) */
-:focus-visible {
-  outline: 2px solid var(--color-mustard);
-  outline-offset: 2px;
-}
-.bg-mustard:focus-visible {
-  outline-color: var(--color-berry-dk);
-}
-
-/* Preloader ilerleme çubuğu (GSAP'sız, Kural 46) */
-@keyframes preload-bar {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-/* ---------- Utility'ler ---------- */
-
-/* 180px @1920 → 9.375vw · mobilde 16vw */
-@utility heading180 {
-  font-family: var(--font-display);
-  font-size: 9.375vw;
-  line-height: 0.9;
-  letter-spacing: 0.01em;
-  @media (width < 48rem) {
-    font-size: 16vw;
-  }
-}
-
-/* 40px @1920 → 2.083vw · mobilde 6vw */
-@utility text40 {
-  font-family: var(--font-ui);
-  font-size: 2.083vw;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  @media (width < 48rem) {
-    font-size: 6vw;
-  }
-}
-
-/* Dolgusuz, ince konturlu metin (nav logo, vurgu). Renk currentColor'dan gelir. */
-@utility text-stroke-small {
-  -webkit-text-stroke-width: 0.06em;
-  -webkit-text-stroke-color: currentColor;
-  -webkit-text-fill-color: transparent;
-  paint-order: stroke fill;
-}
-
-/* Dolgu + arkada kontur (logo). Kontur rengi --stroke-color (varsayılan berry). */
-@utility text-stroke-fill {
-  paint-order: stroke fill;
-  -webkit-text-stroke: 0.09em var(--stroke-color, var(--color-berry));
-}
-
-/* Film grain overlay (.06). Uygulandığı kutuya ::after ile biner, tıklamayı engellemez. */
-@utility grain {
-  position: relative;
-  isolation: isolate;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.06;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-size: 240px 240px;
-  }
+  margin: 0;
 }

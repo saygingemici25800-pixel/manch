@@ -1,12 +1,13 @@
-// Next.js 16: `middleware.ts` yerine `proxy.ts`. next-intl createMiddleware'i proxy olarak dışa aktarıyoruz.
 import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
 
-const proxy = createMiddleware(routing);
+import { routing } from "@/i18n/routing";
 
-export default proxy;
+// Kural 14: Next 16'da `middleware.ts` deprecated; route-level kod `src/proxy.ts`.
+export default createMiddleware(routing);
 
 export const config = {
-  // api, _next, _vercel, metadata rotaları (icon/apple-icon: uzantısız!) ve uzantılı dosyalar hariç her yol (Kural 38)
-  matcher: "/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)",
+  matcher: [
+    // Statik dosyalar, _next ve dosya uzantili yollar haric her sey.
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+  ],
 };

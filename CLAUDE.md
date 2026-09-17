@@ -30,12 +30,11 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 9 tamamlandı — tüm fazlar (1–9) bitti.** Kalan: içerik TODO'ları + domain bağlama.
-- Son başarılı build: 2026-09-17 Faz 9 kapanış (`pnpm build` + lint temiz; temiz klon + `--frozen-lockfile` simülasyonu temiz; canlı smoke **10/10 ✓ 0 uyarı**)
-- Canlı URL: **https://manch-eight.vercel.app** (Vercel, auto-deploy · `origin main` = GitHub `saygingemici25800-pixel/manch`)
-- **Vercel env:** `NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app` ✓ ayarlı (Production + Preview). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmez** (ölçüm build'ine özel, Kural 43).
-- **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Project → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` kaydı `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel domain doğrulaması yeşil olsun · 4) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>` (canonical uyarısı kalkmalı)
-- Açık TODO'lar: çalışma saatleri · **orijinal fotoğraflar istenecek** (kaynaklar ekran görüntüsü, 749–1222 px; hero 1104×1476) · **maskot vektör/orijinal istenecek** (`misu-miyu.png` basılı menüden 472×270) · Guacamole Burger + Corn Ribs/Tenders/Arancini/Fries/Soslar fotoğrafı yok (Placeholder) · iç mekan / zone galerisi fotoğrafı yok (Placeholder) · logo SVG potrace izi (orijinal vektör gelince `public/logo/*.svg` + `ui/logo-*.tsx` yeniden üretilir) · domain yok — `site.url` varsayımı kalır, Faz 9'da `NEXT_PUBLIC_SITE_URL` (karar 2026-09-17) · renk kodlarının logodan teyidi · Webber Digital URL · `CookieBanner` mount edilmiyor · Google Place ID · Crispy Triangle fiyatı menüde yok (`price: null`)
+- Aktif faz: **Faz 1 tamamlandı.** Sıradaki: Faz 2 (Tasarım Sistemi) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Son başarılı build: 2026-09-18 Faz 1 kapanış (`pnpm build` + `pnpm lint` temiz; 3 rota: `/_not-found`, `/tr`, `/en` + `ƒ Proxy`)
+- Dal: **`faz-1-yeniden`** — proje bu dalda sıfırdan kuruldu (2026-09-18). Önceki Faz 1–9 çalışması `main` dalında, ayrıca `yedek/faz-1-9` dalı + `yedek-faz-9` etiketinde duruyor. Canlı https://manch-eight.vercel.app hâlâ `origin/main`'den besleniyor. **Uyarı: `main`, `origin/main`'in 3 commit önünde (push'lanmamış).**
+- İlk ölçüm (iskelet ana sayfa): First Load JS **175 kB gz** (7 chunk), HTML 7.6 kB. Faz 8 hedefi ≤ 200 kB gz (Kural 46).
+- Açık TODO'lar: telefon · çalışma saatleri · sipariş/WhatsApp numarası · Facebook linki · domain (`site.url` şimdilik `https://manch.tr` varsayımı) · fiyatlar (`price: null`) · fotoğraflar (`image: null` → Placeholder) · logo SVG · renk kodlarının logodan teyidi · Webber Digital URL · Truffle Smash / Chicken Sandwich / içecekler `unconfirmed: true`
 
 ---
 
@@ -89,6 +88,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 46. GSAP ilk yükleme JS'inde **yoktur**: `@/lib/gsap` (tek `registerPlugin` noktası) yalnızca `useLazyGsap` / `useGsapModule` (`src/lib/hooks/useLazyGsap.ts`) ile effect içinde `import()` edilir; hiçbir component `@/lib/gsap` veya `@gsap/react`'i statik import etmez (grep ile denetlenir). SSR içeriği olan primitive'ler (SplitReveal, Float, Parallax, Marquee, JellyWave, Juggle, SmashAnatomy, ProductGrid) normal render eder, animasyon modül gelince başlar. SSR'a gerek olmayan layout parçaları (CursorTrail, MenuOverlay, PageTransition) `LayoutDeferred` içinde `next/dynamic` `ssr:false`. Preloader GSAP kullanmaz (CSS keyframe + timer). `TransitionLink` `gsapReady` (motion-store) false iken perdesiz normal navigasyon yapar; PageTransition `api.current` yoksa doğrudan `router.push`. **First Load JS hedefi: ana sayfa ≤ 200 kB gzip** (karar 2026-09-17; Next'in kendi metriği de gzip'tir; React+Next çatısı tek başına ~112 kB gz). Ölçüm `scripts/bundle-report.mjs` (gerçek yükleme, `nomodule` polyfill hariç, gz sütunu esas).
 47. LCP: `/tr` mobil LCP elementi **hero H1**'dir (fotoğraf değil — `hero-cook.jpg` 750w WebP ≈ 36 KB, `priority` + `fetchPriority="high"` + `quality 70`). H1 **SplitText ile animasyonlanmaz** (statik `<h1>`): split → char span'ları → yeniden boyama LCP adayını animasyon sonuna (3.2 s) kaydırıyordu. Hero hareketi dekoratif elemanlarda (rozet spin, kesit Float). Karar (a) uygulandı (sizes/kalite/AVIF/fetchpriority); (b) (mobilde fotoğrafsız hero) gerekmedi. `next.config` `images.formats: ["image/avif","image/webp"]`, **`images.qualities: [70, 75]`** (kullanılan her `quality` listede olmalı, yoksa 400); `next/image` çıktıları prod'da `curl -H "Accept: image/avif"` ile doğrulanır (hero 640w, kesit 384/750w). Genel kural: LCP adayı olan başlık/görsel ilk boyamadan sonra DOM'u değişen bir animasyona sokulmaz.
 48. Deploy duman testi `scripts/smoke.mjs <url>`: sayfalar/sitemap/robots/OG 200, bilinmeyen yol 404, head'de canonical + hreflang + og:image + Restaurant JSON-LD. HTML attribute'larını **case-insensitive** ara (Next 16 `hrefLang` yazar). `canonical` host ölçülen host'tan farklıysa **uyarı** (env eksik), hata değil. Vercel'de `NEXT_PUBLIC_SITE_URL` ayarlanınca yeniden koşulur.
+49. CLAUDE.md'yi script ile düzenlerken başlık aramaları **satır başına çapalı regex** olmalı (`re.search(r"^## 📍 DURUM$", s, re.M)`) — düz `str.index("## …")` dosyanın başındaki HATA PROTOKOLÜ maddelerinde geçen **başlık alıntılarını** yakalar. İki sınırla dilim alırken `assert a < b` şart: sınırlar ters dönerse `s[:a] + s[b:]` aradaki metni **ikizler** (sessiz bozulma). Yazımdan sonra `- [x]` / `- [ ]` ve başlık sayıları grep ile doğrulanır (karar 2026-09-18).
 
 ---
 
@@ -181,7 +181,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 
 ### Faz 1 — Kurulum & Altyapı
 - [x] Proje klasörü içinde (`~/Projects/manch`, içinde sadece `docs/` var): `pnpm create next-app@latest . --ts --tailwind --app --src-dir --eslint --import-alias "@/*" --use-pnpm` *(revize: 2026-09-17 — `--no-turbopack --skip-install` eklendi; scaffold Next 16.3.5 kuruyor; `--no-turbopack` sadece script'e bayrak eklemiyor, Next 16'da build zaten Turbopack)*
-- [x] `docs/CLAUDE.md` dosyasını köke taşı; scaffold'un ürettiği `CLAUDE.md` (`@AGENTS.md`) önce silinir, `AGENTS.md` yerinde bırakılır *(revize: 2026-09-17)*
+- [x] `docs/CLAUDE.md` dosyasını köke taşı; scaffold'un ürettiği `CLAUDE.md` (`@AGENTS.md`) önce silinir, `AGENTS.md` yerinde bırakılır. **Scaffold boş olmayan klasöre kurulmaz** — kökteki `CLAUDE.md` scaffold öncesi `docs/` içine alınır, sonra köke geri taşınır *(revize: 2026-09-17, 2026-09-18)*
 - [x] Bağımlılıklar: `gsap @gsap/react lenis next-intl zustand clsx`
 - [x] Klasörler: `src/{app/[locale],components/{layout,sections,motion,ui},data,lib,messages,styles,i18n}`, `public/{images,burgers,icons}` *(revize: 2026-09-17 — `src/i18n/` eklendi: next-intl `routing.ts` / `navigation.ts` / `request.ts`)*
 - [x] next-intl: `tr` (varsayılan) + `en`, **`src/proxy.ts`** (Next 16'da `middleware.ts` deprecated), `[locale]` layout *(revize: 2026-09-17)*
@@ -190,95 +190,95 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: `pnpm build` temiz, `/tr` ve `/en` açılıyor
 
 ### Faz 2 — Tasarım Sistemi
-- [x] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
-- [x] next/font: Modak, Mouse Memoirs, Silkscreen (latin-ext) — Silkscreen ğşıĞŞİ içermez, sadece EN metinlerde (Kural 18; Press Start 2P denendi ve karar ile kaldırıldı) *(revize: 2026-09-17)*
-- [x] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
-- [x] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
-- [x] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
-- [x] ✅ Kabul: lab sayfası doğru render, build temiz
+- [ ] Tailwind v4 `@theme`: renk tokenları, font değişkenleri (`src/styles/globals.css`, JS aynası `src/styles/tokens.ts`)
+- [ ] next/font: Modak, Mouse Memoirs, Silkscreen (latin-ext) — Silkscreen ğşıĞŞİ içermez, sadece EN metinlerde (Kural 18; Press Start 2P denendi ve karar ile kaldırıldı) *(revize: 2026-09-17)*
+- [ ] Utility'ler: `heading180`, `text40`, `text-stroke-small`, grain overlay
+- [ ] Desen component'leri: `CheckerBand`, `TileWall`, `KraftCard`, `Placeholder` (`src/components/ui/`) + `GlyphCheck` (client, canvas TR glyph testi) *(revize: 2026-09-17)*
+- [ ] `/[locale]/lab` sayfası: tüm token/font/desen önizlemesi, TR karakter testi; production'da 404 (Kural 23), ekran görüntüsü `docs/screens/faz-2-lab.png`
+- [ ] ✅ Kabul: lab sayfası doğru render, build temiz
 
 ### Faz 3 — Motion Primitive'leri
-- [x] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
-- [x] R6 RollText · R7 BlobButton · R14 Marquee (scroll hızıyla `timeScale`) · SplitReveal (chars / lines `mask`, `autoSplit`) — `src/components/motion/`
-- [x] R9 JellyWave (Lenis `velocity` → `quickTo scaleY`) · R8 CursorTrail (hover+fine pointer, `data-cursor-hide`) · R18 Juggle (`--juggle-scale`)
-- [x] Hepsi `/lab` "Motion" bölümünde demo; `useReducedMotion` hook + Zustand override ile emülasyon toggle'ı; `ScrollTrigger.getAll().length` göstergesi *(revize: 2026-09-17)*
-- [x] ✅ Kabul: Playwright (headless Chromium) — console 0 hata/uyarı; ST sayısı 2 → reduced'da 0 → 2; `/tr/lab`↔`/en/lab` ×10 ve `/tr/lab`↔`/tr` ×10 sonrası hep 2 (leak yok). `docs/screens/faz-3-lab.png`, `faz-3-motion.webm`
+- [ ] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
+- [ ] R6 RollText · R7 BlobButton · R14 Marquee (scroll hızıyla `timeScale`) · SplitReveal (chars / lines `mask`, `autoSplit`) — `src/components/motion/`
+- [ ] R9 JellyWave (Lenis `velocity` → `quickTo scaleY`) · R8 CursorTrail (hover+fine pointer, `data-cursor-hide`) · R18 Juggle (`--juggle-scale`)
+- [ ] Hepsi `/lab` "Motion" bölümünde demo; `useReducedMotion` hook + Zustand override ile emülasyon toggle'ı; `ScrollTrigger.getAll().length` göstergesi *(revize: 2026-09-17)*
+- [ ] ✅ Kabul: Playwright (headless Chromium) — console 0 hata/uyarı; ST sayısı 2 → reduced'da 0 → 2; `/tr/lab`↔`/en/lab` ×10 ve `/tr/lab`↔`/tr` ×10 sonrası hep 2 (leak yok). `docs/screens/faz-3-lab.png`, `faz-3-motion.webm`
 
 ### Faz 4 — Global Layout
-- [x] R1 Preloader (`src/components/layout/Preloader.tsx`: ilk render "yükleniyor", sessionStorage effect'te, 3 mesaj + progress, Lenis + overflow kilidi)
-- [x] R2 PageTransition + R3 dinamik title (`PageTransition.tsx` + `motion/TransitionLink.tsx` + `lib/transition-store.ts` + `lib/transition-title.ts`; Kural 29) *(revize: 2026-09-17 — View Transitions API yerine TransitionLink)*
-- [x] R4 Nav (Lenis direction, IO `[data-nav-dark]`, `text-stroke-fill` logo) + R5 MenuOverlay (SplitReveal lines, `useDialog`: ESC / focus trap / scroll kilidi)
-- [x] R12 Cart (`lib/cart-store.ts` persist localStorage, toast, kraft drawer, `wa.me` checkout; numara null → disabled + "yakında")
-- [x] R16 CookieBanner (localStorage OKAY / sessionStorage LATER) · R17 InfoModal (KraftCard, `useDialog`)
-- [x] R18 Footer (SplitReveal + RollText linkler, dev wordmark, Juggle, tape, telif, kredi; `data-nav-dark`)
-- [x] CursorTrail layout'a taşındı; `/lab` "Layout" bölümü (perde tetikle, perde ile ana sayfa, sepete ekle, sepeti aç, InfoModal, preloader sıfırla) *(revize: 2026-09-17)*
-- [x] ✅ Kabul: `scripts/lab-check.mjs` 31/31 ✓, console 0 — perde + title (`Smash'leniyor` → `Servis` → başlık), preloader 1 kez, nav gizlen/göster/invert, cart persist, ESC/focus, mobil 375 overlay + drawer. `docs/screens/faz-4-desktop.png`, `faz-4-mobile.png`, `faz-4-transition.webm`
+- [ ] R1 Preloader (`src/components/layout/Preloader.tsx`: ilk render "yükleniyor", sessionStorage effect'te, 3 mesaj + progress, Lenis + overflow kilidi)
+- [ ] R2 PageTransition + R3 dinamik title (`PageTransition.tsx` + `motion/TransitionLink.tsx` + `lib/transition-store.ts` + `lib/transition-title.ts`; Kural 29) *(revize: 2026-09-17 — View Transitions API yerine TransitionLink)*
+- [ ] R4 Nav (Lenis direction, IO `[data-nav-dark]`, `text-stroke-fill` logo) + R5 MenuOverlay (SplitReveal lines, `useDialog`: ESC / focus trap / scroll kilidi)
+- [ ] R12 Cart (`lib/cart-store.ts` persist localStorage, toast, kraft drawer, `wa.me` checkout; numara null → disabled + "yakında")
+- [ ] R16 CookieBanner (localStorage OKAY / sessionStorage LATER) · R17 InfoModal (KraftCard, `useDialog`)
+- [ ] R18 Footer (SplitReveal + RollText linkler, dev wordmark, Juggle, tape, telif, kredi; `data-nav-dark`)
+- [ ] CursorTrail layout'a taşındı; `/lab` "Layout" bölümü (perde tetikle, perde ile ana sayfa, sepete ekle, sepeti aç, InfoModal, preloader sıfırla) *(revize: 2026-09-17)*
+- [ ] ✅ Kabul: `scripts/lab-check.mjs` 31/31 ✓, console 0 — perde + title (`Smash'leniyor` → `Servis` → başlık), preloader 1 kez, nav gizlen/göster/invert, cart persist, ESC/focus, mobil 375 overlay + drawer. `docs/screens/faz-4-desktop.png`, `faz-4-mobile.png`, `faz-4-transition.webm`
 
 ### Faz 5 — Ana Sayfa
-- [x] R15 pinned izole test `/lab#pin` (`PinTest.tsx`): Lenis root + `pin: true` varsayılan pinType ✓ 1440/375 → Kural 32 *(revize: 2026-09-17)*
-- [x] Hero (R9) — `sections/Hero.tsx`: SplitReveal chars, dönen rozet (SVG textPath, CSS spin), JellyWave, tam ekran Placeholder, `data-nav-dark`
-- [x] Marquee (R14) — `sections/MarqueeBand.tsx` (2 bant, EN)
-- [x] The Hits: 6 imza ürün (R10 + R11) — `ui/SectionHeader.tsx`, `sections/TheHits.tsx` `#hits`, `ProductGrid.tsx` (tek `ScrollTrigger.batch`), `ProductCard.tsx` (2×12 dama hover jelly, quick details, + → cart); `menu.ts` `featured`
-- [x] Smash Anatomy (R15) — `sections/SmashAnatomy.tsx` pinned scrub, 8 katman + etiket
-- [x] Handmade hikayesi — `sections/Handmade.tsx` (SplitReveal + KraftCard)
-- [x] United Chill Burger Zone (R13) — `sections/Zone.tsx` `#zone`: dalgalı üst kenar, TileWall, duvar yazısı, `OrderCta` (blob → sepet), `motion/Parallax.tsx`
-- [x] Misu & Miyu — `sections/MisuMiyu.tsx` + `motion/Float.tsx` (idle)
-- [x] Instagram grid — `sections/InstagramGrid.tsx` (6 Placeholder + @manch.tr CTA)
-- [x] Konum — `sections/Location.tsx` `#location`: adres, saatler "Yakında", yol tarifi, tıkla-yükle Google Maps iframe (lazy), `data-nav-dark`
-- [x] ✅ Kabul: `scripts/lab-check.mjs` **48/48 ✓, console 0** — anchor'lar overlay'den (aynı sayfa hash + lab→perde→`#location`), anatomy pinned 1440 + 375, kartlar batch giriş, quick details, kart + → sepet, harita tıkla-yükle, mobil yatay taşma yok, ana sayfa ST sayısı 17 sabit. `docs/screens/faz-5-desktop-full.png`, `faz-5-mobile-full.png`, `faz-5-scroll.webm`
+- [ ] R15 pinned izole test `/lab#pin` (`PinTest.tsx`): Lenis root + `pin: true` varsayılan pinType ✓ 1440/375 → Kural 32 *(revize: 2026-09-17)*
+- [ ] Hero (R9) — `sections/Hero.tsx`: SplitReveal chars, dönen rozet (SVG textPath, CSS spin), JellyWave, tam ekran Placeholder, `data-nav-dark`
+- [ ] Marquee (R14) — `sections/MarqueeBand.tsx` (2 bant, EN)
+- [ ] The Hits: 6 imza ürün (R10 + R11) — `ui/SectionHeader.tsx`, `sections/TheHits.tsx` `#hits`, `ProductGrid.tsx` (tek `ScrollTrigger.batch`), `ProductCard.tsx` (2×12 dama hover jelly, quick details, + → cart); `menu.ts` `featured`
+- [ ] Smash Anatomy (R15) — `sections/SmashAnatomy.tsx` pinned scrub, 8 katman + etiket
+- [ ] Handmade hikayesi — `sections/Handmade.tsx` (SplitReveal + KraftCard)
+- [ ] United Chill Burger Zone (R13) — `sections/Zone.tsx` `#zone`: dalgalı üst kenar, TileWall, duvar yazısı, `OrderCta` (blob → sepet), `motion/Parallax.tsx`
+- [ ] Misu & Miyu — `sections/MisuMiyu.tsx` + `motion/Float.tsx` (idle)
+- [ ] Instagram grid — `sections/InstagramGrid.tsx` (6 Placeholder + @manch.tr CTA)
+- [ ] Konum — `sections/Location.tsx` `#location`: adres, saatler "Yakında", yol tarifi, tıkla-yükle Google Maps iframe (lazy), `data-nav-dark`
+- [ ] ✅ Kabul: `scripts/lab-check.mjs` **48/48 ✓, console 0** — anchor'lar overlay'den (aynı sayfa hash + lab→perde→`#location`), anatomy pinned 1440 + 375, kartlar batch giriş, quick details, kart + → sepet, harita tıkla-yükle, mobil yatay taşma yok, ana sayfa ST sayısı 17 sabit. `docs/screens/faz-5-desktop-full.png`, `faz-5-mobile-full.png`, `faz-5-scroll.webm`
 
 ### Faz 6 — İç Sayfalar
-- [x] Dokümanlar okundu → Kural 34 (`useSearchParams` + Suspense) ve Kural 35 (`[locale]/not-found` + `[...rest]` catch-all) *(revize: 2026-09-17)*
-- [x] `/menu` (`app/[locale]/menu/`): sticky sekme bandı (`navHidden` store → top geçişli), spicy/new/signature filtre (client, `ScrollTrigger.refresh`), kategori blokları `ProductGrid`, `ProductModal` (useDialog + KraftCard malzeme + quick details + sepet), `?p=slug` URL tek kaynak (derin link)
-- [x] `/about`: hikaye (genişletilmiş), Misu & Miyu (Float), zone galerisi ×4, "Est. 2026" timeline
-- [x] `/contact`: kraft kart adres/telefon/saat/e-posta, WhatsApp (null → disabled + Yakında), Rezervasyon → InfoModal, yol tarifi, Instagram/Facebook, tıkla-yükle harita
-- [x] `[locale]/not-found.tsx` + `[locale]/[...rest]/page.tsx`: Misu & Miyu + "Bu sayfa smash'lenmiş" + TransitionLink; prod'da status 404 (tarayıcıda doğrulandı)
-- [x] Nav BURGERS → `/menu`; her sayfada `generateMetadata` (messages `*.metaTitle/metaDescription`)
-- [x] ✅ Kabul: `scripts/lab-check.mjs` **77/77 ✓, console 0** — 8 iç link 200, 404 status + UI, filtre, modal + `?p=` + ESC, derin link yenileme, sticky sekme (nav gizli → top 0), about/contact, nav → /menu, mobil 375 derin link modal + sekme. `docs/screens/faz-6-{menu,menu-modal-mobile,about,contact,404}.png`
+- [ ] Dokümanlar okundu → Kural 34 (`useSearchParams` + Suspense) ve Kural 35 (`[locale]/not-found` + `[...rest]` catch-all) *(revize: 2026-09-17)*
+- [ ] `/menu` (`app/[locale]/menu/`): sticky sekme bandı (`navHidden` store → top geçişli), spicy/new/signature filtre (client, `ScrollTrigger.refresh`), kategori blokları `ProductGrid`, `ProductModal` (useDialog + KraftCard malzeme + quick details + sepet), `?p=slug` URL tek kaynak (derin link)
+- [ ] `/about`: hikaye (genişletilmiş), Misu & Miyu (Float), zone galerisi ×4, "Est. 2026" timeline
+- [ ] `/contact`: kraft kart adres/telefon/saat/e-posta, WhatsApp (null → disabled + Yakında), Rezervasyon → InfoModal, yol tarifi, Instagram/Facebook, tıkla-yükle harita
+- [ ] `[locale]/not-found.tsx` + `[locale]/[...rest]/page.tsx`: Misu & Miyu + "Bu sayfa smash'lenmiş" + TransitionLink; prod'da status 404 (tarayıcıda doğrulandı)
+- [ ] Nav BURGERS → `/menu`; her sayfada `generateMetadata` (messages `*.metaTitle/metaDescription`)
+- [ ] ✅ Kabul: `scripts/lab-check.mjs` **77/77 ✓, console 0** — 8 iç link 200, 404 status + UI, filtre, modal + `?p=` + ESC, derin link yenileme, sticky sekme (nav gizli → top 0), about/contact, nav → /menu, mobil 375 derin link modal + sekme. `docs/screens/faz-6-{menu,menu-modal-mobile,about,contact,404}.png`
 
 ### Faz 7 — İçerik, SEO & Erişilebilirlik
-- [x] Dokümanlar → Kural 38 (sitemap/robots/manifest kök `app/`, `alternates.languages`, title şablonu), Kural 39 (`next/og` Node runtime + Modak TTF `src/assets/fonts`, `generateImageMetadata` ikonlar) *(revize: 2026-09-17)*
-- [x] Metin geçişi: tr/en 209 anahtar simetrik; US yazım (Favorites, gravity-approved), kısa sayfa başlıkları, placeholder metinler `[TODO]` önekli (Common.todo, hoursSoon, priceTodo, checkoutSoon, Modal.reservation, görsel alt'ları), marka sesi cümleleri brief ile eşleşiyor
-- [x] SEO: `src/lib/seo.ts#pageMetadata` (canonical + hreflang tr/en/x-default + OG/Twitter, `%s | MANCH`), `[locale]/opengraph-image.tsx` (1200×630, berry + Modak), `Restaurant` JSON-LD (telefon/saat null → yazılmaz), `app/sitemap.ts` (8 URL + hreflang), `app/robots.ts` (lab disallow), proxy matcher metadata rotalarını hariç tutar
-- [x] Favicon/app icon: `app/icon.tsx` (`/icon/32`, `/icon/512`), `app/apple-icon.tsx` (180), `app/manifest.ts` — logo gelince değişir (TODO)
-- [x] Erişilebilirlik: global `:focus-visible` hardal halka, skip link `#main`, metinlerde opaklık kaldırıldı (tüm çiftler ≥ 4.5:1, Kural 40), erişilebilir ad düzeltmeleri (logo, harita butonu, ProductModal kapalıyken), dekoratif wordmark SVG; reduced-motion'da preloader atlanır (Faz 4'ten)
-- [x] Malzeme ikonları `public/icons/{lettuce,tomato,cheddar,patty,pickle,brioche}.svg` (24×24, 1.5px, currentColor) + `ui/IngredientIcon` (CSS mask) — CursorTrail, Footer/MotionLab Juggle
-- [x] `/menu` aktif sekme (IntersectionObserver, nav yüksekliğine göre rootMargin, `aria-current`)
-- [x] `scripts/lighthouse.mjs` (playwright-core Chromium CDP + lighthouse 13) → `docs/screens/faz-7-lighthouse.json`
-- [x] ✅ Kabul: Lighthouse `/tr` `/tr/menu` `/tr/contact` **A11y 100 / SEO 100** (wordmark SVG'ye alınınca 96 → 100); sitemap.xml + robots.txt + manifest + ikonlar + OG 200; `/tr` `/en` `/tr/menu` head'inde canonical + hreflang + og:image + JSON-LD; `scripts/lab-check.mjs` 94/94, console 0. `docs/screens/faz-7-og.png`, `faz-7-icons.png`, `faz-7-lighthouse.json`
+- [ ] Dokümanlar → Kural 38 (sitemap/robots/manifest kök `app/`, `alternates.languages`, title şablonu), Kural 39 (`next/og` Node runtime + Modak TTF `src/assets/fonts`, `generateImageMetadata` ikonlar) *(revize: 2026-09-17)*
+- [ ] Metin geçişi: tr/en 209 anahtar simetrik; US yazım (Favorites, gravity-approved), kısa sayfa başlıkları, placeholder metinler `[TODO]` önekli (Common.todo, hoursSoon, priceTodo, checkoutSoon, Modal.reservation, görsel alt'ları), marka sesi cümleleri brief ile eşleşiyor
+- [ ] SEO: `src/lib/seo.ts#pageMetadata` (canonical + hreflang tr/en/x-default + OG/Twitter, `%s | MANCH`), `[locale]/opengraph-image.tsx` (1200×630, berry + Modak), `Restaurant` JSON-LD (telefon/saat null → yazılmaz), `app/sitemap.ts` (8 URL + hreflang), `app/robots.ts` (lab disallow), proxy matcher metadata rotalarını hariç tutar
+- [ ] Favicon/app icon: `app/icon.tsx` (`/icon/32`, `/icon/512`), `app/apple-icon.tsx` (180), `app/manifest.ts` — logo gelince değişir (TODO)
+- [ ] Erişilebilirlik: global `:focus-visible` hardal halka, skip link `#main`, metinlerde opaklık kaldırıldı (tüm çiftler ≥ 4.5:1, Kural 40), erişilebilir ad düzeltmeleri (logo, harita butonu, ProductModal kapalıyken), dekoratif wordmark SVG; reduced-motion'da preloader atlanır (Faz 4'ten)
+- [ ] Malzeme ikonları `public/icons/{lettuce,tomato,cheddar,patty,pickle,brioche}.svg` (24×24, 1.5px, currentColor) + `ui/IngredientIcon` (CSS mask) — CursorTrail, Footer/MotionLab Juggle
+- [ ] `/menu` aktif sekme (IntersectionObserver, nav yüksekliğine göre rootMargin, `aria-current`)
+- [ ] `scripts/lighthouse.mjs` (playwright-core Chromium CDP + lighthouse 13) → `docs/screens/faz-7-lighthouse.json`
+- [ ] ✅ Kabul: Lighthouse `/tr` `/tr/menu` `/tr/contact` **A11y 100 / SEO 100** (wordmark SVG'ye alınınca 96 → 100); sitemap.xml + robots.txt + manifest + ikonlar + OG 200; `/tr` `/en` `/tr/menu` head'inde canonical + hreflang + og:image + JSON-LD; `scripts/lab-check.mjs` 94/94, console 0. `docs/screens/faz-7-og.png`, `faz-7-icons.png`, `faz-7-lighthouse.json`
 
 ### İçerik commit'i (Faz 7.5) — `docs/prompts/icerik-commit.md`
-- [x] Kaynaklar `docs/source/` (11 ekran görüntüsü, 749–1222 px; commit'te), `docs/_in/` silindi
-- [x] `public/burgers/*.png|webp` ×7 (rembg isnet + kaynak ön-temizlik + soğuk alt kesim, Kural 41), `public/images/{hero-cook,crispy-triangle,tiramisu}.{jpg,webp}`, `misu-miyu.png`; kontak `docs/screens/icerik-burgers.png`
-- [x] Logo: `public/logo/logo-manch|menu|m.svg` (potrace) + üretilen `ui/logo-*.tsx` (Kural 42); Nav, Footer, Preloader, PageTransition, OG, ikonlar, `/menu` başlığı
-- [x] `src/data/menu.ts` basılı menüden: 6 kategori, 25 ürün, fiyatlar; eski tahmini ürünler silindi; `featured` 6
-- [x] `site.ts`: telefon, WhatsApp, e-posta, Facebook, menü alt başlığı; JSON-LD telephone/email/sameAs; messages'ta `[TODO]` kalmadı
-- [x] Sepet: satır + genel toplam, WhatsApp mesajında tutar, checkout aktif; Contact/Location tel:/mailto: linkleri
-- [x] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot)
-- [x] ✅ Kabul: build + lint temiz; lab-check 96/96, console 0; Lighthouse A11y 100 / SEO 100 ×3; `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png`
+- [ ] Kaynaklar `docs/source/` (11 ekran görüntüsü, 749–1222 px; commit'te), `docs/_in/` silindi
+- [ ] `public/burgers/*.png|webp` ×7 (rembg isnet + kaynak ön-temizlik + soğuk alt kesim, Kural 41), `public/images/{hero-cook,crispy-triangle,tiramisu}.{jpg,webp}`, `misu-miyu.png`; kontak `docs/screens/icerik-burgers.png`
+- [ ] Logo: `public/logo/logo-manch|menu|m.svg` (potrace) + üretilen `ui/logo-*.tsx` (Kural 42); Nav, Footer, Preloader, PageTransition, OG, ikonlar, `/menu` başlığı
+- [ ] `src/data/menu.ts` basılı menüden: 6 kategori, 25 ürün, fiyatlar; eski tahmini ürünler silindi; `featured` 6
+- [ ] `site.ts`: telefon, WhatsApp, e-posta, Facebook, menü alt başlığı; JSON-LD telephone/email/sameAs; messages'ta `[TODO]` kalmadı
+- [ ] Sepet: satır + genel toplam, WhatsApp mesajında tutar, checkout aktif; Contact/Location tel:/mailto: linkleri
+- [ ] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot)
+- [ ] ✅ Kabul: build + lint temiz; lab-check 96/96, console 0; Lighthouse A11y 100 / SEO 100 ×3; `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png`
 
 ### Faz 8 — Performans & QA
-- [x] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
-- [x] Bundle: `scripts/bundle-report.mjs` (sunucu HTML script'leri, gz, noModule hariç), `@next/bundle-analyzer` (ANALYZE=1); GSAP lazy (Kural 46: `useLazyGsap`, `LayoutDeferred` ssr:false, Preloader CSS) → `/tr` First Load **249.7 → 187.5 kB gz** (≤ 200), lazy gsap 48.9 gz sonradan
-- [x] NextIntlClientProvider daraltma (Kural 44: layout 7 namespace + sayfa sağlayıcıları)
-- [x] next/image: AVIF+WebP (`images.formats`), `images.qualities [70,75]`, hero `priority`+`fetchPriority`+`quality 70`, kartlarda ilk kart `priority` / 2–3 `eager`, `sizes` denetimi; AVIF çıktıları doğrulandı (hero 640w 16.5 KB, kesit 384w 9.9 KB)
-- [x] LCP: Kural 47 — `/tr` mobil LCP elementi hero H1, SplitText'ten çıkarıldı; 3122 → **1672 ms**
-- [x] CLS: 0 (desktop `/tr/menu` footer 0.006 — karar: kalır)
-- [x] Safari/WebKit: Playwright `webkit-2359`, `BROWSER=webkit lab-check` (Kural 45: Option+Tab, `priority` preload uyarısı → `eager`)
-- [x] Görsel kontrol 375/768/1440/1920 (`scripts/screens.mjs`, `docs/screens/faz-8-{w}[-menu].png`): yatay taşma yok
-- [x] Final `docs/screens/faz-8-final.json` + `faz-8-table.md` (baseline → final)
-- [x] ✅ Kabul: mobil preloader'sız **perf 100/100/100**, LCP 1672/1259/806 ms, CLS 0; A11y/SEO 100; First Load 187.5 kB gz; lab-check chromium 96/96 + webkit 96/96, console temiz
+- [ ] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
+- [ ] Bundle: `scripts/bundle-report.mjs` (sunucu HTML script'leri, gz, noModule hariç), `@next/bundle-analyzer` (ANALYZE=1); GSAP lazy (Kural 46: `useLazyGsap`, `LayoutDeferred` ssr:false, Preloader CSS) → `/tr` First Load **249.7 → 187.5 kB gz** (≤ 200), lazy gsap 48.9 gz sonradan
+- [ ] NextIntlClientProvider daraltma (Kural 44: layout 7 namespace + sayfa sağlayıcıları)
+- [ ] next/image: AVIF+WebP (`images.formats`), `images.qualities [70,75]`, hero `priority`+`fetchPriority`+`quality 70`, kartlarda ilk kart `priority` / 2–3 `eager`, `sizes` denetimi; AVIF çıktıları doğrulandı (hero 640w 16.5 KB, kesit 384w 9.9 KB)
+- [ ] LCP: Kural 47 — `/tr` mobil LCP elementi hero H1, SplitText'ten çıkarıldı; 3122 → **1672 ms**
+- [ ] CLS: 0 (desktop `/tr/menu` footer 0.006 — karar: kalır)
+- [ ] Safari/WebKit: Playwright `webkit-2359`, `BROWSER=webkit lab-check` (Kural 45: Option+Tab, `priority` preload uyarısı → `eager`)
+- [ ] Görsel kontrol 375/768/1440/1920 (`scripts/screens.mjs`, `docs/screens/faz-8-{w}[-menu].png`): yatay taşma yok
+- [ ] Final `docs/screens/faz-8-final.json` + `faz-8-table.md` (baseline → final)
+- [ ] ✅ Kabul: mobil preloader'sız **perf 100/100/100**, LCP 1672/1259/806 ms, CLS 0; A11y/SEO 100; First Load 187.5 kB gz; lab-check chromium 96/96 + webkit 96/96, console temiz
 
 ### Faz 9 — Deploy
-- [x] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
-- [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
-- [x] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
-- [x] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
-- [x] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
-- [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
-- [x] Preview/canlı URL DURUM'da
+- [ ] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
+- [ ] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
+- [ ] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
+- [ ] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
+- [ ] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
+- [ ] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
+- [ ] Preview/canlı URL DURUM'da
 - [ ] Domain (Cloudflare DNS) — TODO'daki adım listesi
-- [x] ✅ Kabul: production build Vercel'de yeşil (canlı: https://manch-eight.vercel.app)
+- [ ] ✅ Kabul: production build Vercel'de yeşil (canlı: https://manch-eight.vercel.app)
 
 ---
 
@@ -322,6 +322,9 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 8 | `next/image` hero isteği 44 B döndü (400) — hero fotoğrafı prod'da kırıktı; console "quality 70 not configured in images.qualities" | Next 16'da `quality` prop'u `images.qualities` listesinde olmak zorunda (varsayılan `[75]`) | `next.config` `images.qualities: [70, 75]` (Kural 47). lab-check console filtresi bunu yakaladı — görsel istek durumu da kabul kriteri oldu |
 | 2026-09-17 | 8 | WebKit: `preloaded but not used` (fig-jam/classic 384w); Chromium: `Performance.measure('CatchAll') negative time stamp` pageerror | `loading="eager"` de preload üretiyor (WebKit aday uyuşmazlığı); ikincisi Next dev araçlarının 404 catch-all ölçümü | `eager` kaldırıldı, `priority` sadece LCP adaylarında; dev-only pageerror belgeli filtre (Kural 45) |
 | 2026-09-17 | 9 | `smoke.mjs` canlıda "hreflang yok" dedi; oysa 3 alternate link doğru üretiliyor | Next 16 metadata çıktısı **`hrefLang`** (camelCase) yazıyor; regex `hreflang="` arıyordu (HTML'de attribute adı büyük/küçük harf duyarsız, regex değil) | Regex `/hrefLang="…"/i` (case-insensitive) — ürün hatası değil, test hatası (Kural 48) |
+| 2026-09-18 | 1 | `pnpm create next-app` boş olmayan klasöre kurulmuyor (kökte `CLAUDE.md` varken hata) | scaffold'un `validFiles` listesinde `.git` ve `docs` var, `CLAUDE.md` yok | `CLAUDE.md` scaffold öncesi geçici olarak `docs/` içine alındı, sonra köke geri taşındı — orijinal Faz 1 başlangıç durumu zaten böyleydi (Faz 1, madde 2) |
+| 2026-09-18 | 1 | CLAUDE.md'yi script ile güncellerken **dosya ikizlendi** ve protokol bölümü bozuldu (aynı kök neden iki kez) | `str.index("## 🧠 HATA GÜNLÜĞÜ")` protokolün 1. maddesindeki **alıntıyı** yakaladı → dilim sınırları ters döndü (`b < a`) → `s[:a] + s[b:]` aradaki metni iki kez yazdı; ilk denemede aynı şey `## 📍 DURUM` ile oldu | Satır başına çapalı regex + `assert a < b` + yazım sonrası grep doğrulaması (Kural 49); dosya `yedek/faz-1-9` dalından geri alınıp yeniden yazıldı |
+| 2026-09-18 | 1 | `ERR_PNPM_IGNORED_BUILDS` tekrar (@parcel/watcher, @swc/core) | pnpm 11 postinstall script'lerini engelliyor; Next 16 scaffold'u `pnpm-workspace.yaml`'a bu kez `sharp: false` + `unrs-resolver: false` yazıyor | Dört paket de `allowBuilds`'te `false`; build etkilenmedi |
 
 ---
 
