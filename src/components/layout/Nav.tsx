@@ -69,7 +69,7 @@ export default function Nav() {
       <TransitionLink
         href="/"
         data-cursor-hide
-        aria-label={t("home")}
+        aria-label={`${site.name} — ${t("home")}`}
         className="text-stroke-fill font-display text-[2.6vw] max-md:text-[8vw] leading-none text-mustard transition-transform duration-300 hover:scale-105 [--stroke-color:var(--color-berry)]"
       >
         {site.name}

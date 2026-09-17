@@ -9,6 +9,7 @@ import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import BlobButton from "@/components/motion/BlobButton";
 import JellyWave from "@/components/motion/JellyWave";
 import Juggle from "@/components/motion/Juggle";
+import IngredientIcon, { INGREDIENTS } from "@/components/ui/IngredientIcon";
 import Marquee from "@/components/motion/Marquee";
 import RollText from "@/components/motion/RollText";
 import SplitReveal from "@/components/motion/SplitReveal";
@@ -57,12 +58,7 @@ function ReducedMotionToggle() {
 export default function MotionLab() {
   const t = useTranslations("Motion");
   const marqueeItems = t("marqueeItems").split("|");
-  const icons = [
-    <svg key="l" viewBox="0 0 24 24" className="h-[3vw] w-[3vw] max-md:h-[9vw] max-md:w-[9vw]"><circle cx="12" cy="12" r="10" fill="#7CBF6A" /></svg>,
-    <svg key="t" viewBox="0 0 24 24" className="h-[3vw] w-[3vw] max-md:h-[9vw] max-md:w-[9vw]"><circle cx="12" cy="12" r="10" fill="#E24B3B" /></svg>,
-    <svg key="c" viewBox="0 0 24 24" className="h-[3vw] w-[3vw] max-md:h-[9vw] max-md:w-[9vw]"><rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-mustard)" /></svg>,
-    <svg key="p" viewBox="0 0 24 24" className="h-[3vw] w-[3vw] max-md:h-[9vw] max-md:w-[9vw]"><circle cx="12" cy="12" r="10" fill="#6B3F2A" /></svg>,
-  ];
+  const icons = INGREDIENTS.slice(0, 4).map((n) => <IngredientIcon key={n} name={n} className="h-[3vw] w-[3vw] max-md:h-[9vw] max-md:w-[9vw] text-mustard" />);
 
   return (
     <div className="flex flex-col gap-[3vw] max-md:gap-[8vw]">

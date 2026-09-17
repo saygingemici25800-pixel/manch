@@ -29,9 +29,9 @@ export default function ContactClient() {
           {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
         </address>
         <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-          <dt className="opacity-60">{t("phone")}</dt><dd>{site.contact.phone ?? tc("todo")}</dd>
-          <dt className="opacity-60">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
-          <dt className="opacity-60">{t("email")}</dt><dd>{site.contact.email ?? tc("todo")}</dd>
+          <dt className="text-berry">{t("phone")}</dt><dd>{site.contact.phone ?? tc("todo")}</dd>
+          <dt className="text-berry">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
+          <dt className="text-berry">{t("email")}</dt><dd>{site.contact.email ?? tc("todo")}</dd>
         </dl>
 
         <div className="flex flex-wrap gap-[0.8vw] max-md:gap-[2.5vw]">
@@ -46,7 +46,7 @@ export default function ContactClient() {
 
         <ul className="mt-[0.5vw] flex flex-wrap gap-[1.2vw] max-md:gap-[4vw] text40 text-[1.05vw] max-md:text-[3.6vw]">
           <li><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Instagram {site.social.instagramHandle}</a></li>
-          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Facebook</a> : <span className="opacity-60">Facebook · {tc("todo")}</span>}</li>
+          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Facebook</a> : <span className="text-berry">Facebook · {tc("todo")}</span>}</li>
         </ul>
       </KraftCard>
 
@@ -54,7 +54,7 @@ export default function ContactClient() {
         {loaded ? (
           <iframe data-testid="map-iframe" title={t("mapTitle")} src={MAP_SRC} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen className="absolute inset-0 h-full w-full border-0" />
         ) : (
-          <button type="button" data-testid="map-load" onClick={() => setLoaded(true)} className="group absolute inset-0 grid place-items-center text-cream" aria-label={t("loadMap")}>
+          <button type="button" data-testid="map-load" onClick={() => setLoaded(true)} className="group absolute inset-0 grid place-items-center text-cream">
             <Placeholder tone="sky" label={t("mapTitle")} ratio="auto" className="absolute inset-0 rounded-none!" />
             <span className="relative rounded-full bg-berry-dk px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-transform duration-300 group-hover:scale-105">{t("loadMap")}</span>
           </button>

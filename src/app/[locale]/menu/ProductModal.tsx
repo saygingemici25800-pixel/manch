@@ -35,7 +35,8 @@ export default function ProductModal({ product, onClose }: Props) {
         ref={ref}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="product-title"
+        aria-labelledby={product ? "product-title" : undefined}
+        aria-label={product ? undefined : t("detail")}
         data-testid="product-modal"
         data-state={open ? "open" : "closed"}
         className={clsx("w-[52vw] max-md:w-[92vw] max-h-[90svh] overflow-y-auto transition-transform duration-400", open ? "scale-100" : "scale-95")}
@@ -49,7 +50,7 @@ export default function ProductModal({ product, onClose }: Props) {
                 <button type="button" data-cursor-hide data-testid="product-close" onClick={onClose} aria-label={tc("close")} className="text40 text-[1.1vw] max-md:text-[4vw] underline underline-offset-4">✕</button>
               </div>
               <p className="text40 text-[1.2vw] max-md:text-[4.2vw] normal-case tracking-normal">{product.desc[locale]}</p>
-              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide opacity-70">{product.price !== null ? `${product.price} ₺` : t("priceTodo")}</p>
+              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} ₺` : t("priceTodo")}</p>
 
               <h3 className="mt-[0.5vw] font-display text-[1.3vw] max-md:text-[5vw]">{t("ingredients")}</h3>
               <ul className="flex flex-col gap-[0.2vw] max-md:gap-[1vw] text40 text-[1.05vw] max-md:text-[3.8vw]">
@@ -57,10 +58,10 @@ export default function ProductModal({ product, onClose }: Props) {
               </ul>
 
               <dl className="mt-[0.5vw] grid grid-cols-2 gap-x-[1vw] gap-y-[0.3vw] max-md:gap-y-[1.2vw] border-t border-berry/15 pt-[0.8vw] max-md:pt-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw]">
-                <dt className="opacity-60">{t("time")}</dt><dd>{t("minutes", { n: product.quick.time })}</dd>
-                <dt className="opacity-60">{t("bun")}</dt><dd>{product.quick.bun[locale]}</dd>
-                <dt className="opacity-60">{t("patty")}</dt><dd>{product.quick.patty[locale]}</dd>
-                <dt className="opacity-60">{t("spice")}</dt><dd>{t(`spiceLevel.${product.quick.spice}`)}</dd>
+                <dt className="text-berry">{t("time")}</dt><dd>{t("minutes", { n: product.quick.time })}</dd>
+                <dt className="text-berry">{t("bun")}</dt><dd>{product.quick.bun[locale]}</dd>
+                <dt className="text-berry">{t("patty")}</dt><dd>{product.quick.patty[locale]}</dd>
+                <dt className="text-berry">{t("spice")}</dt><dd>{t(`spiceLevel.${product.quick.spice}`)}</dd>
               </dl>
 
               <button

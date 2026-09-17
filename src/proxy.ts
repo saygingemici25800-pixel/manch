@@ -7,6 +7,6 @@ const proxy = createMiddleware(routing);
 export default proxy;
 
 export const config = {
-  // api, _next, _vercel ve uzantılı dosyalar (favicon.ico, *.png vb.) hariç her yol
-  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+  // api, _next, _vercel, metadata rotaları (icon/apple-icon: uzantısız!) ve uzantılı dosyalar hariç her yol (Kural 38)
+  matcher: "/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)",
 };

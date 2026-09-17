@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/seo";
 import Float from "@/components/motion/Float";
 import SplitReveal from "@/components/motion/SplitReveal";
 import CheckerBand from "@/components/ui/CheckerBand";
@@ -12,7 +14,7 @@ import { site } from "@/lib/site";
 export async function generateMetadata({ params }: Pick<PageProps<"/[locale]/about">, "params">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "About" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ locale: locale as Locale, path: "/about", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function AboutPage({ params }: PageProps<"/[locale]/about">) {
@@ -24,7 +26,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
   const timeline = t("timeline.items").split("|").map((row) => row.split("::"));
 
   return (
-    <main data-testid="about-page">
+    <main id="main" data-testid="about-page">
       {/* hikaye */}
       <section className="bg-cream px-[2.5vw] pb-[8vw] pt-[9vw] max-md:px-[5vw] max-md:pb-[16vw] max-md:pt-[26vw]">
         <SectionHeader eyebrow={t("eyebrow")} title={t("title")} className="mb-[3vw] max-md:mb-[8vw]" />
@@ -57,7 +59,7 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/about">
             ))}
           </div>
           <div className="flex flex-col gap-[1.2vw] max-md:gap-[4vw]">
-            <p className="font-display text-[1.3vw] max-md:text-[4.5vw] opacity-70">{site.mascots.label}</p>
+            <p className="font-display text-[1.3vw] max-md:text-[4.5vw]">{site.mascots.label}</p>
             <h2 className="font-display text-[4vw] max-md:text-[10vw] leading-[0.95] text-berry">{t("mascots.title")}</h2>
             <p className="max-w-[32vw] max-md:max-w-none text40 text-[1.3vw] max-md:text-[4.3vw] normal-case tracking-normal">{t("mascots.body")}</p>
           </div>

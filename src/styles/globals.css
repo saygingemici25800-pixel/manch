@@ -36,6 +36,15 @@ body {
   font-family: var(--font-ui);
 }
 
+/* Erişilebilirlik: klavye odağı hardal halka (Kural 40) */
+:focus-visible {
+  outline: 2px solid var(--color-mustard);
+  outline-offset: 2px;
+}
+.bg-mustard:focus-visible {
+  outline-color: var(--color-berry-dk);
+}
+
 /* ---------- Utility'ler ---------- */
 
 /* 180px @1920 → 9.375vw · mobilde 16vw */

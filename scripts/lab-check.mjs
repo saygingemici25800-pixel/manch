@@ -305,6 +305,53 @@ const browser = await chromium.launch();
   await mctx.close();
 }
 
+// ===================== Faz 7: SEO + a11y =====================
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => { sessionStorage.setItem("manch-preloaded", "1"); });
+  const page = await ctx.newPage(); attach(page, "faz7");
+  for (const [p, type] of [["/sitemap.xml", "xml"], ["/robots.txt", "text"], ["/manifest.webmanifest", "json"], ["/icon/32", "image/png"], ["/icon/512", "image/png"], ["/apple-icon", "image/png"], ["/tr/opengraph-image", "image/png"]]) {
+    const res = await page.request.get(`${BASE}${p}`);
+    check(`GET ${p} → 200 (${type})`, res.status() === 200 && (res.headers()["content-type"] ?? "").includes(type.includes("/") ? type : ""), `${res.status()} ${res.headers()["content-type"]}`);
+  }
+  const sm = await (await page.request.get(`${BASE}/sitemap.xml`)).text();
+  check("sitemap: 8 url + hreflang", (sm.match(/<loc>/g) ?? []).length === 8 && sm.includes('hreflang="en"'));
+  const rb = await (await page.request.get(`${BASE}/robots.txt`)).text();
+  check("robots: lab disallow + sitemap", rb.includes("Disallow: /tr/lab") && rb.includes("sitemap.xml"));
+  const og = await page.request.get(`${BASE}/tr/opengraph-image`);
+  fs.writeFileSync(path.join(OUT, "faz-7-og.png"), await og.body());
+  for (const p of ["/tr", "/en", "/tr/menu"]) {
+    await page.goto(`${BASE}${p}`, { waitUntil: "networkidle" });
+    const head = await page.evaluate(() => ({
+      canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
+      hreflang: [...document.querySelectorAll('link[rel="alternate"][hreflang]')].map((l) => l.getAttribute("hreflang")).sort().join(","),
+      og: document.querySelector('meta[property="og:image"]')?.getAttribute("content"),
+      title: document.title,
+      jsonld: !!document.querySelector('script[type="application/ld+json"]')?.textContent?.includes('"Restaurant"'),
+      lang: document.documentElement.lang,
+    }));
+    check(`${p}: canonical + hreflang tr/en/x-default + og:image + JSON-LD`, !!head.canonical && head.hreflang === "en,tr,x-default" && !!head.og?.includes("opengraph-image") && head.jsonld, JSON.stringify(head));
+  }
+  check("title şablonu (/tr/menu → 'Menü | MANCH')", (await page.title()) === "Menü | MANCH", await page.title());
+  // skip link + focus ring
+  await page.goto(`${BASE}/tr`, { waitUntil: "networkidle" });
+  await page.keyboard.press("Tab"); await page.waitForTimeout(200);
+  check("skip link ilk Tab'da görünür", await page.evaluate(() => { const a = document.activeElement; return a?.getAttribute("href") === "#main" && a.getBoundingClientRect().width > 0; }));
+  check("focus-visible mustard ring", await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor.replace(/\s/g, "") === "rgb(246,195,67)"), await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor));
+  // [TODO] işaretleri görünüyor (placeholder içerik)
+  await page.goto(`${BASE}/tr/contact`, { waitUntil: "networkidle" });
+  check("[TODO] placeholder işaretli", (await page.textContent("body")).includes("[TODO]"));
+  // menü aktif sekme
+  await page.goto(`${BASE}/tr/menu`, { waitUntil: "networkidle" }); await page.waitForTimeout(500);
+  await page.evaluate(() => document.querySelector("#cat-desserts").scrollIntoView({ behavior: "instant", block: "start" })); await page.waitForTimeout(800);
+  check("menü aktif sekme = Tatlılar", (await page.getAttribute('[data-testid="tab-desserts"]', "aria-current")) === "true");
+  // ikon sayfası screenshot
+  await page.setContent(`<html><body style="margin:0;display:flex;gap:32px;align-items:center;justify-content:center;background:#F4EEE6;height:200px;color:#7A1F4B">${["lettuce","tomato","cheddar","patty","pickle","brioche"].map((n) => `<img src="${BASE}/icons/${n}.svg" width="96" height="96" alt="${n}" style="filter: invert(17%) sepia(45%) saturate(2400%) hue-rotate(300deg)">`).join("")}</body></html>`);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(OUT, "faz-7-icons.png"), clip: { x: 0, y: 0, width: 1440, height: 200 } });
+  await ctx.close();
+}
+
 // ===================== Faz 4: mobil 375 =====================
 {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });

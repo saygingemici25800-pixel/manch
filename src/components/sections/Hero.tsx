@@ -35,7 +35,7 @@ export default async function Hero() {
           start="top 100%"
           className="max-w-[80vw] max-md:max-w-none font-display text-[9.5vw] max-md:text-[17vw] leading-[0.9] text-mustard [-webkit-text-stroke:0.02em_var(--color-berry-dk)]"
         />
-        <p className="mt-[1.5vw] max-md:mt-[5vw] text40 text-[1.4vw] max-md:text-[4.5vw] text-cream/90">{t("sub")}</p>
+        <p className="mt-[1.5vw] max-md:mt-[5vw] text40 text-[1.4vw] max-md:text-[4.5vw] text-cream">{t("sub")}</p>
       </div>
 
       <JellyWave fill="var(--color-cream)" className="relative z-1 -mb-px" />

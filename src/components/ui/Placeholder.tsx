@@ -34,7 +34,7 @@ export default function Placeholder({
           "repeating-linear-gradient(-45deg, rgba(255,255,255,.08) 0 1.2vw, transparent 1.2vw 2.4vw)",
       }}
     >
-      <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw] uppercase tracking-wider p-[1vw] max-md:p-[3vw] opacity-80">
+      <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw] uppercase tracking-wider p-[1vw] max-md:p-[3vw]">
         {label}
       </span>
     </div>

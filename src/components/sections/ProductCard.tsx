@@ -73,7 +73,7 @@ export default function ProductCard({ product, onSelect }: Props) {
                 name
               )}
             </h3>
-            <p className="mt-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide opacity-70">
+            <p className="mt-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">
               {product.price !== null ? `${product.price} ₺` : t("priceTodo")}
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function ProductCard({ product, onSelect }: Props) {
             +
           </button>
         </div>
-        <p className="text40 text-[1.05vw] max-md:text-[3.8vw] normal-case tracking-normal opacity-80">{product.desc[locale]}</p>
+        <p className="text40 text-[1.05vw] max-md:text-[3.8vw] normal-case tracking-normal">{product.desc[locale]}</p>
 
         <div className="mt-auto">
           <button
@@ -102,10 +102,10 @@ export default function ProductCard({ product, onSelect }: Props) {
             <span aria-hidden="true" className={clsx("transition-transform duration-300", open && "rotate-45")}>+</span>
           </button>
           <dl className={clsx("grid grid-cols-2 gap-x-[1vw] gap-y-[0.3vw] max-md:gap-y-[1.2vw] overflow-hidden text40 text-[0.85vw] max-md:text-[3vw] transition-[max-height,opacity,margin] duration-400", open ? "mt-[0.7vw] max-md:mt-[2.5vw] max-h-[12vw] max-md:max-h-[40vw] opacity-100" : "max-h-0 opacity-0")}>
-            <dt className="opacity-60">{t("time")}</dt><dd>{t("minutes", { n: product.quick.time })}</dd>
-            <dt className="opacity-60">{t("bun")}</dt><dd>{product.quick.bun[locale]}</dd>
-            <dt className="opacity-60">{t("patty")}</dt><dd>{product.quick.patty[locale]}</dd>
-            <dt className="opacity-60">{t("spice")}</dt><dd>{t(`spiceLevel.${product.quick.spice}`)}</dd>
+            <dt className="text-berry">{t("time")}</dt><dd>{t("minutes", { n: product.quick.time })}</dd>
+            <dt className="text-berry">{t("bun")}</dt><dd>{product.quick.bun[locale]}</dd>
+            <dt className="text-berry">{t("patty")}</dt><dd>{product.quick.patty[locale]}</dd>
+            <dt className="text-berry">{t("spice")}</dt><dd>{t(`spiceLevel.${product.quick.spice}`)}</dd>
           </dl>
         </div>
       </div>

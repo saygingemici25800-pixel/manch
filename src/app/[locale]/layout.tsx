@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
+import { pageMetadata, restaurantJsonLd } from "@/lib/seo";
+import { site } from "@/lib/site";
 import Cart from "@/components/layout/Cart";
 import Footer from "@/components/layout/Footer";
 import InfoModal from "@/components/layout/InfoModal";
@@ -25,8 +27,10 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Meta" });
   return {
-    title: t("title"),
-    description: t("description"),
+    metadataBase: new URL(site.url),
+    ...pageMetadata({ locale: locale as Locale, path: "", title: t("title"), description: t("description") }),
+    // şablon en sonda: sayfalar kısa başlık verir ("Menü" → "Menü | MANCH"), ana sayfa default'u alır
+    title: { template: `%s | ${site.name}`, default: t("title") },
   };
 }
 
@@ -39,10 +43,16 @@ export default async function LocaleLayout({
 
   // Statik render için locale'i istek bağlamına yaz
   setRequestLocale(locale);
+  const tc = await getTranslations("Common");
+  const jsonLd = JSON.stringify(restaurantJsonLd(locale));
 
   return (
     <html lang={locale} className={`${fontVariables} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-cream text-ink font-ui">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-[1vw] focus:top-[1vw] focus:z-100 focus:rounded-full focus:bg-mustard focus:px-[1.2vw] focus:py-[0.6vw] focus:text-ink text40 text-[1vw] max-md:text-[3.5vw]">
+          {tc("skipToContent")}
+        </a>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
         <NextIntlClientProvider>
           <SmoothScroll>
             <Preloader />

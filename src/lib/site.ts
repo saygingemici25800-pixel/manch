@@ -3,6 +3,8 @@
 
 export const site = {
   name: "MANCH",
+  // TODO: gerçek domain (Cloudflare DNS, Faz 9). Vercel preview'da NEXT_PUBLIC_SITE_URL ile ezilir.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://manch.tr",
   legalName: "MANCH",
   tagline: "United Chill Burger Zone",
   taglineAlt: "Handmade Hits Different",

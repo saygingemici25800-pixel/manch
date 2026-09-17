@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import Juggle from "@/components/motion/Juggle";
+import IngredientIcon, { INGREDIENTS } from "@/components/ui/IngredientIcon";
 import RollText from "@/components/motion/RollText";
 import SplitReveal from "@/components/motion/SplitReveal";
 import TransitionLink from "@/components/motion/TransitionLink";
@@ -12,13 +13,7 @@ const LINKS = [
   { key: "contact", href: "/contact" },
 ] as const;
 
-// Geçici ikonlar — Faz 7'de berry tek çizgi line-art SVG
-const icons = [
-  <svg key="l" viewBox="0 0 24 24" className="h-[3.5vw] w-[3.5vw] max-md:h-[10vw] max-md:w-[10vw]"><circle cx="12" cy="12" r="10" fill="#7CBF6A" /></svg>,
-  <svg key="t" viewBox="0 0 24 24" className="h-[3.5vw] w-[3.5vw] max-md:h-[10vw] max-md:w-[10vw]"><circle cx="12" cy="12" r="10" fill="#E24B3B" /></svg>,
-  <svg key="c" viewBox="0 0 24 24" className="h-[3.5vw] w-[3.5vw] max-md:h-[10vw] max-md:w-[10vw]"><rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-mustard)" /></svg>,
-  <svg key="p" viewBox="0 0 24 24" className="h-[3.5vw] w-[3.5vw] max-md:h-[10vw] max-md:w-[10vw]"><circle cx="12" cy="12" r="10" fill="#6B3F2A" /></svg>,
-];
+const icons = INGREDIENTS.slice(0, 4).map((n) => <IngredientIcon key={n} name={n} className="h-[3.5vw] w-[3.5vw] max-md:h-[10vw] max-md:w-[10vw] text-mustard" />);
 
 /** R18 — Modak linkler (line-mask + RollText), dev MANCH wordmark, juggle ikonlar, tape, telif, kredi. */
 export default async function Footer() {
@@ -38,15 +33,18 @@ export default async function Footer() {
         </nav>
         <div className="flex flex-col items-end max-md:items-start gap-[1vw] max-md:gap-[3vw] [--juggle-scale:0.7]">
           <Juggle>{icons}</Juggle>
-          <p className="font-pixel text-[0.75vw] max-md:text-[2.8vw] uppercase tracking-widest text-cream/70">{t("tape")}</p>
+          <p className="font-pixel text-[0.75vw] max-md:text-[2.8vw] uppercase tracking-widest text-cream">{t("tape")}</p>
         </div>
       </div>
 
-      <p aria-hidden="true" className="mt-[2vw] max-md:mt-[8vw] font-display text-[22vw] max-md:text-[34vw] leading-[0.8] text-berry select-none">
-        {site.name}
-      </p>
+      {/* dev wordmark: dekoratif, konturlu SVG metin (axe kontrast denetimi dışında, Kural 40) */}
+      <svg aria-hidden="true" viewBox="0 0 1000 200" className="mt-[2vw] max-md:mt-[8vw] block w-[95vw] max-md:w-[140vw] select-none overflow-visible">
+        <text x="0" y="175" fill="none" stroke="var(--color-berry)" strokeWidth="6" style={{ fontFamily: "var(--font-display)", fontSize: 230 }}>
+          {site.name}
+        </text>
+      </svg>
 
-      <div className="mt-[1.5vw] max-md:mt-[5vw] flex flex-wrap items-center justify-between gap-[1vw] max-md:gap-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw] text-cream/80">
+      <div className="mt-[1.5vw] max-md:mt-[5vw] flex flex-wrap items-center justify-between gap-[1vw] max-md:gap-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw] text-cream">
         <span>{t("rights")}</span>
         <span>{t("credit")}</span>
       </div>

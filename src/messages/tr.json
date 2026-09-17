@@ -1,7 +1,9 @@
 {
   "Meta": {
     "title": "MANCH — United Chill Burger Zone",
-    "description": "Fethiye'de el yapımı smash burger. Handmade Hits Different."
+    "description": "Fethiye Paspatur'da el yapımı smash burger. Handmade Hits Different.",
+    "siteName": "MANCH",
+    "ogAlt": "MANCH — United Chill Burger Zone"
   },
   "Home": {
     "eyebrow": "United Chill Burger Zone",
@@ -12,7 +14,7 @@
       "title": "HANDMADE HITS DIFFERENT",
       "sub": "Fethiye'nin smash burger zone'u. Smash sesi mutfaktan, ilk ısırık masadan.",
       "badge": "MISU & MIYU · MANCH'İN YÜZLERİ · ",
-      "imageAlt": "Smash burger — hero görseli (yakında)"
+      "imageAlt": "[TODO] Hero görseli — smash burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
@@ -44,7 +46,7 @@
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "Tarihi çarşının ortasında mavi karo duvarlar, pembe dama kağıtlar ve lezzet seviyesi biraz kontrolden çıkmış burgerler. Just another chill lunch.",
-      "imageAlt": "MANCH iç mekan (yakında)"
+      "imageAlt": "[TODO] MANCH iç mekan fotoğrafı"
     },
     "misu": {
       "title": "Aç değiliz. Sadece takıntılıyız.",
@@ -54,14 +56,14 @@
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 KARE",
-      "alts": "Berry Manch|Cheese pull|Tiramisu|Karo duvar|Crispy tenders|Misu & Miyu",
+      "alts": "[TODO] Berry Manch|[TODO] Cheese pull|[TODO] Tiramisu|[TODO] Karo duvar|[TODO] Crispy tenders|[TODO] Misu & Miyu",
       "cta": "@manch.tr'yi takip et"
     },
     "location": {
       "eyebrow": "KONUM",
       "title": "Bizi bul.",
       "hours": "Saatler",
-      "hoursSoon": "Yakında",
+      "hoursSoon": "[TODO] Yakında",
       "phone": "Telefon",
       "directions": "Yol tarifi",
       "contact": "İletişim",
@@ -110,22 +112,23 @@
     "products": "{count, plural, =1 {# ürün} other {# ürün}}",
     "quickDetails": "Hızlı Detaylar",
     "addToCart": "Sepete Ekle",
-    "todo": "Yakında",
-    "close": "Kapat"
+    "todo": "[TODO] Yakında",
+    "close": "Kapat",
+    "skipToContent": "İçeriğe atla"
   },
   "Cart": {
     "added": "SEPETE EKLENDİ",
     "title": "Sepet",
-    "empty": "Sepetin boş.",
+    "empty": "Sepetin boş. MANCH alışkanlığı yükleniyor…",
     "checkout": "Siparişi Tamamla",
     "open": "Sepeti aç",
     "close": "Kapat",
     "less": "Azalt",
     "more": "Artır",
     "remove": "Kaldır",
-    "priceTodo": "fiyat yakında",
+    "priceTodo": "[TODO] fiyat",
     "waIntro": "Merhaba MANCH! Sipariş vermek istiyorum:",
-    "checkoutSoon": "WhatsApp sipariş hattı yakında — numara eklendiğinde buton aktif olacak."
+    "checkoutSoon": "[TODO] WhatsApp sipariş hattı yakında — numara eklendiğinde buton aktif olur."
   },
   "Cookie": {
     "text": "Çerezleri lezzet için kullanıyoruz.",
@@ -139,7 +142,7 @@
     "address": "Adres",
     "phone": "Telefon",
     "hours": "Saatler",
-    "reservation": "Rezervasyon için Instagram DM veya telefon (yakında)."
+    "reservation": "[TODO] Rezervasyon için Instagram DM (telefon yakında)."
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -195,7 +198,7 @@
     "resetPreloader": "Preloader + çerezi sıfırla"
   },
   "Product": {
-    "priceTodo": "fiyat yakında",
+    "priceTodo": "[TODO] fiyat",
     "time": "Süre",
     "minutes": "{n} dk",
     "bun": "Ekmek",
@@ -211,19 +214,21 @@
       "new": "Yeni",
       "signature": "İmza"
     },
-    "ingredients": "Malzemeler"
+    "ingredients": "Malzemeler",
+    "detail": "Ürün detayı"
   },
   "Menu": {
-    "metaTitle": "Menü — MANCH",
-    "metaDescription": "Smash burgerler, chicken, sides, tatlılar ve içecekler. Hepsi el yapımı.",
+    "metaTitle": "Menü",
+    "metaDescription": "Smash burgerler, chicken, sides, tatlılar ve içecekler. Hepsi el yapımı, hepsi MANCH mutfağından.",
     "eyebrow": "MENÜ",
     "title": "Tam Liste",
     "categories": "Kategoriler",
     "filters": "Filtreler",
-    "empty": "Bu filtrede ürün yok."
+    "empty": "Bu filtrede ürün yok.",
+    "activeCategory": "Aktif kategori"
   },
   "About": {
-    "metaTitle": "Hakkımızda — MANCH",
+    "metaTitle": "Hakkımızda",
     "metaDescription": "Fethiye Paspatur'da el yapımı smash burger. Misu & Miyu, mavi karo duvar ve hazır soslara biraz uzak bir mutfak.",
     "eyebrow": "HAKKIMIZDA",
     "title": "United Chill Burger Zone",
@@ -242,7 +247,7 @@
       "eyebrow": "ZONE",
       "title": "Mavi karo, pembe dama",
       "counter": "4 KARE",
-      "alts": "Karo duvar|Tepsi & dama kağıt|Sos sıkılan brioche|Tezgah"
+      "alts": "[TODO] Karo duvar|[TODO] Tepsi & dama kağıt|[TODO] Sos sıkılan brioche|[TODO] Tezgah"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",
@@ -251,8 +256,8 @@
     }
   },
   "Contact": {
-    "metaTitle": "İletişim — MANCH",
-    "metaDescription": "Çarşı Cd. 21/b, Fethiye (Paspatur). Yol tarifi, WhatsApp ve rezervasyon.",
+    "metaTitle": "İletişim",
+    "metaDescription": "Çarşı Cd. 21/b, Paspatur, Fethiye. Yol tarifi, WhatsApp ve rezervasyon.",
     "eyebrow": "İLETİŞİM",
     "title": "Bize ulaş.",
     "phone": "Telefon",
@@ -267,6 +272,8 @@
   "NotFound": {
     "title": "Bu sayfa smash'lenmiş.",
     "body": "Aradığın sayfa menüde yok. Misu & Miyu de bulamadı. Ana sayfadan devam et.",
-    "home": "Ana sayfa"
+    "home": "Ana sayfa",
+    "metaTitle": "Sayfa bulunamadı",
+    "metaDescription": "Aradığın sayfa menüde yok."
   }
 }

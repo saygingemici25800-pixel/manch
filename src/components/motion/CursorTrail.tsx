@@ -4,17 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import IngredientIcon, { type Ingredient } from "@/components/ui/IngredientIcon";
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 const TRAIL_LEN = 18;
 
-/** Geçici malzeme ikonları (gerçek ikonlar Faz 7 — TODO). Sıra: marul, domates, peynir, köfte. */
-const ICONS = [
-  <circle key="lettuce" cx="12" cy="12" r="8" fill="#7CBF6A" />,
-  <circle key="tomato" cx="12" cy="12" r="8" fill="#E24B3B" />,
-  <rect key="cheese" x="4" y="4" width="16" height="16" rx="2" fill="var(--color-mustard)" />,
-  <circle key="patty" cx="12" cy="12" r="8" fill="#6B3F2A" />,
-];
+const ICONS: Ingredient[] = ["lettuce", "tomato", "cheddar", "patty"];
 
 /**
  * R8 — Desktop-only: beyaz 2px iz path + buzlu cam dairede dönen malzeme ikonu.
@@ -75,7 +70,7 @@ export default function CursorTrail() {
       };
       gsap.ticker.add(tick);
 
-      const rotate = gsap.to(disc.querySelector("svg"), { rotation: 360, duration: 6, ease: "none", repeat: -1 });
+      const rotate = gsap.to(disc.querySelector(".icon"), { rotation: 360, duration: 6, ease: "none", repeat: -1 });
       const cycle = window.setInterval(() => setIcon((i) => (i + 1) % ICONS.length), 1400);
 
       window.addEventListener("mousemove", onMove, { passive: true });
@@ -112,9 +107,7 @@ export default function CursorTrail() {
         className="disc absolute left-0 top-0 grid h-[3.2vw] w-[3.2vw] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/50 bg-white/25 backdrop-blur-md"
         style={{ opacity: 0, visibility: "hidden" }}
       >
-        <svg viewBox="0 0 24 24" className="h-[55%] w-[55%]">
-          {ICONS[icon]}
-        </svg>
+        <IngredientIcon name={ICONS[icon]} className="icon h-[60%] w-[60%] text-berry" />
       </div>
     </div>
   );

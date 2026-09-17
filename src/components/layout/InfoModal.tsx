@@ -29,16 +29,16 @@ export default function InfoModal() {
           <h2 id="info-title" className="font-display text-[2.4vw] max-md:text-[8vw] leading-none">{t("title")}</h2>
           <p className="text40 text-[1.2vw] max-md:text-[4vw] normal-case tracking-normal">{t("subtitle")}</p>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-            <dt className="opacity-60">{t("address")}</dt>
+            <dt className="text-berry">{t("address")}</dt>
             <dd>{site.address.full}</dd>
-            <dt className="opacity-60">{t("phone")}</dt>
+            <dt className="text-berry">{t("phone")}</dt>
             <dd>{site.contact.phone ?? tc("todo")}</dd>
-            <dt className="opacity-60">{t("hours")}</dt>
+            <dt className="text-berry">{t("hours")}</dt>
             <dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
-            <dt className="opacity-60">Instagram</dt>
+            <dt className="text-berry">Instagram</dt>
             <dd><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{site.social.instagramHandle}</a></dd>
           </dl>
-          <p className="font-pixel text-[0.7vw] max-md:text-[2.6vw] opacity-70">{t("reservation")}</p>
+          <p className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{t("reservation")}</p>
           <button type="button" data-cursor-hide data-testid="info-close" onClick={close} className="group mt-[0.5vw] grid place-items-center rounded-full bg-berry px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink">
             <RollText text={t("close")} />
           </button>

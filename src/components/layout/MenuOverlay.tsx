@@ -54,7 +54,7 @@ export default function MenuOverlay() {
           ))}
         </nav>
       )}
-      <p className="font-pixel text-[0.8vw] max-md:text-[3vw] uppercase tracking-widest text-cream/80">{t("est")}</p>
+      <p className="font-pixel text-[0.8vw] max-md:text-[3vw] uppercase tracking-widest text-cream">{t("est")}</p>
     </div>
   );
 }

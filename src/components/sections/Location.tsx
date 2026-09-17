@@ -27,8 +27,8 @@ export default function Location() {
             {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
           </address>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-            <dt className="opacity-60">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : t("hoursSoon")}</dd>
-            <dt className="opacity-60">{t("phone")}</dt><dd>{site.contact.phone ?? tc("todo")}</dd>
+            <dt className="text-mustard">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : t("hoursSoon")}</dd>
+            <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ?? tc("todo")}</dd>
           </dl>
           <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">
             <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className="group rounded-full bg-mustard px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-ink transition-[transform] duration-300 hover:scale-105">
@@ -52,12 +52,12 @@ export default function Location() {
               className="absolute inset-0 h-full w-full border-0"
             />
           ) : (
-            <button type="button" data-testid="map-load" onClick={() => setLoaded(true)} className="group absolute inset-0 grid place-items-center text-cream" aria-label={t("loadMap")}>
+            <button type="button" data-testid="map-load" onClick={() => setLoaded(true)} className="group absolute inset-0 grid place-items-center text-cream">
               <Placeholder tone="sky" label={t("mapTitle")} ratio="auto" className="absolute inset-0 rounded-none!" />
               <span className="relative rounded-full bg-berry-dk px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-transform duration-300 group-hover:scale-105">
                 {t("loadMap")}
               </span>
-              <span className="absolute bottom-[1vw] max-md:bottom-[3vw] font-pixel text-[0.6vw] max-md:text-[2.4vw] uppercase tracking-widest opacity-80">{t("mapNote")}</span>
+              <span className="absolute bottom-[1vw] max-md:bottom-[3vw] font-pixel text-[0.6vw] max-md:text-[2.4vw] uppercase tracking-widest">{t("mapNote")}</span>
             </button>
           )}
         </div>

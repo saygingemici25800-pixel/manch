@@ -16,9 +16,7 @@ import type { Locale } from "@/i18n/routing";
 import { site } from "@/lib/site";
 import { colors, fonts, trTestChars } from "@/styles/tokens";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = { title: "Lab", robots: { index: false, follow: false } };
 
 // Boyut kademeleri: küçük / orta / büyük — vw + max-md karşılığı (Kural 8)
 const sizes = [
@@ -62,7 +60,7 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
   }));
 
   return (
-    <main className="flex flex-col gap-[5vw] max-md:gap-[14vw] px-[2.5vw] pb-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[10vw] max-md:pt-[24vw]">
+    <main id="main" className="flex flex-col gap-[5vw] max-md:gap-[14vw] px-[2.5vw] pb-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[10vw] max-md:pt-[24vw]">
       <header className="flex flex-col gap-[0.5vw] max-md:gap-[2vw]">
         <h1 className="heading180 text-berry">{t("title")}</h1>
         <p className="text40 text-berry-dk">{t("subtitle")}</p>
@@ -82,7 +80,7 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
                 style={{ background: colors[name] }}
               />
               <span className="text-[1vw] max-md:text-[3.5vw] uppercase tracking-wide">{name}</span>
-              <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw] opacity-70">{colors[name]}</span>
+              <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{colors[name]}</span>
             </li>
           ))}
         </ul>

@@ -20,10 +20,10 @@ export default async function MisuMiyu() {
           ))}
         </div>
         <div className="flex flex-col gap-[1.5vw] max-md:gap-[5vw]">
-          <p className="font-display text-[1.3vw] max-md:text-[4.5vw] opacity-70">{site.mascots.label}</p>
+          <p className="font-display text-[1.3vw] max-md:text-[4.5vw]">{site.mascots.label}</p>
           <SplitReveal as="h2" mode="lines" text={t("title")} className="font-display text-[5vw] max-md:text-[12vw] leading-[0.95] text-berry" />
           <p className="max-w-[32vw] max-md:max-w-none text40 text-[1.4vw] max-md:text-[4.5vw] normal-case tracking-normal">{t("body")}</p>
-          <p className="font-pixel text-[0.8vw] max-md:text-[3vw] uppercase tracking-widest opacity-70">{t("tape")}</p>
+          <p className="font-pixel text-[0.8vw] max-md:text-[3vw] uppercase tracking-widest">{t("tape")}</p>
         </div>
       </div>
       <CheckerBand tone="pink" rows={1} />

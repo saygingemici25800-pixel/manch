@@ -9,7 +9,7 @@ export default async function Handmade() {
   return (
     <section className="grid grid-cols-2 max-md:grid-cols-1 items-center gap-[4vw] max-md:gap-[10vw] bg-cream px-[2.5vw] py-[8vw] max-md:px-[5vw] max-md:py-[16vw]">
       <div className="flex flex-col gap-[1.5vw] max-md:gap-[5vw]">
-        <p className="font-display text-[1.3vw] max-md:text-[4.5vw] text-berry-dk/70">{t("eyebrow")}</p>
+        <p className="font-display text-[1.3vw] max-md:text-[4.5vw] text-berry">{t("eyebrow")}</p>
         <SplitReveal as="h2" mode="lines" text={t("title")} className="font-display text-[5.5vw] max-md:text-[12vw] leading-[0.95] text-berry" />
         <p className="max-w-[34vw] max-md:max-w-none text40 text-[1.4vw] max-md:text-[4.5vw] normal-case tracking-normal text-berry-dk">{t("body")}</p>
       </div>

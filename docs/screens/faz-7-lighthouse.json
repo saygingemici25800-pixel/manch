@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-17T08:15:29.491Z",
+  "base": "http://localhost:3100",
+  "target": {
+    "accessibility": 95,
+    "seo": 95
+  },
+  "results": {
+    "/tr": {
+      "scores": {
+        "accessibility": 100,
+        "seo": 100
+      },
+      "failing": []
+    },
+    "/tr/menu": {
+      "scores": {
+        "accessibility": 100,
+        "seo": 100
+      },
+      "failing": []
+    },
+    "/tr/contact": {
+      "scores": {
+        "accessibility": 100,
+        "seo": 100
+      },
+      "failing": []
+    }
+  }
+}

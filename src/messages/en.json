@@ -1,7 +1,9 @@
 {
   "Meta": {
     "title": "MANCH — United Chill Burger Zone",
-    "description": "Handmade smash burgers in Fethiye. Handmade Hits Different."
+    "description": "Handmade smash burgers in Fethiye's Paspatur bazaar. Handmade Hits Different.",
+    "siteName": "MANCH",
+    "ogAlt": "MANCH — United Chill Burger Zone"
   },
   "Home": {
     "eyebrow": "United Chill Burger Zone",
@@ -12,12 +14,12 @@
       "title": "HANDMADE HITS DIFFERENT",
       "sub": "Fethiye's smash burger zone. Smash from the kitchen, first bite from the table.",
       "badge": "MISU & MIYU · THE FACES OF MANCH · ",
-      "imageAlt": "Smash burger — hero image (coming soon)"
+      "imageAlt": "[TODO] Hero image — smash burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
       "eyebrow": "THE HITS",
-      "title": "Crowd Favourites"
+      "title": "Crowd Favorites"
     },
     "anatomy": {
       "eyebrow": "SMASH ANATOMY",
@@ -44,7 +46,7 @@
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "In the heart of the old bazaar: blue tile walls, pink checkered paper and burgers with flavor levels slightly out of control. Just another chill lunch.",
-      "imageAlt": "MANCH interior (coming soon)"
+      "imageAlt": "[TODO] MANCH interior photo"
     },
     "misu": {
       "title": "Not hungry. Just obsessed.",
@@ -54,14 +56,14 @@
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 SHOTS",
-      "alts": "Berry Manch|Cheese pull|Tiramisu|Tile wall|Crispy tenders|Misu & Miyu",
+      "alts": "[TODO] Berry Manch|[TODO] Cheese pull|[TODO] Tiramisu|[TODO] Tile wall|[TODO] Crispy tenders|[TODO] Misu & Miyu",
       "cta": "Follow @manch.tr"
     },
     "location": {
       "eyebrow": "LOCATION",
       "title": "Find us.",
       "hours": "Hours",
-      "hoursSoon": "Coming soon",
+      "hoursSoon": "[TODO] Coming soon",
       "phone": "Phone",
       "directions": "Directions",
       "contact": "Contact",
@@ -97,7 +99,7 @@
     "smashSound": "Smash from the kitchen, first bite from the table.",
     "obsessed": "Not hungry. Just obsessed.",
     "handmadeSauce": "We like our sauces handmade.",
-    "cheesePull": "Gravity approved cheese pull.",
+    "cheesePull": "Gravity-approved cheese pull.",
     "flavorLevels": "Flavor levels may have gotten a little out of control.",
     "habitLoading": "MANCH habit: loading…",
     "layers": "Meet the layers of your smash. Handmade in every layer.",
@@ -110,22 +112,23 @@
     "products": "{count, plural, =1 {# item} other {# items}}",
     "quickDetails": "Quick Details",
     "addToCart": "Add to Cart",
-    "todo": "Coming soon",
-    "close": "Close"
+    "todo": "[TODO] Coming soon",
+    "close": "Close",
+    "skipToContent": "Skip to content"
   },
   "Cart": {
     "added": "ADDED TO CART",
     "title": "Cart",
-    "empty": "Your cart is empty.",
+    "empty": "Your cart is empty. MANCH habit: loading…",
     "checkout": "Checkout",
     "open": "Open cart",
     "close": "Close",
     "less": "Decrease",
     "more": "Increase",
     "remove": "Remove",
-    "priceTodo": "price soon",
+    "priceTodo": "[TODO] price",
     "waIntro": "Hi MANCH! I'd like to order:",
-    "checkoutSoon": "WhatsApp ordering coming soon — the button activates once the number is added."
+    "checkoutSoon": "[TODO] WhatsApp ordering coming soon — the button activates once the number is added."
   },
   "Cookie": {
     "text": "We use cookies for flavor.",
@@ -139,7 +142,7 @@
     "address": "Address",
     "phone": "Phone",
     "hours": "Hours",
-    "reservation": "For reservations: Instagram DM or phone (soon)."
+    "reservation": "[TODO] For reservations: Instagram DM (phone coming soon)."
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -195,7 +198,7 @@
     "resetPreloader": "Reset preloader + cookie"
   },
   "Product": {
-    "priceTodo": "price soon",
+    "priceTodo": "[TODO] price",
     "time": "Time",
     "minutes": "{n} min",
     "bun": "Bun",
@@ -211,19 +214,21 @@
       "new": "New",
       "signature": "Signature"
     },
-    "ingredients": "Ingredients"
+    "ingredients": "Ingredients",
+    "detail": "Product details"
   },
   "Menu": {
-    "metaTitle": "Menu — MANCH",
-    "metaDescription": "Smash burgers, chicken, sides, desserts and drinks. All handmade.",
+    "metaTitle": "Menu",
+    "metaDescription": "Smash burgers, chicken, sides, desserts and drinks. All handmade, all from the MANCH kitchen.",
     "eyebrow": "MENU",
     "title": "Full List",
     "categories": "Categories",
     "filters": "Filters",
-    "empty": "No items for this filter."
+    "empty": "No items for this filter.",
+    "activeCategory": "Active category"
   },
   "About": {
-    "metaTitle": "About — MANCH",
+    "metaTitle": "About",
     "metaDescription": "Handmade smash burgers in Fethiye's Paspatur bazaar. Misu & Miyu, blue tile walls and a kitchen that keeps sauces homemade.",
     "eyebrow": "ABOUT",
     "title": "United Chill Burger Zone",
@@ -242,7 +247,7 @@
       "eyebrow": "ZONE",
       "title": "Blue tile, pink checker",
       "counter": "4 SHOTS",
-      "alts": "Tile wall|Tray & checkered paper|Sauce on brioche|Counter"
+      "alts": "[TODO] Tile wall|[TODO] Tray & checkered paper|[TODO] Sauce on brioche|[TODO] Counter"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",
@@ -251,8 +256,8 @@
     }
   },
   "Contact": {
-    "metaTitle": "Contact — MANCH",
-    "metaDescription": "Çarşı Cd. 21/b, Fethiye (Paspatur). Directions, WhatsApp and reservations.",
+    "metaTitle": "Contact",
+    "metaDescription": "Çarşı Cd. 21/b, Paspatur, Fethiye. Directions, WhatsApp and reservations.",
     "eyebrow": "CONTACT",
     "title": "Reach us.",
     "phone": "Phone",
@@ -267,6 +272,8 @@
   "NotFound": {
     "title": "This page got smashed.",
     "body": "The page you're looking for isn't on the menu. Misu & Miyu couldn't find it either. Head back home.",
-    "home": "Home"
+    "home": "Home",
+    "metaTitle": "Page not found",
+    "metaDescription": "The page you're looking for isn't on the menu."
   }
 }

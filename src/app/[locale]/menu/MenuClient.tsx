@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
@@ -28,6 +28,7 @@ export default function MenuClient({ categories, products }: Props) {
   const searchParams = useSearchParams();
   const navHidden = useUiStore((s) => s.navHidden);
   const [filter, setFilter] = useState<Tag | null>(null);
+  const [active, setActive] = useState<string | null>(null);
 
   // URL tek kaynak (Kural 34)
   const selectedSlug = searchParams.get("p");
@@ -41,6 +42,28 @@ export default function MenuClient({ categories, products }: Props) {
 
   const visible = useMemo(() => (filter ? products.filter((p) => p.tags.includes(filter)) : products), [products, filter]);
   // Kural 36: türetilmiş diziler memo — aksi halde her render (scroll → navHidden) ProductGrid'in useGSAP'ını revert edip kartları gizliyordu
+  // Aktif kategori: nav + sekme bandı altındaki ilk blok (IntersectionObserver, karar 2026-09-17)
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="menu-category"]'));
+    if (els.length === 0) return;
+    const navPx = Math.round(window.innerWidth * (window.innerWidth < 768 ? 0.14 : 0.046)) + 60;
+    const visible = new Map<Element, number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.set(e.target, e.boundingClientRect.top);
+          else visible.delete(e.target);
+        }
+        const first = [...visible.entries()].sort((a, b) => a[1] - b[1])[0];
+        const id = first ? (first[0] as HTMLElement).id.replace("cat-", "") : null;
+        window.setTimeout(() => setActive(id), 0); // Kural 25
+      },
+      { rootMargin: `-${navPx}px 0px -55% 0px`, threshold: 0 },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [filter]);
+
   const blocks = useMemo(
     () => categories.map((c) => ({ category: c, items: visible.filter((p) => p.category === c.id) })).filter((b) => b.items.length > 0),
     [categories, visible],
@@ -63,7 +86,12 @@ export default function MenuClient({ categories, products }: Props) {
               key={c.id}
               href={`#cat-${c.id}`}
               data-cursor-hide
-              className="rounded-full border-[0.12vw] max-md:border-[0.4vw] border-berry px-[1.1vw] py-[0.35vw] max-md:px-[3.2vw] max-md:py-[1.2vw] text40 text-[0.95vw] max-md:text-[3.2vw] text-berry transition-[background-color,color] duration-300 hover:bg-berry hover:text-cream"
+              data-testid={`tab-${c.id}`}
+              aria-current={active === c.id ? "true" : undefined}
+              className={clsx(
+                "rounded-full border-[0.12vw] max-md:border-[0.4vw] border-berry px-[1.1vw] py-[0.35vw] max-md:px-[3.2vw] max-md:py-[1.2vw] text40 text-[0.95vw] max-md:text-[3.2vw] transition-[background-color,color] duration-300 hover:bg-berry hover:text-cream",
+                active === c.id ? "bg-berry text-cream" : "text-berry",
+              )}
             >
               {c.name[locale]}
             </a>
