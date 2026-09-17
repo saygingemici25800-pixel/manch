@@ -10,8 +10,13 @@ fs.mkdirSync(OUT, { recursive: true });
 const issues = [];
 const fails = [];
 const check = (name, ok, info = "") => { console.log(`${ok ? "✓" : "✗"} ${name}${info ? " — " + info : ""}`); if (!ok) fails.push(name); };
+let expect404 = false; // bilinçli 404 navigasyonunda tarayıcının "Failed to load resource: 404" hatası beklenir
 const attach = (page, tag) => {
-  page.on("console", (m) => { if (["error", "warning"].includes(m.type())) issues.push(`[${tag}] console.${m.type()}: ${m.text().slice(0, 300)}`); });
+  page.on("console", (m) => {
+    if (!["error", "warning"].includes(m.type())) return;
+    if (expect404 && /status of 404/.test(m.text())) return;
+    issues.push(`[${tag}] console.${m.type()}: ${m.text().slice(0, 300)}`);
+  });
   page.on("pageerror", (e) => issues.push(`[${tag}] pageerror: ${e.message.slice(0, 300)}`));
 };
 const stCount = async (page) => { await page.waitForSelector('[data-testid="st-count"]'); await page.waitForTimeout(600); return Number((await page.textContent('[data-testid="st-count"]')).match(/\d+/)[0]); };
@@ -148,14 +153,25 @@ const browser = await chromium.launch();
   await page.waitForTimeout(1200);
   const locTop = await page.$eval("#location", (el) => Math.round(el.getBoundingClientRect().top));
   check("lab → perde → #location anchor", Math.abs(locTop) < 160, `top=${locTop}`);
-  // Pinned anatomy
-  await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForFunction(() => !document.documentElement.classList.contains("lenis-scrolling"));
-  await page.evaluate(() => document.querySelector('[data-testid="anatomy"] .pin').scrollIntoView({ behavior: "instant", block: "start" }));
+  // Pinned anatomy — Kural 32: pin'li elemana değil section'a scrollIntoView (ST elemanı spacer sonuna taşımış olabilir)
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForFunction(() => Math.round(scrollY) === 0 && !document.documentElement.classList.contains("lenis-scrolling"), null, { timeout: 8000 });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => document.querySelector('[data-testid="anatomy"]').scrollIntoView({ behavior: "instant", block: "start" }));
   await page.waitForTimeout(500);
   const tops = [];
   await page.mouse.move(700, 450);
   for (let i = 0; i < 5; i++) { await page.mouse.wheel(0, 200); await page.waitForTimeout(250); tops.push(await page.$eval('[data-testid="anatomy"] .pin', (el) => Math.round(el.getBoundingClientRect().top))); }
-  check("anatomy pinned (top sabit)", tops.every((t) => Math.abs(t - tops[0]) <= 2), tops.join(" "));
+  const f0 = await page.evaluate(() => window.__TICK?.()); await page.waitForTimeout(300); const f1 = await page.evaluate(() => window.__TICK?.());
+  const pinDump = JSON.stringify(await page.evaluate(() => (window.__ST_DUMP?.() ?? []).filter((x) => x.pin))) + ` ticker:${f1 - f0}f/300ms scrollY:${await page.evaluate(() => Math.round(scrollY))}`;
+  const pinned = tops.every((t) => Math.abs(t - tops[0]) <= 2);
+  if (!pinned) {
+    await page.evaluate(() => window.__ST_REFRESH?.()); await page.waitForTimeout(400);
+    const afterRefresh = JSON.stringify(await page.evaluate(() => (window.__ST_DUMP?.() ?? []).filter((x) => x.pin)));
+    const topAfter = await page.$eval('[data-testid="anatomy"] .pin', (el) => Math.round(el.getBoundingClientRect().top));
+    console.log("  [diag] after refresh:", afterRefresh, "pinTop:", topAfter);
+  }
+  check("anatomy pinned (top sabit)", pinned, `${tops.join(" ")} pins=${pinDump}`);
   // Kart etkileşimleri
   await page.evaluate(() => document.querySelector("#hits").scrollIntoView({ behavior: "instant" })); await page.waitForTimeout(1200);
   check("kartlar görünür (batch giriş)", await page.$$eval('[data-testid="product-card"]', (els) => els.every((el) => Number(getComputedStyle(el).opacity) > 0.9)));
@@ -187,7 +203,7 @@ const browser = await chromium.launch();
   await mp.goto(`${BASE}/tr`, { waitUntil: "networkidle", timeout: 120000 }); await mp.waitForTimeout(600);
   check("mobil: 6 kart", (await mp.$$('[data-testid="product-card"]')).length === 6);
   check("mobil: yatay taşma yok", await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await mp.evaluate(() => `${document.documentElement.scrollWidth}/${window.innerWidth}`));
-  await mp.evaluate(() => document.querySelector('[data-testid="anatomy"] .pin').scrollIntoView({ behavior: "instant", block: "start" })); await mp.waitForTimeout(500);
+  await mp.evaluate(() => document.querySelector('[data-testid="anatomy"]').scrollIntoView({ behavior: "instant", block: "start" })); await mp.waitForTimeout(500);
   const mtops = [];
   for (let i = 0; i < 5; i++) { await mp.evaluate(() => window.scrollBy(0, 160)); await mp.waitForTimeout(250); mtops.push(await mp.$eval('[data-testid="anatomy"] .pin', (el) => Math.round(el.getBoundingClientRect().top))); }
   check("mobil: anatomy pinned", mtops.every((t) => Math.abs(t - mtops[0]) <= 2), mtops.join(" "));
@@ -209,6 +225,84 @@ const browser = await chromium.launch();
   await vp.waitForTimeout(600);
   const video = vp.video(); await vctx.close();
   fs.renameSync(await video.path(), path.join(OUT, "faz-5-scroll.raw.webm")); fs.rmSync(vdir, { recursive: true, force: true });
+}
+
+// ===================== Faz 6: iç sayfalar =====================
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => { sessionStorage.setItem("manch-preloaded", "1"); localStorage.setItem("manch-cookie", "ok"); });
+  const page = await ctx.newPage(); attach(page, "faz6");
+  // tüm iç linkler 200
+  for (const path of ["/tr", "/tr/menu", "/tr/about", "/tr/contact", "/en", "/en/menu", "/en/about", "/en/contact"]) {
+    const res = await page.goto(`${BASE}${path}`, { waitUntil: "networkidle", timeout: 120000 });
+    check(`GET ${path} → 200`, res.status() === 200, String(res.status()));
+  }
+  expect404 = true;
+  const nf = await page.goto(`${BASE}/tr/olmayan-sayfa`, { waitUntil: "networkidle" });
+  expect404 = false;
+  check("404 sayfası status 404", nf.status() === 404, String(nf.status()));
+  check("404: Misu&Miyu + başlık", (await page.$('[data-testid="not-found"]')) !== null && (await page.textContent("h1")).includes("smash"));
+  await page.screenshot({ path: path.join(OUT, "faz-6-404.png") });
+  await page.click('[data-testid="nf-home"]'); await page.waitForURL(/\/tr$/, { timeout: 8000 });
+  check("404 → ana sayfa (perde ile)", page.url().endsWith("/tr"));
+  // /menu
+  await page.goto(`${BASE}/tr/menu`, { waitUntil: "networkidle" }); await page.waitForTimeout(500);
+  check("menu: 9 ürün", (await page.$$('[data-testid="product-card"]')).length === 9);
+  check("menu: 5 kategori bloğu", (await page.$$('[data-testid="menu-category"]')).length === 5);
+  await page.click('[data-testid="filter-spicy"]'); await page.waitForTimeout(500);
+  check("filtre spicy → 1 ürün", (await page.$$('[data-testid="product-card"]')).length === 1);
+  await page.click('[data-testid="filter-spicy"]'); await page.waitForTimeout(500);
+  check("filtre kapat → 9 ürün", (await page.$$('[data-testid="product-card"]')).length === 9);
+  // sticky sekme bandı: scroll-down'da nav gizlenince top 0
+  await page.mouse.move(700, 450); for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, 300); await page.waitForTimeout(80); } await page.waitForTimeout(700);
+  check("sekme bandı sticky + nav gizli → top 0", await page.$eval('[data-testid="menu-tabs"]', (el) => { const r = el.getBoundingClientRect(); return el.dataset.navHidden === "true" && Math.abs(r.top) < 2; }));
+  // modal + ?p=
+  await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForFunction(() => !document.documentElement.classList.contains("lenis-scrolling"));
+  await page.click('[data-testid="open-product"] >> nth=1'); await page.waitForTimeout(500);
+  check("modal açık + ?p= URL", (await page.getAttribute('[data-testid="product-modal"]', "data-state")) === "open" && page.url().includes("?p=berry-manch"), page.url());
+  await page.click('[data-testid="modal-add"]'); await page.waitForTimeout(400);
+  check("modal → sepete ekle", (await page.textContent('[data-testid="cart-count"]')) !== null);
+  await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+  check("ESC → modal kapalı + ?p yok", (await page.getAttribute('[data-testid="product-modal"]', "data-state")) === "closed" && !page.url().includes("?p="));
+  await page.goto(`${BASE}/tr/menu?p=berry-manch`, { waitUntil: "networkidle" }); await page.waitForTimeout(700);
+  check("derin link ?p=berry-manch → modal açık", (await page.getAttribute('[data-testid="product-modal"]', "data-state")) === "open" && (await page.textContent("#product-title")).includes("Berry"));
+  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+  // once batch girişleri tetiklensin: sona kadar kaydır, sonra başa
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(1500);
+  await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(600);
+  check("menu: tüm kartlar görünür (batch giriş)", await page.$$eval('[data-testid="product-card"]', (els) => els.every((el) => Number(getComputedStyle(el).opacity) > 0.9)));
+  await page.screenshot({ path: path.join(OUT, "faz-6-menu.png"), fullPage: true });
+  // /about, /contact
+  await page.goto(`${BASE}/tr/about`, { waitUntil: "networkidle" }); await page.waitForTimeout(500);
+  check("about: galeri 4 + timeline", (await page.$$('[data-testid="zone-gallery"] li')).length === 4 && (await page.$$('[data-testid="timeline"] li')).length === 4);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(1200); await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(600);
+  await page.screenshot({ path: path.join(OUT, "faz-6-about.png"), fullPage: true });
+  await page.goto(`${BASE}/tr/contact`, { waitUntil: "networkidle" }); await page.waitForTimeout(500);
+  check("contact: WhatsApp disabled (numara TODO)", await page.$eval('[data-testid="wa-button"]', (el) => el.matches(":disabled")));
+  await page.click('[data-testid="contact-info"]'); await page.waitForTimeout(500);
+  check("contact: InfoModal açılır", (await page.getAttribute('[aria-labelledby="info-title"]', "data-state")) === "open");
+  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+  // screenshot harita yüklenmeden (Google iframe headless'ta boş render eder)
+  await page.screenshot({ path: path.join(OUT, "faz-6-contact.png"), fullPage: true });
+  await page.click('[data-testid="map-load"]'); await page.waitForTimeout(500);
+  check("contact: harita tıkla-yükle", (await page.$('[data-testid="map-iframe"]')) !== null);
+  // nav BURGERS → /menu (perde)
+  await page.goto(`${BASE}/tr`, { waitUntil: "networkidle" }); await page.waitForTimeout(400);
+  await page.click('[data-nav] a[href$="/menu"]'); await page.waitForURL(/\/tr\/menu$/, { timeout: 8000 });
+  check("nav BURGERS → /menu", page.url().endsWith("/tr/menu"));
+  await ctx.close();
+
+  // mobil: sekme bandı + modal
+  const mctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  await mctx.addInitScript(() => { sessionStorage.setItem("manch-preloaded", "1"); localStorage.setItem("manch-cookie", "ok"); });
+  const mp = await mctx.newPage(); attach(mp, "faz6-mobile");
+  await mp.goto(`${BASE}/tr/menu?p=berry-manch`, { waitUntil: "networkidle", timeout: 120000 }); await mp.waitForTimeout(700);
+  check("mobil: derin link modal açık", (await mp.getAttribute('[data-testid="product-modal"]', "data-state")) === "open");
+  check("mobil: modal viewport içinde", await mp.$eval('[data-testid="product-modal"]', (el) => { const r = el.getBoundingClientRect(); return r.width <= innerWidth && r.height <= innerHeight + 1; }));
+  await mp.screenshot({ path: path.join(OUT, "faz-6-menu-modal-mobile.png") });
+  await mp.keyboard.press("Escape"); await mp.waitForTimeout(400);
+  check("mobil: sekme bandı sticky görünür", await mp.$eval('[data-testid="menu-tabs"]', (el) => getComputedStyle(el).position === "sticky"));
+  await mctx.close();
 }
 
 // ===================== Faz 4: mobil 375 =====================

@@ -110,7 +110,8 @@
     "products": "{count, plural, =1 {# item} other {# items}}",
     "quickDetails": "Quick Details",
     "addToCart": "Add to Cart",
-    "todo": "Coming soon"
+    "todo": "Coming soon",
+    "close": "Close"
   },
   "Cart": {
     "added": "ADDED TO CART",
@@ -209,6 +210,63 @@
       "spicy": "Spicy",
       "new": "New",
       "signature": "Signature"
+    },
+    "ingredients": "Ingredients"
+  },
+  "Menu": {
+    "metaTitle": "Menu — MANCH",
+    "metaDescription": "Smash burgers, chicken, sides, desserts and drinks. All handmade.",
+    "eyebrow": "MENU",
+    "title": "Full List",
+    "categories": "Categories",
+    "filters": "Filters",
+    "empty": "No items for this filter."
+  },
+  "About": {
+    "metaTitle": "About — MANCH",
+    "metaDescription": "Handmade smash burgers in Fethiye's Paspatur bazaar. Misu & Miyu, blue tile walls and a kitchen that keeps sauces homemade.",
+    "eyebrow": "ABOUT",
+    "title": "United Chill Burger Zone",
+    "story": {
+      "title": "We like our sauces handmade. Our burgers even more.",
+      "p1": "MANCH is a smash burger zone in Paspatur, Fethiye's historic bazaar. Daily patties, butter brioche, sauces from the MANCH kitchen — berry and roasted pepper alike.",
+      "p2": "Smash from the kitchen, first bite from the table. Flavor levels may have gotten a little out of control — we consider that a feature. We also take tiramisu seriously.",
+      "cardTitle": "In short",
+      "points": "120 g beef patty, smashed|Homemade berry & roasted pepper sauce|Butter brioche, baked daily|Real mascarpone tiramisu|Blue tile wall, pink checkered paper"
+    },
+    "mascots": {
+      "title": "Misu & Miyu",
+      "body": "The faces of MANCH. Two characters holding your burger, getting the cheese pull gravity-approved and taking tiramisu very seriously."
+    },
+    "gallery": {
+      "eyebrow": "ZONE",
+      "title": "Blue tile, pink checker",
+      "counter": "4 SHOTS",
+      "alts": "Tile wall|Tray & checkered paper|Sauce on brioche|Counter"
+    },
+    "timeline": {
+      "eyebrow": "EST. 2026 — FETHİYE",
+      "title": "A short journey",
+      "items": "2025::The idea — a smash burger zone for Fethiye|Spring 2026::Kitchen tests, sauce trials, Misu & Miyu drawn|June 2026::Teasers: \"coming soon to Fethiye\"|July 2026::Çarşı Cd. 21/b opens — the sweetest work in progress"
     }
+  },
+  "Contact": {
+    "metaTitle": "Contact — MANCH",
+    "metaDescription": "Çarşı Cd. 21/b, Fethiye (Paspatur). Directions, WhatsApp and reservations.",
+    "eyebrow": "CONTACT",
+    "title": "Reach us.",
+    "phone": "Phone",
+    "hours": "Hours",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "reservation": "Reservation",
+    "directions": "Directions",
+    "loadMap": "Load map",
+    "mapTitle": "MANCH — Google Maps"
+  },
+  "NotFound": {
+    "title": "This page got smashed.",
+    "body": "The page you're looking for isn't on the menu. Misu & Miyu couldn't find it either. Head back home.",
+    "home": "Home"
   }
 }

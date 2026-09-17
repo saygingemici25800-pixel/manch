@@ -110,7 +110,8 @@
     "products": "{count, plural, =1 {# ürün} other {# ürün}}",
     "quickDetails": "Hızlı Detaylar",
     "addToCart": "Sepete Ekle",
-    "todo": "Yakında"
+    "todo": "Yakında",
+    "close": "Kapat"
   },
   "Cart": {
     "added": "SEPETE EKLENDİ",
@@ -209,6 +210,63 @@
       "spicy": "Acı",
       "new": "Yeni",
       "signature": "İmza"
+    },
+    "ingredients": "Malzemeler"
+  },
+  "Menu": {
+    "metaTitle": "Menü — MANCH",
+    "metaDescription": "Smash burgerler, chicken, sides, tatlılar ve içecekler. Hepsi el yapımı.",
+    "eyebrow": "MENÜ",
+    "title": "Tam Liste",
+    "categories": "Kategoriler",
+    "filters": "Filtreler",
+    "empty": "Bu filtrede ürün yok."
+  },
+  "About": {
+    "metaTitle": "Hakkımızda — MANCH",
+    "metaDescription": "Fethiye Paspatur'da el yapımı smash burger. Misu & Miyu, mavi karo duvar ve hazır soslara biraz uzak bir mutfak.",
+    "eyebrow": "HAKKIMIZDA",
+    "title": "United Chill Burger Zone",
+    "story": {
+      "title": "Hazır soslara biraz uzağız. Hazır burgerlere daha da.",
+      "p1": "MANCH, Fethiye'nin tarihi çarşısı Paspatur'da bir smash burger zone'u. Köfte günlük, brioche tereyağlı, soslar MANCH mutfağında; berry sosu da köz biber sosu da elimizle.",
+      "p2": "Smash sesi mutfaktan, ilk ısırık masadan. Lezzet seviyesi biraz kontrolden çıkmış olabilir — bunu bir özellik olarak görüyoruz. Tiramisu konusunda da biraz iddialıyız.",
+      "cardTitle": "Kısa kısa",
+      "points": "120 g dana köfte, smash|Ev yapımı berry & köz biber sosu|Tereyağlı brioche, her gün|Gerçek mascarpone tiramisu|Mavi karo duvar, pembe dama kağıt"
+    },
+    "mascots": {
+      "title": "Misu & Miyu",
+      "body": "MANCH'in yüzleri. Burgerini tutan, cheese pull'u yer çekimine onaylatan, tiramisu konusunda biraz iddialı iki karakter."
+    },
+    "gallery": {
+      "eyebrow": "ZONE",
+      "title": "Mavi karo, pembe dama",
+      "counter": "4 KARE",
+      "alts": "Karo duvar|Tepsi & dama kağıt|Sos sıkılan brioche|Tezgah"
+    },
+    "timeline": {
+      "eyebrow": "EST. 2026 — FETHİYE",
+      "title": "Kısa bir yolculuk",
+      "items": "2025::Fikir — Fethiye'ye bir smash burger zone'u|2026 İlkbahar::Mutfak testleri, sos denemeleri, Misu & Miyu çizildi|2026 Haziran::Teaser'lar: \"çok yakında Fethiye'de\"|2026 Temmuz::Çarşı Cd. 21/b açıldı — The sweetest work in progress"
     }
+  },
+  "Contact": {
+    "metaTitle": "İletişim — MANCH",
+    "metaDescription": "Çarşı Cd. 21/b, Fethiye (Paspatur). Yol tarifi, WhatsApp ve rezervasyon.",
+    "eyebrow": "İLETİŞİM",
+    "title": "Bize ulaş.",
+    "phone": "Telefon",
+    "hours": "Saatler",
+    "email": "E-posta",
+    "whatsapp": "WhatsApp",
+    "reservation": "Rezervasyon",
+    "directions": "Yol tarifi",
+    "loadMap": "Haritayı yükle",
+    "mapTitle": "MANCH — Google Haritalar"
+  },
+  "NotFound": {
+    "title": "Bu sayfa smash'lenmiş.",
+    "body": "Aradığın sayfa menüde yok. Misu & Miyu de bulamadı. Ana sayfadan devam et.",
+    "home": "Ana sayfa"
   }
 }

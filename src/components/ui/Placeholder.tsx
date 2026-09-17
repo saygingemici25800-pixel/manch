@@ -22,7 +22,9 @@ export default function Placeholder({
       role="img"
       aria-label={label}
       className={clsx(
-        "relative flex items-end overflow-hidden rounded-[1vw] max-md:rounded-[3vw]",
+        // className "absolute" içeriyorsa relative ekleme (Tailwind CSS'te relative sonra geldiği için override'ı ezer)
+        !className?.includes("absolute") && "relative",
+        "flex items-end overflow-hidden rounded-[1vw] max-md:rounded-[3vw]",
         isBerry ? "bg-berry text-cream" : "bg-sky text-berry",
         className,
       )}

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import JellyWave from "@/components/motion/JellyWave";
 import SplitReveal from "@/components/motion/SplitReveal";
 import Placeholder from "@/components/ui/Placeholder";
+import HeroBurger from "./HeroBurger";
 import { site } from "@/lib/site";
 
 /** R9 — tam ekran görsel (şimdilik Placeholder), hardal Modak char reveal, dönen Misu&Miyu rozeti, jelly dalga. */
@@ -10,8 +11,11 @@ export default async function Hero() {
   const badge = t("badge");
   return (
     <section data-nav-dark className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-berry text-cream">
-      {/* TODO: gerçek görsel /images/hero-smash.jpg gelince next/image (Faz 8) */}
-      <Placeholder tone="berry" label={t("imageAlt")} ratio="auto" className="absolute inset-0 rounded-none! opacity-90" />
+      {/* TODO(Faz 7): gerçek görsel /images/hero-smash.jpg next/image ile; şimdilik CSS katmanlı burger (karar 2026-09-17) */}
+      <div aria-hidden="true" className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,.04)_0_1.2vw,transparent_1.2vw_2.4vw)]" />
+      <div className="absolute left-1/2 top-[52%] max-md:top-[38%] -translate-x-1/2 -translate-y-1/2 max-md:h-[70vw]">
+        <HeroBurger />
+      </div>
 
       {/* dönen rozet */}
       <div className="absolute right-[4vw] top-[8vw] max-md:right-[5vw] max-md:top-[26vw] grid h-[14vw] w-[14vw] max-md:h-[34vw] max-md:w-[34vw] place-items-center">

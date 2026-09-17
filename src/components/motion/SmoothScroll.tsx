@@ -25,7 +25,12 @@ function LenisTicker() {
 
   useEffect(() => {
     if (!lenis) return;
-    const update = (time: number) => lenis.raf(time * 1000);
+    // Kural 24: ScrollTrigger.update her tick'te ticker'dan — Lenis "scroll" event köprüsü tek başına
+    // dev StrictMode instance takasından sonra güvenilir değildi (pin/batch tetiklenmiyordu, 2026-09-17)
+    const update = (time: number) => {
+      lenis.raf(time * 1000);
+      ScrollTrigger.update();
+    };
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);

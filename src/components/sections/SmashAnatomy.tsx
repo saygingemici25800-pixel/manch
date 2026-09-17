@@ -31,7 +31,7 @@ export default function SmashAnatomy() {
       if (reduced) return;
       const n = LAYERS.length;
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: ".pin", start: "top top", end: "+=140%", pin: true, scrub: 0.6 },
+        scrollTrigger: { trigger: ".pin", start: "top top", end: "+=200%", pin: true, scrub: 0.6 },
       });
       LAYERS.forEach((_, i) => {
         const offset = (i - (n - 1) / 2) * 1; // vw katsayısı

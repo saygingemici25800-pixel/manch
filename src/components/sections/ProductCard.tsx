@@ -9,7 +9,13 @@ import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
 
 /** R11 — beyaz kart, ortada 2×12 dama bandı (hover'da jelly esner + kayar + renk değişir), burger döner, quick details, hardal +. */
-export default function ProductCard({ product }: { product: Product }) {
+interface Props {
+  product: Product;
+  /** verilirse görsel + isim tıklanabilir → detay modalı */
+  onSelect?: (slug: string) => void;
+}
+
+export default function ProductCard({ product, onSelect }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Product");
   const tc = useTranslations("Common");
@@ -23,7 +29,10 @@ export default function ProductCard({ product }: { product: Product }) {
       className="product-card group relative flex flex-col overflow-hidden rounded-[2vw] max-md:rounded-[6vw] bg-white text-berry-dk shadow-[0_1vw_2.5vw_-1vw_rgba(78,16,48,.35)]"
     >
       {/* görsel */}
-      <div className="relative flex h-[19vw] max-md:h-[60vw] items-center justify-center overflow-hidden bg-cream">
+      <div
+        className={clsx("relative flex h-[19vw] max-md:h-[60vw] items-center justify-center overflow-hidden bg-cream", onSelect && "cursor-pointer")}
+        onClick={onSelect ? () => onSelect(product.slug) : undefined}
+      >
         <div className="h-[80%] w-[70%] transition-transform duration-500 ease-[var(--ease-jelly)] group-hover:rotate-6 group-hover:scale-105">
           <Placeholder tone={product.image ? "berry" : "sky"} label={name} ratio="1/1" className="h-full w-full" />
         </div>
@@ -55,7 +64,15 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-1 flex-col gap-[0.8vw] max-md:gap-[3vw] p-[1.4vw] max-md:p-[5vw]">
         <div className="flex items-start justify-between gap-[1vw]">
           <div className="flex flex-col">
-            <h3 className="font-display text-[1.8vw] max-md:text-[6.5vw] leading-none text-berry">{name}</h3>
+            <h3 className="font-display text-[1.8vw] max-md:text-[6.5vw] leading-none text-berry">
+              {onSelect ? (
+                <button type="button" data-testid="open-product" onClick={() => onSelect(product.slug)} className="text-left hover:underline underline-offset-4 decoration-[0.08em]">
+                  {name}
+                </button>
+              ) : (
+                name
+              )}
+            </h3>
             <p className="mt-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide opacity-70">
               {product.price !== null ? `${product.price} ₺` : t("priceTodo")}
             </p>

@@ -8,7 +8,6 @@ import TransitionLink from "@/components/motion/TransitionLink";
 import { useDialog } from "@/lib/hooks/useDialog";
 import { useUiStore } from "@/lib/ui-store";
 
-// TODO(Faz 6): /menu, /about, /contact sayfaları gelene kadar 404 döner
 const LINKS = [
   { key: "home", href: "/" },
   { key: "menu", href: "/menu" },
