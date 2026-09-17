@@ -34,11 +34,14 @@ export default function CursorTrail() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Kural 31: koşullu null render → scope yok, ref effect içinde okunur
   useGSAP(
     () => {
-      if (!enabled || reduced || !root.current) return;
-      const poly = root.current.querySelector<SVGPolylineElement>("polyline")!;
-      const disc = root.current.querySelector<HTMLDivElement>(".disc")!;
+      const el = root.current;
+      if (!enabled || reduced || !el) return;
+      const poly = el.querySelector<SVGPolylineElement>("polyline");
+      const disc = el.querySelector<HTMLDivElement>(".disc");
+      if (!poly || !disc) return;
       const pts: [number, number][] = [];
       let hidden = false;
       let moved = false; // ilk mousemove'a kadar disk görünmez (mouseenter tek başına göstermez)
@@ -88,7 +91,7 @@ export default function CursorTrail() {
         document.documentElement.removeEventListener("mouseenter", onEnter);
       };
     },
-    { scope: root, dependencies: [enabled, reduced], revertOnUpdate: true },
+    { dependencies: [enabled, reduced], revertOnUpdate: true },
   );
 
   if (!enabled || reduced) return null;

@@ -3,6 +3,15 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import Cart from "@/components/layout/Cart";
+import CookieBanner from "@/components/layout/CookieBanner";
+import Footer from "@/components/layout/Footer";
+import InfoModal from "@/components/layout/InfoModal";
+import MenuOverlay from "@/components/layout/MenuOverlay";
+import Nav from "@/components/layout/Nav";
+import PageTransition from "@/components/layout/PageTransition";
+import Preloader from "@/components/layout/Preloader";
+import CursorTrail from "@/components/motion/CursorTrail";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import { fontVariables } from "@/styles/fonts";
 import "@/styles/globals.css";
@@ -36,7 +45,18 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${fontVariables} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-cream text-ink font-ui">
         <NextIntlClientProvider>
-          <SmoothScroll>{children}</SmoothScroll>
+          <SmoothScroll>
+            <Preloader />
+            <CursorTrail />
+            <Nav />
+            <MenuOverlay />
+            <PageTransition />
+            {children}
+            <Footer />
+            <Cart />
+            <CookieBanner />
+            <InfoModal />
+          </SmoothScroll>
         </NextIntlClientProvider>
       </body>
     </html>

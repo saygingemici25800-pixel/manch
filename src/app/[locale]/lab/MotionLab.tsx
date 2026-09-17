@@ -7,7 +7,6 @@ import { ScrollTrigger } from "@/lib/gsap";
 import { useMotionStore } from "@/lib/motion-store";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import BlobButton from "@/components/motion/BlobButton";
-import CursorTrail from "@/components/motion/CursorTrail";
 import JellyWave from "@/components/motion/JellyWave";
 import Juggle from "@/components/motion/Juggle";
 import Marquee from "@/components/motion/Marquee";
@@ -67,7 +66,6 @@ export default function MotionLab() {
 
   return (
     <div className="flex flex-col gap-[3vw] max-md:gap-[8vw]">
-      <CursorTrail />
 
       <div className="flex flex-wrap items-center gap-[1vw] max-md:gap-[3vw]">
         <ReducedMotionToggle />
@@ -113,7 +111,7 @@ export default function MotionLab() {
       {/* R9 */}
       <div className="flex flex-col gap-[0.6vw] max-md:gap-[2vw]">
         <code className={label}>JellyWave · {t("jellyNote")}</code>
-        <div className="bg-berry pt-[6vw] max-md:pt-[14vw]">
+        <div data-nav-dark data-testid="dark-block" className="bg-berry pt-[6vw] max-md:pt-[14vw]">
           <p className="px-[2vw] pb-[2vw] font-display text-[3vw] max-md:text-[8vw] text-cream">{t("jellyText")}</p>
           <JellyWave fill="var(--color-cream)" />
         </div>

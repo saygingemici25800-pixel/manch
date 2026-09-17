@@ -55,7 +55,15 @@
     "added": "SEPETE EKLENDİ",
     "title": "Sepet",
     "empty": "Sepetin boş.",
-    "checkout": "Siparişi Tamamla"
+    "checkout": "Siparişi Tamamla",
+    "open": "Sepeti aç",
+    "close": "Kapat",
+    "less": "Azalt",
+    "more": "Artır",
+    "remove": "Kaldır",
+    "priceTodo": "fiyat yakında",
+    "waIntro": "Merhaba MANCH! Sipariş vermek istiyorum:",
+    "checkoutSoon": "WhatsApp sipariş hattı yakında — numara eklendiğinde buton aktif olacak."
   },
   "Cookie": {
     "text": "Çerezleri lezzet için kullanıyoruz.",
@@ -63,7 +71,13 @@
     "okay": "TAMAM!"
   },
   "Modal": {
-    "close": "ANLADIM & KAPAT"
+    "close": "ANLADIM & KAPAT",
+    "title": "İletişim & Rezervasyon",
+    "subtitle": "Bize ulaş, masa ayır, ya da sadece selam ver.",
+    "address": "Adres",
+    "phone": "Telefon",
+    "hours": "Saatler",
+    "reservation": "Rezervasyon için Instagram DM veya telefon (yakında)."
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -89,7 +103,8 @@
     "enOnly": "yalnızca EN metinlerde (tape/marquee)",
     "navOtherLocale": "English lab",
     "navHome": "Ana sayfa",
-    "motion": "Motion"
+    "motion": "Motion",
+    "layout": "Layout"
   },
   "Motion": {
     "rmToggle": "Reduced motion",
@@ -107,5 +122,13 @@
     "jellyNote": "scroll hızı → scaleY",
     "jellyText": "Yer çekimi onaylı cheese pull.",
     "cursorNote": "sadece desktop (hover + fine pointer); butonlarda data-cursor-hide ile gizlenir"
+  },
+  "LayoutLab": {
+    "trigger": "Perdeyi tetikle",
+    "tlHome": "Perde ile ana sayfa",
+    "addTest": "Sepete test ürünü ekle",
+    "openCart": "Sepeti aç",
+    "openInfo": "InfoModal aç",
+    "resetPreloader": "Preloader + çerezi sıfırla"
   }
 }

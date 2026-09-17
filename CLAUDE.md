@@ -30,10 +30,10 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 3 tamamlandı** — Faz 4 için kullanıcı onayı bekleniyor
-- Son başarılı build: 2026-09-17 Faz 3 (`pnpm build` + lint temiz; prod'da `/lab` 404 (Kural 23); Playwright kabul testi geçti)
+- Aktif faz: **Faz 4 tamamlandı** — Faz 5 için kullanıcı onayı bekleniyor
+- Son başarılı build: 2026-09-17 Faz 4 (`pnpm build` + lint temiz; prod `/tr` 200 / `/lab` 404; `scripts/lab-check.mjs` 31/31)
 - Preview URL: —
-- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · `text-stroke-fill` utility'si Faz 4'te açılacak (karar 2026-09-17) · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak) · CursorTrail/Juggle malzeme ikonları geçici (renkli daire/kare) — gerçek SVG ikonlar Faz 7 · CursorTrail şu an sadece `/lab`'da mount; Faz 4'te layout'a taşınacak · Playwright kabul script'i scratchpad'de (`faz3.mjs`), repoya `scripts/` altında eklenmesi Faz 8'de değerlendirilsin
+- Açık TODO'lar: fiyatlar · telefon · çalışma saatleri · WhatsApp/sipariş linki · gerçek görseller · logo SVG · renk kodlarının logodan teyidi · Truffle Smash / Chicken Sandwich / çilekli ürün isim teyidi · Facebook linki · Webber Digital URL · `NextIntlClientProvider` mesaj daraltma (namespace bazlı) → **Faz 8'e ertelendi** (karar 2026-09-17) · `not-found.tsx` `[locale]` altında yok (Faz 6) · Nav "BURGERS" hap butonu ve overlay/footer'daki `/menu` `/about` `/contact` linkleri Faz 6'ya kadar 404 (BURGERS geçici olarak `/`) · WhatsApp checkout `site.contact.whatsapp` null → disabled · InfoModal'da telefon/saat "Yakında" · Ana sayfa placeholder'ı hâlâ yeni fontları kullanmıyor (Faz 5'te yeniden yazılacak) · Malzeme ikonları (marul/domates/peynir/köfte) Faz 7'de **berry tek çizgi line-art SVG** olarak çizilecek; şimdilik renkli daire/kare (karar 2026-09-17)
 
 ---
 
@@ -62,9 +62,14 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 21. Yeni bir font eklerken TR kapsamını `latin-ext` etiketine güvenmeden doğrula: build sonrası `.next/static/media/*.woff2` dosyalarında cmap union'ı (fontTools) **ve** `/lab` GlyphCheck. Fontlar tek dosyada: `src/styles/fonts.ts`; token listesi `src/styles/tokens.ts` `globals.css` ile senkron tutulur.
 22. Tailwind v4: renkler `@theme`, next/font değişkenlerini tüketen font tokenları `@theme inline`. Özel sınıflar `@utility` ile; `max-md:` karşılığı utility içinde `@media (width < 48rem)`.
 23. `/[locale]/lab` sadece development: sayfa başında `if (process.env.NODE_ENV === "production") notFound()`. Production build'de lab 404 döner; lab doğrulaması `next dev` ile yapılır.
-24. Smooth scroll: **`lenis/react`** (`<ReactLenis root options={{ autoRaf:false }}>` + `useLenis`) — manuel `new Lenis()` değil. Gerekçe: `useLenis` context'i Marquee/JellyWave'in scroll `velocity` okuması için hazır; instance lifecycle'ı React'e bağlı; raf yine README'deki gibi `gsap.ticker`'a bağlanır (`lenis.on("scroll", ScrollTrigger.update)`, `lagSmoothing(0)`). Sistem reduced-motion'ı Lenis kendisi izler; lab override'ı için `lerp` elle 1 yapılır.
-25. React Compiler lint kuralları aktif (`react-hooks/refs`, `react-hooks/immutability`): `ref.current`'i render'da **ve render'da çağrılan closure'larda** (`contextSafe(...)` dahil) okuma → GSAP hedefini `useGSAP({ scope })` selector'ıyla ver (`".wrap"`, `"path"`); dinamik element için `createElement(as, { ref })` değil `const Tag = as; <Tag ref={ref}>`; kütüphane nesnesi mutasyonunu (`lenis.options.x = …`) modül-seviyesi helper fonksiyona taşı.
+24. Smooth scroll: **`lenis/react`** (`<ReactLenis root options={{ autoRaf:false }}>` + `useLenis`) — manuel `new Lenis()` değil. Gerekçe: `useLenis` context'i Marquee/JellyWave'in scroll `velocity` okuması için hazır; instance lifecycle'ı React'e bağlı; raf `gsap.ticker`'a **`<ReactLenis>` içindeki çocuk `LenisTicker` component'inde `useLenis()` ile** bağlanır — `ref.current.lenis` mount anında `undefined`dır, ona güvenme (`lenis.on("scroll", ScrollTrigger.update)`, `lagSmoothing(0)`). Sistem reduced-motion'ı Lenis kendisi izler; lab override'ı için `lerp` elle 1 yapılır.
+25. React Compiler lint kuralları aktif (`react-hooks/refs`, `react-hooks/immutability`, `react-hooks/set-state-in-effect`): effect içinde **senkron `setState` yok** (türetilmiş değer kullan ya da `setTimeout(fn, 0)` ile ertele, cleanup'ta temizle); closure'larda `ref.current` **okumak da yazmak da** yasak — closure'larda `document.title =` gibi global mutasyon ve modül-seviyesi `let` ataması da yasak → hepsi ayrı modülde plain fonksiyon (`src/lib/transition-title.ts`), closure sadece çağırır; `ref.current`'i render'da **ve render'da çağrılan closure'larda** (`contextSafe(...)` dahil) okuma → GSAP hedefini `useGSAP({ scope })` selector'ıyla ver (`".wrap"`, `"path"`); dinamik element için `createElement(as, { ref })` değil `const Tag = as; <Tag ref={ref}>`; kütüphane nesnesi mutasyonunu (`lenis.options.x = …`) modül-seviyesi helper fonksiyona taşı.
 26. Her motion primitive `useReducedMotion()` okur (`src/lib/hooks/useReducedMotion.ts` = sistem tercihi ∨ `useMotionStore.forceReduced`), `true` ise GSAP kurmadan statik render eder. GSAP eklentileri sadece `src/lib/gsap.ts` üzerinden import edilir (tek `registerPlugin`).
+27. CursorTrail: `data-cursor-hide` **sadece açıkça işaretlenen** elementlerde (BlobButton, hap butonlar, nav). Otomatik `button, a` selector'ı yok — her yeni etkileşimli bileşen kendi karar verir (karar 2026-09-17).
+28. Marquee metinleri iki dilde de İngilizce (`Motion.marqueeItems` / `Home.marquee*` tr.json'da da EN) — Kural 18'in sonucu (karar 2026-09-17).
+29. PageTransition: React `<ViewTransition>` / View Transitions API **kullanılmıyor** — snapshot crossfade'i canlı GSAP path morph'u ve "eski sayfayı perde kapanana kadar tut" akışını veremez. Yol: `TransitionLink` (next-intl `Link` + `onNavigate` → `preventDefault`) → `useTransitionStore.trigger(href)` → perde kapanır → `router.push` → `usePathname` değişince perde açılır; 4 s fallback. Reduced motion / hash / aynı sayfa: normal navigasyon. Tüm iç linkler `TransitionLink`.
+30. `persist` (localStorage) store'ları SSR'da boş; badge/sayaç gibi çıktılar `useHydrated()` sonrası render edilir (hydration uyuşmazlığı yok). Preloader `sessionStorage`, cookie `localStorage` sadece effect'te okunur.
+31. Koşullu `null` render eden client component'te `useGSAP({ scope })` kullanma: ref effect içinde okunur, yoksa erken çıkılır, hedefler element olarak verilir. Aksi halde bağımlılık değişince "Invalid scope" uyarısı.
 
 ---
 
@@ -181,13 +186,14 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: Playwright (headless Chromium) — console 0 hata/uyarı; ST sayısı 2 → reduced'da 0 → 2; `/tr/lab`↔`/en/lab` ×10 ve `/tr/lab`↔`/tr` ×10 sonrası hep 2 (leak yok). `docs/screens/faz-3-lab.png`, `faz-3-motion.webm`
 
 ### Faz 4 — Global Layout
-- [ ] R1 Preloader (ilk yükleme, sessionStorage ile 1 kez)
-- [ ] R2 PageTransition + R3 dinamik title
-- [ ] R4 Nav + R5 MenuOverlay
-- [ ] R12 Cart (Zustand store, toast, drawer, WhatsApp checkout)
-- [ ] R16 CookieBanner · R17 InfoModal
-- [ ] R18 Footer
-- [ ] ✅ Kabul: sayfalar arası geçiş akıcı, mobil nav çalışıyor
+- [x] R1 Preloader (`src/components/layout/Preloader.tsx`: ilk render "yükleniyor", sessionStorage effect'te, 3 mesaj + progress, Lenis + overflow kilidi)
+- [x] R2 PageTransition + R3 dinamik title (`PageTransition.tsx` + `motion/TransitionLink.tsx` + `lib/transition-store.ts` + `lib/transition-title.ts`; Kural 29) *(revize: 2026-09-17 — View Transitions API yerine TransitionLink)*
+- [x] R4 Nav (Lenis direction, IO `[data-nav-dark]`, `text-stroke-fill` logo) + R5 MenuOverlay (SplitReveal lines, `useDialog`: ESC / focus trap / scroll kilidi)
+- [x] R12 Cart (`lib/cart-store.ts` persist localStorage, toast, kraft drawer, `wa.me` checkout; numara null → disabled + "yakında")
+- [x] R16 CookieBanner (localStorage OKAY / sessionStorage LATER) · R17 InfoModal (KraftCard, `useDialog`)
+- [x] R18 Footer (SplitReveal + RollText linkler, dev wordmark, Juggle, tape, telif, kredi; `data-nav-dark`)
+- [x] CursorTrail layout'a taşındı; `/lab` "Layout" bölümü (perde tetikle, perde ile ana sayfa, sepete ekle, sepeti aç, InfoModal, preloader sıfırla) *(revize: 2026-09-17)*
+- [x] ✅ Kabul: `scripts/lab-check.mjs` 31/31 ✓, console 0 — perde + title (`Smash'leniyor` → `Servis` → başlık), preloader 1 kez, nav gizlen/göster/invert, cart persist, ESC/focus, mobil 375 overlay + drawer. `docs/screens/faz-4-desktop.png`, `faz-4-mobile.png`, `faz-4-transition.webm`
 
 ### Faz 5 — Ana Sayfa
 - [ ] Hero (R9)
@@ -243,6 +249,9 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-17 | 2 | Silkscreen TR karakter desteği zayıf: `ğ ş ı Ğ Ş İ` yok (fontTools ile `.next/static/media/*.woff2` cmap union'ı; latin-ext dilimi sadece 18 glyph) | Google Fonts "latin-ext" etiketi tam kapsama garantisi vermiyor | Kural 18 uygulandı: `font-pixel` = **Press Start 2P** (12/12 TR ✓). Silkscreen `font-pixel-alt` olarak sadece `/lab`'da, `preload: false`. Modak ve Mouse Memoirs 12/12 ✓ — fallback zinciri yine de tanımlı (Kural 19) |
 | 2026-09-17 | 2 | Sistemde fontTools yok; glyph kapsamı doğrulanamıyordu | macOS python3'te fontTools/brotli yok | Scratchpad'e `pip --target` ile kuruldu; `/lab`'daki `GlyphCheck` (canvas ölçümü) tarayıcı tarafında aynı testi yapar (Kural 21) |
 | 2026-09-17 | 3 | `pnpm lint` 4 hata: `react-hooks/refs` (BlobButton `contextSafe` closure'ları + SplitReveal `createElement(as,{ref})`), `react-hooks/immutability` (SmoothScroll `lenis.options.lerp =`) | `eslint-config-next@16` React Compiler kurallarını açıyor; `ref.current`'i render sırasında çağrılan fonksiyonlara vermek ve dış nesne mutasyonu yasak | Kural 25: GSAP hedefleri `scope` selector'ı (`.wrap`, `path`) ile; dinamik tag `createElement` değil JSX `<Tag ref>`; Lenis mutasyonu modül-seviyesi `applyLerp()` helper'ına taşındı |
+| 2026-09-17 | 4 | `pnpm lint` 6 hata: `react-hooks/set-state-in-effect` (Cart toast, Nav `setDark(false)`), `react-hooks/refs` + `immutability` (PageTransition `contextSafe` closure'larında `root.current` okuma ve `ref.current =` yazma) | Kural 25 eksikti: closure'da ref *yazmak* da yasak; effect'te senkron `setState` de ayrı kural | Kural 25 genişletildi: state türet ya da `setTimeout(…,0)`; closure'lar sadece selector + store + helper fonksiyon çağrısı kullanır (`src/lib/transition-title.ts`) |
+| 2026-09-17 | 4 | Wheel ile scroll çalışmıyor (`lenis-scrolling` sınıfı geliyor ama `scrollY` 0); nav gizlenme testi düşüyor | `ReactLenis` instance'ı effect'te `setLenis` ile state'e yazıyor, `ref.current.lenis` ancak sonraki render'da doluyor; SmoothScroll'un `[]` bağımlılıklı effect'i o anda `undefined` görüp ticker'ı hiç bağlamıyordu (Faz 3'te StrictMode ikinci koşusuyla şans eseri çalışmış) | Ticker bağlama `useLenis()` ile **çocuk** component'e (`LenisTicker`) taşındı; `lenis` var olunca effect koşuyor (Kural 24 güncellendi) |
+| 2026-09-17 | 4 | Console: `Invalid scope` + `GSAP target .bar not found` | `CursorTrail` reduced/coarse'ta `null` render edince `root.current` null; `useGSAP({ scope })` bağımlılık değişince null scope ile yeniden koşuyor | Koşullu null render eden component'lerde `scope` yok; ref effect içinde okunur, element yoksa erken çıkılır; hedefler `querySelector` ile element olarak verilir (Kural 31) |
 
 ---
 

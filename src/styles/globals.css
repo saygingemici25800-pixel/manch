@@ -69,6 +69,12 @@ body {
   paint-order: stroke fill;
 }
 
+/* Dolgu + arkada kontur (logo). Kontur rengi --stroke-color (varsayılan berry). */
+@utility text-stroke-fill {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.09em var(--stroke-color, var(--color-berry));
+}
+
 /* Film grain overlay (.06). Uygulandığı kutuya ::after ile biner, tıklamayı engellemez. */
 @utility grain {
   position: relative;

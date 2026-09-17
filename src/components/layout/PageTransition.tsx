@@ -1,0 +1,102 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/lib/gsap";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useTransitionStore } from "@/lib/transition-store";
+import { markCover, markServing, pathChangedSinceCover } from "@/lib/transition-title";
+
+// viewBox 0 0 100 100 — Q kontrol noktalı dalgalı kenar
+const FLAT_BOTTOM = "M0 100 Q50 100 100 100 L100 100 L0 100 Z";
+const FULL_COVER_UP = "M0 0 Q50 -18 100 0 L100 100 L0 100 Z";
+const FULL_RECT = "M0 0 L100 0 L100 100 Q50 100 0 100 Z";
+const GONE_TOP = "M0 0 L100 0 L100 0 Q50 -18 0 0 Z";
+
+const LAYERS = ["var(--color-berry)", "var(--color-pink)", "var(--color-mustard)"];
+const FALLBACK_MS = 4000;
+
+/**
+ * R2 — 3 SVG perde (berry → pink → mustard), alttan yukarı path morph, ortada Modak "MANCHING…".
+ * R3 — document.title: "<sayfa> | Smash'leniyor" → "<sayfa> | Servis" → sayfa başlığı.
+ * Akış (Kural 29): trigger → cover → covering → covered → (pathname değişti) → reveal → idle
+ */
+export default function PageTransition() {
+  const root = useRef<HTMLDivElement>(null);
+  const t = useTranslations("Transition");
+  const router = useRouter();
+  const pathname = usePathname();
+  const phase = useTransitionStore((s) => s.phase);
+  const setPhase = useTransitionStore((s) => s.setPhase);
+
+  const { contextSafe } = useGSAP({ scope: root });
+
+  const reveal = contextSafe(() => {
+    setPhase("reveal");
+    const restoreTitle = markServing(t("titleServing"));
+    gsap
+      .timeline({
+        onComplete: () => {
+          gsap.set(".layer path", { attr: { d: FLAT_BOTTOM } });
+          gsap.set(".stage", { autoAlpha: 0 });
+          setPhase("idle");
+          window.setTimeout(restoreTitle, 900);
+        },
+      })
+      .set(".layer path", { attr: { d: FULL_RECT } })
+      .to(".word", { autoAlpha: 0, y: -20, duration: 0.3, ease: "power2.in" }, 0)
+      .to(".layer path", { attr: { d: GONE_TOP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 }, 0.05);
+  });
+
+  const cover = contextSafe(() => {
+    setPhase("covering");
+    markCover(pathname, t("titleFlipping"));
+    gsap
+      .timeline({
+        onComplete: () => {
+          const { href, locale } = useTransitionStore.getState();
+          setPhase("covered");
+          if (href) router.push(href, { locale });
+          else window.setTimeout(reveal, 350); // demo: navigasyon yok
+        },
+      })
+      .set(".stage", { autoAlpha: 1 })
+      .set(".layer path", { attr: { d: FLAT_BOTTOM } })
+      .set(".word", { autoAlpha: 0, y: 20 })
+      .to(".layer path", { attr: { d: FULL_COVER_UP }, duration: 0.9, ease: "power4.inOut", stagger: 0.08 })
+      .to(".word", { autoAlpha: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.35");
+  });
+
+  // trigger → cover (bir kez; cover() hemen "covering"e geçer)
+  useEffect(() => {
+    if (phase === "cover") cover();
+  }, [phase, cover]);
+
+  // pathname değişti (navigasyon bitti) → reveal; fallback: 4 s içinde değişmezse yine aç
+  useEffect(() => {
+    if (phase !== "covered" || !useTransitionStore.getState().href) return;
+    // Yeni sayfanın metadata title'ı bir sonraki frame'de yerleşir
+    const delay = pathChangedSinceCover(pathname) ? 80 : FALLBACK_MS;
+    const id = window.setTimeout(reveal, delay);
+    return () => window.clearTimeout(id);
+  }, [phase, pathname, reveal]);
+
+  return (
+    <div ref={root} data-transition={phase} aria-hidden="true" className="contents">
+      <div
+        className="stage fixed inset-0 z-90 invisible opacity-0"
+        style={{ pointerEvents: phase === "idle" ? "none" : "auto" }}
+      >
+        {LAYERS.map((fill, i) => (
+          <svg key={i} className="layer absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d={FLAT_BOTTOM} fill={fill} />
+          </svg>
+        ))}
+        <div className="word absolute inset-0 grid place-items-center font-display text-[7vw] max-md:text-[16vw] leading-none text-berry opacity-0">
+          {t("word")}
+        </div>
+      </div>
+    </div>
+  );
+}

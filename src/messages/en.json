@@ -55,7 +55,15 @@
     "added": "ADDED TO CART",
     "title": "Cart",
     "empty": "Your cart is empty.",
-    "checkout": "Checkout"
+    "checkout": "Checkout",
+    "open": "Open cart",
+    "close": "Close",
+    "less": "Decrease",
+    "more": "Increase",
+    "remove": "Remove",
+    "priceTodo": "price soon",
+    "waIntro": "Hi MANCH! I'd like to order:",
+    "checkoutSoon": "WhatsApp ordering coming soon — the button activates once the number is added."
   },
   "Cookie": {
     "text": "We use cookies for flavor.",
@@ -63,7 +71,13 @@
     "okay": "OKAY!"
   },
   "Modal": {
-    "close": "ACKNOWLEDGE & CLOSE"
+    "close": "ACKNOWLEDGE & CLOSE",
+    "title": "Contact & Reservations",
+    "subtitle": "Reach us, book a table, or just say hi.",
+    "address": "Address",
+    "phone": "Phone",
+    "hours": "Hours",
+    "reservation": "For reservations: Instagram DM or phone (soon)."
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -89,7 +103,8 @@
     "enOnly": "EN-only text (tape/marquee)",
     "navOtherLocale": "Türkçe lab",
     "navHome": "Home",
-    "motion": "Motion"
+    "motion": "Motion",
+    "layout": "Layout"
   },
   "Motion": {
     "rmToggle": "Reduced motion",
@@ -107,5 +122,13 @@
     "jellyNote": "scroll velocity → scaleY",
     "jellyText": "Gravity approved cheese pull.",
     "cursorNote": "desktop only (hover + fine pointer); hidden over data-cursor-hide elements"
+  },
+  "LayoutLab": {
+    "trigger": "Trigger curtain",
+    "tlHome": "Home via curtain",
+    "addTest": "Add test item to cart",
+    "openCart": "Open cart",
+    "openInfo": "Open InfoModal",
+    "resetPreloader": "Reset preloader + cookie"
   }
 }

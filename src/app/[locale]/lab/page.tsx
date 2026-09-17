@@ -6,6 +6,7 @@ import GlyphCheck from "@/components/ui/GlyphCheck";
 import KraftCard from "@/components/ui/KraftCard";
 import Placeholder from "@/components/ui/Placeholder";
 import TileWall from "@/components/ui/TileWall";
+import LayoutLab from "./LayoutLab";
 import MotionLab from "./MotionLab";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -60,7 +61,7 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
   }));
 
   return (
-    <main className="flex flex-col gap-[5vw] max-md:gap-[14vw] px-[2.5vw] py-[3vw] max-md:px-[5vw] max-md:py-[10vw]">
+    <main className="flex flex-col gap-[5vw] max-md:gap-[14vw] px-[2.5vw] pb-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[10vw] max-md:pt-[24vw]">
       <header className="flex flex-col gap-[0.5vw] max-md:gap-[2vw]">
         <h1 className="heading180 text-berry">{t("title")}</h1>
         <p className="text40 text-berry-dk">{t("subtitle")}</p>
@@ -197,6 +198,11 @@ export default async function LabPage({ params }: PageProps<"/[locale]/lab">) {
       {/* ---------- Motion (Faz 3) ---------- */}
       <Section id="motion" title={t("motion")}>
         <MotionLab />
+      </Section>
+
+      {/* ---------- Layout (Faz 4) ---------- */}
+      <Section id="layout" title={t("layout")}>
+        <LayoutLab />
       </Section>
     </main>
   );
