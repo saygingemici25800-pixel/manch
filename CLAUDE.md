@@ -30,8 +30,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 2 tamamlandı.** Sıradaki: Faz 3 (Motion Primitive'leri) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
-- Son başarılı build: 2026-09-18 Faz 2 kapanış (`pnpm build` + `pnpm lint` temiz; 5 rota: `/_not-found`, `/tr`, `/en`, `/tr/lab`, `/en/lab` + `ƒ Proxy`)
+- Aktif faz: **Faz 3 tamamlandı.** Sıradaki: Faz 4 (Global Layout) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Son başarılı build: 2026-09-18 Faz 3 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 5 rota + `ƒ Proxy`; `scripts/lab-check.mjs` 16/16)
 - Dal: **`faz-1-yeniden`** — proje bu dalda sıfırdan kuruldu. Eski tam proje `main` + `yedek/faz-1-9` dalı + `yedek-faz-9` etiketinde.
 - **Canlı: https://manch-eight.vercel.app — `origin/main` = `e05f994`, 2026-09-18'de push edildi, deploy yeşil, `scripts/smoke.mjs` 10/10 ✓ 0 uyarı.** Vercel `NEXT_PUBLIC_SITE_URL` ayarlı.
 - **Devralınanlar (main → faz-1-yeniden):** `public/` (32 dosya: 7 burger kesiti PNG+WebP, 6 malzeme ikonu, 3 fotoğraf JPG+WebP, maskot, 4 logo) · `src/data/menu.ts` (6 kategori, **25 ürün, 24'ünde gerçek fiyat 35–790 TL**) · `src/lib/site.ts` (**telefon, WhatsApp, e-posta, Facebook dolu**; `hours` + `orderUrl` hâlâ null) · `src/messages/{tr,en}.json` (19 namespace, 216 anahtar, simetrik) · `src/assets/fonts/Modak-Regular.ttf` (OG için, Kural 39) · **KURALLAR 49 madde + HATA GÜNLÜĞÜ 39 satır**.
@@ -39,14 +39,14 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **RENK TEYİDİ (2026-09-18) — 9 tokendan yalnızca 3'ü doğrulanabildi:**
   - `public/logo/*.svg` **renk taşımıyor** (`fill="currentColor"`, potrace izi — Kural 42). `public/logo/logo-manch.png` ise `photos_logo.py` içinde `BERRY = (0x7A,0x1F,0x4B)` ile boyanarak üretilmiş → **döngüsel kanıt, teyit sayılmaz**.
   - Tek bağımsız kaynak **`docs/source/menu-print.png`** (düz renkli tasarım dosyası, fotoğraf değil).
-  - `berry #7a1f4b` → menü baskısında wordmark **#6A1F3B** (%45.9). Fark: R −16, B −16 — baskı daha koyu/şaraba yakın. **KARAR BEKLİYOR, değiştirilmedi.**
+  - `berry` → **#7A1F4B'den #6A1F3B'ye güncellendi (karar 2026-09-18, kullanıcı)**; kaynak menü baskısındaki wordmark (%45.9). Kontrast Kural 40 açısından **iyileşti**: berry/cream 8.57→9.73 · berry/pink 4.89→5.55 · berry/tile 5.15→5.85 · mustard/berry 6.03→6.84 — hiçbir çift gerilemedi.
   - `sky #c4e4f3` → mavi burger filigranı **~#C7E0F2**. Fark ihmal edilebilir ✓
-  - `cream #f4eee6` → menü zemini **#FEF8F3**. Ölçülen daha açık/pembemsi. **KARAR BEKLİYOR.**
+  - `cream #f4eee6` → **değişmiyor (karar 2026-09-18)**; ölçülen #FEF8F3 kağıt zemini, marka rengi değil.
   - `tile #8fc3d6` → yalnızca fotoğrafta var (~#84A8BA, ışık bağımlı) — **teyit edilemez**.
   - `berry-dk` · `paper` · `pink` · `mustard` · `ink` → **hiçbir kaynakta yok, teyit edilemez.**
-  - Kesin teyit için gereken: **orijinal vektör logo** (AI/SVG) veya marka kılavuzu.
+  - Kalan 7 token (`berry-dk` `sky` `tile` `paper` `pink` `mustard` `ink`) **değişmiyor** — teyit için orijinal vektör logo / marka kılavuzu gerekli.
 - **Kararlar (2026-09-18, kullanıcı):** ① Smash Anatomy (R15) **kalıyor** — 8 katman tepeden çekilip şeffaf zemine alınacak; görseller gelene kadar placeholder ile çalışılır. ② Instagram grid **kalıyor** — 6 gerçek 1:1 fotoğraf gelecek. ③ 25 ürünün açıklamaları TR+EN yeniden yazılacak; **metinler dışarıdan gelir, Claude üretmez**.
-- Açık TODO'lar: **8 katman fotoğrafı** (Smash Anatomy, tepeden, şeffaf zemin) · **Instagram için 6 adet 1:1 fotoğraf** · **25 ürün açıklaması TR+EN** (dışarıdan) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** (Guacamole, 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · iç mekan/zone galerisi fotoğrafı yok · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- Açık TODO'lar: **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **8 katman fotoğrafı** (Smash Anatomy, tepeden, şeffaf zemin) · **Instagram için 6 adet 1:1 fotoğraf** · **25 ürün açıklaması TR+EN** (dışarıdan) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** (Guacamole, 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · iç mekan/zone galerisi fotoğrafı yok · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -102,6 +102,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 47. LCP: `/tr` mobil LCP elementi **hero H1**'dir (fotoğraf değil — `hero-cook.jpg` 750w WebP ≈ 36 KB, `priority` + `fetchPriority="high"` + `quality 70`). H1 **SplitText ile animasyonlanmaz** (statik `<h1>`): split → char span'ları → yeniden boyama LCP adayını animasyon sonuna (3.2 s) kaydırıyordu. Hero hareketi dekoratif elemanlarda (rozet spin, kesit Float). Karar (a) uygulandı (sizes/kalite/AVIF/fetchpriority); (b) (mobilde fotoğrafsız hero) gerekmedi. `next.config` `images.formats: ["image/avif","image/webp"]`, **`images.qualities: [70, 75]`** (kullanılan her `quality` listede olmalı, yoksa 400); `next/image` çıktıları prod'da `curl -H "Accept: image/avif"` ile doğrulanır (hero 640w, kesit 384/750w). Genel kural: LCP adayı olan başlık/görsel ilk boyamadan sonra DOM'u değişen bir animasyona sokulmaz.
 48. Deploy duman testi `scripts/smoke.mjs <url>`: sayfalar/sitemap/robots/OG 200, bilinmeyen yol 404, head'de canonical + hreflang + og:image + Restaurant JSON-LD. HTML attribute'larını **case-insensitive** ara (Next 16 `hrefLang` yazar). `canonical` host ölçülen host'tan farklıysa **uyarı** (env eksik), hata değil. Vercel'de `NEXT_PUBLIC_SITE_URL` ayarlanınca yeniden koşulur.
 49. CLAUDE.md'yi script ile düzenlerken başlık aramaları **satır başına çapalı regex** olmalı (`re.search(r"^## 📍 DURUM$", s, re.M)`) — düz `str.index("## …")` dosyanın başındaki HATA PROTOKOLÜ maddelerinde geçen **başlık alıntılarını** yakalar. İki sınırla dilim alırken `assert a < b` şart: sınırlar ters dönerse `s[:a] + s[b:]` aradaki metni **ikizler** (sessiz bozulma). Yazımdan sonra `- [x]` / `- [ ]` ve başlık sayıları grep ile doğrulanır (karar 2026-09-18).
+50. **Fold kuralı.** Girişte animasyon uygulayan her primitive (SplitReveal, ScrollTrigger.batch, scrub) ilk boyamada **viewport içinde olan öğeye hiç dokunmaz** — gizlemez, ScrollTrigger kurmaz, öğe animasyonsuz görünür başlar. Animasyon yalnızca fold altındaki öğelere kurulur. Ölçüt: `el.getBoundingClientRect().top < window.innerHeight`. Gerekçe: eski sitede batch tetiklenmeyince öğeler `opacity:0`'da kalıyordu (`/tr/menu` açılışında 8 karttan 1'i görünüyordu; Faz 6 hata günlüğü). Kural 47 (LCP adayı animasyona sokulmaz) bunun özel hâlidir. `/lab#d-fold` bunu test eder (karar 2026-09-18).
+51. Eğik (`rotate`) tam genişlik bant: bandı **%115 genişlikte** yapıp yatayda taşır, dış kırpma kutusuna **`paddingBlock ≈ |tilt| vw`** verilir. Aksi hâlde `overflow-hidden` döndürülmüş bandı çapraz keser ve bant kama şekline döner (2026-09-18, Marquee).
 
 ---
 
@@ -156,9 +158,9 @@ Fethiye'deki smash burger markası **MANCH** için animasyon ağırlıklı, iki 
 
 ## 3. TASARIM SİSTEMİ
 
-**Renkler** (logodan teyit edilecek):
+**Renkler** (`berry` 2026-09-18'de basılı menüden teyit edildi; kalan 8 token teyit bekliyor — DURUM):
 ```
-berry #7A1F4B · berry-dk #4E1030 · sky #C4E4F3 · tile #8FC3D6
+berry #6A1F3B · berry-dk #4E1030 · sky #C4E4F3 · tile #8FC3D6
 cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 ```
 **Fontlar:** Modak (`font-display`) · Mouse Memoirs (`font-ui`, uppercase, tracking-wide) · **Press Start 2P** (`font-pixel`, tape/aksan — Kural 18). TR karakterleri test et (Kural 21).
@@ -211,11 +213,11 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ✅ Kabul: `pnpm build` + `pnpm lint` temiz; `/tr/lab` + `/en/lab` dev'de 200, **prod'da 404** (Kural 23 doğrulandı); TR kapsamı **iki bağımsız yöntemle** ✓ — fontTools cmap union (Modak 442 glyph, Mouse Memoirs 354, Press Start 2P 616; üçü de 12/12) **ve** `/lab` GlyphCheck canvas ölçümü (üçü de 12/12); konsol 0 hata; 1440 ve 375'te yatay taşma yok. `docs/screens/faz-2-lab.png`, `faz-2-lab-mobile.png` *(revize: 2026-09-18)*
 
 ### Faz 3 — Motion Primitive'leri
-- [ ] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
-- [ ] R6 RollText · R7 BlobButton · R14 Marquee (scroll hızıyla `timeScale`) · SplitReveal (chars / lines `mask`, `autoSplit`) — `src/components/motion/`
-- [ ] R9 JellyWave (Lenis `velocity` → `quickTo scaleY`) · R8 CursorTrail (hover+fine pointer, `data-cursor-hide`) · R18 Juggle (`--juggle-scale`)
-- [ ] Hepsi `/lab` "Motion" bölümünde demo; `useReducedMotion` hook + Zustand override ile emülasyon toggle'ı; `ScrollTrigger.getAll().length` göstergesi *(revize: 2026-09-17)*
-- [ ] ✅ Kabul: Playwright (headless Chromium) — console 0 hata/uyarı; ST sayısı 2 → reduced'da 0 → 2; `/tr/lab`↔`/en/lab` ×10 ve `/tr/lab`↔`/tr` ×10 sonrası hep 2 (leak yok). `docs/screens/faz-3-lab.png`, `faz-3-motion.webm`
+- [x] R19 SmoothScroll provider (`lenis/react` + GSAP ticker, Kural 24; `[locale]/layout.tsx`'te)
+- [x] R6 RollText · R7 BlobButton · R14 Marquee (scroll hızıyla `timeScale`) · SplitReveal (chars / lines `mask`, `autoSplit`) — `src/components/motion/`
+- [x] R9 JellyWave (Lenis `velocity` → `quickTo scaleY`) · R8 CursorTrail (hover+fine pointer, `data-cursor-hide`) · R18 Juggle (`--juggle-scale`)
+- [x] Hepsi `/lab` "Motion" bölümünde demo; `useReducedMotion` hook + Zustand override ile emülasyon toggle'ı; `ScrollTrigger.getAll().length` göstergesi *(revize: 2026-09-17)*
+- [x] ✅ Kabul: `scripts/lab-check.mjs` **16/16 ✓, konsol 0 hata/uyarı** — Lenis root sınıfı + GSAP ticker ilerliyor · Kural 50 fold testi (fold üstünde split kurulmuyor, öğe opacity 1; fold altında kuruluyor ve geliyor) · CursorTrail masaüstünde render + `data-cursor-hide` üstünde opacity 0 · reduced-motion AÇIK→KAPALI gidiş-dönüş (CursorTrail null, RollText tek kopya) · **sızıntı yok: lab↔ana sayfa 6 gezinmede ScrollTrigger [3,3,3,3,3,3]** · 11 demo bloğu. `docs/screens/faz-3-lab.png`, `faz-3-lab-mobile.png`, `faz-3-motion.webm` *(revize: 2026-09-18)*
 
 ### Faz 4 — Global Layout
 - [ ] R1 Preloader (`src/components/layout/Preloader.tsx`: ilk render "yükleniyor", sessionStorage effect'te, 3 mesaj + progress, Lenis + overflow kilidi)
@@ -340,6 +342,9 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-18 | 1 | `ERR_PNPM_IGNORED_BUILDS` tekrar (@parcel/watcher, @swc/core) | pnpm 11 postinstall script'lerini engelliyor; Next 16 scaffold'u `pnpm-workspace.yaml`'a bu kez `sharp: false` + `unrs-resolver: false` yazıyor | Dört paket de `allowBuilds`'te `false`; build etkilenmedi |
 | 2026-09-18 | 2 | `/lab` GlyphCheck **üç fontta da "12/12 eksik"** dedi; oysa fontTools ve sayfanın kendisi karakterlerin var olduğunu gösteriyordu | Canvas `ctx.font` **CSS değişkeni çözmez** — `48px var(--font-modak), monospace` geçersiz shorthand, atama sessizce yok sayılıyor; iki çizim de varsayılan fontla yapılınca pikseller eşitleniyor ve her karakter "fallback'e düştü" sayılıyor | Aile adı `getComputedStyle(document.documentElement).getPropertyValue(cssVar)` ile çözülür; ayrıca next/font değişkeni `"X", "X Fallback"` şeklinde ve fallback (yerel Arial türevi) TR karakterleri **içerir** → yalnızca **ilk** aile kullanılır, yoksa ölçüm yanlış "var" derdi |
 | 2026-09-18 | 2 | Düzeltmeden sonra Modak "ölçülemedi", diğer ikisi doğru | Kapı `ctx.font` geri okumasını ham karşılaştırıyordu; tarayıcı **tek kelimelik** aile adının tırnaklarını düşürüyor (`"Modak"` → `Modak`), çok kelimeliyi koruyor (`"Mouse Memoirs"`) | Karşılaştırma normalize edildi (tırnak sil + küçük harf). Genel kural: `ctx.font` geri okuması normalize edilmeden karşılaştırılmaz |
+| 2026-09-18 | 3 | Eğik Marquee bantları kenarlarda zemini açıkta bırakıyor, sonra kama şekline döndü | (a) bant tam genişlikte olduğu için `rotate` sonrası köşeler viewport'a yetişmiyor; (b) genişletince dış `overflow-hidden` kutusu dikey dolgusuz kaldı → döndürülmüş bandı çapraz kesti | Bant %115 genişlik + `translateX(-6.5%)`, dış kutuya `paddingBlock = |tilt|·1.1 vw` (Kural 51) |
+| 2026-09-18 | 3 | `lab-check` "data-cursor-hide üstünde iz gizlendi" testi düştü (opacity=1) | **Test hatası**: fold testi sayfayı kaydırmıştı, `#d-cursor` viewport dışındaydı; `boundingBox()` viewport dışı koordinat döndürünce `mouse.move` elemana isabet etmedi | Hover testinden önce `scrollIntoViewIfNeeded()`; ayrıca "iz normalde görünür" ön koşul testi eklendi (yanlış pozitifi ayırt etmek için) |
+| 2026-09-18 | 3 | Playwright `waitUntil: "networkidle"` dev sunucuda hiç tetiklenmiyor (script 300 s'de asıldı) | `next dev` HMR websocket'ini açık tutar → ağ hiç boşa düşmez | `waitUntil: "domcontentloaded"` + `waitForSelector` + `document.fonts.ready`. Dev sunucuda networkidle kullanılmaz |
 
 ---
 

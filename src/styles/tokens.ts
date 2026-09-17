@@ -2,7 +2,7 @@
 // Kullanım: /lab önizlemesi, canvas/SVG gibi CSS değişkeni okuyamayan yerler.
 
 export const colors = {
-  berry: "#7a1f4b",
+  berry: "#6a1f3b",
   "berry-dk": "#4e1030",
   sky: "#c4e4f3",
   tile: "#8fc3d6",

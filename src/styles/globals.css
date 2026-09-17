@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 /* ---------- Renk tokenları (src/styles/tokens.ts ile senkron tutulur — Kural 21/22) ---------- */
 @theme {
-  --color-berry: #7a1f4b;
+  --color-berry: #6a1f3b; /* karar 2026-09-18: menu-print.png wordmark ölçümü */
   --color-berry-dk: #4e1030;
   --color-sky: #c4e4f3;
   --color-tile: #8fc3d6;

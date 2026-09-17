@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { MotionLab } from "./MotionLab";
 import { CheckerBand } from "@/components/ui/CheckerBand";
 import { GlyphCheck } from "@/components/ui/GlyphCheck";
 import { KraftCard } from "@/components/ui/KraftCard";
@@ -110,6 +111,11 @@ export default async function LabPage({ params }: Props) {
             <div className="grain h-[8vw] bg-mustard max-md:h-[20vw]" />
           </div>
         </div>
+      </Section>
+
+      {/* ---------------- MOTION ---------------- */}
+      <Section id="motion" title={t("motion")}>
+        <MotionLab />
       </Section>
 
       {/* ---------------- DESENLER ---------------- */}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { routing } from "@/i18n/routing";
 import { fontVariables } from "@/styles/fonts";
 import "@/styles/globals.css";
@@ -40,7 +41,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} className={fontVariables}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <SmoothScroll>{children}</SmoothScroll>
         </NextIntlClientProvider>
       </body>
     </html>
