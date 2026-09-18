@@ -470,6 +470,72 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   const back = await m.evaluate(() => document.querySelectorAll("[data-product-card]").length);
   t("/menu · filtre kapatılınca 28'e döner", back === 28, `${back}`);
 
+  /* ---- Faz 6: FİYATSIZ ürün /menu'den de sipariş EDİLEMEZ ----
+     Zone'un sipariş tahtası (5.5.8) bunu yapıyordu, `/menu` kartı ve modalı yapmıyordu:
+     4 fiyatsız ürün (Crispy Triangle + 3 içecek) sepete girebiliyor ve `orderTotal` onları
+     0 saydığı için WhatsApp siparişine **bedelsiz** yazılıyordu. Koşul veriden gelir
+     (`price == null`), koda slug listesi gömülmez.
+
+     Tıklama DOM'dan (`el.click()`) yapılır, Playwright'ın `locator.click()`'iyle değil:
+     ① önceki testten kalan modal perdesi gerçek tıklamayı yakalıyordu (ölçüm aracının
+     yan etkisi, Kural 60) ② `disabled` bir düğme zaten olay almaz — DOM tıklaması hem
+     `disabled`ı hem `onClick` içindeki korumayı aynı anda sınar. */
+  await m.goto(`${BASE}/tr/menu`, { waitUntil: "domcontentloaded" });
+  await m.waitForSelector("[data-product-card]");
+  await m.waitForTimeout(1500);
+  const soonSel = "[data-product-card]:has([data-testid=soon-badge]), [data-product-card]";
+  const soon = await m.evaluate(() => {
+    const cards = [...document.querySelectorAll("[data-product-card]")]
+      .filter((c) => /YAKINDA|COMING SOON/i.test(c.textContent));
+    const btn = cards[0]?.querySelector("[data-add-to-cart]");
+    return {
+      n: cards.length,
+      slug: btn?.getAttribute("data-add-to-cart") ?? null,
+      disabled: btn?.disabled ?? null,
+      aria: btn?.getAttribute("aria-disabled") ?? null,
+      title: btn?.getAttribute("title") ?? null,
+    };
+  });
+  void soonSel;
+  t("/menu · fiyatsız ürün YAKINDA rozetiyle görünüyor", soon.n === 4, `${soon.n} kart`);
+  t("/menu · fiyatsız kartın + düğmesi devre dışı", soon.disabled === true && soon.aria === "true",
+    JSON.stringify({ disabled: soon.disabled, aria: soon.aria }));
+  t("/menu · devre dışı + düğmesi sebebini söylüyor", !!soon.title, `title="${soon.title}"`);
+
+  const cartBefore = await m.evaluate(() => window.__CART__.getState().lines.length);
+  await m.evaluate(() => {
+    const c = [...document.querySelectorAll("[data-product-card]")]
+      .find((x) => /YAKINDA|COMING SOON/i.test(x.textContent));
+    c?.querySelector("[data-add-to-cart]")?.click();
+  });
+  await m.waitForTimeout(400);
+  const cartAfter = await m.evaluate(() => window.__CART__.getState().lines.length);
+  t("/menu · fiyatsız kart sepeti DEĞİŞTİRMİYOR", cartAfter === cartBefore, `${cartBefore} → ${cartAfter}`);
+
+  // aynı kural modalda
+  await m.goto(`${BASE}/tr/menu?p=${soon.slug}`, { waitUntil: "domcontentloaded" });
+  await m.waitForSelector("[data-testid=modal-add]");
+  await m.waitForTimeout(1200);
+  const modalAdd = await m.evaluate(() => {
+    const b = document.querySelector("[data-testid=modal-add]");
+    return { disabled: b?.disabled ?? null, aria: b?.getAttribute("aria-disabled") ?? null };
+  });
+  t("/menu · fiyatsız ürünün MODALINDA da ekle devre dışı",
+    modalAdd.disabled === true && modalAdd.aria === "true", `${soon.slug} · ${JSON.stringify(modalAdd)}`);
+  await m.evaluate(() => document.querySelector("[data-testid=modal-add]")?.click());
+  await m.waitForTimeout(400);
+  const cartAfterModal = await m.evaluate(() => window.__CART__.getState().lines.length);
+  t("/menu · modal sepeti DEĞİŞTİRMİYOR", cartAfterModal === cartBefore, `${cartBefore} → ${cartAfterModal}`);
+  /* Modalı KAPAT ve temiz duruma dön: açık bırakılırsa perdesi (z-73) sonraki testlerin
+     tıklamalarını yakalıyor ve onlar zaman aşımına düşüyor — kendi bloğunun artığıyla
+     başka bir kontrolü kırmak, testin kendi yan etkisidir (Kural 60). */
+  await m.keyboard.press("Escape");
+  await m.waitForTimeout(500);
+  await m.goto(`${BASE}/tr/menu`, { waitUntil: "domcontentloaded" });
+  await m.waitForSelector("[data-product-card]");
+  await m.waitForTimeout(1200);
+
+
   // --- disclaimer iki yerde
   const d1 = await m.locator("[data-testid=menu-disclaimer]").count();
   await m.locator("[data-open-detail='classic-manch']").click();

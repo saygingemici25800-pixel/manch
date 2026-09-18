@@ -26,6 +26,8 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Common");
   const tp = useTranslations("Product");
+  /** Fiyatı bilinmeyen ürün sipariş edilemez — koşul veriden gelir. */
+  const orderable = p.price != null;
   const add = useCartStore((s) => s.add);
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -89,13 +91,21 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
           >
             {t("quickDetails")}
           </button>
+          {/* Fiyatı olmayan ürün SEPETE EKLENEMEZ (Kural 54-A + Faz 6).
+              Koşul VERİDEN türüyor (`price == null`), koda slug listesi gömülmez: gerçek
+              fiyat `menu.ts`'e girildiği an düğme kendiliğinden normale döner. Zone'un
+              sipariş tahtası (5.5.8) bunu zaten yapıyordu; `/menu` kartı ve modalı
+              yapmıyordu — fiyatsız ürün sepete girip toplama 0 olarak yazılıyordu. */}
           <button
             type="button"
             data-cursor-hide
             data-add-to-cart={p.slug}
-            onClick={() => add(p.slug)}
-            aria-label={`${t("addToCart")} — ${p.name[locale]}`}
-            className="grid h-[2.4vw] w-[2.4vw] place-items-center rounded-full bg-mustard text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
+            disabled={!orderable}
+            aria-disabled={!orderable}
+            title={orderable ? undefined : t("priceSoon")}
+            onClick={() => (orderable ? add(p.slug) : undefined)}
+            aria-label={`${p.name[locale]} — ${orderable ? t("addToCart") : t("priceSoon")}`}
+            className="grid h-[2.4vw] w-[2.4vw] place-items-center rounded-full bg-mustard text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-mustard/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
           >
             +
           </button>

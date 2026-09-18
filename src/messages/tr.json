@@ -110,7 +110,8 @@
     "close": "Kapat",
     "skipToContent": "İçeriğe atla",
     "priceOnRequest": "Fiyat için sor",
-    "soon": "YAKINDA"
+    "soon": "YAKINDA",
+    "priceSoon": "Fiyat yakında — şimdilik sipariş edilemiyor"
   },
   "Cart": {
     "added": "SEPETE EKLENDİ",
@@ -248,7 +249,8 @@
       "eyebrow": "ZONE",
       "title": "Mavi karo, pembe dama",
       "counter": "6 KARE",
-      "alts": "Tepside servis|Paket kutusu|Masada düzen|Masada iki kişi|Dolu masa|Tiramisu"
+      "alts": "Tepside servis|Paket kutusu|Masada düzen|Masada iki kişi|Dolu masa|Tiramisu",
+      "cta": "ZONE'A GİR"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",

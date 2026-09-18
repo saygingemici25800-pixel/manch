@@ -110,7 +110,8 @@
     "close": "Close",
     "skipToContent": "Skip to content",
     "priceOnRequest": "Ask for price",
-    "soon": "COMING SOON"
+    "soon": "COMING SOON",
+    "priceSoon": "Price coming soon — not orderable yet"
   },
   "Cart": {
     "added": "ADDED TO CART",
@@ -248,7 +249,8 @@
       "eyebrow": "ZONE",
       "title": "Blue tile, pink checker",
       "counter": "6 SHOTS",
-      "alts": "Served on a tray|Takeaway box|Flat lay|Two at the table|Full table|Tiramisu"
+      "alts": "Served on a tray|Takeaway box|Flat lay|Two at the table|Full table|Tiramisu",
+      "cta": "ENTER THE ZONE"
     },
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",

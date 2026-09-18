@@ -8,6 +8,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Float } from "@/components/motion/Float";
 import { SplitReveal } from "@/components/motion/SplitReveal";
 import { KraftCard } from "@/components/ui/KraftCard";
+import TransitionLink from "@/components/motion/TransitionLink";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { TileWall } from "@/components/ui/TileWall";
 import { site } from "@/lib/site";
@@ -135,6 +136,20 @@ export default async function AboutPage({ params }: Props) {
             </li>
           ))}
         </ul>
+
+        {/* Zone'a dönüş: Zone'a giriş kapısı ana sayfadaki `#zone` bölümünde.
+            Bağlantı tek yönlüydü — maskot panosu buraya getiriyordu ama buradan
+            geri dönüş yoktu (Faz 6 envanteri). Hash'li iç link `TransitionLink`
+            ile: perde hash'te normal navigasyona düşer (Kural 29), `LenisTicker`
+            de hedefe kaydırır (Kural 32). */}
+        <TransitionLink
+          href="/#zone"
+          data-cursor-hide
+          data-testid="about-zone-cta"
+          className="mt-[2vw] inline-flex items-center gap-[0.5vw] rounded-full border-2 border-berry-dk bg-mustard px-[1.8vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] text-berry-dk transition-transform duration-300 hover:scale-105 max-md:mt-[6vw] max-md:gap-[2vw] max-md:px-[6vw] max-md:py-[2.6vw] max-md:text-[4vw]"
+        >
+          {t("gallery.cta")} <span aria-hidden="true">→</span>
+        </TransitionLink>
       </TileWall>
 
       {/* ---------- timeline ---------- */}

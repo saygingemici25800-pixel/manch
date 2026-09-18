@@ -75,15 +75,30 @@ export function ProductModal({ product, onClose }: Props) {
                 <dt className="text-berry">{t("spice")}</dt><dd>{t(`spiceLevel.${product.quick.spice}`)}</dd>
               </dl>
 
-              <button
-                type="button"
-                data-cursor-hide
-                data-testid="modal-add"
-                onClick={() => add(product.slug)}
-                className="group mt-[0.5vw] grid place-items-center rounded-full bg-berry px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink"
-              >
-                <RollText>{tc("addToCart")}</RollText>
-              </button>
+              {/* Karttaki kuralın aynısı: fiyatsız ürün modalda da sipariş edilemez.
+                  İki yerde ayrı ayrı yazmak yerine koşul tek kaynaktan — `price == null`. */}
+              {product.price != null ? (
+                <button
+                  type="button"
+                  data-cursor-hide
+                  data-testid="modal-add"
+                  onClick={() => add(product.slug)}
+                  className="group mt-[0.5vw] grid place-items-center rounded-full bg-berry px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink"
+                >
+                  <RollText>{tc("addToCart")}</RollText>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  data-testid="modal-add"
+                  title={tc("priceSoon")}
+                  className="mt-[0.5vw] inline-flex cursor-not-allowed flex-wrap items-center justify-center gap-x-[0.6vw] gap-y-[0.3vw] rounded-full bg-berry/40 px-[1.6vw] py-[0.8vw] max-md:gap-x-[2vw] max-md:gap-y-[1vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-cream"
+                >
+                  <span>{tc("addToCart")}</span> <SoonBadge />
+                </button>
+              )}
             </div>
           </KraftCard>
         )}
