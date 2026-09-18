@@ -16,10 +16,12 @@ type Props = {
   product: Product;
   /** Kural 47: yalnızca gerçek LCP adayına `priority` (filtresiz ilk kart). */
   priority?: boolean;
+  /** Verilirse "quick details" yerine detay modalını açar (/menu). */
+  onSelect?: (slug: string) => void;
 };
 
 /** R11 — dama bandı, kesit PNG, quick details, hardal "+" sepete ekle. */
-export function ProductCard({ product: p, priority }: Props) {
+export function ProductCard({ product: p, priority, onSelect }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Common");
   const tp = useTranslations("Product");
@@ -48,8 +50,9 @@ export function ProductCard({ product: p, priority }: Props) {
             width={600}
             height={600}
             priority={priority}
-            quality={75}
-            sizes="(min-width: 768px) 30vw, 90vw"
+            fetchPriority={priority ? "high" : undefined}
+            quality={70}
+            sizes="(min-width: 768px) 30vw, 88vw"
             className={clsx(
               "relative mx-auto h-full w-auto object-contain p-[1.5vw] max-md:p-[5vw]",
               !reduced && "transition-transform duration-500 group-hover/card:rotate-6 group-hover/card:scale-105",
@@ -78,8 +81,9 @@ export function ProductCard({ product: p, priority }: Props) {
           <button
             type="button"
             data-cursor-hide
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+            data-open-detail={onSelect ? p.slug : undefined}
+            aria-expanded={onSelect ? undefined : open}
+            onClick={() => (onSelect ? onSelect(p.slug) : setOpen((v) => !v))}
             className="font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry underline underline-offset-4 max-md:text-[3.2vw]"
           >
             {t("quickDetails")}
@@ -96,7 +100,7 @@ export function ProductCard({ product: p, priority }: Props) {
           </button>
         </div>
 
-        {open ? (
+        {open && !onSelect ? (
           <dl className="grid grid-cols-2 gap-x-[1vw] gap-y-[0.2vw] border-t border-berry/15 pt-[0.6vw] font-ui text-[0.85vw] text-ink max-md:gap-y-[1vw] max-md:pt-[2vw] max-md:text-[3.2vw]">
             <dt className="text-berry">{tp("time")}</dt>
             <dd>{tp("minutes", { n: p.quick.time })}</dd>

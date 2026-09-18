@@ -12,6 +12,8 @@ type Props = {
   products: Product[];
   /** Kural 47: filtresiz ilk kart LCP adayı olabilir. */
   priorityFirst?: boolean;
+  /** /menu: kart "quick details" yerine detay modalını açar. */
+  onSelect?: (slug: string) => void;
   className?: string;
 };
 
@@ -26,7 +28,7 @@ type Props = {
  *      görünür durumdan başlar, tetiklenince gizliden görünüre oynar.
  * Böylece batch hiç çalışmasa bile tek bir kart bile kaybolmaz.
  */
-export function ProductGrid({ products, priorityFirst, className }: Props) {
+export function ProductGrid({ products, priorityFirst, onSelect, className }: Props) {
   const root = useRef<HTMLUListElement>(null);
   const reduced = useReducedMotion();
 
@@ -79,7 +81,7 @@ export function ProductGrid({ products, priorityFirst, className }: Props) {
     >
       {products.map((p, i) => (
         <li key={p.slug}>
-          <ProductCard product={p} priority={priorityFirst && i === 0} />
+          <ProductCard product={p} priority={priorityFirst && i === 0} onSelect={onSelect} />
         </li>
       ))}
     </ul>

@@ -7,18 +7,20 @@ type Props = {
   title: string;
   /** Sağdaki sayaç, ör. "6 ÜRÜN". */
   counter?: string;
+  /** Sayfanın ana başlığıysa "h1" (her sayfada tek h1 olmalı). */
+  as?: "h1" | "h2";
   className?: string;
 };
 
 /** R10 — küçük Modak üst başlık + büyük berry başlık + sağda sayaç. */
-export function SectionHeader({ eyebrow, title, counter, className }: Props) {
+export function SectionHeader({ eyebrow, title, counter, as = "h2", className }: Props) {
   return (
     <header className={clsx("mb-[2vw] max-md:mb-[6vw]", className)}>
       <p className="font-display text-[1vw] uppercase tracking-[0.2em] text-berry max-md:text-[3.4vw]">
         {eyebrow}
       </p>
       <div className="flex items-end justify-between gap-[2vw]">
-        <SplitReveal as="h2" type="lines" className="text40 text-[3.2vw] text-berry max-md:text-[8vw]">
+        <SplitReveal as={as} type="lines" className="text40 text-[3.2vw] text-berry max-md:text-[8vw]">
           {title}
         </SplitReveal>
         {counter ? (

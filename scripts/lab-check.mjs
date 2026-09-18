@@ -377,8 +377,143 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   t("reduced · kartlar 6/6 görünür", red.cards === 6, `${red.cards}/6`);
   await h.evaluate(() => window.__MOTION__.getState().setForceReduced(null));
 
-  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|detected as LCP/.test(e));
+  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint/.test(e));
   t("Ana sayfa · konsol temiz", hf.length === 0, hf.slice(0, 2).join(" | ").slice(0, 150));
+  await ctx.close();
+}
+
+// ============================ FAZ 6 — İÇ SAYFALAR ============================
+{
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const m = await ctx.newPage();
+  const merrs = [];
+  const bad4xx = [];
+  m.on("console", (e) => { if (e.type() === "error" || e.type() === "warning") merrs.push(e.type() + ": " + e.text()); });
+  m.on("pageerror", (e) => merrs.push("pageerror: " + e.message));
+  // Konsol filtresi yerine ağ denetimi: 404 belge yanıtı tarayıcıda konsol hatası üretir,
+  // bu yüzden "Failed to load resource" filtrelenirse gerçek eksik varlıklar da gizlenir.
+  // Bunun yerine tüm 4xx/5xx istekler URL'siyle toplanır; kasıtlı 404 dışında hiçbiri olmamalı.
+  m.on("response", (r) => { if (r.status() >= 400) bad4xx.push(`${r.status()} ${r.url().replace(BASE, "").split("?")[0]}`); });
+
+  // --- üç sayfa × iki dil, hepsi 200
+  const routes = ["/tr/menu", "/tr/about", "/tr/contact", "/en/menu", "/en/about", "/en/contact"];
+  const codes = [];
+  for (const r of routes) {
+    const res = await m.goto(`${BASE}${r}`, { waitUntil: "domcontentloaded" });
+    await m.waitForTimeout(500);
+    codes.push(`${r}=${res.status()}`);
+  }
+  t("İç sayfalar · 6 rota (3 sayfa × 2 dil) 200", codes.every((c) => c.endsWith("=200")), codes.join(" "));
+
+  // --- her sayfada tek h1
+  const h1s = [];
+  for (const r of ["/tr/menu", "/tr/about", "/tr/contact"]) {
+    await m.goto(`${BASE}${r}`, { waitUntil: "domcontentloaded" });
+    await m.waitForTimeout(900);
+    h1s.push(await m.evaluate(() => document.querySelectorAll("h1").length));
+  }
+  t("İç sayfalar · her sayfada tek h1", h1s.every((n) => n === 1), `h1 sayıları: ${h1s.join(", ")}`);
+
+  // --- /menu: filtresiz 25 kart
+  await m.goto(`${BASE}/tr/menu`, { waitUntil: "domcontentloaded" });
+  await m.waitForSelector("[data-product-card]");
+  await m.waitForTimeout(3200);
+  const menu0 = await m.evaluate(() => {
+    const c = [...document.querySelectorAll("[data-product-card]")];
+    return { total: c.length, shown: c.filter((x) => Number(getComputedStyle(x).opacity) > 0.99).length,
+             cats: document.querySelectorAll("[data-testid=menu-category]").length,
+             tabs: document.querySelectorAll("[data-testid^=tab-]").length };
+  });
+  t("/menu · filtresiz 25 kart", menu0.total === 25, `${menu0.total}`);
+  t("Kural 50 · /menu ilk boyamada 25/25 kart GÖRÜNÜR", menu0.shown === 25, `${menu0.shown}/${menu0.total}`);
+  t("/menu · 6 kategori bloğu + 6 sekme", menu0.cats === 6 && menu0.tabs === 6, JSON.stringify(menu0));
+
+  // --- SABOTAJ: ScrollTrigger'lar öldürülse de filtresiz listede hepsi görünür
+  await m.evaluate(() => window.__ST_KILL__?.());
+  await m.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+  await m.waitForTimeout(1200);
+  const sab = await m.evaluate(() => {
+    const c = [...document.querySelectorAll("[data-product-card]")];
+    return { st: window.__ST_COUNT__?.() ?? -1, shown: c.filter((x) => Number(getComputedStyle(x).opacity) > 0.99).length, total: c.length };
+  });
+  t("Kural 50 · /menu SABOTAJ: ScrollTrigger'sız da 25/25 görünür", sab.shown === 25, `ST=${sab.st} · ${sab.shown}/${sab.total}`);
+  await m.reload({ waitUntil: "domcontentloaded" });
+  await m.waitForSelector("[data-product-card]");
+  await m.waitForTimeout(2600);
+
+  // --- filtreler (beklenen: spicy 1 · new 1 · signature 4)
+  const counts = {};
+  for (const [tag, expect] of [["spicy", 1], ["new", 1], ["signature", 4]]) {
+    await m.locator(`[data-testid=filter-${tag}]`).click();
+    await m.waitForTimeout(900);
+    counts[tag] = await m.evaluate(() => document.querySelectorAll("[data-product-card]").length);
+    const vis = await m.evaluate(() => [...document.querySelectorAll("[data-product-card]")].filter((c) => Number(getComputedStyle(c).opacity) > 0.99).length);
+    t(`/menu · filtre "${tag}" → ${expect} ürün, hepsi görünür`, counts[tag] === expect && vis === expect, `${counts[tag]} kart, ${vis} görünür`);
+    await m.locator(`[data-testid=filter-${tag}]`).click();
+    await m.waitForTimeout(600);
+  }
+  const back = await m.evaluate(() => document.querySelectorAll("[data-product-card]").length);
+  t("/menu · filtre kapatılınca 25'e döner", back === 25, `${back}`);
+
+  // --- disclaimer iki yerde
+  const d1 = await m.locator("[data-testid=menu-disclaimer]").count();
+  await m.locator("[data-open-detail='classic-manch']").click();
+  await m.waitForTimeout(900);
+  const modal = await m.evaluate(() => ({
+    state: document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state"),
+    url: location.search,
+    disclaimer: !!document.querySelector("[data-testid=modal-disclaimer]"),
+    ing: document.querySelectorAll("[data-testid=product-modal] li").length,
+  }));
+  t("/menu · modal açılır + ?p= URL'e yazılır", modal.state === "open" && modal.url === "?p=classic-manch", JSON.stringify(modal));
+  t("Menu.disclaimer · iki yerde (başlık altı + modal)", d1 === 1 && modal.disclaimer, `başlık=${d1} modal=${modal.disclaimer}`);
+  t("/menu · modalda malzeme listesi", modal.ing >= 6, `${modal.ing} madde`);
+
+  await m.keyboard.press("Escape");
+  await m.waitForTimeout(800);
+  const closed = await m.evaluate(() => ({ state: document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state"), url: location.search }));
+  t("/menu · ESC modalı kapatır + URL temizlenir", closed.state === "closed" && closed.url === "", JSON.stringify(closed));
+
+  // --- derin link: ?p=slug ile doğrudan açılış
+  await m.goto(`${BASE}/tr/menu?p=tiramisu`, { waitUntil: "domcontentloaded" });
+  await m.waitForTimeout(2200);
+  const deep = await m.evaluate(() => document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state"));
+  t("/menu · derin link (?p=tiramisu) modalı açar", deep === "open", `state=${deep}`);
+
+  // --- 404 + catch-all
+  const r404 = await m.goto(`${BASE}/tr/olmayan-sayfa`, { waitUntil: "domcontentloaded" });
+  await m.waitForTimeout(1500);
+  const nf = await m.evaluate(() => ({
+    ui: !!document.querySelector("[data-testid=not-found]"),
+    nav: !!document.querySelector("header"),
+    link: !!document.querySelector("[data-testid=not-found] a"),
+  }));
+  t("404 · status 404", r404.status() === 404, `${r404.status()}`);
+  t("404 · bizim UI + nav + ana sayfa linki", nf.ui && nf.nav && nf.link, JSON.stringify(nf));
+
+  // --- Nav / Footer / MenuOverlay linkleri gerçek rotalara gidiyor mu
+  await m.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await m.waitForTimeout(2600);
+  await m.evaluate(() => window.__UI__.getState().setMenuOpen(true));
+  await m.waitForTimeout(900);
+  const hrefs = await m.evaluate(() => {
+    const grab = (sel) => [...document.querySelectorAll(`${sel} a[href]`)].map((a) => new URL(a.href).pathname);
+    return { nav: grab("header"), overlay: grab("#menu-overlay"), footer: grab("footer") };
+  });
+  await m.evaluate(() => window.__UI__.getState().closeAll());
+  const all = [...new Set([...hrefs.nav, ...hrefs.overlay, ...hrefs.footer])].filter((h) => h.startsWith("/tr") || h.startsWith("/en"));
+  const bad404 = [];
+  for (const href of all) {
+    const res = await m.goto(`${BASE}${href}`, { waitUntil: "domcontentloaded" });
+    if (res.status() !== 200) bad404.push(`${href}=${res.status()}`);
+  }
+  t("Nav/Footer/Overlay · tüm iç linkler 200", bad404.length === 0, `${all.length} link · sorunlu: ${bad404.join(", ") || "yok"}`);
+
+  const mf = merrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|Failed to load resource/.test(e));
+  t("İç sayfalar · konsol temiz", mf.length === 0, mf.slice(0, 2).join(" | ").slice(0, 160));
+  const unexpected = bad4xx.filter((x) => !x.endsWith("/tr/olmayan-sayfa"));
+  t("İç sayfalar · kasıtlı 404 dışında 4xx/5xx istek yok", unexpected.length === 0,
+    `toplam ${bad4xx.length} · beklenmeyen: ${unexpected.slice(0, 3).join(", ") || "yok"}`);
   await ctx.close();
 }
 
