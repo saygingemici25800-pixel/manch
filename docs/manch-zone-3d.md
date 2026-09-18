@@ -608,6 +608,12 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 
 ## 12. AÇIK TODO'LAR
 
+> **Kapanan madde — rakam tipografisi (karar 2026-09-18).** Fiyat, adet ve toplam `font-ui`
+> (Mouse Memoirs) ile yazılır; Modak'ın sıfırı okunmuyor. `About.timeline.eyebrow`'daki
+> "EST. 2026" **Modak kalır**: `SectionHeader` eyebrow ortak bileşendir, tek başına değiştirmek
+> tüm bölüm kickerlarını etkilerdi. Rakam-font kuralı **fiyat/adet/toplam içindir.**
+> **Madde kapandı, yeniden açılmayacak.**
+
 - Misu ve Miyu'nun 4 açılık çizimleri (8 dosya) — çizerde
 - Orijinal vektör logo + marka renk kılavuzu
 - İçecek fiyatları — şimdilik örnek değer

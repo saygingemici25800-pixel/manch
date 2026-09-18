@@ -91,9 +91,9 @@ Birleştirme kararı verilirken bunların canlıda görüneceği bilinerek veril
    %73 → **%100** kadrajda (karar 2026-09-18). Masaüstü etkilenmedi.
 4. ~~Modak'ın `0`'ı okunmuyor.~~ **ÇÖZÜLDÜ** — sipariş tahtası adedi/TOPLAM'ı ve site sepeti
    TOPLAM'ı `font-ui`'ye geçti (karar 2026-09-18). İki kırılımda `0 TL` · `2460 TL` ile gözle
-   doğrulandı. **Sitede Modak'ta kalan tek rakam:** `About.timeline.eyebrow` = "EST. 2026 —
-   FETHİYE" — dekoratif kicker; `SectionHeader` eyebrow'u tüm bölümlerde ortak olduğu için tek
-   başına değiştirmek bütün kickerları etkilerdi → **karar bekliyor.**
+   doğrulandı. Sitede Modak'ta kalan tek rakam `About.timeline.eyebrow` = "EST. 2026 — FETHİYE"
+   idi: **Karar 2026-09-18 — `SectionHeader` eyebrow ortak bileşen olduğu için Modak kalır.
+   Rakam-font kuralı fiyat/adet/toplam içindir. Madde kapandı, yeniden açılmayacak.**
 5. **Menü metinleri taslak** — `Menu.disclaimer` bunu tahtanın üstünde de duyuruyor
    ("Menü ve fiyatlar örnek amaçlıdır, değişebilir").
 6. **Prod konsolunda bir kütüphane uyarısı var:** `THREE.Clock … deprecated`
