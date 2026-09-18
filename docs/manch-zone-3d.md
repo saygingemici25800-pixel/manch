@@ -4,6 +4,12 @@
 > Bu faz `zone/3d-galeri` dalında yapılır, `faz-1-yeniden` dalına ancak kabul kriterleri geçince birleşir.
 > **Referans prototip: `docs/reference/manch-zone-prototype.html`** — tek dosya, vanilla Three.js, tarayıcıda açılır.
 > Ölçüler ve hareket katsayıları için **prototip doğruluk kaynağıdır**; bu dosya nedenini anlatır, prototip değerini verir.
+>
+> ⚠️ **Ama prototip eksiksiz değildir.** Değer kaynağı olması, davranış kaynağı olduğu anlamına gelmez.
+> Bu dosyanın istediği bir davranışı prototip uygulamıyorsa **bu dosya kazanır**. Bilinen fark:
+> **billboard (bölüm 8.3)** — prototip sprite'ı hiç döndürmüyor (`hero.rotation.y` hep 0,
+> `material.side` FrontSide). Kamera sabit olduğu için prototipte sonucu görünmüyor; yön takipli
+> kamerada (bölüm 3.1) karakter her 180° dönüşte **kayboluyor**. 5.5.3'te bölüm 8.3'e göre uygulandı.
 
 ---
 
@@ -81,14 +87,14 @@ CEIL_H = 6
 Z_MIN = -15, Z_MAX = 15
 CHAR_BOUND_X = HALF_W - 1
 SPEED = 4.6
-CAMERA_FOV = 48
+CAMERA_FOV = 48       // DİKEY. Portrede uyarlanır — aşağıdaki nota bak
 CAM_DIST = 5.4
 CAM_HEIGHT = 2.45
 CAM_LERP = 0.09
 LOOK_AHEAD = 3.0
 LOOK_HEIGHT = 1.55
 TURN_BASE = 0.15       // kamera dönüşü — bölüm 3.1
-CHAR_TURN_BASE = 0.02  // karakter dönüşü, kameradan hızlı
+CHAR_TURN_BASE = 0.002 // karakter dönüşü, kameradan hızlı (revize: 2026-09-18, aşağıdaki nota bak)
 FRAME_PROXIMITY = 2.6
 MARKER_SIZE = 4.6      // görünür yarıçap 2.3 < 2.6
 PROMPT_HEIGHT = 1.35
@@ -96,6 +102,25 @@ POV_DISTANCE = 3.25
 POV_LERP = 0.055
 POV_HEIGHT = 2.65
 ```
+
+### 3.0 FOV portrede uyarlanır *(revize: 2026-09-18)*
+
+`CAMERA_FOV` **dikey** açıdır. 48° dikey, 390×844 portrede yatayda ≈ **23°** demek — salon tünel
+gibi okunuyor. Spec kusuruydu, bilinçli değildi. Yatay açı hedeflenir, dikey ondan türetilir:
+
+```ts
+const H_TARGET = 46 * Math.PI / 180
+const vFov = 2 * Math.atan(Math.tan(H_TARGET / 2) / aspect)
+camera.fov = clamp(vFov * 180 / Math.PI, 48, 72)
+camera.updateProjectionMatrix()
+```
+
+- **Masaüstü (16:9)** → türetilen değer 27°, alt sınır 48'e takılır: **hiçbir şey değişmez.**
+- **Tablet (3:4)** → 59° dikey, yatayda tam 46°.
+- **Portre (390×844)** → türetilen 85°, üst sınır **72**'ye takılır; yatay 23° → **37°**.
+
+**Üst sınır 72 şart** — olmadan portrede balık gözü olur. Uygulama: `fovForAspect()` +
+`applyAdaptiveFov()` (`lib/zone/frames.ts`), `useFollowCamera` ekran boyu değişince çağırır.
 
 ### 3.1 Yön takipli 3. şahıs kamera
 
@@ -132,6 +157,20 @@ hızına bağımlıdır. `TURN_BASE = 0.15` ile 180° dönüş ~1.2 sn. İlk den
 çok hızlı bulundu.
 
 **Girdi bittiğinde `camAng` yerinde kalır.** Kamera kendi kendine eski yönüne dönmez.
+
+**`CHAR_TURN_BASE` neden 0.002** *(revize: 2026-09-18, ilk değer 0.02)*: sprite'ın hangi görünümde
+çizileceğini karakter–kamera **ayrışması** belirler (bölüm 8.1). Ayrışmanın tepe değeri
+`dönüş açısı × max_t(TURN_BASE^t − CHAR_TURN_BASE^t)`:
+
+| `CHAR_TURN_BASE` | tepe oran | 180° dönüşte | kova | karakterin %90 dönüş süresi |
+|---|---|---|---|---|
+| 0.02 (ilk) | %26.1 | 46.9° | `back34` | 0.59 sn |
+| 0.005 | %36.2 | **65.2°** | `back34` | 0.43 sn |
+| **0.002** | **%41.2** | **74.2°** | **`side`** | **0.37 sn** |
+
+`side` kovası 67.5°'de başlıyor: **0.005 eşiğin 2.3° altında kalıyor**, `side` yine hiç tetiklenmezdi.
+0.002 eşiği 6.7° payla geçiyor. `front` (≥112.5°) sürekli girdiyle ulaşılamaz — tavan %44.5 → 80°;
+o görünüm `CharacterSelect` ve NPC içindir.
 
 **`prefers-reduced-motion` → kamera hiç dönmez.** Ani dönüş, yavaş dönüşten daha rahatsız edicidir.
 
@@ -414,9 +453,29 @@ gelmesini beklemez; dosyalar düşünce `TextureLoader` devreye girer, başka hi
 - Dururken y ve rotation lerp ile sıfıra döner
 - Ayak izi: her 0.26 s, sağ/sol dönüşümlü, 18'lik havuz, `opacity` saniyede 0.28 azalır.
   İzin dönüşü **hareket yönüne** göre, kamera yönüne göre değil.
+
+  > **Uygulama notları (5.5.4).**
+  > · İzin **konumu** da hareket yönünden türetilir: karakterin 0.25 arkasına, adımı atan ayağın
+  >   tarafına 0.18 kayarak. (Prototip izi sabit `z + 0.25`'e koyuyor — yalnızca −z yönünde
+  >   yürürken doğru; kamera dönmeye başlayınca yan yürüyüşte iz yanlış tarafa düşüyor.)
+  > · Sayaç **girdiye değil, gerçekten alınan yola** bakar; yoksa duvara dayanmışken izler aynı
+  >   noktada üst üste yığılıyor.
+  > · **Görünürlük ölçüldü:** yürürken 8–11 iz canlı, ama kamera karakterin ÖNÜNE baktığı için
+  >   aynı anda **yalnızca 1–2'si kadrajda** (portrede 2–3). İzler doğru basılıyor/dönüyor/sönüyor;
+  >   sınırlayan şey kamera geometrisi (CAM_DIST 5.4 arkada, LOOK_AHEAD 3.0 önde). Daha görünür
+  >   istenirse iz ölçüsü (0.22 × 0.3) veya opaklığı (0.85) büyütülür — tasarım kararı.
 - `prefers-reduced-motion` → bob, lean, ayak izi ve kamera dönüşü kapalı
 
 **Seçilmeyen maskot** salonun dibinde (x=-3.2, z=-12) NPC, `front` görünümüyle durur, hafif idle.
+
+> **Uygulama notu (5.5.4).** NPC de **billboard yapar** — kamera salonda dolaşıp arkasına
+> geçebiliyor. Ayrıca sahnede artık İKİ sprite seti var: `acquireCharacterSet` karakter başına
+> önbelleğe alır (tekil olsaydı NPC ile oyuncu birbirinin dokusunu bırakırdı). Toplam 8 sprite
+> dokusu; `zone-leak-check` sayıyı sabit tutar.
+
+**Serbest gezinmede hangi görünümler çıkıyor** (ölçüldü, 5.5.4): 180° dönüş → `back`, `back34`,
+`side` · 90° dönüşler → `back`, `back34` · düz yürüyüş → `back`. **`front` serbest gezinmede
+ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelect` ve NPC onun yeri.
 
 ---
 
@@ -452,7 +511,7 @@ gelmesini beklemez; dosyalar düşünce `TextureLoader` devreye girer, başka hi
       + `menu.ts`'e içecek kategorisi
 - [ ] **5.5.2** `ZoneCanvas` + `Hall` (ön duvar + künye + `document.fonts.ready`) — `/lab/zone`
 - [x] **5.5.3** `Character` (4 açılık sprite + **billboard**) + `useZoneControls` + **yön takipli kamera** — `lib/zone/{angles,character,runtime}.ts`, `hooks/{useZoneControls,useFollowCamera}.ts`, `scripts/zone-camera-check.mjs` (32/32)
-- [ ] **5.5.4** `Footprints` + `Npc` + ışık bantları
+- [x] **5.5.4** `Footprints` + `Npc` + ışık bantları — 18'lik havuz, ikinci sprite seti, prototip ölçüsünde bantlar
 - [ ] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık
 - [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
 - [ ] **5.5.7** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard`

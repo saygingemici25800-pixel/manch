@@ -5,16 +5,18 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 import { Character } from "@/components/zone/Character";
+import { Footprints } from "@/components/zone/Footprints";
 import { Hall } from "@/components/zone/Hall";
+import { Npc } from "@/components/zone/Npc";
 import { useFollowCamera } from "@/hooks/useFollowCamera";
 import { useZoneControls } from "@/hooks/useZoneControls";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { angLerp, normalizeAngle, smoothing } from "@/lib/zone/angles";
 import { mirrorFor, viewFor } from "@/lib/zone/character";
 import { CAMERA_FOV, CAM_DIST, CAM_HEIGHT } from "@/lib/zone/frames";
-import { CAM_START_ANG, CHAR_START, resetRuntime, zoneRuntime } from "@/lib/zone/runtime";
-import { textureLedger } from "@/lib/zone/textures";
-import { useZoneStore, type Character as CharacterId } from "@/store/zone";
+import { CAM_START_ANG, CHAR_START, resetRuntime, resetZoneDebug, zoneRuntime } from "@/lib/zone/runtime";
+import { releaseTextureSlots, textureLedger } from "@/lib/zone/textures";
+import { otherCharacter, useZoneStore, type Character as CharacterId } from "@/store/zone";
 import { colors } from "@/styles/tokens";
 
 /**
@@ -73,6 +75,8 @@ export function ZoneCanvas({ className }: { className?: string }) {
     const w = window as unknown as Record<string, unknown>;
     // Saf açı matematiği — `scripts/zone-camera-check.mjs` üç tuzağı doğrudan burada sınar.
     w.__ZONE_ANG__ = { angLerp, normalizeAngle, smoothing, viewFor, mirrorFor };
+    // Ölçüm penceresi: test tepe ayrışmayı/kovaları kare döngüsünden okur, örneklemeden değil.
+    w.__ZONE_DEBUG_RESET__ = resetZoneDebug;
     w.__ZONE_STATS__ = () => ({
       created: stats.created,
       disposed: stats.disposed,
@@ -98,12 +102,40 @@ export function ZoneCanvas({ className }: { className?: string }) {
       char: { x: +zoneRuntime().char.x.toFixed(3), z: +zoneRuntime().char.z.toFixed(3), ang: zoneRuntime().char.ang },
       cam: {
         ang: zoneRuntime().cam.ang,
+        /** Portrede uyarlanan dikey FOV (spec 3.0). */
+        fov: (liveCamera as THREE.PerspectiveCamera | null)?.fov ?? null,
         x: liveCamera ? +liveCamera.position.x.toFixed(3) : null,
         y: liveCamera ? +liveCamera.position.y.toFixed(3) : null,
         z: liveCamera ? +liveCamera.position.z.toFixed(3) : null,
       },
       /** Elle üretilen dokuların defteri — bağlam sayacının göremediği sızıntı (spec 9). */
       textures: textureLedger(),
+      /** Ayak izleri: kaçı görünür, en koyusu ne kadar (spec 8.3 — basılır ve söner). */
+      footprints: (() => {
+        const g = liveScene?.getObjectByName("zone-footprints");
+        if (!g) return null;
+        const ops = g.children.map(
+          (c) => ((c as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity,
+        );
+        // Kaçı gerçekten KADRAJDA? Görünür opaklık tek başına yetmiyor: iz kameranın
+        // arkasında ya da ekran dışında olabilir (kamera karakterin ÖNÜNE bakıyor).
+        let onScreen = 0;
+        if (liveCamera) {
+          const v = new THREE.Vector3();
+          for (const c of g.children) {
+            const m = (c as THREE.Mesh).material as THREE.MeshBasicMaterial;
+            if (m.opacity <= 0.01) continue;
+            v.copy(c.position).project(liveCamera);
+            if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1 && v.z < 1) onScreen += 1;
+          }
+        }
+        return {
+          pool: ops.length,
+          visible: ops.filter((o) => o > 0.01).length,
+          onScreen,
+          max: +Math.max(0, ...ops).toFixed(3),
+        };
+      })(),
       /** Sahnede bırakılmış (ölü) dokuya bağlı materyal sayısı — 0 olmalı. */
       staleMaps: (() => {
         let n = 0;
@@ -121,6 +153,16 @@ export function ZoneCanvas({ className }: { className?: string }) {
       input: { ...zoneRuntime().input },
       /** Billboard açısı — sprite kameraya dönmezse `FrontSide` onu kırpar (spec 8.3). */
       heroRotY: liveScene?.getObjectByName("zone-char")?.rotation.y ?? null,
+      /** NPC: konum + billboard açısı (kameraya dönmeli — Kural 63 ⑤). */
+      npc: (() => {
+        const o = liveScene?.getObjectByName("zone-npc");
+        return o
+          ? { x: +o.position.x.toFixed(2), y: +o.position.y.toFixed(3), z: +o.position.z.toFixed(2), rotY: o.rotation.y }
+          : null;
+      })(),
+      lastStepRot: zoneRuntime().debug.lastStepRot,
+      peakSpread: zoneRuntime().debug.peakSpread,
+      seenViews: { ...zoneRuntime().debug.seenViews },
       view: zoneRuntime().debug.view,
       mirrored: zoneRuntime().debug.mirrored,
       spriteSource: zoneRuntime().debug.source,
@@ -128,6 +170,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
     return () => {
       delete w.__ZONE_STATS__;
       delete w.__ZONE_ANG__;
+      delete w.__ZONE_DEBUG_RESET__;
     };
   }, []);
 
@@ -172,6 +215,10 @@ export function ZoneCanvas({ className }: { className?: string }) {
             `FollowCamera` yalnızca o açıyı kamera konumuna çevirir. R3F `useFrame`
             aboneliklerini mount sırasına göre çalıştırır. */}
         <Character who={character ?? FALLBACK_CHARACTER} reduced={reduced} />
+        {/* Ayak izleri `Character`'dan SONRA: `stepWorld` bu karenin adımını üretir,
+            `Footprints` onu aynı karede tüketir. */}
+        <Footprints />
+        <Npc who={otherCharacter(character ?? FALLBACK_CHARACTER)} reduced={reduced} />
         <FollowCamera />
         <SceneDisposer onDispose={() => { stats.disposed += 1; liveCamera = null; }} />
       </Canvas>
@@ -190,6 +237,9 @@ function SceneDisposer({ onDispose }: { onDispose: () => void }) {
     liveScene = scene;
     return () => {
       disposeScene(scene);
+      // Yuvalı dokular (salon + ayak izi) sahneye değil, yuva kaydına ait — sahne seviyesinde
+      // bırakılırlar. `trackTexture` çift `dispose()`'u bir kez sayar.
+      releaseTextureSlots();
       if (liveScene === scene) liveScene = null;
       onDispose();
     };

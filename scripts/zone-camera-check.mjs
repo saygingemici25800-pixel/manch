@@ -131,20 +131,46 @@ async function openZone(opts = {}) {
 }
 
 const read = (page) => page.evaluate(() => window.__ZONE_STATS__());
+/** Ölçüm penceresi başlat: tepe ayrışma ve görülen kovalar sıfırlanır. */
+const resetDebug = (page) => page.evaluate(() => window.__ZONE_DEBUG_RESET__?.());
 
-/** Tuş(lar)ı basılı tutarken periyodik örnek alır. */
+/**
+ * Tuş(lar)ı basılı tutarken periyodik örnek alır.
+ *
+ * Her örneğe **gerçek zaman damgası** konur: `page.evaluate` gidiş-dönüşü `step`in üstüne
+ * 20–40 ms ekliyor, dolayısıyla "örnek no × step" gerçek süreyi olduğundan kısa gösteriyordu
+ * (180° dönüş 1.4 sn sürerken 585 ms ölçülüyordu).
+ */
 async function hold(page, keys, ms, step = 90) {
   const list = Array.isArray(keys) ? keys : [keys];
   const samples = [];
   for (const k of list) await page.keyboard.down(k);
+  const t0 = Date.now();
   for (let t = 0; t < ms; t += step) {
     await page.waitForTimeout(step);
-    samples.push(await read(page));
+    samples.push({ ...(await read(page)), t: Date.now() - t0 });
   }
   for (const k of list) await page.keyboard.up(k);
   await page.waitForTimeout(250);
-  samples.push(await read(page));
+  samples.push({ ...(await read(page)), t: Date.now() - t0 });
   return samples;
+}
+
+/** 8 yönden hedefe en yakın olanın tuşları (derece; 0 = +z, 90 = +x). */
+function inputForTarget(targetDeg) {
+  const dirs = [
+    [0, ["ArrowDown"]], [45, ["ArrowDown", "ArrowRight"]], [90, ["ArrowRight"]],
+    [135, ["ArrowUp", "ArrowRight"]], [180, ["ArrowUp"]], [225, ["ArrowUp", "ArrowLeft"]],
+    [270, ["ArrowLeft"]], [315, ["ArrowDown", "ArrowLeft"]],
+  ];
+  const want = ((targetDeg % 360) + 360) % 360;
+  let best = dirs[0];
+  let bestD = 999;
+  for (const d of dirs) {
+    const diff = Math.abs(((d[0] - want + 180) % 360 + 360) % 360 - 180);
+    if (diff < bestD) { bestD = diff; best = d; }
+  }
+  return best[1];
 }
 
 /** Belirli bir açıya yerleşene kadar yürü (testler arası temiz başlangıç). */
@@ -165,7 +191,8 @@ if (runs("scene")) {
     "başlangıç sprite'ı 'back', aynalanmamış", `görünen: ${start.view}`);
 
   /* --- aşağı: tam 180° dönüş. Spec'in "aşağı çekince arkaya dönmüyor" vakası. --- */
-  const down = await hold(page, "ArrowDown", 3600);
+  await resetDebug(page);
+  const down = await hold(page, "ArrowDown", 3600, 90);
   const end = down.at(-1);
   ok(dd(end.cam.ang, 0) < 12,
     "AŞAĞI: kamera 180° dönüyor (180° → 0°)",
@@ -184,15 +211,19 @@ if (runs("scene")) {
   for (let i = 1; i < down.length; i++) {
     const a = down[i - 1];
     const b = down[i];
-    jumps.push(Math.hypot(b.cam.x - a.cam.x, b.cam.z - a.cam.z));
+    // MESAFE değil HIZ: dev sunucusu takıldığında örnek arası 300 ms'e çıkıyor ve meşru
+    // hareket "sıçrama" gibi görünüyordu. Ters yöne atlama tek karede olur: 10.8 birim /
+    // 16 ms ≈ 675 birim/sn. Meşru tepe ~19 birim/sn (orbit 14 + yürüme 4.6).
+    const secs = Math.max(0.001, (b.t - a.t) / 1000);
+    jumps.push(Math.hypot(b.cam.x - a.cam.x, b.cam.z - a.cam.z) / secs);
     if (Math.abs(b.cam.x) > 6.51 || Math.abs(b.cam.z) > 19.21) outside.push(`x${b.cam.x} z${b.cam.z}`);
     const d = deg(norm(b.cam.ang - a.cam.ang));
     if (Math.abs(d) > 0.5) deltas.push(Math.sign(d));
   }
   const flips = deltas.filter((v, i) => i > 0 && v !== deltas[i - 1]).length;
-  ok(Math.max(...jumps) < 4.0,
-    "dönüş boyunca kamera ışınlanmıyor (sıçrama < 4 birim; ters yöne atlasa 10.8 olurdu)",
-    `en büyük sıçrama ${Math.max(...jumps).toFixed(2)}`);
+  ok(Math.max(...jumps) < 60,
+    "dönüş boyunca kamera ışınlanmıyor (hız < 60 birim/sn; ters yöne atlasa ~675 olurdu)",
+    `en büyük hız ${Math.max(...jumps).toFixed(1)} birim/sn`);
   ok(flips === 0,
     "(b) dönüş tek yönde ilerliyor — kamera 180°'de titremiyor",
     `${flips} yön değişimi`);
@@ -200,24 +231,28 @@ if (runs("scene")) {
     "dönüş boyunca kamera duvarın içine girmiyor",
     outside.slice(0, 3).join(" · "));
 
-  // Karakter kameradan hızlı döner; aradaki fark sprite'ı 'back'ten çıkarır.
-  // İki tabanın (0.02 / 0.15) ürettiği en büyük ayrışma ~47° — yani 'back34'.
-  // Sabit katsayıya kaçılırsa ya da iki taban eşitlenirse bu ayrışma kaybolur.
-  const seen = new Set(down.map((s) => s.view));
-  const spread = Math.max(...down.map((s) => dd(s.char.ang, s.cam.ang)));
+  // Tepe ayrışma ve kovalar KARE DÖNGÜSÜNDEN okunur (örnekleme tepeyi kaçırıyordu).
+  const last = down.at(-1);
+  const seen = new Set(Object.entries(last.seenViews).filter(([, v]) => v).map(([k]) => k));
+  const spread = deg(last.peakSpread);
   ok(seen.size > 1 && seen.has("back34"),
     "dönüş sırasında sprite açıya göre değişiyor (back → back34)",
     `görülen: ${[...seen].join(", ")}`);
-  ok(spread > 25 && spread < 70,
-    "karakter kameradan hızlı dönüyor — ayrışma 25–70° bandında",
-    `en büyük ayrışma ${spread.toFixed(0)}°`);
+  // `side` kovası 67.5°'de başlar. CHAR_TURN_BASE 0.002 ile tepe ayrışma 74.2° — 6.7° pay var.
+  // Taban büyütülürse (0.005 → 65.2°) bu kova ÖLÜR ve çizerden istenen 8 çizimin ikisi boşa gider.
+  ok(seen.has("side"),
+    "180° dönüşte `side` kovası en az bir kare tetikleniyor",
+    `görülen: ${[...seen].join(", ")}`);
+  ok(spread > 70 && spread < 85,
+    "karakter kameradan hızlı dönüyor — tepe ayrışma 70–85° (beklenen 74.2°)",
+    `en büyük ayrışma ${spread.toFixed(1)}°`);
   ok(down.at(-1).view === "back",
     "dönüş bitince sprite yine 'back' (ikisi aynı yöne yerleşti)",
     `görünen: ${down.at(-1).view}`);
 
   // Dönüş süresi: TURN_BASE 0.15 → 180° ≈ 1.2 sn. Sabit katsayıya kaçılırsa bu bozulur.
-  const firstDone = down.findIndex((s) => dd(s.cam.ang, 0) < 12);
-  const turnMs = firstDone < 0 ? null : (firstDone + 1) * 90;
+  const firstDone = down.find((s) => dd(s.cam.ang, 0) < 12);
+  const turnMs = firstDone ? firstDone.t : null;
   ok(turnMs !== null && turnMs > 600 && turnMs < 2600,
     "180° dönüş ~1.2 sn (600–2600 ms arası)",
     `ölçülen ${turnMs} ms`);
@@ -263,28 +298,105 @@ if (runs("scene")) {
       `ölçülen ${got.toFixed(0)}°`);
   }
 
-  /* --- aynalama: dönüş yönüne göre (spec 8.1) ---
-     180°'den ÇAPRAZ girdiyle 135°'lik dönüş: ayrışma ~35°, yani 'back34' kovası.
-     (90°'lik dönüş yalnızca ~23° ayrışma üretiyor — kova sınırının dibinde, ölçüm oynak.)
-     Aşağı+sağ → hedef 45°, negatif yönde dönüş → rel < 0 → AYNALI.
-     Aşağı+sol  → hedef 315°, pozitif yönde dönüş → rel > 0 → aynalanmaz. */
-  await settle(page, "ArrowUp");
-  const negTurn = await hold(page, ["ArrowDown", "ArrowRight"], 1200, 60);
-  const mirroredNeg = negTurn.some((s) => s.mirrored);
+  /* --- aynalama (spec 8.1) ---
+     ÖNCEKİ HÂLİ KIRILGANDI: "aşağı+sağ negatif yönde döner" diye VARSAYIYORDU. Dönüş yönü
+     o anki `camAng`'a bağlı; testin başlangıç açısı birkaç saniyelik yürüyüşün sonunda
+     tam 180° olmayabiliyor ve varsayım ara sıra ters dönüyordu (koşular arası oynak sonuç).
+     Onun yerine KURALIN KENDİSİ ölçülüyor — her örnekte:
+         mirrored  ⇔  rel < 0 ve görünüm asimetrik (back/front değil)
+     Bu, dönüşün hangi yöne gittiğinden bağımsızdır. İki çapraz dönüş, iki işareti de görsün diye. */
+  const turns = [];
+  for (const delta of [-135, +135]) {
+    await settle(page, "ArrowUp");
+    // Dönüş yönü, o anki kamera açısına göre BELİRLENİR — sabit tuş çifti varsaymak,
+    // başlangıç açısı birkaç derece kaydığında yönü ters çeviriyordu (oynak test).
+    const from = deg(norm((await read(page)).cam.ang));
+    turns.push(...(await hold(page, inputForTarget(from + delta), 1200, 60)));
+  }
+  const rule = (s) => {
+    const rel = norm(s.char.ang - s.cam.ang);
+    return s.mirrored === (rel < 0 && s.view !== "back" && s.view !== "front");
+  };
+  const broken = turns.filter((s) => !rule(s));
+  const sawMirrored = turns.some((s) => s.mirrored);
+  const sawPlain = turns.some((s) => !s.mirrored && norm(s.char.ang - s.cam.ang) > 0 && s.view === "back34");
 
-  await settle(page, "ArrowUp");
-  const posTurn = await hold(page, ["ArrowDown", "ArrowLeft"], 1200, 60);
-  const mirroredPos = posTurn.some((s) => s.mirrored);
-
-  ok(mirroredNeg && !mirroredPos,
-    "aynalama dönüş yönüne göre — tek çizim seti iki yönü veriyor",
-    `negatif yön: ${mirroredNeg} · pozitif yön: ${mirroredPos}`);
+  ok(broken.length === 0,
+    "aynalama kuralı sahnede birebir uygulanıyor (rel < 0 ∧ asimetrik görünüm)",
+    `${broken.length}/${turns.length} örnek kuralı bozdu`);
+  ok(sawMirrored && sawPlain,
+    "iki dönüş yönü de görüldü — tek çizim seti iki yönü veriyor",
+    `aynalı örnek: ${sawMirrored} · aynasız (rel>0) örnek: ${sawPlain}`);
 
   /* --- karakter salonun dışına çıkmıyor --- */
   const far = await hold(page, "ArrowLeft", 3600);
   ok(Math.abs(far.at(-1).char.x) <= 6.21,
     "karakter yan duvarı geçmiyor (|x| ≤ 6.2)",
     `x ${far.at(-1).char.x}`);
+
+  /* ========================= 5.5.4: ayak izleri + NPC ========================= */
+
+  /* İzin dönüşü HAREKET yönünden gelmeli, kamera yönünden değil (spec 8.3).
+     Ayrım yapabilmek için ikisinin farklı olduğu ana bakıyoruz: 180°'e yerleştikten hemen
+     sonra sağa yürümek — karakter sağa döner, kamera hâlâ geride. İz kamerayı takip etse
+     ~180°, hareketi takip ederse ~270° çıkar. */
+  await settle(page, "ArrowUp");
+  const right = await hold(page, "ArrowRight", 700, 45);
+  const rots = right.map((s) => s.lastStepRot).filter((v) => v != null);
+  const lastRot = rots.at(-1);
+  const camThen = right.at(-1).cam.ang;
+  ok(
+    lastRot != null && dd(lastRot, Math.PI * 1.5) < 35,
+    "ayak izi dönüşü HAREKET yönünden (kamera yönünden değil)",
+    `iz ${lastRot == null ? "-" : deg(norm(lastRot)).toFixed(0)}° · kamera ${deg(norm(camThen)).toFixed(0)}° · beklenen ~270°`,
+  );
+  ok(lastRot != null && dd(lastRot, camThen) > 20,
+    "iz dönüşü kamera açısından AYRI (aynı olsaydı kamerayı takip ediyor olurdu)",
+    `fark ${lastRot == null ? "-" : dd(lastRot, camThen).toFixed(0)}°`);
+
+  /* Basılıyor · kadrajda · sönüyor.
+     ÖNCE açık zemine geç: karakter arka duvara dayalıyken (önceki testler onu oraya
+     götürüyor) girdi sürse de ilerlemiyor ve iz basılmıyor — bu doğru davranış, ama
+     testin ölçmek istediği şey değil. */
+  await settle(page, "ArrowDown", 1500);
+  const walking = await hold(page, "ArrowDown", 1400, 90);
+  const peakVisible = Math.max(...walking.map((s) => s.footprints?.visible ?? 0));
+  const peakOnScreen = Math.max(...walking.map((s) => s.footprints?.onScreen ?? 0));
+  ok(peakVisible >= 4, "yürürken ayak izi basılıyor", `en çok ${peakVisible} iz canlı`);
+  ok(peakOnScreen >= 1,
+    "izlerden en az biri kadrajda (kamera karakterin önüne bakıyor — çoğu arkada kalır)",
+    `en çok ${peakOnScreen} iz ekranda`);
+
+  await page.waitForTimeout(4200); // 0.85 opaklık, saniyede 0.28 → ~3 sn
+  const faded = await read(page);
+  ok(faded.footprints?.visible === 0,
+    "durunca izler tamamen sönüyor (havuz yeniden kullanılabilir)",
+    `kalan ${faded.footprints?.visible}`);
+
+  /* NPC: konum, idle, billboard */
+  const npc1 = (await read(page)).npc;
+  ok(npc1 && Math.abs(npc1.x - -3.2) < 0.01 && Math.abs(npc1.z - -12) < 0.01,
+    "NPC salonun dibinde (x −3.2, z −12)", JSON.stringify(npc1));
+
+  // Idle bir sinüs (periyot ~3.14 sn, genlik 0.04). İKİ örnek yetmez: 500 ms arayla aynı
+  // değere düşebiliyor (sinüs tepe çevresinde simetrik) ve test boşuna kırmızı yanıyordu.
+  // Yarım periyodu tarayıp salınım genişliğine bakıyoruz.
+  const ys = [];
+  for (let i = 0; i < 8; i++) {
+    await page.waitForTimeout(200);
+    ys.push((await read(page)).npc?.y ?? 0);
+  }
+  const swing = Math.max(...ys) - Math.min(...ys);
+  ok(swing > 0.015,
+    "NPC idle: yerinde hafifçe süzülüyor",
+    `salınım ${swing.toFixed(3)} (genlik 0.04 · en az 0.04 beklenir)`);
+  {
+    const st = await read(page);
+    const aim = Math.atan2(st.cam.x - st.npc.x, st.cam.z - st.npc.z);
+    ok(dd(st.npc.rotY, aim) < 3,
+      "NPC de billboard yapıyor (kamera etrafından dolaşabiliyor)",
+      `sapma ${dd(st.npc.rotY, aim).toFixed(1)}°`);
+  }
 
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;
@@ -313,6 +425,12 @@ if (runs("reduced")) {
   ok(after.char.z > before.char.z + 1,
     "reduced-motion: yürüme çalışıyor",
     `z ${before.char.z} → ${after.char.z}`);
+  ok(s.every((x) => (x.footprints?.visible ?? 0) === 0),
+    "reduced-motion: ayak izi hiç basılmıyor (spec 8.3)",
+    `en çok ${Math.max(...s.map((x) => x.footprints?.visible ?? 0))} iz`);
+  ok(after.npc && Math.abs(after.npc.y - 0.7) < 0.001,
+    "reduced-motion: NPC idle durdu",
+    `y ${after.npc?.y}`);
   await page.close();
 }
 

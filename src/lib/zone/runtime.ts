@@ -27,7 +27,32 @@ export interface ZoneRuntime {
   /** Basılı tuşlar, küçük harf. */
   keys: Set<string>;
   /** Yalnızca gözlem: ekrandaki sprite. Sahne yazar, lab/QA okur. */
-  debug: { view: CharView; mirrored: boolean; source: "drawn" | "png" };
+  debug: {
+    view: CharView;
+    mirrored: boolean;
+    source: "drawn" | "png";
+    /** Son basılan izin dönüşü — spec 8.3: HAREKET yönünden gelir, kamera yönünden değil. */
+    lastStepRot: number | null;
+    /**
+     * Sıfırlamadan bu yana görülen en büyük karakter–kamera ayrışması (radyan) ve
+     * tetiklenen sprite kovaları.
+     *
+     * Neden burada: bunlar **kare içinde** olup biten, tepe değeri ~0.3 sn süren olaylar.
+     * Test tarafından `page.evaluate` ile örneklemek gidiş-dönüş başına 70–90 ms demek;
+     * tepe kaçırılıyor ve aynı kod bir koşuda 74°, ötekinde 67° ölçülüyordu (oynak test).
+     * Döngünün kendisi biriktirince ölçüm kesinleşir.
+     */
+    peakSpread: number;
+    seenViews: Record<CharView, boolean>;
+  };
+}
+
+/** Bir adım izi: `Footprints` bunu havuzdan bir decal'a basar (spec 8.3). */
+export interface Footstep {
+  x: number;
+  z: number;
+  /** Düzlemin `rotation.z` değeri — **hareket** yönünden, kamera yönünden değil. */
+  rot: number;
 }
 
 /** Salona giriş noktası — prototiple aynı (spec bölüm 3: z −15..15). */
@@ -39,13 +64,28 @@ export const CHAR_START = { x: 0, y: 0.83, z: 12 } as const;
  */
 export const CAM_START_ANG = Math.PI;
 
+/** Ayak izi zamanlayıcısı ve sağ/sol sırası — dışarıdan görünmez. */
+const step = { timer: 0, side: 1, pending: null as Footstep | null };
+
+/** Adım aralığı ve karakterin yanındaki iz kayması (prototip değerleri). */
+const STEP_PERIOD = 0.26;
+const STEP_LATERAL = 0.18;
+const STEP_BEHIND = 0.25;
+
 const runtime: ZoneRuntime = {
   char: { x: CHAR_START.x, y: CHAR_START.y, z: CHAR_START.z, ang: CAM_START_ANG, bob: 0 },
   cam: { ang: CAM_START_ANG },
   input: { ix: 0, iz: 0, len: 0 },
   joy: { x: 0, y: 0 },
   keys: new Set<string>(),
-  debug: { view: "back", mirrored: false, source: "drawn" },
+  debug: {
+    view: "back",
+    mirrored: false,
+    source: "drawn",
+    lastStepRot: null,
+    peakSpread: 0,
+    seenViews: { back: false, back34: false, side: false, front: false },
+  },
 };
 
 /** Okumak serbest; yazmak yalnızca aşağıdaki fonksiyonlarla. */
@@ -67,6 +107,18 @@ export function resetRuntime() {
   runtime.keys.clear();
   runtime.debug.view = "back";
   runtime.debug.mirrored = false;
+  runtime.debug.lastStepRot = null;
+  resetZoneDebug();
+  step.timer = 0;
+  step.side = 1;
+  step.pending = null;
+}
+
+/** `Footprints` her karede çağırır: bu karede basılacak iz varsa döner ve kuyruğu boşaltır. */
+export function consumeFootstep(): Footstep | null {
+  const s = step.pending;
+  step.pending = null;
+  return s;
 }
 
 /* ---------------------------------- girdi ---------------------------------- */
@@ -140,8 +192,12 @@ export function stepWorld(dt: number, reduced: boolean) {
   const { char, cam } = runtime;
 
   // yürüme: dünya eksenlerinde, salon sınırları içinde
+  const fromX = char.x;
+  const fromZ = char.z;
   char.x = clamp(char.x + ix * SPEED * dt, -CHAR_BOUND_X, CHAR_BOUND_X);
   char.z = clamp(char.z + iz * SPEED * dt, Z_MIN, Z_MAX);
+  /** Bu karede GERÇEKTEN alınan yol. Duvara dayanınca girdi sürse de 0'dır. */
+  const moved = Math.hypot(char.x - fromX, char.z - fromZ);
 
   if (len > MOVING) {
     const want = wantedAngle(ix, iz);
@@ -157,16 +213,52 @@ export function stepWorld(dt: number, reduced: boolean) {
   if (len > MOVING && !reduced) {
     char.bob += dt * 11;
     char.y = CHAR_START.y + Math.abs(Math.sin(char.bob)) * 0.07;
+
+    /* ---- ayak izi (spec 8.3): 0.26 sn'de bir, sağ/sol dönüşümlü ----
+       Konum ve dönüş **hareket** yönüne göre: iz karakterin arkasına, adımı atan ayağın
+       tarafına düşer. (Prototip izi sabit +z'ye koyuyor; yalnızca −z yönünde yürürken doğru,
+       kamera dönmeye başlayınca yan yürüyüşte iz yanlış tarafa çıkıyor.) */
+    // Duvara dayanmışken iz basma: girdi sürüyor ama karakter ilerlemiyor, yoksa izler
+    // aynı noktada üst üste yığılır.
+    step.timer -= moved > dt * SPEED * 0.1 ? dt : 0;
+    if (step.timer <= 0 && moved > 0) {
+      step.timer = STEP_PERIOD;
+      const ang = wantedAngle(ix, iz);
+      const fx = Math.sin(ang);
+      const fz = Math.cos(ang);
+      step.pending = {
+        x: char.x - fx * STEP_BEHIND + fz * step.side * STEP_LATERAL,
+        z: char.z - fz * STEP_BEHIND - fx * step.side * STEP_LATERAL,
+        rot: ang + Math.PI,
+      };
+      runtime.debug.lastStepRot = step.pending.rot;
+      step.side *= -1;
+    }
   } else {
     char.y += (CHAR_START.y - char.y) * 0.2;
+    step.timer = 0; // durunca sonraki adım hemen basılsın
   }
 
   return { moving: len > MOVING, lean: len > MOVING && !reduced ? Math.sin(char.bob) * 0.05 : null };
 }
 
 /** Sahne ekrandaki sprite'ı buraya bildirir; `__ZONE_STATS__` okur. */
-export function reportSprite(view: CharView, mirrored: boolean, source: "drawn" | "png") {
+export function reportSprite(
+  view: CharView,
+  mirrored: boolean,
+  source: "drawn" | "png",
+  spread: number,
+) {
   runtime.debug.view = view;
   runtime.debug.mirrored = mirrored;
   runtime.debug.source = source;
+  const abs = Math.abs(spread);
+  if (abs > runtime.debug.peakSpread) runtime.debug.peakSpread = abs;
+  runtime.debug.seenViews[view] = true;
+}
+
+/** Test, bir ölçüm penceresine başlarken çağırır. */
+export function resetZoneDebug() {
+  runtime.debug.peakSpread = 0;
+  runtime.debug.seenViews = { back: false, back34: false, side: false, front: false };
 }

@@ -33,6 +33,12 @@ for (let i = 1; i <= ROUNDS; i++) {
   await p.locator("[data-testid=zone-toggle]").click();
   await p.waitForFunction(() => document.querySelector("canvas") !== null, { timeout: 20000 });
   await p.waitForTimeout(1200);
+  // Kısa bir yürüyüş: ayak izi dokusu ilk adımda üretiliyor. Yürümeden ölçersek o doku hiç
+  // oluşmaz ve sızsa bile kontrol onu göremez (kapsam boşluğu).
+  await p.keyboard.down("ArrowDown");
+  await p.waitForTimeout(700);
+  await p.keyboard.up("ArrowDown");
+  await p.waitForTimeout(400);
 
   const st = await read();
   rows.push({ round: i, closedAlive: closed?.alive ?? -1, closedLabels: closed?.byLabel, ...(st ?? {}) });

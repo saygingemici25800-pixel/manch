@@ -11,7 +11,6 @@ import {
   floorTexture,
   frontWallTexture,
   redrawTextTextures,
-  releaseTextureSlots,
   tileTexture,
 } from "@/lib/zone/textures";
 import { colors } from "@/styles/tokens";
@@ -20,6 +19,11 @@ import { colors } from "@/styles/tokens";
 const Z_BACK = -20;
 const Z_FRONT = 20;
 const HALL_LEN = Z_FRONT - Z_BACK;
+
+/** Tavan ışık bantları — prototipteki ölçüler (0.5 × 36, tavanın 4 cm altında). */
+const STRIP_W = 0.5;
+const STRIP_LEN = 36;
+const STRIP_Y = CEIL_H - 0.04;
 
 export function Hall() {
   const t = useTranslations("Zone");
@@ -81,9 +85,8 @@ export function Hall() {
     () => frontWallTexture(frontLines, fontEpoch),
   );
 
-  // Sahne kapanınca tüm yuvalar bırakılır. (ZoneCanvas'taki SceneDisposer ikinci güvence;
-  // doku defteri çift `dispose()`'u bir kez sayar.)
-  useEffect(() => () => releaseTextureSlots(), []);
+  // Yuvaları `SceneDisposer` bırakır (ZoneCanvas): yuva kaydı sahne geneli — ayak izi dokusu da
+  // orada. Salonun onu bırakması, sahibi olmadığı bir şeyi bırakması olurdu.
 
   return (
     <group>
@@ -101,10 +104,12 @@ export function Hall() {
         <meshBasicMaterial color={colors.cream} toneMapped={false} />
       </mesh>
 
-      {/* tavandaki hardal ışık bantları (x = ±4) */}
+      {/* tavandaki hardal ışık bantları (x = ±4, prototip ölçüsü: 0.5 × 36, y 5.96).
+          Aydınlatmaya katkıları yok — spec 3.1'deki ışık listesi ambient + iki directional;
+          bantlar salonun uzunluğunu okutan dekoratif çizgiler. */}
       {[-4, 4].map((x) => (
-        <mesh key={x} rotation={[Math.PI / 2, 0, 0]} position={[x, CEIL_H - 0.02, 0]}>
-          <planeGeometry args={[0.5, HALL_LEN - 2]} />
+        <mesh key={x} rotation={[Math.PI / 2, 0, 0]} position={[x, STRIP_Y, 0]}>
+          <planeGeometry args={[STRIP_W, STRIP_LEN]} />
           <meshBasicMaterial color={colors.mustard} toneMapped={false} />
         </mesh>
       ))}

@@ -282,20 +282,26 @@ export function createCharacterSet(
 /* ---------------------------- tekil set yönetimi ---------------------------- */
 
 /**
- * Sahne tekil olduğu için sprite seti de tekildir. Bileşen her karede `acquire…` çağırır;
- * karakter ya da anizotropi değişmediği sürece aynı set döner (üretim bir kez olur).
+ * Sprite setleri **karakter başına** tutulur: 5.5.4'ten itibaren sahnede aynı anda İKİ maskot var
+ * (oyuncu + NPC). Tek bir tekil set olsaydı ikisi birbirinin dokusunu bırakırdı — NPC her karede
+ * `acquire` çağırdıkça set sıfırdan üretilir, oyuncununki çöpe giderdi.
+ *
+ * Bileşenler her karede `acquire…` çağırır; karakter ve anizotropi değişmedikçe aynı set döner.
  * Mutasyon bu modülün içinde kalır — Kural 25.
  */
-let active: { who: Character; anisotropy: number; set: CharacterSet } | null = null;
+const sets = new Map<Character, { anisotropy: number; set: CharacterSet }>();
 
 export function acquireCharacterSet(who: Character, anisotropy: number): CharacterSet {
-  if (active && active.who === who && active.anisotropy === anisotropy) return active.set;
-  active?.set.dispose();
-  active = { who, anisotropy, set: createCharacterSet(who, { anisotropy }) };
-  return active.set;
+  const current = sets.get(who);
+  if (current && current.anisotropy === anisotropy) return current.set;
+  current?.set.dispose();
+  const set = createCharacterSet(who, { anisotropy });
+  sets.set(who, { anisotropy, set });
+  return set;
 }
 
-export function releaseCharacterSet() {
-  active?.set.dispose();
-  active = null;
+/** Sahne kapanınca iki setin ikisi de bırakılır (spec bölüm 9). */
+export function releaseCharacterSets() {
+  for (const { set } of sets.values()) set.dispose();
+  sets.clear();
 }

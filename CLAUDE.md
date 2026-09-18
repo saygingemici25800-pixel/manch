@@ -30,13 +30,21 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.3 bitti, sırada 5.5.4** (Footprints + Npc + ışık bantları).
+- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.4 bitti, sırada 5.5.5** (`Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık).
 - Dal: **`zone/3d-galeri`** (5.5 çalışması burada). **`faz-1-yeniden` production dalı, canlı site oradan besleniyor — Zone kabul kriterlerini geçene kadar BİRLEŞTİRİLMEZ.**
 - Fazlar 1–9 tamamlandı, site yayında. Kalan: domain bağlama + Faz 8'den devreden performans borcu.
 - **CANLI (yeni site): https://manch-v2.vercel.app** — Vercel projesi `manch-v2`, dal **`faz-1-yeniden`**, build 1 dk, smoke 31/31.
 - **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
 - ✅ **Vercel `manch-v2` production branch = `faz-1-yeniden`** (2026-09-18, panodan ayarlandı). Bu dala yapılan push artık doğrudan `manch-v2.vercel.app`'i günceller; doğrulandı (hero düzeltmesi 49 s'de production'a çıktı).
 - **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43). Env **Preview kapsamına da** eklendi — ilk push'ta preview build Kural 57 ile kırılmıştı (koruma çalıştı); eklendikten sonra push → Ready (~40 s), auto-deploy doğrulandı.
+- **Zone durumu (5.5.4 sonu):** salonda iki maskot var — oyuncu yürüyor, **seçilmeyen maskot** salonun dibinde (x −3.2, z −12) `front` görünümüyle idle duruyor; ikisi de billboard yapıyor. Arkada **18'lik ayak izi havuzu** (0.26 sn, sağ/sol dönüşümlü, saniyede 0.28 sönme, **dönüş ve konum hareket yönünden**). Tavan ışık bantları prototip ölçüsünde (0.5 × 36, y 5.96). Sahne 32 mesh · 15 doku.
+  · `scripts/zone-camera-check.mjs` → **44/44**, üç ardışık koşu temiz (oynaklık giderildi — Kural 60)
+  · `zone-leak-check` → 6 tur: bağlam 1 · canvas 1 · **canlı doku 15 sabit** · ölü bağ 0 · **kapalıyken 0** · konsol 0. Tur içinde kısa yürüyüş var: ayak izi dokusu ilk adımda üretildiği için, yürümeden ölçmek o dokuyu kapsam dışında bırakıyordu
+  · `zone-bundle-check` → three ana bundle'da yok, `/tr` **215.0 kB gz** (değişmedi)
+  · **Ayak izi görünürlüğü ölçüldü:** yürürken 8–11 iz canlı ama kamera karakterin ÖNÜNE baktığı için **aynı anda yalnızca 1–2'si kadrajda** (portrede 2–3). İzler doğru basılıyor, dönüyor ve sönüyor; mesele kamera geometrisi (CAM_DIST 5.4 arkada, LOOK_AHEAD 3.0 önde) — prototipte de aynı. Daha görünür istenirse iz ölçüsü/opaklığı büyütülür (karar planlayıcıda)
+  · Ekranlar: `docs/screens/faz-5.5.4-zone-1440-{baslangic,izler,npc,donusta}.png`, `faz-5.5.4-zone-390-{portre,izler}.png`
+- **Revizyonlar (2026-09-18, planlayıcı):** **A · FOV portrede uyarlanıyor** — `fovForAspect()` yatay 46°'yi hedefler, dikeyi orandan türetir, `clamp(48, 72)`. Masaüstü **48.0°** (değişmedi, alt sınıra takılıyor) · portre **72.0°**, yatay 23° → **37.1°**. **B · `CHAR_TURN_BASE` 0.02 → 0.002** (0.005 DEĞİL, aşağıdaki günlüğe bak): `side` kovası artık tetikleniyor. **C ·** billboard kararı spec'e işlendi.
+- **Serbest gezinmede tetiklenen sprite kovaları (ölçüldü, iki kırılımda da aynı):** 180° dönüş → `back`, `back34`, **`side`** (tepe ayrışma **74.2°**) · 90° dönüşler → `back`, `back34` (37°) · düz yürüyüş → `back`. **`front` serbest gezinmede ulaşılamaz** (tavan %44.5 → 80°, eşik 112.5°) — o görünüm NPC'de ve 5.5.10'daki `CharacterSelect`'te kullanılıyor, yani 8 çizimin hiçbiri ölü değil.
 - **Zone durumu (5.5.3 sonu):** `/lab/zone` gezilebilir — 12 mesh (10 salon + karakter sprite'ı + gölge). **Kamera yürünen yöne dönüyor**, karakter (Misu/Miyu) WASD/ok tuşlarıyla yürüyor, sprite açıya göre 4 görünüm arasında geçiyor ve karşı taraf `scale.x=-1` ile aynalanıyor.
   · `node scripts/zone-bundle-check.mjs` → three ana bundle'da **yok** (`/tr` **215.0** kB gz — 5.5.2'den değişmedi, 5.5.3 ana bundle'a hiçbir şey eklemedi)
   · `CHROME=… node scripts/zone-leak-check.mjs` → 6 tur aç-kapa: `alive` 1 · canvas 1 · **canlı doku 10 sabit** · **ölü doku bağı 0** · **kapalıyken doku 0** · konsol 0
@@ -45,7 +53,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter çizimleri hâlâ yok** — `drawCapy()` geçici sprite üretiyor. PNG yolu (`TextureLoader`) yazıldı **ve uçtan uca denendi** (8 geçici PNG ile: `spriteSource` → `png`, doku sayısı sabit, ölü bağ 0). Çizimler gelince `character.ts`'teki `MASCOT_SPRITE_BASE` sabiti `"/images/mascots"` yapılır — **başka hiçbir şey değişmez**. Otomatik yoklama bilerek yapılmıyor: olmayan PNG'ye istek 404 üretip Kural 53'e takılır. Dev'de `?sprites=<yol>` ile aynı yol denenebilir.
   · Ekranlar: `docs/screens/faz-5.5.3-zone-1440-{baslangic,sag,sol,180,donusta,miyu}.png`, `faz-5.5.3-zone-375{,-180}.png`
   · 5.5.2 ekranları: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
-- Son başarılı build: 2026-09-18 **5.5.3 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- Son başarılı build: 2026-09-18 **5.5.4 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
@@ -143,6 +151,15 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     ayırt edemiyordu · ② three.js sızıntı kontrolü ilk sabotajı yakalamadı (yanlış yere konmuştu) ·
     ③ Zone sızıntı testi sayfa navigasyonuyla ölçtüğü için sayaçları sıfırlıyor, sızıntı olsa da geçiyordu.
     Kural 59 (gözle bak) bunun görsel tarafı; bu madde otomatik tarafı.
+    **Oynak kontrol de güvenilmez kontroldür** (2026-09-18, 5.5.3/5.5.4): aynı kod bir koşuda
+    geçip ötekinde kalıyorsa hata üründe değil, ölçümdedir — ve düzeltilene kadar hiçbir
+    yeşil rapor bir şey kanıtlamaz. Üç kaynak yaşandı: ① **kare içindeki tepe değeri**
+    `page.evaluate` ile örneklemek (gidiş-dönüş 70–90 ms, tepe 0.3 sn sürüyor → 74° yerine 67°
+    okunuyordu) → değeri **döngünün kendisi biriktirir**, test sıfırlayıp okur.
+    ② **"örnek sayısı × adım" ile süre hesaplamak** (evaluate gecikmesi sayılmıyor, 1.4 sn
+    dönüş 585 ms görünüyordu) → gerçek zaman damgası. ③ **Testin yön/başlangıç varsayması**
+    ("aşağı+sağ negatif yönde döner") → yön, ölçülen açıdan türetilir; ya da varsayım yerine
+    **kuralın kendisi** her örnekte denetlenir. Düzeltme sonrası **üç ardışık temiz koşu** şart.
 61. **İstemci bundle'ına yalnızca client component'ten sızılır.** Ağır bir kütüphaneyi (three, vb.) bir
     **Server Component**'te statik import etmek onu istemci paketine SOKMAZ — server bundle'da kalır.
     Sızıntı kontrolü bu yüzden client component üzerinden test edilir; server component'te test edilirse
@@ -371,7 +388,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] **5.5.1** Bağımlılıklar (three 0.186 · fiber 9.7 · drei 10.7) + `store/zone.ts` + `lib/zone/frames.ts` + `lib/zone/textures.ts` + `menu.ts` içecek kategorisi (28 ürün) + `Zone` namespace (37 anahtar)
 - [x] **5.5.2** `ZoneCanvas` + `Hall` (10 mesh, ön duvar z=+20 dahil, künye metni i18n'den, `document.fonts.ready` yeniden çizimi) + `/lab/zone`
 - [x] **5.5.3** `Character` (4 açılık sprite, **billboard**) + `useZoneControls` + `useFollowCamera` + `lib/zone/{angles,character,runtime}.ts` + `scripts/zone-camera-check.mjs` (32/32)
-- [ ] **5.5.4** `Footprints` + `Npc` + ışık bantları
+- [x] **5.5.4** `Footprints` (18'lik havuz, hareket yönüne göre) + `Npc` (billboard'lu, idle) + ışık bantları prototip ölçüsünde
 - [ ] **5.5.5** `Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık
 - [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
 - [ ] **5.5.7** POV geçişi + `FrameBoard`
@@ -482,6 +499,11 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.3 | **Test hatası:** "kamera fırlamıyor" eşiği 2 birim, ölçülen 2.65 | Meşru orbit hızı zaten ~1.7 birim/örnek (2.6 rad/s × 5.4 yarıçap); yavaş örneklerde 2.65. Eşik gerçek kusurun ölçeğine göre değil, tahminle konmuştu | Eşik 4 birim (düz lerp ters yöne atsa 2·CAM_DIST ≈ 10.8 olurdu) + asıl ölçüt eklendi: dönüş boyunca açı **işaret değiştirmemeli** — tuzak (b)'nin sahnedeki doğrudan karşılığı |
 | 2026-09-18 | 5.5.3 | **Test hatası:** aynalama kontrolü iki yönde de `false` verdi | 90°'lik dönüş yalnızca ~23° ayrışma üretiyor — `back34` kovasının (22.5°) tam sınırında, örnekleme anına göre oynak | Çapraz girdiyle 135°'lik dönüş (~35° ayrışma): aşağı+sağ aynalı, aşağı+sol değil |
 | 2026-09-18 | 5.5.3 | Turbopack dev sunucusu ~20 hot reload sonra **HMR iç hatasına** düştü; testler 30 sn'de zaman aşımına uğradı | `TurbopackInternalError: Cell … no longer exists` — uzun oturumda HMR durumu bozuluyor; ürün kodu hatası değil | Dev sunucu `rm -rf .next` ile yeniden başlatıldı. Script'lere ısıtma isteği + `page.setDefaultTimeout(90000)` eklendi (ilk derleme 30 sn'yi aşabiliyor) |
+| 2026-09-18 | rev-B | Planlayıcının verdiği `CHAR_TURN_BASE = 0.005` **hedefine ulaşmıyordu**: gerekçe "ayrışma ~102° → side çıkar" idi, gerçekte 65.2° çıkıyor ve `side` eşiği 67.5° | Üstel yumuşatmada tepe ayrışma `dönüş × max_t(camBase^t − charBase^t)`; 0.005/0.15 çifti için bu oran **%36.2**, %57 değil. 2.3° farkla kova ölü kalıyordu — üstelik istenen "180°'de side tetiklenir" kontrolü doğrudan kırmızı doğardı | Hedef uygulandı, değer **0.002** (%41.2 → 74.2°, 6.7° pay). Üç değer de ölçüldü: 0.02 → 46.6° · 0.005 → **65.1°** · 0.002 → 74.2° (model tahminiyle 0.3° içinde). Sabotajla doğrulandı: 0.005 ve 0.02'de `side` kontrolü düşüyor. Tek sabitlik geri alma |
+| 2026-09-18 | 5.5.4 | Ayak izleri duvara dayanınca da basılıyordu — aynı noktada üst üste yığılıyordu | Adım sayacı **girdiye** bakıyordu; duvara dayalıyken girdi sürüyor ama karakter ilerlemiyor | Sayaç bu karede **gerçekten alınan yola** bakıyor (`moved`). Ölçüm: 2 sn yürüyüşte 11 iz → **8** (0.26 sn periyoduyla birebir) |
+| 2026-09-18 | 5.5.4 | Ayak izi görünürlüğünü **piksel farkıyla** ölçmeye çalıştım, sonuç yanıltıcı çıktı | İki kare arasındaki farkın neredeyse tamamı **NPC'nin idle salınımıydı**; izler farkın içinde kayboluyordu. Maske görüntüsü bunu gösterdi: tek küçük küme, hem de kare ortasında (NPC'nin yeri) | Ölçüm doğrudan yapıldı: her izin dünya konumu kameraya **projelendirilip** kadrajda olup olmadığı sayılıyor (`footprints.onScreen`). Sonuç: 8–11 canlı izin yalnızca 1–2'si kadrajda |
+| 2026-09-18 | 5.5.4 | `acquireCharacterSet` tekildi; NPC ikinci maskotu isteyince ikisi birbirinin dokusunu bırakacaktı | Tek yuva, iki tüketici: NPC her karede `acquire` çağırdıkça set sıfırdan üretilir, oyuncununki çöpe giderdi | Setler **karakter başına** `Map`'te; `releaseCharacterSets()` hepsini bırakır. Doku defteri 10 → 14 sabit (2 karakter × 4 + 5 salon + 1 gölge) |
+| 2026-09-18 | 5.5.3/4 | `zone-camera-check` **koşular arası oynadı** — aynı kod bir koşuda 44/44, ötekinde 41/44 | Üçü de ölçüm hatası: ① kare içindeki tepe ayrışma `page.evaluate` ile örnekleniyordu (gidiş-dönüş 70–90 ms, tepe 0.3 sn) → 74° yerine 67° ② süre "örnek sayısı × adım" ile hesaplanıyordu (1.4 sn → 585 ms) ③ aynalama testi dönüş yönünü **varsayıyordu** | ① tepe ve kovalar **kare döngüsünde** birikiyor (`debug.peakSpread`, `seenViews`), test sıfırlayıp okuyor ② gerçek zaman damgası ③ yön ölçülen açıdan türetiliyor + **kuralın kendisi** her örnekte denetleniyor. Işınlanma ölçütü de mesafeden **hıza** çevrildi (sunucu takılınca örnek arası uzuyordu). **Üç ardışık temiz koşu** ile kapatıldı (Kural 60) |
 
 ---
 

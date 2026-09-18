@@ -8,7 +8,7 @@ import { normalizeAngle } from "@/lib/zone/angles";
 import {
   acquireCharacterSet,
   mirrorFor,
-  releaseCharacterSet,
+  releaseCharacterSets,
   viewFor,
 } from "@/lib/zone/character";
 import { CHAR_START, reportSprite, stepWorld, zoneRuntime } from "@/lib/zone/runtime";
@@ -38,7 +38,7 @@ export function Character({ who, reduced }: { who: CharacterId; reduced: boolean
   // Sahne kapanınca tekil sprite seti ve gölge dokusu bırakılır (spec bölüm 9).
   useEffect(
     () => () => {
-      releaseCharacterSet();
+      releaseCharacterSets();
       releaseShadowTexture();
     },
     [],
@@ -65,7 +65,7 @@ export function Character({ who, reduced }: { who: CharacterId; reduced: boolean
       mat.map = sprite[view];
       mat.needsUpdate = true;
     }
-    reportSprite(view, mirrored, sprite.source);
+    reportSprite(view, mirrored, sprite.source, rel);
 
     /* ---- billboard (spec 8.3) ----
        Düzlem kameraya DÖNMEZSE, kamera karakterin öbür tarafına geçtiği anda — ki yön takipli

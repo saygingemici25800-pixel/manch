@@ -1,9 +1,11 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 import * as THREE from "three";
 
 import {
+  applyAdaptiveFov,
   CAM_DIST,
   CAM_HEIGHT,
   CAM_LERP,
@@ -34,6 +36,15 @@ const target = new THREE.Vector3();
 
 export function useFollowCamera() {
   const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
+
+  /**
+   * Ekran oranı değişince dikey FOV yeniden türetilir (bkz. `fovForAspect`): portrede salon
+   * tünel gibi okunmasın. R3F `aspect`'i kendisi günceller, `fov`'u güncellemez.
+   */
+  useEffect(() => {
+    applyAdaptiveFov(camera as THREE.PerspectiveCamera, size.width, size.height);
+  }, [camera, size]);
 
   useFrame(() => {
     const { char, cam } = zoneRuntime();

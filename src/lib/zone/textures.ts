@@ -329,7 +329,7 @@ export function artPlaceholderTexture(title: string, kicker: string, waiting: st
 /* ------------------------------ zemin decal'ları ----------------------------- */
 
 /** Ayak izi (spec 8.3) — 18'lik havuzda sönerek kullanılır. */
-export function footprintTexture() {
+export function footprintTexture(anisotropy?: number) {
   const c = cv(64, 64);
   const x = c.getContext("2d")!;
   x.clearRect(0, 0, 64, 64);
@@ -340,7 +340,7 @@ export function footprintTexture() {
   x.beginPath();
   x.ellipse(32, 50, 9, 7, 0, 0, Math.PI * 2);
   x.fill();
-  return tex(c, undefined, undefined, undefined, "footprint");
+  return tex(c, undefined, undefined, anisotropy, "footprint");
 }
 
 /** Tablonun önündeki halka: kesikli dış çember + ince iç çember + içe bakan 4 ok (spec 5.1). */

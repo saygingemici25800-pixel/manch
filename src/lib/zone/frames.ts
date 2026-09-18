@@ -75,6 +75,42 @@ export const CHAR_BOUND_X = HALF_W - 1;
 export const SPEED = 4.6;
 
 export const CAMERA_FOV = 48;
+/**
+ * **Portrede FOV uyarlanır (revizyon 2026-09-18).** `CAMERA_FOV` DİKEY açıdır; 390×844'te
+ * yatay karşılığı ≈ 23° kalıyordu — salon tünel gibi okunuyordu. Yatay açıyı hedefleyip dikeyi
+ * en-boy oranından türetiyoruz:
+ *
+ *   vFov = 2·atan( tan(FOV_H_TARGET/2) / aspect )   →   clamp(FOV_MIN, FOV_MAX)
+ *
+ * Masaüstünde (16:9) türetilen değer 27° çıkar ve `FOV_MIN = 48`'e takılır: **masaüstünde
+ * hiçbir şey değişmez.** `FOV_MAX = 72` şart — üst sınır olmadan portrede balık gözü olur.
+ */
+export const FOV_H_TARGET = 46;
+export const FOV_MIN = 48;
+export const FOV_MAX = 72;
+
+/** En-boy oranına göre dikey FOV (derece). */
+export function fovForAspect(aspect: number) {
+  const hTarget = (FOV_H_TARGET * Math.PI) / 180;
+  const vFov = 2 * Math.atan(Math.tan(hTarget / 2) / aspect);
+  const deg = (vFov * 180) / Math.PI;
+  return deg < FOV_MIN ? FOV_MIN : deg > FOV_MAX ? FOV_MAX : deg;
+}
+
+/**
+ * FOV'u kameraya uygular. Kural 25: hook'tan dönen nesnenin mutasyonu bileşen içinde yasak —
+ * değişiklik ayrı modüldeki plain fonksiyonda olur, hook yalnızca çağırır (`applyLerp` gibi).
+ * `three` import etmemek için yapısal tip kullanılıyor.
+ */
+export function applyAdaptiveFov(
+  camera: { isPerspectiveCamera?: boolean; fov: number; updateProjectionMatrix: () => void },
+  width: number,
+  height: number,
+) {
+  if (!camera.isPerspectiveCamera || !height) return;
+  camera.fov = fovForAspect(width / height);
+  camera.updateProjectionMatrix();
+}
 export const CAM_DIST = 5.4;
 export const CAM_HEIGHT = 2.45;
 export const CAM_LERP = 0.09;
@@ -82,8 +118,22 @@ export const LOOK_AHEAD = 3.0;
 export const LOOK_HEIGHT = 1.55;
 /** Kamera dönüşü — 180° ≈ 1.2 sn. `1 - pow(BASE, dt)` biçiminde kullanılır. */
 export const TURN_BASE = 0.15;
-/** Karakter dönüşü, kameradan hızlı. */
-export const CHAR_TURN_BASE = 0.02;
+/**
+ * Karakter dönüşü — kameradan **belirgin** hızlı (revizyon 2026-09-18: 0.02 → 0.002).
+ *
+ * Neden: sprite'ın hangi görünümde çizileceğini karakter ile kamera arasındaki ayrışma belirler
+ * (spec 8.1). Ayrışmanın tepe değeri `dönüş açısı × max_t(TURN_BASE^t − CHAR_TURN_BASE^t)`.
+ * 0.02 ile bu oran %26.1 → 180°'lik dönüşte yalnızca **46.9°**, yani hep `back`/`back34`:
+ * `side` (≥67.5°) hiç tetiklenmiyordu ve çizerden istenecek 8 çizimin ikisi ölü kalacaktı.
+ *
+ * Ara değerler ölçüldü: 0.005 → %36.2 → **65.2°**, hâlâ `side` eşiğinin **altında** (2.3° farkla).
+ * 0.002 → %41.2 → **74.2°** → `side` tetikleniyor, eşiğe 6.7° pay var. Karakter dönüşü %90'ını
+ * 0.37 sn'de tamamlıyor (0.02'de 0.59 sn), kamera 1.2 sn'de yetişiyor.
+ *
+ * `front` (≥112.5°) sürekli girdiyle ulaşılamaz (tavan %44.5 → 80°); o görünüm
+ * `CharacterSelect` ve NPC içindir.
+ */
+export const CHAR_TURN_BASE = 0.002;
 
 export const FRAME_PROXIMITY = 2.6;
 /** Görünür yarıçap 2.3 < tetikleme 2.6 — halka tetikleme alanının İÇİNDE kalır. */
