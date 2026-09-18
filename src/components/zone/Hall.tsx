@@ -1,14 +1,17 @@
 "use client";
 
+import { useThree } from "@react-three/fiber";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import { CEIL_H, HALF_W } from "@/lib/zone/frames";
 import {
+  acquireTexture,
   backWallTexture,
   floorTexture,
   frontWallTexture,
   redrawTextTextures,
+  releaseTextureSlots,
   tileTexture,
 } from "@/lib/zone/textures";
 import { colors } from "@/styles/tokens";
@@ -20,6 +23,13 @@ const HALL_LEN = Z_FRONT - Z_BACK;
 
 export function Hall() {
   const t = useTranslations("Zone");
+
+  /**
+   * Zemin daması eğik bakılan, sık tekrarlı bir doku — anizotropik filtre olmadan uzakta
+   * titrer (moiré), üstelik titreme ancak YÜRÜRKEN görülür. Cihazın verebildiği en yüksek
+   * değeri kullanıyoruz: bedeli yok, sabit 4'ten belirgin daha temiz.
+   */
+  const aniso = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
 
   /**
    * spec 4.2 — Google fontları canvas'a GEÇ yüklenir. İlk çizimde yazılar yedek fontla
@@ -37,11 +47,12 @@ export function Hall() {
     };
   }, []);
 
-  // --- yazısız dokular: fontEpoch'a bağlı DEĞİL, boşuna yeniden üretilmez
-  // (React Compiler kuralı: useMemo bağımlılığı dizi LİTERALİ olmalı → jenerik hook yok)
-  const floor = useMemo(() => floorTexture(), []);
-  const tileL = useMemo(() => tileTexture(), []);
-  const tileR = useMemo(() => tileTexture(), []);
+  // --- yazısız dokular: fontEpoch'a bağlı DEĞİL, boşuna yeniden üretilmez.
+  // `useMemo` DEĞİL, doku yuvası (bkz. `acquireTexture`): StrictMode çift render'ında
+  // useMemo sahipsiz doku bırakıyordu — tur başına +7, `zone-leak-check` yakaladı.
+  const floor = acquireTexture("floor", String(aniso), () => floorTexture(aniso));
+  const tileL = acquireTexture("tileL", String(aniso), () => tileTexture(aniso));
+  const tileR = acquireTexture("tileR", String(aniso), () => tileTexture(aniso));
 
   // --- yazılı dokular: metin i18n'den, fontEpoch değişince yeniden çizilir
   const plaque = useMemo(
@@ -58,15 +69,21 @@ export function Hall() {
     [t],
   );
 
-  const back = useMemo(() => backWallTexture(plaque, fontEpoch), [plaque, fontEpoch]);
-  const front = useMemo(() => frontWallTexture(frontLines, fontEpoch), [frontLines, fontEpoch]);
+  // Anahtar metni + fontEpoch: yazı ya da font değişince yuva yeni doku üretir, eskisini bırakır.
+  const back = acquireTexture(
+    "backWall",
+    `${fontEpoch}|${plaque.title}|${plaque.place}|${plaque.body.join("¶")}|${plaque.footer}`,
+    () => backWallTexture(plaque, fontEpoch),
+  );
+  const front = acquireTexture(
+    "frontWall",
+    `${fontEpoch}|${frontLines.join("|")}`,
+    () => frontWallTexture(frontLines, fontEpoch),
+  );
 
-  // Doku dispose'u tek yerde: değişince eskisi, unmount'ta hepsi bırakılır.
-  // (ZoneCanvas'taki SceneDisposer ikinci güvence; burada erken bırakmak yeniden
-  //  çizimde eski dokunun asılı kalmasını engeller.)
-  useEffect(() => () => { floor.dispose(); tileL.dispose(); tileR.dispose(); }, [floor, tileL, tileR]);
-  useEffect(() => () => back.dispose(), [back]);
-  useEffect(() => () => front.dispose(), [front]);
+  // Sahne kapanınca tüm yuvalar bırakılır. (ZoneCanvas'taki SceneDisposer ikinci güvence;
+  // doku defteri çift `dispose()`'u bir kez sayar.)
+  useEffect(() => () => releaseTextureSlots(), []);
 
   return (
     <group>

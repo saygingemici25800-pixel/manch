@@ -28,6 +28,86 @@ const C = {
 /** berry'nin rgba karşılığı — künye metninde yarı saydam kullanılır. */
 const BERRY_RGB = "106, 31, 59";
 
+/**
+ * Doku defteri (spec bölüm 9 / Kural 60).
+ *
+ * WebGL bağlam sayacı elle üretilen dokuların sızıntısını GÖREMEZ: her mount yeni bir renderer
+ * açar, eski renderer'ın `info` sayaçları onunla gider. Bu yüzden doku üretimini/bırakılmasını
+ * burada, renderer'dan bağımsız sayıyoruz. Aç-kapa-aç'ta `alive` sabit kalmalı.
+ */
+const ledger = { created: 0, disposed: 0 };
+/** Etiket bazlı döküm: sızıntı çıkarsa hangi dokunun bırakılmadığını doğrudan söyler. */
+const byLabel = new Map<string, number>();
+export const textureLedger = () => ({
+  ...ledger,
+  alive: ledger.created - ledger.disposed,
+  byLabel: Object.fromEntries(byLabel),
+});
+
+/**
+ * Sayaca bağlar: three.js `dispose()` çağrısında 'dispose' olayı yayar.
+ *
+ * **Bir kez sayar.** Aynı doku hem sahibi tarafından hem de `SceneDisposer` tarafından
+ * bırakılabiliyor; iki kez saymak `alive`'ı düşürüp gerçek bir sızıntıyı gizlerdi
+ * (Kural 60: güvenilmeyen kontrol, kontrolsüzlükten kötüdür).
+ */
+export function trackTexture<T extends THREE.Texture>(t: T, label = "?"): T {
+  ledger.created += 1;
+  byLabel.set(label, (byLabel.get(label) ?? 0) + 1);
+  let counted = false;
+  t.addEventListener("dispose", () => {
+    // Bırakılmış dokuyu YENİDEN kullanmak sızıntıdan farklı ama en az onun kadar sinsi bir
+    // hata: sayaçlar temiz görünür, ekranda karakter/duvar beyaz çıkar. `__ZONE_STATS__`
+    // sahnedeki materyalleri dolaşıp bu işareti arıyor (`staleMaps`).
+    t.userData.zoneDisposed = true;
+    if (counted) return;
+    counted = true;
+    ledger.disposed += 1;
+    byLabel.set(label, (byLabel.get(label) ?? 0) - 1);
+  });
+  return t;
+}
+
+// Dev/QA: defter sahnenin ömründen BAĞIMSIZ okunabilmeli. `__ZONE_STATS__` unmount'ta
+// siliniyor; oysa asıl soru "Zone KAPALIYKEN canlı doku kaç?" (spec bölüm 9: kapanınca
+// hepsi bırakılmalı). Modül seviyesinden yayınlanır, prod'da tree-shake edilir.
+if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+  (window as unknown as Record<string, unknown>).__ZONE_TEXTURES__ = textureLedger;
+}
+
+/* ------------------------------ doku yuvaları ------------------------------ */
+
+/**
+ * **Doku `useMemo` ile üretilmez.** React StrictMode render'ı iki kez çağırır: `useMemo`
+ * fabrikası iki doku üretir, React birini saklar, diğeri sahipsiz kalır ve hiç `dispose`
+ * edilmez — aç-kapa-aç'ta bellek büyür. (`useMemo` zaten bir önbellek garantisi değildir;
+ * React istediği an atıp yeniden hesaplayabilir.) 5.5.2'de bu hata yapıldı ve
+ * `zone-leak-check`'e doku defteri eklenince ortaya çıktı: tur başına +7 doku.
+ *
+ * Yuva mantığı buna bağışık: aynı `slot` + aynı `key` için hep aynı doku döner, anahtar
+ * değişince eskisi bırakılır. Render sırasında çağrılması güvenli — idempotent.
+ */
+interface TextureSlot {
+  key: string;
+  texture: THREE.Texture;
+}
+const slots = new Map<string, TextureSlot>();
+
+export function acquireTexture(slot: string, key: string, make: () => THREE.Texture): THREE.Texture {
+  const current = slots.get(slot);
+  if (current && current.key === key) return current.texture;
+  current?.texture.dispose();
+  const texture = make();
+  slots.set(slot, { key, texture });
+  return texture;
+}
+
+/** Sahne kapanırken tüm yuvalar bırakılır. */
+export function releaseTextureSlots() {
+  for (const s of slots.values()) s.texture.dispose();
+  slots.clear();
+}
+
 function cv(w: number, h: number) {
   const c = document.createElement("canvas");
   c.width = w;
@@ -35,9 +115,14 @@ function cv(w: number, h: number) {
   return c;
 }
 
-function tex(c: HTMLCanvasElement, rx?: number, ry?: number) {
-  const t = new THREE.CanvasTexture(c);
-  t.anisotropy = 4;
+/**
+ * `anisotropy`: eğik bakılan yüzeylerde (özellikle zemin daması) uzakta titremeyi/moiré'yi
+ * kesen tek ayar. Cihazın desteklediği en yüksek değer `gl.capabilities.getMaxAnisotropy()`
+ * ile okunur ve çağıranlar onu geçirir; 4 yalnızca yedek değerdir.
+ */
+function tex(c: HTMLCanvasElement, rx?: number, ry?: number, anisotropy = 4, label = "tex") {
+  const t = trackTexture(new THREE.CanvasTexture(c), label);
+  t.anisotropy = anisotropy;
   t.colorSpace = THREE.SRGBColorSpace;
   if (rx) {
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -57,7 +142,7 @@ function grain(x: CanvasRenderingContext2D, size: number, count: number, alpha: 
 /* ---------------------------------- zemin ---------------------------------- */
 
 /** Bordo–krem dama, 128 px kare, `repeat(10, 26)`. */
-export function floorTexture() {
+export function floorTexture(anisotropy?: number) {
   const c = cv(256, 256);
   const x = c.getContext("2d")!;
   x.fillStyle = C.cream;
@@ -66,13 +151,13 @@ export function floorTexture() {
   x.fillRect(0, 0, 128, 128);
   x.fillRect(128, 128, 128, 128);
   grain(x, 256, 1400, 0.06);
-  return tex(c, 10, 26);
+  return tex(c, 10, 26, anisotropy, "floor");
 }
 
 /* --------------------------------- duvarlar -------------------------------- */
 
 /** Mavi karo + beyaz derz, 64 px grid, `repeat(6, 3)`. */
-export function tileTexture() {
+export function tileTexture(anisotropy?: number) {
   const c = cv(256, 256);
   const x = c.getContext("2d")!;
   x.fillStyle = C.tile;
@@ -88,7 +173,7 @@ export function tileTexture() {
     x.stroke();
   }
   grain(x, 256, 900, 0.05);
-  return tex(c, 6, 3);
+  return tex(c, 6, 3, anisotropy, "tile");
 }
 
 /** Yazı çizilecek duvarlar için karo zeminli canvas (tekrarsız, tek parça). */
@@ -175,7 +260,7 @@ export function backWallTexture(t: PlaqueText, revision = 0) {
   x.font = '400 26px "Press Start 2P", monospace';
   x.fillText(t.footer, left, y + 64);
 
-  const out = tex(c);
+  const out = tex(c, undefined, undefined, undefined, "backWall");
   out.userData.revision = revision;
   return out;
 }
@@ -193,7 +278,7 @@ export function frontWallTexture(lines: readonly [string, string, string], revis
   x.fillText(lines[1], W / 2, 470);
   x.font = '700 120px Modak, "Arial Black", sans-serif';
   x.fillText(lines[2], W / 2, 600);
-  const out = tex(c);
+  const out = tex(c, undefined, undefined, undefined, "frontWall");
   out.userData.revision = revision;
   return out;
 }
@@ -238,7 +323,7 @@ export function artPlaceholderTexture(title: string, kicker: string, waiting: st
   x.globalAlpha = 0.75;
   x.font = '400 22px "Press Start 2P", monospace';
   x.fillText(waiting, 210, 552);
-  return tex(c);
+  return tex(c, undefined, undefined, undefined, "art");
 }
 
 /* ------------------------------ zemin decal'ları ----------------------------- */
@@ -255,7 +340,7 @@ export function footprintTexture() {
   x.beginPath();
   x.ellipse(32, 50, 9, 7, 0, 0, Math.PI * 2);
   x.fill();
-  return tex(c);
+  return tex(c, undefined, undefined, undefined, "footprint");
 }
 
 /** Tablonun önündeki halka: kesikli dış çember + ince iç çember + içe bakan 4 ok (spec 5.1). */
@@ -310,7 +395,7 @@ export function pulseTexture() {
 }
 
 /** Karakterin altındaki yumuşak gölge — gölge haritası kapalı (spec 3.1). */
-export function shadowTexture() {
+export function shadowTexture(anisotropy?: number) {
   const c = cv(128, 128);
   const x = c.getContext("2d")!;
   const g = x.createRadialGradient(64, 64, 4, 64, 64, 62);
@@ -318,7 +403,7 @@ export function shadowTexture() {
   g.addColorStop(1, "rgba(27,27,27,0)");
   x.fillStyle = g;
   x.fillRect(0, 0, 128, 128);
-  return tex(c);
+  return tex(c, undefined, undefined, anisotropy, "shadow");
 }
 
 /* ------------------------------ font tuzağı (4.2) ----------------------------- */
@@ -334,4 +419,25 @@ export async function redrawTextTextures(
   if (typeof document === "undefined" || !document.fonts) return;
   await document.fonts.ready;
   redraw();
+}
+
+/**
+ * Gölge dokusu sahnenin ömrü boyunca tektir (karakter + 5.5.4'teki NPC aynısını kullanır).
+ * Tekil tutup plain fonksiyonla yönetiyoruz: JSX'te `ref.current` okumak React Compiler
+ * kurallarına takılıyor (Kural 25), materyale `useFrame` içinde takılması da hero sprite'ıyla
+ * aynı kalıp oluyor.
+ */
+let shadowSingleton: { anisotropy: number; texture: THREE.Texture } | null = null;
+
+export function acquireShadowTexture(anisotropy: number) {
+  if (shadowSingleton?.anisotropy !== anisotropy) {
+    shadowSingleton?.texture.dispose();
+    shadowSingleton = { anisotropy, texture: shadowTexture(anisotropy) };
+  }
+  return shadowSingleton.texture;
+}
+
+export function releaseShadowTexture() {
+  shadowSingleton?.texture.dispose();
+  shadowSingleton = null;
 }

@@ -4,8 +4,17 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
+import { Character } from "@/components/zone/Character";
 import { Hall } from "@/components/zone/Hall";
-import { CAMERA_FOV, CAM_HEIGHT } from "@/lib/zone/frames";
+import { useFollowCamera } from "@/hooks/useFollowCamera";
+import { useZoneControls } from "@/hooks/useZoneControls";
+import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { angLerp, normalizeAngle, smoothing } from "@/lib/zone/angles";
+import { mirrorFor, viewFor } from "@/lib/zone/character";
+import { CAMERA_FOV, CAM_DIST, CAM_HEIGHT } from "@/lib/zone/frames";
+import { CAM_START_ANG, CHAR_START, resetRuntime, zoneRuntime } from "@/lib/zone/runtime";
+import { textureLedger } from "@/lib/zone/textures";
+import { useZoneStore, type Character as CharacterId } from "@/store/zone";
 import { colors } from "@/styles/tokens";
 
 /**
@@ -17,10 +26,18 @@ import { colors } from "@/styles/tokens";
  * material / texture ve rAF bırakılır. Sonradan eklenmesi zor, şimdi ucuz.
  */
 
+/**
+ * Karakter seçimi 5.5.10'da (`CharacterSelect`) bağlanacak. O zamana kadar — ve store boşken —
+ * Misu ile gezilir; sahne karaktersiz kalmaz.
+ */
+const FALLBACK_CHARACTER: CharacterId = "misu";
+
 /** Dev/QA: canlı WebGL bağlamı sayacı — sızıntı testi bunu okur. */
 const stats = { created: 0, disposed: 0 };
 /** Dev/QA: aktif sahne — lab testleri mesh sayısı/konumunu buradan doğrular. */
 let liveScene: THREE.Scene | null = null;
+/** Dev/QA: aktif kamera — `zone-camera-check` dönüşü buradan ölçer. */
+let liveCamera: THREE.Camera | null = null;
 
 function disposeScene(scene: THREE.Scene) {
   scene.traverse((obj) => {
@@ -41,11 +58,21 @@ function disposeScene(scene: THREE.Scene) {
 
 export function ZoneCanvas({ className }: { className?: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const character = useZoneStore((s) => s.character);
+
+  /**
+   * Kontroller `<Canvas>` DIŞINDA bağlanır: pencere olayları sahneye ait değil, üstelik
+   * 5.5.6'daki Joystick de DOM tarafında aynı runtime modülüne yazacak.
+   */
+  useZoneControls();
 
   // Dev sayaçları — sadece development'ta (prod'da tree-shake).
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
     const w = window as unknown as Record<string, unknown>;
+    // Saf açı matematiği — `scripts/zone-camera-check.mjs` üç tuzağı doğrudan burada sınar.
+    w.__ZONE_ANG__ = { angLerp, normalizeAngle, smoothing, viewFor, mirrorFor };
     w.__ZONE_STATS__ = () => ({
       created: stats.created,
       disposed: stats.disposed,
@@ -68,9 +95,39 @@ export function ZoneCanvas({ className }: { className?: string }) {
           })()
         : null,
       fog: liveScene?.fog ? `${(liveScene.fog as THREE.Fog).near}-${(liveScene.fog as THREE.Fog).far}` : null,
+      char: { x: +zoneRuntime().char.x.toFixed(3), z: +zoneRuntime().char.z.toFixed(3), ang: zoneRuntime().char.ang },
+      cam: {
+        ang: zoneRuntime().cam.ang,
+        x: liveCamera ? +liveCamera.position.x.toFixed(3) : null,
+        y: liveCamera ? +liveCamera.position.y.toFixed(3) : null,
+        z: liveCamera ? +liveCamera.position.z.toFixed(3) : null,
+      },
+      /** Elle üretilen dokuların defteri — bağlam sayacının göremediği sızıntı (spec 9). */
+      textures: textureLedger(),
+      /** Sahnede bırakılmış (ölü) dokuya bağlı materyal sayısı — 0 olmalı. */
+      staleMaps: (() => {
+        let n = 0;
+        liveScene?.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          for (const m of mats) {
+            const map = (m as THREE.MeshBasicMaterial | undefined)?.map;
+            if (map?.userData?.zoneDisposed) n += 1;
+          }
+        });
+        return n;
+      })(),
+      input: { ...zoneRuntime().input },
+      /** Billboard açısı — sprite kameraya dönmezse `FrontSide` onu kırpar (spec 8.3). */
+      heroRotY: liveScene?.getObjectByName("zone-char")?.rotation.y ?? null,
+      view: zoneRuntime().debug.view,
+      mirrored: zoneRuntime().debug.mirrored,
+      spriteSource: zoneRuntime().debug.source,
     });
     return () => {
       delete w.__ZONE_STATS__;
+      delete w.__ZONE_ANG__;
     };
   }, []);
 
@@ -79,15 +136,30 @@ export function ZoneCanvas({ className }: { className?: string }) {
       <Canvas
         // Kural/spec 9: retina'da 2 ile sınırla, yoksa mobilde fps düşer.
         dpr={typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio, 2)}
-        camera={{ fov: CAMERA_FOV, position: [0, CAM_HEIGHT, 14], near: 0.1, far: 120 }}
+        /* Başlangıçta kamera zaten takip pozisyonunda dursun: mount'ta içeri doğru
+           süzülme olmaz, ilk kare doğru kadrajla açılır. */
+        camera={{
+          fov: CAMERA_FOV,
+          position: [
+            CHAR_START.x - Math.sin(CAM_START_ANG) * CAM_DIST,
+            CAM_HEIGHT,
+            CHAR_START.z - Math.cos(CAM_START_ANG) * CAM_DIST,
+          ],
+          near: 0.1,
+          far: 120,
+        }}
         // Gölge haritası KAPALI — karakterin altında canvas'tan üretilen yumuşak gölge var.
         shadows={false}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         onCreated={({ gl, scene, camera }) => {
           stats.created += 1;
+          // Sahne her kurulduğunda dünya sıfırlanır: aç-kapa-aç aynı yerden başlar.
+          // (`onCreated` render değil, callback — ilk kareden önce koşar.)
+          resetRuntime();
           gl.setClearColor(colors.cream);
           scene.fog = new THREE.Fog(colors.cream, 26, 52);
-          camera.lookAt(0, 1.55, 0);
+          liveCamera = camera;
+          camera.lookAt(CHAR_START.x, 1.55, CHAR_START.z - CAM_DIST);
         }}
       >
         {/* spec 3.1 — gölgesiz, iki yönlü ışık */}
@@ -96,7 +168,12 @@ export function ZoneCanvas({ className }: { className?: string }) {
         <directionalLight color={colors.sky} intensity={0.35} position={[-6, 6, -8]} />
 
         <Hall />
-        <SceneDisposer onDispose={() => { stats.disposed += 1; }} />
+        {/* Sıra önemli: `Character` simülasyon adımıdır (girdi → konum → İKİ açı),
+            `FollowCamera` yalnızca o açıyı kamera konumuna çevirir. R3F `useFrame`
+            aboneliklerini mount sırasına göre çalıştırır. */}
+        <Character who={character ?? FALLBACK_CHARACTER} reduced={reduced} />
+        <FollowCamera />
+        <SceneDisposer onDispose={() => { stats.disposed += 1; liveCamera = null; }} />
       </Canvas>
     </div>
   );
@@ -118,5 +195,11 @@ function SceneDisposer({ onDispose }: { onDispose: () => void }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene]);
+  return null;
+}
+
+/** `useFollowCamera` `<Canvas>` içinde çağrılmalı (useThree/useFrame). Tek satırlık kap. */
+function FollowCamera() {
+  useFollowCamera();
   return null;
 }

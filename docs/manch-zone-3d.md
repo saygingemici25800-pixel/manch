@@ -394,9 +394,22 @@ Misu: kulaklık + oversize tişört. Miyu: güneş gözlüğü kafasının üst�
 **Çizimler gelmeden:** prototipteki `drawCapy()` geçici sprite üretir. Sahne kodu çizimlerin
 gelmesini beklemez; dosyalar düşünce `TextureLoader` devreye girer, başka hiçbir şey değişmez.
 
+> **Uygulandı (5.5.3).** `createCharacterSet()` çizilmiş sprite'ı **senkron** döndürür, PNG'leri arka
+> planda dener ve **dördü birden** yüklenince alanları yerinde değiştirir (yarım set dönerken zıplayan
+> karakter demek olurdu). Anahtar: `character.ts` içindeki `MASCOT_SPRITE_BASE` sabiti. Şu an `null` —
+> **otomatik yoklama bilerek yok**, olmayan PNG'ye atılan istek 404 üretir, Kural 53'ün ağ denetimine
+> takılır ve Zone ana sayfaya bağlanınca (5.5.10) her açılışta 8 boş istek olur. Çizimler gelince sabit
+> `"/images/mascots"` yapılır. Yükleyici ölü kod değil: dev'de `?sprites=<yol>` ile aynı yol denenir ve
+> 8 geçici PNG ile uçtan uca doğrulandı (`spriteSource` → `png`, doku sayısı sabit, ölü doku bağı 0).
+
 ### 8.3 Animasyon
 
-- Sprite **billboard**: her karede kameraya döner
+- Sprite **billboard**: her karede kameraya döner. **Atlanamaz:** `PlaneGeometry` normali +z ve
+  `MeshBasicMaterial` varsayılanı `FrontSide` olduğu için, kamera karakterin öbür yanına geçtiği anda
+  (yön takipli kamerada her 180° dönüşte) sprite arka yüzden görünür ve **kırpılır — karakter kaybolur**.
+  Prototipte bu adım yazılmamış (`hero.rotation.y` hep 0); kamera sabit olduğu için ortaya çıkmamış.
+  Yalnız Y ekseninde döndürülür (karakter dik kalır); Euler XYZ sırasında `rotation.z` (lean) önce
+  yerel düzlemde uygulanır, billboard açısı sonra gelir
 - Yürürken `bob += dt*11`, `y = 0.83 + |sin(bob)|*0.07`, `rotation.z = sin(bob)*0.05`
 - Dururken y ve rotation lerp ile sıfıra döner
 - Ayak izi: her 0.26 s, sağ/sol dönüşümlü, 18'lik havuz, `opacity` saniyede 0.28 azalır.
@@ -438,7 +451,7 @@ gelmesini beklemez; dosyalar düşünce `TextureLoader` devreye girer, başka hi
 - [ ] **5.5.1** Bağımlılıklar + `store/zone.ts` + `lib/zone/frames.ts` + `lib/zone/textures.ts`
       + `menu.ts`'e içecek kategorisi
 - [ ] **5.5.2** `ZoneCanvas` + `Hall` (ön duvar + künye + `document.fonts.ready`) — `/lab/zone`
-- [ ] **5.5.3** `Character` (4 açılık sprite) + `useZoneControls` + **yön takipli kamera**
+- [x] **5.5.3** `Character` (4 açılık sprite + **billboard**) + `useZoneControls` + **yön takipli kamera** — `lib/zone/{angles,character,runtime}.ts`, `hooks/{useZoneControls,useFollowCamera}.ts`, `scripts/zone-camera-check.mjs` (32/32)
 - [ ] **5.5.4** `Footprints` + `Npc` + ışık bantları
 - [ ] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık
 - [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik

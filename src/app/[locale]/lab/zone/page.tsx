@@ -8,7 +8,7 @@ import { ZoneStage } from "./ZoneStage";
 
 type Props = { params: Promise<{ locale: string }> };
 
-/** Faz 5.5.2 izole test sayfası — Kural 23: production'da 404. */
+/** Faz 5.5 izole test sayfası — Kural 23: production'da 404. */
 export default async function ZoneLabPage({ params }: Props) {
   if (process.env.NODE_ENV === "production") notFound();
 
@@ -22,9 +22,12 @@ export default async function ZoneLabPage({ params }: Props) {
     <NextIntlClientProvider messages={messages}>
       <main id="main" className="relative h-[100svh] w-full overflow-hidden bg-cream">
         <ZoneStage />
-        <p className="pointer-events-none absolute left-[2vw] top-[2vw] z-10 font-pixel text-[0.8vw] uppercase tracking-[0.2em] text-berry max-md:left-[5vw] max-md:top-[5vw] max-md:text-[2.6vw]">
-          {t("title")} · 5.5.2 — salon
-        </p>
+        <div className="pointer-events-none absolute left-[2vw] top-[2vw] z-10 font-pixel text-[0.8vw] uppercase tracking-[0.2em] text-berry max-md:left-[5vw] max-md:top-[5vw] max-md:text-[2.6vw]">
+          <p>{t("title")} · 5.5.3 — karakter + kontroller + kamera</p>
+          <p className="mt-[0.6vw] text-[0.6vw] normal-case tracking-[0.1em] max-md:text-[2.2vw]">
+            {t("hint.mouse")}
+          </p>
+        </div>
       </main>
     </NextIntlClientProvider>
   );
