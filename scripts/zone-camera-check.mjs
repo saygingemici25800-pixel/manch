@@ -952,6 +952,55 @@ if (runs("gate")) {
     "karakter hatırlanıyor — ikinci girişte seçim atlanıyor",
     `durum ${second}`);
 
+  /* ---------------- 5.5.10: StoryBoard × 3 (kapı akışının içinden) ---------------- */
+  // Sahnedeyiz (yukarıdaki adım karakteri hatırlayıp doğrudan sahneye soktu).
+  await page.waitForFunction(
+    () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
+    { timeout: 60000 },
+  );
+  await page.waitForTimeout(800);
+
+  const STORY = { crew: [5.6, -4], mascot: [-5.6, 6], visit: [5.6, 6] };
+  const tpGate = (x, z) => page.evaluate(({ x, z }) => window.__ZONE_TELEPORT__(x, z), { x, z });
+
+  const storyDetail = [];
+  let storyOk = true;
+  for (const [id, [x, z]] of Object.entries(STORY)) {
+    await tpGate(x, z);
+    await page.waitForTimeout(400);
+    await page.keyboard.press("e");
+    await page.waitForTimeout(900);
+    const board = page.locator("[data-testid=story-board]");
+    const shown = await board.getAttribute("data-frame").catch(() => null);
+    const paras = await board.locator("p").count().catch(() => 0);
+    const link = await page.locator("[data-testid=story-fullpage]").count();
+    if (shown !== id || paras !== 2 || link !== 1) storyOk = false;
+    storyDetail.push(`${id}:${shown}/${paras}p/${link}link`);
+    // Panodan Zone'a dönüş: karakter ve konum korunmalı
+    const before = await read(page);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(600);
+    const after = await read(page);
+    if (Math.abs(before.char.x - after.char.x) > 0.01 || Math.abs(before.char.z - after.char.z) > 0.01) storyOk = false;
+  }
+  ok(storyOk, "üç hikâye panosu: doğru içerik, iki paragraf, tam sayfa linki; çıkışta konum korunuyor",
+    storyDetail.join(" · "));
+
+  /* "TAM SAYFAYA GİT" Zone'u KAPATIP gezinmeli — kilit sayaçta asılı kalmamalı (Kural 67) */
+  await tpGate(...STORY.visit);
+  await page.waitForTimeout(400);
+  await page.keyboard.press("e");
+  await page.waitForTimeout(900);
+  await page.locator("[data-testid=story-fullpage]").click();
+  await page.waitForTimeout(3000);
+  const url = page.url();
+  ok(url.includes("/contact"), "tam sayfa linki hedefe gidiyor", url.replace(BASE, ""));
+  ok((await page.locator("[data-testid=zone-curtain]").count()) === 0, "gezinirken Zone kapanıyor");
+  ok((await page.evaluate(() => window.__SCROLL_LOCK__?.() ?? 0)) === 0
+      && (await page.evaluate(() => document.documentElement.style.overflow)) !== "hidden",
+    "gezindikten sonra kaydırma kilidi sayaçta ASILI KALMIYOR (Kural 67)",
+    `derinlik=${await page.evaluate(() => window.__SCROLL_LOCK__?.())} · overflow=${await page.evaluate(() => document.documentElement.style.overflow || "(yok)")}`);
+
   const clean = errs.filter((e) => !/Download the React DevTools|Failed to load resource/.test(e));
   ok(clean.length === 0, "kapı akışında konsol temiz", clean.slice(0, 2).join(" | "));
   await page.close();

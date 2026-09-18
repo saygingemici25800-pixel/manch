@@ -331,7 +331,21 @@
     },
     "less": "Decrease by one",
     "more": "Increase by one",
-    "priceSoon": "Price coming soon — not orderable yet"
+    "priceSoon": "Price coming soon — not orderable yet",
+    "story": {
+      "crew": {
+        "p1": "Brioche is opened here, sauce is whisked here, patties are never pre-cooked. Three of us in the kitchen, and one person follows each order end to end.",
+        "p2": "Nothing rushed ever turns out well — so the queue holds even at peak hour. No plate waits; the guest does, and those are not the same thing."
+      },
+      "mascot": {
+        "p1": "Misu wears headphones, Miyu wears sunglasses. Both capybaras, both the face of MANCH — one for the rhythm of the kitchen, one for the ease of the room.",
+        "p2": "You'll spot them on the wall, on the box, on the sign. Same line, same berry outline; wherever they go, the same two characters."
+      },
+      "visit": {
+        "p1": "Çarşı Cd. 21/b, Paspatur — tucked into Fethiye's narrow streets, two chairs out front.",
+        "p2": "Monday to Thursday 08.30–23.30, Friday and Saturday until midnight. Just call to hold a table."
+      }
+    }
   },
   "Order": {
     "intro": "Hi MANCH! I'd like to order:",

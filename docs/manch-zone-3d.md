@@ -526,7 +526,33 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 ## 9. PERFORMANS (kabul kriteri)
 
 - Zone bundle'ı ana sayfaya **dahil değil** — `next/dynamic` ile ayrı chunk
-- Zone chunk'ı gzip **< 180 KB** (three + fiber + drei dahil)
+- Zone chunk'ı gzip **< 260 KB** (three + fiber + drei dahil) *(revize: 2026-09-18, ilk değer 180)*
+
+  > **Neden 180 → 260.** 180, gerçek maliyet bilinmeden yazılmış bir tahmindi; three + fiber +
+  > drei için **241.5 kB gz normal**. Chunk ana sayfaya dokunmuyor (`/tr` ilk yükleme 218.4 kB gz,
+  > three imzası yok), ana sayfa LCP'sini bozmuyor (796 → 772 ms mobil) ve kullanıcı **kapıya
+  > basıp yükleyiciyi gördükten sonra** iniyor: bedeli 3D'yi bilerek isteyen ödüyor.
+  >
+  > **Kırılım (ölçüldü 2026-09-18, fark-build yöntemiyle).** Yöntem: aynı üretim build'i üç kez
+  > alınıp three imzası taşıyan chunk'ların gz toplamı karşılaştırıldı.
+  >
+  > | ölçüm | gz | çıkarım |
+  > |---|---|---|
+  > | three + fiber + drei (mevcut) | **241.5 kB** | — |
+  > | drei `<Html>` çıkarılmış | 238.8 kB | **drei ≈ 2.7 kB** |
+  > | yalnız three (namespace import) | **245.4 kB** | three tek başına zaten tüm chunk kadar |
+  >
+  > **Sonuç: yük neredeyse tamamen three.** `drei`'nin payı **2.7 kB** — tek kullanıcısı `<Html>`
+  > ve ağaç budaması işini yapıyor; **drei'yi atmak hiçbir şey kazandırmaz.** `fiber`'ın bu
+  > chunk içindeki artışı ölçülebilir düzeyde değil (ince bir reconciler katmanı).
+  >
+  > ⚠️ **Yöntemin sınırı:** yalnızca **three imzası taşıyan** chunk'lar sayılıyor; fiber/React
+  > reconciler kodunun başka chunk'a düşen kısmı bu toplamın dışında kalır. Ayrıca "yalnız three"
+  > ölçümü `import * as THREE` ile yapıldığı için budamaya dirençli — gerçek three yükü
+  > **~236–240 kB** aralığında.
+  >
+  > **İleride mobilde takılırsa kesilecek tek yer three'nin kendisidir** (özel/ince build,
+  > kullanılmayan renderer özelliklerinin dışlanması). fiber ve drei'de kesecek bir şey yok.
 - Ana sayfa LCP'si Zone'dan **etkilenmez** (mevcut: mobil 2310 ms, masaüstü ~230 ms)
 - Sahne mobilde 60 fps; düşerse önce `setPixelRatio` 1.5
 - `dpr = Math.min(devicePixelRatio, 2)`
@@ -564,7 +590,7 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - [x] **5.5.7** `Joystick` + reduced-motion + erişilebilirlik  *(öne alındı)*
 - [x] **5.5.6** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard` kabuğu (odak gidiş-dönüşü dahil)
 - [x] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, **`submitOrder` adaptörü**, scroll korunması
-- [ ] **5.5.9** `StoryBoard` × 3 + "TAM SAYFAYA GİT"
+- [x] **5.5.10** `StoryBoard` × 3 + "TAM SAYFAYA GİT" (Zone'u kapatıp gezdirir)
 - [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
 - [ ] **5.5.11** Performans + Kural 59 gözle bakma (mobil + masaüstü ekran görüntüleri)
 - [ ] ✅ **Kabul:** build temiz · Zone chunk < 180 KB gz · ana sayfa LCP bozulmadı ·

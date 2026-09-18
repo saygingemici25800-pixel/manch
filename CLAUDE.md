@@ -45,7 +45,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter hatırlanıyor**: ikinci girişte seçim atlanıyor
   · **Ana sayfa LCP bozulmadı** (prod build, yavaş 4G + 4× CPU, 3 koşu medyanı): mobil **796 → 772 ms**, masaüstü **764 → 780 ms** — gürültü sınırında
   · `/tr` ilk yükleme **215.5 → 218.4 kB gz** (+2.9: kapı/seçim/yükleyici arayüzü)
-  · ⚠️ **Zone chunk 241.5 kB gz — spec limiti 180 kB, 61.5 kB AŞIYOR.** three + fiber + drei tek parçada. Sızıntı YOK (ana bundle'da three yok); yalnızca boyut. **Optimizasyona girişilmedi — karar planlayıcıda**
+  · **Zone chunk 241.5 kB gz — limit 180 → 260'a çekildi (karar 2026-09-18, kullanıcı).** 180 gerçek maliyet bilinmeden yazılmış bir tahmindi. Chunk ana sayfaya dokunmuyor, LCP'yi bozmuyor, kullanıcı kapıya basıp yükleyiciyi gördükten sonra iniyor. **Kırılım ölçüldü:** drei **2.7 kB** (tek kullanıcısı `<Html>`, budama çalışıyor) · yalnız three **245.4 kB** → **yük neredeyse tamamen three**; fiber/drei'de kesecek şey yok. İleride mobilde takılırsa tek kesme yeri three'nin kendisi (spec bölüm 9)
   · Ekranlar: `docs/screens/faz-5.5.9-{1-anasayfa,2-secim,3-yukleyici,4-sahne}-{1440,390}.png`
 - **Zone durumu (5.5.8 sonu):** `SİPARİŞ VER` tablosuna girince **15 satırlık sipariş tahtası** açılıyor (7 smash burger · 4 yanında · 4 içecek/tatlı). −/+ adet **mevcut `useCartStore`'a** yazıyor; Zone'da eklenen ürün site sepetinde ve sepet rozetinde görünüyor (uçtan uca doğrulandı). Sticky alt şerit: TOPLAM (`aria-live="polite"`) + gönder düğmesi. Sahne 21 doku (değişmedi).
   · `zone-camera-check` → **84/84** · `zone-leak-check` → doku 21 sabit, kapalıyken 0 · `/tr` **215.5 kB gz**
@@ -231,6 +231,15 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     **Server Component**'te statik import etmek onu istemci paketine SOKMAZ — server bundle'da kalır.
     Sızıntı kontrolü bu yüzden client component üzerinden test edilir; server component'te test edilirse
     "temiz" der ve hiçbir şey kanıtlamaz (2026-09-18).
+61-A. **Sızıntı, ağır kütüphaneyi DOĞRUDAN kullanmayan bir bileşenin bağımlılık zincirinden de
+    gelir (2026-09-18, 5.5.9).** `ZoneGate` sahneyi `next/dynamic` ile yüklüyordu — doğru. Ama
+    `CharacterSelect`'i **statik** import ediyordu; o `drawCapy`'yi `character.ts`'ten alıyordu;
+    `character.ts` ise `three` import ediyordu. Sonuç: `/tr` ilk yüklemesi 215.5 → **318.8 kB gz**.
+    Sahne değil, **seçim ekranı** sızdırdı. Ders: "ağır olan şey dynamic import'ta mı?" yetmez;
+    **statik import edilen her modülün zincirini** izle. Çözüm kalıbı: ağır bağımlılığı olmayan
+    saf kısmı ayrı modüle çıkar (`lib/zone/capy.ts` — three'siz çizim), ağır modül ondan tüketip
+    yeniden yaysın. Bekçi: `zone-bundle-check`.
+
 62. **Mount/unmount ölçümü navigasyonla yapılmaz.** Tam sayfa yüklemesi modül seviyesi sayaçları sıfırlar.
     Aç-kapa-aç testi aynı sayfada bir aç/kapa düğmesiyle kurulur — zaten ürünün gerçek davranışı da budur
     (Zone ana sayfada açılıp kapanıyor, navigasyonla değil). `scripts/zone-leak-check.mjs` (2026-09-18).
@@ -287,6 +296,19 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     tahta ve sepet dokunulmadan kalmalı. Doğrulandı: adaptör boş bir gerçeklemeyle
     değiştirildiğinde ikisi de derleniyor ve `wa.me` yalnızca adaptörde geçiyor.
     (`ContactClient`'taki WhatsApp bağlantısı **iletişim** kanalıdır, sipariş değil — kapsam dışı.)
+
+67. **Global stil/DOM durumu tek modülden, SAYAÇLA yönetilir (karar 2026-09-18).**
+    `html.style.overflow`, `body.style.position`, `document.title` gibi **paylaşılan** durumu
+    "eski değeri kaydet → geri yükle" kalıbıyla yöneten birden fazla yer varsa, üst üste
+    bindiklerinde birbirlerini ezerler ve sıra bozulur.
+    Yaşanan (5.5.9): Preloader ve `useDialog` ikisi de `html.style.overflow`'u kaydet/geri-yükle
+    ile yönetiyordu. Ölçülen sıra: preloader kilitli → Zone perdesi açılıp önceki değeri
+    **"hidden"** olarak saklıyor → preloader bitip `""` yazıyor ve **perdenin kilidini açıyor** →
+    perde kapanırken sakladığı "hidden"ı geri yazıyor ve **site kaydırılamaz kalıyor.**
+    Doğru kalıp: `lib/scroll-lock.ts` — kilit **ilk** `lock()`'ta konur, **son** `unlock()`'ta
+    kalkar; arada kim gelirse gelsin sıra bozulamaz. Yeni bir kilitleyici eklenirken kendi
+    kaydet/geri-yükle mantığını YAZMAZ, sayacı kullanır. Kontroller derinliği
+    `__SCROLL_LOCK__()` ile okur (inline stili okumak iki kilitleyici arasında yanıltıcıdır).
 
 ---
 
@@ -632,8 +654,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.7 | **"GÖRÜNMÜYOR ≠ YOK"** — Joystick ekranda görünmüyordu; topuz ve "SÜRÜKLE" etiketi kayıptı. **Kullanıcının üç turdur bildirdiği kusurun ta kendisiydi** | Sitenin sepet düğmesi `fixed z-60` ve tam olarak aynı köşede (sağ alt). Joystick `z-40` ve kapsayıcısı yığın bağlamı **oluşturmadığı** için doğrudan onunla yarışıp altında kalıyordu. Otomatik kontrollerin hepsi yeşildi: **DOM'da var, olaylar çalışıyor, sekiz yön doğru, sürükleme ped dışında yaşıyor** — ama ekranda yok. Bir bileşenin **var olması**, **görünür olmasını** garanti etmez; z-index çakışması hiçbir davranış testine yakalanmaz. **Kural 59'un dördüncü yakalayışı** (öncekiler: hero overlay yazısı, gri tavan, maskot alfası) | Zone'un DOM katmanı site kromunun üstüne alındı: joystick z-70, `FrameBoard` z-75 (nav z-80'in altında). Kalıcı kontrol: joystick merkezinde `elementFromPoint` joystick'i dönmeli. 5.5.9'daki tam ekran kapısı site kromunu zaten perdenin altında bırakacak |
 | 2026-09-18 | 5.5.8 | Sipariş tahtasında −/+ düğmeleri **23 px**, işaretler silik | `1.6vw` masaüstünde 23 px ediyor — Kural 40'ın dokunma hedefi eşiği **24 px**'in altında; üstelik işaret dar bir yazı tipinde (Mouse Memoirs) ince kalıyordu. Glyph eksikliği sanıldı, ölçümle çürütüldü (U+2212 fontta var: 4.25 px, ASCII 4.19 px) | Düğmeler `2vw` + `min-h/min-w 26px`, işaretler `font-display`. Ders: "silik görünüyor" her zaman eksik glyph değil — önce ölç |
 | 2026-09-18 | 5.5.8 | Mobilde lab okuma paneli, panonun **sticky alt şeridini** (TOPLAM + gönder) kapatıyordu | Lab aracı z-90, pano z-75. Ürünün birincil eylemi lab kromunun altında kalıyordu | Okuma paneli POV'da gizleniyor. Lab aracı ürünün eylemini örtmemeli |
-| 2026-09-18 | 5.5.9 | **three.js ANA SAYFAYA SIZDI** — `/tr` ilk yüklemesi 215.5 → **318.8 kB gz** | `ZoneGate` sahneyi `next/dynamic` ile yüklüyordu ama `CharacterSelect`'i **statik** import ediyor; o da `drawCapy`'yi `character.ts`'ten alıyor, `character.ts` ise `three` import ediyor. Sahne değil, **seçim ekranı** sızdırdı. Kural 61'in kardeşi: sızıntı ağır kütüphaneyi **dolaylı** çeken bir client component'ten de gelir | Çizim ve açı→görünüm eşlemesi three'siz `lib/zone/capy.ts`'e ayrıldı; `character.ts` oradan tüketip yeniden yayıyor. `/tr` **218.4 kB gz**'ye döndü. `zone-bundle-check` yakaladı — bekçi çalıştı |
-| 2026-09-18 | 5.5.9 | **Perde kapanınca site kaydırılamaz kalıyordu** | `html.style.overflow`'u kaydet/geri-yükle kalıbıyla yöneten İKİ yer vardı: Preloader ve `useDialog`. Ölçülen sıra: preloader kilitli → perde açılıyor ve önceki değeri "hidden" olarak saklıyor → preloader bitip `""` yazıyor ve **perdenin kilidini açıyor** → perde kapanırken "hidden"ı geri yazıyor. İki kilitleyici birbirini eziyor | `lib/scroll-lock.ts`: **sayaçlı** kilit. İlk `lock()`'ta konur, **son** `unlock()`'ta kalkar; sıra bozulamaz. Preloader ve `useDialog` ikisi de onu kullanıyor. Kontrol sayaç derinliğini okuyor |
+| 2026-09-18 | 5.5.9 | **"DOLAYLI SIZINTI"** — three.js ana sayfaya sızdı, `/tr` 215.5 → **318.8 kB gz** | `ZoneGate` sahneyi `next/dynamic` ile yüklüyordu ama `CharacterSelect`'i **statik** import ediyor; o da `drawCapy`'yi `character.ts`'ten alıyor, `character.ts` ise `three` import ediyor. Sahne değil, **seçim ekranı** sızdırdı. Kural 61'in kardeşi: sızıntı ağır kütüphaneyi **dolaylı** çeken bir client component'ten de gelir | Çizim ve açı→görünüm eşlemesi three'siz `lib/zone/capy.ts`'e ayrıldı; `character.ts` oradan tüketip yeniden yayıyor. `/tr` **218.4 kB gz**'ye döndü. `zone-bundle-check` yakaladı — bekçi çalıştı |
+| 2026-09-18 | 5.5.9 | **"TEK KAYNAKTAN YÖNETİLMEYEN GLOBAL DURUM"** — perde kapanınca site kaydırılamaz kalıyordu | `html.style.overflow`'u kaydet/geri-yükle kalıbıyla yöneten İKİ yer vardı: Preloader ve `useDialog`. Ölçülen sıra: preloader kilitli → perde açılıyor ve önceki değeri "hidden" olarak saklıyor → preloader bitip `""` yazıyor ve **perdenin kilidini açıyor** → perde kapanırken "hidden"ı geri yazıyor. İki kilitleyici birbirini eziyor | `lib/scroll-lock.ts`: **sayaçlı** kilit. İlk `lock()`'ta konur, **son** `unlock()`'ta kalkar; sıra bozulamaz. Preloader ve `useDialog` ikisi de onu kullanıyor. Kontrol sayaç derinliğini okuyor |
 | 2026-09-18 | 5.5.9 | `pnpm lint` 8646 sorun bildirdi | ESLint ölçüm build klasörünü (`.next-build`) tarıyordu; `.next` yok sayılıyor, yenisi değil | `eslint.config.mjs` `globalIgnores`'a `.next-build/**` eklendi |
 
 ---

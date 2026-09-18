@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import { OrderBoard } from "@/components/zone/boards/OrderBoard";
+import { StoryBoard } from "@/components/zone/boards/StoryBoard";
 import { getFrame } from "@/lib/zone/frames";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { useZoneStore } from "@/store/zone";
@@ -90,15 +90,7 @@ export function FrameBoard() {
             // Kaydırma kabı `card`: adet değişince `scrollTop` orada korunur (spec 6.3).
             <OrderBoard scroller={card} />
           ) : (
-            <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-ink/20 bg-paper">
-              <Image
-                src={frame.art}
-                alt={t(`frames.${frame.id}`)}
-                fill
-                sizes="(max-width: 768px) 92vw, 720px"
-                className="object-contain"
-              />
-            </div>
+            <StoryBoard frame={frame} />
           )}
         </div>
       </div>

@@ -331,7 +331,21 @@
     },
     "less": "Bir azalt",
     "more": "Bir arttır",
-    "priceSoon": "Fiyat yakında — şimdilik sipariş edilemiyor"
+    "priceSoon": "Fiyat yakında — şimdilik sipariş edilemiyor",
+    "story": {
+      "crew": {
+        "p1": "Brioche burada açılır, sos burada çırpılır, köfte önceden pişmez. Mutfakta üç kişiyiz ve her siparişi biri baştan sona takip eder.",
+        "p2": "Acele edilen hiçbir şey iyi olmuyor — bu yüzden yoğun saatte bile sıra bozulmaz. Bekleyen tabak yok, bekleyen müşteri var; ikisi aynı şey değil."
+      },
+      "mascot": {
+        "p1": "Misu kulaklıklı, Miyu güneş gözlüklü. İkisi de kapibara, ikisi de MANCH'in yüzü — biri mutfağın ritmini, öteki salonun keyfini temsil ediyor.",
+        "p2": "Onları duvarda, kutuda, tabelada görürsünüz. Aynı çizgi, aynı bordo kontur; nereye koyarsak koyalım aynı iki karakter."
+      },
+      "visit": {
+        "p1": "Çarşı Cd. 21/b, Paspatur — Fethiye'nin dar sokaklarının içinde, kapının önünde iki sandalye.",
+        "p2": "Pazartesiden perşembeye 08.30–23.30, cuma ve cumartesi gece yarısına kadar. Yer ayırtmak için aramanız yeterli."
+      }
+    }
   },
   "Order": {
     "intro": "Merhaba MANCH! Sipariş vermek istiyorum:",
