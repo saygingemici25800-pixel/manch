@@ -5,6 +5,19 @@
 // yeni sanıp, döngü sonunda da sebepsiz exit 1 verdi). Başarısız deploy'u başarılıdan
 // ayırt edemeyen bir bekleme döngüsü, olmamasından kötüdür.
 //
+// ⚠️ BU SCRIPT TEK BAŞINA "DEPLOY BİTTİ" DEMEZ (karar 2026-09-18).
+//    READY yalnızca Vercel'in kendi kaydıdır; canlıda gerçekten YENİ kodun servis edildiğini
+//    kanıtlamaz (CDN, alias gecikmesi, sıradaki başka bir deploy). Onay **ürün seviyesinden**
+//    verilir: beklenen commit'in getirdiği bir DOM çapası canlı HTML'de görünmeden bitti denmez.
+//
+//      curl -s https://<host>/<yol> | grep -c '<o commit ile gelen çapa>'
+//
+//    Kanıt (2026-09-18 birleştirmesi): token 403 verdiği için deploy ürün seviyesinden beklendi
+//    ve bu bir hatadan korudu — `zone-gate` zaten canlıydı ama ARA bir commit'ten geliyordu;
+//    "Zone görünüyor, demek ki bitti" denseydi eski build onaylanmış olacaktı. Çapa olarak o
+//    turun EN SON commit'iyle gelen bir şey seçilir (o turda: `id="mascots"`).
+//    Token yeşil olsa bile bu adım atlanmaz.
+//
 // Kullanım: node scripts/deploy-wait.mjs [--project manch-v2] [--sha <git sha>] [--timeout 600]
 // Çıkış: 0 READY · 1 ERROR/CANCELED · 2 zaman aşımı · 3 yapılandırma hatası
 import { readFileSync } from "node:fs";

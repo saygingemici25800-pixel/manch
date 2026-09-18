@@ -11,7 +11,13 @@ import { chromium } from "playwright-core";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const LABEL = process.env.LABEL ?? "mevcut";
-const OUT = "docs/screens";
+/**
+ * Çıktı VARSAYILAN olarak yok sayılan `docs/screens/_tur/` altına düşer (Kural 69, 70):
+ * bir tur 48 kare / ~56 MB üretiyor ve bunların repoya girmesi `docs/screens/`i 159 MB'a
+ * çıkardı. Kabul edilmiş bir kararı belgeleyen kare ELLE `docs/screens/`e kopyalanır.
+ * Repo dışına almak için: `ZONE_SHOTS=~/manch-olcum node scripts/...`
+ */
+const OUT = process.env.ZONE_SHOTS ?? "docs/screens/_tur";
 mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME });

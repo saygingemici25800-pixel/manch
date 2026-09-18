@@ -46,3 +46,14 @@ ham-fotograflar/
 # onizleme artiklari (masaustu uygulamasi uretiyor)
 .pv-*
 .next-build/
+
+# ölçüm / tur çıktıları — repoya GİRMEZ (Kural 69, 70)
+# Tur kareleri yerelde üretilir, bakılır, atılır; `zone-walkthrough.mjs` tek komutla
+# yeniden üretir. Yalnız kabul edilmiş bir kararı belgeleyen kare ELLE docs/screens/'e
+# kopyalanıp commit edilir (faz başına en fazla 2).
+docs/screens/_tur/
+*-shots/
+.playwright-*
+playwright-report/
+test-results/
+*.tmp.mjs

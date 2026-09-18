@@ -201,6 +201,9 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
 - Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/`; gelene kadar `drawCapy()` geçici sprite üretiyor — geldiğinde tek satır: `character.ts` `MASCOT_SPRITE_BASE = "/images/mascots"`) · **`@react-three/fiber@9.7.0` prod konsoluna `THREE.Clock` deprecation uyarısı basıyor** (kütüphane kaynaklı, 9.7.0 son kararlı sürüm — **kalıcı kabul edildi**, belgeli istisna) · **içecek fiyatları teyit bekliyor** — uydurma değerler KALDIRILDI, üçü de `price: null`; tahtada YAKINDA rozeti, sipariş edilemiyor (karar 2026-09-18) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- **Ölçüm kareleri repoya girmez (Kural 69, 70):** tur çıktıları `docs/screens/_tur/`'e düşer ve
+  `.gitignore`'dadır; repo dışına almak için `ZONE_SHOTS=~/manch-olcum node scripts/zone-walkthrough.mjs`.
+  Mevcut 159 MB `docs/screens/` **budanmadı** (tarihçeden silmek depo boyutunu küçültmez, dal yayında).
 - **Cloudflare DNS adımları (domain gelince):** 0) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle (Kural 57) · 1) Vercel → `manch-v2` → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -314,6 +317,15 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     **Kural:** bir kontrol kırmızı yandığında önce "bu değer neyin fonksiyonu?" diye sor.
     Cevapta **ortam** (kare hızı, sunucu yükü) ya da **sürücü** (otomasyon aracının kendi
     davranışı) varsa, ölçüm yanlış öznededir; ürünü düzeltmeden önce ölçümü düzelt.
+
+    **Aynı soru YEŞİL rapor için de geçerli — örnek: "deploy bitti" (2026-09-18).**
+    Vercel'in `READY` durumu **Vercel'in kendi kaydıdır**, canlıda yeni kodun servis
+    edildiğinin kanıtı değil (CDN, alias gecikmesi, sırada bekleyen başka deploy).
+    Onay ürün seviyesinden verilir: **beklenen commit'in getirdiği bir DOM çapası canlı
+    HTML'de görünmeden "deploy bitti" denmez** — `curl … | grep -c '<çapa>'`.
+    Kanıt: birleştirmede `zone-gate` canlıda GÖRÜNÜYORDU ama ARA bir commit'tendi; çapa
+    olarak turun **en son** commit'iyle gelen `id="mascots"` seçilmeseydi eski build
+    onaylanmış olacaktı. **Token yeşil olsa bile bu adım atlanmaz** (`deploy-wait.mjs` başı).
 61. **İstemci bundle'ına yalnızca client component'ten sızılır.** Ağır bir kütüphaneyi (three, vb.) bir
     **Server Component**'te statik import etmek onu istemci paketine SOKMAZ — server bundle'da kalır.
     Sızıntı kontrolü bu yüzden client component üzerinden test edilir; server component'te test edilirse
@@ -557,15 +569,18 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] `scripts/lighthouse.mjs` (playwright-core Chromium CDP + lighthouse 13) → `docs/screens/faz-7-lighthouse.json`
 - [x] ✅ Kabul: Lighthouse (mobil, prod build) **A11y 100 / SEO 100** — `/tr`, `/tr/menu`, `/tr/contact`, ayrıca `/tr/about` ve `/en` de 100/100 · düşen denetim yok. `scripts/lab-check.mjs` **90/90 ✓, konsol 0** — 9 metadata rotası 200 · üç sayfada canonical + hreflang(tr/en/x-default) + og:image + twitter · **JSON-LD 11 bilinen alan, `openingHours`/`priceRange` YOK, boş string yok, telefon E.164** (Kural 54-B) · 'Yakında' rozeti 4 sayfada 7 yerde (Kural 54-A) · focus ring 14/14 · RollText aria-hidden 12/12 · footer wordmark dekoratif. `docs/screens/faz-7-og.png`, `faz-7-icons.png`, `faz-7-lighthouse.json` *(revize: 2026-09-18)*
 
-### İçerik commit'i (Faz 7.5) — `docs/prompts/icerik-commit.md`
-- [ ] Kaynaklar `docs/source/` (11 ekran görüntüsü, 749–1222 px; commit'te), `docs/_in/` silindi
-- [ ] `public/burgers/*.png|webp` ×7 (rembg isnet + kaynak ön-temizlik + soğuk alt kesim, Kural 41), `public/images/{hero-cook,crispy-triangle,tiramisu}.{jpg,webp}`, `misu-miyu.png`; kontak `docs/screens/icerik-burgers.png`
-- [ ] Logo: `public/logo/logo-manch|menu|m.svg` (potrace) + üretilen `ui/logo-*.tsx` (Kural 42); Nav, Footer, Preloader, PageTransition, OG, ikonlar, `/menu` başlığı
-- [ ] `src/data/menu.ts` basılı menüden: 6 kategori, 25 ürün, fiyatlar; eski tahmini ürünler silindi; `featured` 6
-- [ ] `site.ts`: telefon, WhatsApp, e-posta, Facebook, menü alt başlığı; JSON-LD telephone/email/sameAs; messages'ta `[TODO]` kalmadı
-- [ ] Sepet: satır + genel toplam, WhatsApp mesajında tutar, checkout aktif; Contact/Location tel:/mailto: linkleri
-- [ ] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot)
-- [ ] ✅ Kabul: build + lint temiz; lab-check 96/96, console 0; Lighthouse A11y 100 / SEO 100 ×3; `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png`
+### İçerik commit'i (Faz 7.5) — `docs/prompts/icerik-commit.md` — **KAPANDI (doğrulandı 2026-09-18)**
+> Sekiz madde tek tek **canlıda ve kodda** doğrulandı (DURUM'a güvenilmedi). İki maddede metindeki
+> sayılar bayattı, iş tamdı: menü 6→**7 kategori** / 25→**28 ürün** (5.5.1 içecek kategorisi),
+> lab-check 96→**93 kontrol** (script birleşti/yenilendi, hepsi yeşil). Kanıtlar madde altlarında.
+- [x] Kaynaklar `docs/source/` (11 ekran görüntüsü, 749–1222 px; commit'te), `docs/_in/` silindi
+- [x] `public/burgers/*.png|webp` ×7 (rembg isnet + kaynak ön-temizlik + soğuk alt kesim, Kural 41), `public/images/{hero-cook,crispy-triangle,tiramisu}.{jpg,webp}`, `misu-miyu.png`; kontak `docs/screens/icerik-burgers.png`
+- [x] Logo: `public/logo/logo-manch|menu|m.svg` (potrace) + üretilen `ui/logo-*.tsx` (Kural 42); Nav, Footer, Preloader, PageTransition, OG, ikonlar, `/menu` başlığı
+- [x] `src/data/menu.ts` basılı menüden: 6 kategori, 25 ürün, fiyatlar; eski tahmini ürünler silindi; `featured` 6 *(doğrulandı 2026-09-18 — sayılar 5.5.1'de değişti: **7 kategori · 28 ürün**, içecek kategorisi eklendi. Canlı `/menu`: 28 kart · 7 kategori · 24 fiyatlı · 4 YAKINDA; ana sayfa `#hits` 6 featured)*
+- [x] `site.ts`: telefon, WhatsApp, e-posta, Facebook, menü alt başlığı; JSON-LD telephone/email/sameAs; messages'ta `[TODO]` kalmadı *(canlı `/contact`: `tel:+905054970748`, `mailto:manch.burger.coffee@gmail.com`, wa.me 1, Facebook 1, Instagram 2; `[TODO]` grep 0; JSON-LD smoke 31/31)*
+- [x] Sepet: satır + genel toplam, WhatsApp mesajında tutar, checkout aktif; Contact/Location tel:/mailto: linkleri *(canlıda arayüzden ölçüldü: 2 satır, rozet 3, `Toplam 1870 TL`, checkout etkin, `wa.me/905054970748?text=…` tutarı içeriyor)*
+- [x] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot) *(canlı ana sayfa 22 görselin 22'si `/_next/image`, 0 kırık; `/about` aynı)*
+- [x] ✅ Kabul: build + lint temiz; lab-check **93/93** *(96 değil — script o gün 96 kontrol içeriyordu, sonraki fazlarda birleşti/yenilendi; sayı değişti, **hepsi yeşil**)*, console 0; Lighthouse A11y 100 / SEO 100 ×3 **canlıda yeniden ölçüldü** (`/tr`, `/tr/menu`, `/tr/contact` — Zone'lu ana sayfa dahil); `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png` dördü de var
 
 ### Faz 8 — Performans & QA
 - [x] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
@@ -649,6 +664,20 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     Tur kareleri yerelde üretilir, bakılır, commit edilmez; script'i commit etmek yeter
     (`zone-walkthrough.mjs` aynı kareleri tek komutla yeniden üretir). Faz sonu raporunda
     kareler **sayıyla** anlatılır, dosyayla değil.
+
+70. **Auto-deploy'lu dala (`faz-1-yeniden`) kademeli/commit-commit push YASAK
+    (karar 2026-09-18).** Her ara push **ayrı bir Vercel deploy** tetikler; yarım durumlar
+    canlıda kalır. Kanıt: 2026-09-18 birleştirmesinde 104.6 MB'lık paket 408 verince
+    commit commit push edildi ve **5.5.2'nin boş salonu kısa süre canlıda kaldı.**
+
+    Push tek seferde geçmiyorsa sıra:
+    ① `git config http.postBuffer 524288000` (repo-yerel) + `lowSpeedLimit 0` → **tek push dene**
+    ② Yine olmuyorsa **Vercel'de auto-deploy'u geçici durdur** (proje ayarları; `vercel.json`
+       ile DEĞİL — o dosya iki proje arasında ortaktır, Kural 58), push et, geri aç
+    ③ Kademeli push **son çare bile değildir**: yapılacaksa önce ② uygulanır
+
+    Kalıcı önlem: büyük ikili dosyalar (ekran görüntüleri) repoya girmesin — Kural 69 ve
+    `.gitignore`'daki `docs/screens/_tur/`.
 
 ---
 
@@ -777,7 +806,7 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.11 | Sipariş tahtasında adet ve TOPLAM **siyah bir leke** gibi görünüyor | `font-display` (Modak) — Modak'ın `0` karakteri dolu bir elips, counter'ı kapalı. 1–9 temiz, **yalnız sıfır**. 40 px'te bile böyle → boyut değil font tasarımı. Tahta açıldığında 15 satırın hepsi `0`, TOPLAM da `0` | **Değiştirilmedi — marka tipografisi kararı planlayıcıda.** Ölçüm yapıldı: `font-ui` ve `font-pixel` sıfırı temiz veriyor. Aynı durum site sepetinin TOPLAM'ında da var (Zone'a özgü değil) |
 | 2026-09-18 | 5.5.11 | JSX yorumu `{/* */}` yerine düz `/* */` yazıldı — **`pnpm build` TEMİZ GEÇTİ**, `pnpm lint` yakaladı | `/* ... */` JSX içinde geçerli bir **metin düğümüdür**: derlenir ve ekranda **görünür metin olarak render edilir**. Sipariş tahtasının TOPLAM satırında beş satırlık yorum kullanıcıya gösterilecekti. Build hata vermez çünkü ortada sözdizimi hatası yok | `{/* ... */}` biçimine çevrildi. **Ders: Kural 2'nin "build yetmez" tarafı burada tersine işliyor — build geçiyor ama lint gerekli.** `react/jsx-no-comment-textnodes` tam bu kusur için var; lint'siz zincir kurulmaz. **Kural 2 bu bulguyla revize edildi (2026-09-18): kapı `lint && build`, ikisi farklı sınıf hata yakalar.** |
 | 2026-09-18 | 5.5.11 | CPU 20× pay sondası ardışık iki koşuda **14.4** ve **32.8** fps verdi | Sonda 20×'te kare bütçesini zaten taşırıyor; makinedeki her başka yük (ikinci sunucu, paralel tarayıcı) doğrudan sonuca yansıyor. İlk koşu **"FOV 80 pahalıya mal oldu"** diye yorumlanacaktı ve `dpr` 1.5 kolunun "artık işe yaradığı" sonucu çıkarılacaktı — ikinci koşu ikisini de çürüttü | Sondanın oynaklığı hem script'e hem DURUM'a yazıldı: **tek koşusundan sonuç çıkarılmaz, en az üç koşu gerekir.** Hedef senaryolar (1× ve 4×) her koşuda 60 fps / en uzun kare 17.7 ms — kararlı ve anlamlı olan ölçüm odur. Kural 60'ın "oynak kontrol güvenilmez kontroldür" maddesinin sonda hâli |
-| 2026-09-18 | 5.5 merge | `git push` **HTTP 408** ile düştü, uzak dal ilerlemedi | Gönderilecek paket **104.6 MB** (20 commit + ~56 MB ekran görüntüsü); varsayılan `http.postBuffer` 1 MB ve GitHub büyük HTTPS push'unda zaman aşımına düşüyor | Repo-yerel `http.postBuffer 524288000` + `lowSpeedLimit 0`; sonra **commit commit kademeli push** (her biri küçük delta, 3 denemeli). **Yan etki:** her ara push Vercel'de ayrı deploy tetikledi — ara Zone durumları (boş salon vb.) kısa süre canlıda kaldı. İleride büyük push'ta ya önce auto-deploy durdurulmalı ya da tek seferde geçecek şekilde ağ sağlanmalı |
+| 2026-09-18 | 5.5 merge | `git push` **HTTP 408** ile düştü, uzak dal ilerlemedi | Gönderilecek paket **104.6 MB** (20 commit + ~56 MB ekran görüntüsü); varsayılan `http.postBuffer` 1 MB ve GitHub büyük HTTPS push'unda zaman aşımına düşüyor | Repo-yerel `http.postBuffer 524288000` + `lowSpeedLimit 0`; sonra **commit commit kademeli push** (her biri küçük delta, 3 denemeli). **Yan etki:** her ara push Vercel'de ayrı deploy tetikledi — ara Zone durumları (boş salon vb.) kısa süre canlıda kaldı. **Bu olaydan Kural 70 doğdu: auto-deploy'lu dala kademeli push YASAK** — önce `postBuffer` + tek push, olmuyorsa Vercel'de auto-deploy geçici durdurulur |
 | 2026-09-18 | 5.5 merge | `git push origin $MID:refs/heads/...` → "src refspec ... does not match any" | **zsh** `$MID:r`'yi parametre değiştiricisi (`:r` = uzantıyı at) olarak yorumladı, `:refs` yutuldu. Aynı komut bash'te sorunsuz | Refspec tırnak içinde: `"${MID}:refs/heads/faz-1-yeniden"`. Kural 41'deki zsh notunun kardeşi — **zsh'de `$VAR:` içeren her şey tırnaklanır** |
 | 2026-09-18 | 5.5 merge | `scripts/deploy-wait.mjs` **403 invalidToken** verdi, deploy beklenemedi | Vercel API token'ı geçersiz/süresi dolmuş | Deploy, **ürün seviyesinden** beklendi: son commit'le gelen `id="mascots"` çapası canlı HTML'de aranarak. Ara deploy'ları yeni sanmayı da bu önledi (`zone-gate` zaten canlıydı ama o ara commit'tendi) — Kural 60: ölçtüğün şey doğru özne mi |
 

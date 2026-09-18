@@ -17,7 +17,13 @@ import { chromium } from "playwright-core";
 
 const PROD = process.env.PROD ?? "http://localhost:3101";
 const REDUCED = process.env.REDUCED === "1";
-const OUT = "docs/screens";
+/**
+ * Çıktı VARSAYILAN olarak yok sayılan `docs/screens/_tur/` altına düşer (Kural 69, 70):
+ * bir tur 48 kare / ~56 MB üretiyor ve bunların repoya girmesi `docs/screens/`i 159 MB'a
+ * çıkardı. Kabul edilmiş bir kararı belgeleyen kare ELLE `docs/screens/`e kopyalanır.
+ * Repo dışına almak için: `ZONE_SHOTS=~/manch-olcum node scripts/...`
+ */
+const OUT = process.env.ZONE_SHOTS ?? "docs/screens/_tur";
 const TAG = REDUCED ? "faz-5.5.11-reduced" : "faz-5.5.11";
 mkdirSync(OUT, { recursive: true });
 
