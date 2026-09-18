@@ -10,14 +10,14 @@ export const site = {
   taglineAlt: "Handmade Hits Different",
   menuTagline: "BURGER . FRIES . ATIŞTIRMALIK . TATLI",
   hashtags: ["#Manch", "#HandmadeHitsDifferent", "#Fethiye"],
+  // Kuruluş yılı (marka rozeti "EST. 2026"). İşletme AÇIK — açılış vaadi değil.
   est: 2026,
-  // Yaz 2026 açılış — brief: Haziran teaser, Temmuz başı açık
-  openingLabel: "2026",
 
   address: {
     street: "Çarşı Cd. 21/b",
     district: "Paspatur",
     city: "Fethiye",
+    region: "Muğla",
     postalCode: "48300",
     country: "TR",
     full: "Çarşı Cd. 21/b, Fethiye 48300 (Paspatur)",
@@ -36,9 +36,36 @@ export const site = {
     email: "manch.burger.coffee@gmail.com" as string | null,
   },
 
-  hours: null as
-    | ReadonlyArray<{ days: string; open: string; close: string }>
-    | null, // TODO: çalışma saatleri
+  /**
+   * Çalışma saatleri (2026-09-18, işletmeden geldi).
+   * `dayOfWeek` schema.org gün adları — JSON-LD `OpeningHoursSpecification` doğrudan kullanır.
+   * Cuma/Cumartesi kapanışı "00:00": schema.org bunu ertesi güne taşma sayar.
+   */
+  hours: [
+    {
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday"],
+      opens: "08:30",
+      closes: "23:30",
+      label: { tr: "Pazartesi–Perşembe", en: "Monday–Thursday" },
+    },
+    {
+      dayOfWeek: ["Friday", "Saturday"],
+      opens: "08:30",
+      closes: "00:00",
+      label: { tr: "Cuma–Cumartesi", en: "Friday–Saturday" },
+    },
+    {
+      dayOfWeek: ["Sunday"],
+      opens: "08:30",
+      closes: "23:30",
+      label: { tr: "Pazar", en: "Sunday" },
+    },
+  ] as ReadonlyArray<{
+    dayOfWeek: readonly string[];
+    opens: string;
+    closes: string;
+    label: { tr: string; en: string };
+  }> | null,
 
   orderUrl: null as string | null, // TODO: sipariş linki (Getir/Yemeksepeti/WhatsApp)
 
@@ -56,3 +83,9 @@ export const site = {
 } as const;
 
 export type Site = typeof site;
+
+/** Arayüzde gösterilecek saat metni. Saatler yoksa null → çağıran `SoonBadge` gösterir. */
+export function formatHours(locale: "tr" | "en"): string | null {
+  if (!site.hours) return null;
+  return site.hours.map((h) => `${h.label[locale]} ${h.opens}–${h.closes}`).join(" · ");
+}

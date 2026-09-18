@@ -49,6 +49,9 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   - `tile #8fc3d6` → yalnızca fotoğrafta var (~#84A8BA, ışık bağımlı) — **teyit edilemez**.
   - `berry-dk` · `paper` · `pink` · `mustard` · `ink` → **hiçbir kaynakta yok, teyit edilemez.**
   - Kalan 7 token (`berry-dk` `sky` `tile` `paper` `pink` `mustard` `ink`) **değişmiyor** — teyit için orijinal vektör logo / marka kılavuzu gerekli.
+- **GERÇEK VERİ (2026-09-18, kullanıcı):** İşletme **zaten açık** — Google kaydında 150 yorum / 4,5 puan, aylardır çalışıyor. Brief'teki "2026 yazı açılış" ve "çok yakında Fethiye'de" ifadeleri **yanlıştı**; açılış vaadi veren tüm metinler tarandı ve düzeltildi. `site.openingLabel` (kullanılmıyordu) ve `Common.todo` · `Home.location.hoursSoon` (öksüz) silindi; "EST. 2026" kuruluş rozeti olarak **bilerek bırakıldı**.
+- **Çalışma saatleri geldi (2026-09-18):** Pzt–Per 08:30–23:30 · Cum–Cmt 08:30–00:00 · Paz 08:30–23:30. `site.hours` dolu, arayüzdeki saat rozetleri kalktı, JSON-LD'ye `openingHoursSpecification` **eklendi**, `addressRegion: "Muğla"` eklendi. Kural 54-B artık saatler için geçerli değil — veri var.
+- **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
 - Açık TODO'lar: **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
@@ -136,8 +139,10 @@ Fethiye'deki smash burger markası **MANCH** için animasyon ağırlıklı, iki 
 | Instagram | https://www.instagram.com/manch.tr/ |
 | Maskotlar | **Misu & Miyu**, "MANCH'in yüzleri" (burger tutan sevimli line-art karakterler) |
 | Duvar yazısı | "THE BURGER YOU'LL CRAVE AGAIN" (mavi karo üzerinde bordo) |
-| Açılış | 2026 yazı |
-| Telefon / saat / sipariş | TODO |
+| Durum | **Açık — Fethiye Paspatur** (Google kaydı: 150 yorum / 4,5 puan). "EST. 2026" kuruluş yılı rozetidir, açılış vaadi değil |
+| Telefon | +90 505 497 07 48 |
+| Saatler | Pzt–Per 08:30–23:30 · Cum–Cmt 08:30–00:00 · Paz 08:30–23:30 |
+| Sipariş linki | TODO — sağlayıcı belli değil, sipariş WhatsApp'ta |
 
 **Ses:** Kısa, esprili, cool, 😏. Her metin TR + EN.
 - Smash sesi mutfaktan, ilk ısırık masadan. / Smash from the kitchen, first bite from the table.

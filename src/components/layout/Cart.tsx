@@ -25,7 +25,6 @@ function buildWaUrl(text: string): string | null {
 /** R12 — sağ altta berry sepet + hardal sayaç, "SEPETE EKLENDİ" toast, kraft drawer, WhatsApp checkout. */
 export default function Cart() {
   const t = useTranslations("Cart");
-  const tc = useTranslations("Common");
   const locale = useLocale() as Locale;
   const hydrated = useHydrated();
   const reduced = useReducedMotion();
@@ -190,7 +189,13 @@ export default function Cart() {
               aria-disabled="true"
               className="grid cursor-not-allowed place-items-center rounded-full bg-berry/40 px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] text-cream"
             >
-              {lines.length === 0 ? t("checkout") : `${t("checkout")} · ${tc("todo")}`}
+              {lines.length === 0 ? (
+                t("checkout")
+              ) : (
+                <>
+                  {t("checkout")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" />
+                </>
+              )}
             </button>
           )}
         </div>

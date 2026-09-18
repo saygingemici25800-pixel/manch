@@ -555,16 +555,23 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
     const el = document.querySelector('script[type="application/ld+json"]');
     return el ? JSON.parse(el.textContent) : null;
   });
-  const must = ["@context", "@type", "name", "url", "image", "servesCuisine", "hasMenu", "address", "sameAs", "telephone", "email"];
-  const banned = ["openingHours", "openingHoursSpecification", "priceRange"];
-  t("JSON-LD · Restaurant + 11 bilinen alan", !!ld && ld["@type"] === "Restaurant" && must.every((k) => k in ld),
+  // 2026-09-18: saatler geldi → openingHoursSpecification artık ZORUNLU, yasaklı değil.
+  const must = ["@context", "@type", "name", "url", "image", "servesCuisine", "hasMenu", "address",
+                "sameAs", "telephone", "email", "openingHoursSpecification"];
+  const banned = ["priceRange"];
+  t("JSON-LD · Restaurant + 12 bilinen alan", !!ld && ld["@type"] === "Restaurant" && must.every((k) => k in ld),
     must.filter((k) => !(ld ?? {})[k]).join(", ") || `${Object.keys(ld ?? {}).length} alan`);
-  t("KURAL B · openingHours / priceRange JSON-LD'de YOK", banned.every((k) => !(k in (ld ?? {}))),
+  t("KURAL B · priceRange JSON-LD'de YOK (veri yok)", banned.every((k) => !(k in (ld ?? {}))),
     banned.filter((k) => k in (ld ?? {})).join(", ") || "hiçbiri yok");
   const emptyish = Object.entries(ld ?? {}).filter(([, v]) => v === "" || v === null ||
     (typeof v === "string" && /yakında|coming soon|todo/i.test(v)));
   t("KURAL B · boş string / 'Yakında' değeri yok", emptyish.length === 0, emptyish.map(([k]) => k).join(", ") || "temiz");
   t("JSON-LD · telefon E.164 (boşluksuz)", /^\+\d+$/.test(ld?.telephone ?? ""), `telephone=${ld?.telephone}`);
+  const ohs = ld?.openingHoursSpecification ?? [];
+  const days = ohs.flatMap((o) => o.dayOfWeek ?? []);
+  t("JSON-LD · openingHoursSpecification 7 günü kapsıyor", days.length === 7,
+    `${ohs.length} blok, ${days.length} gün: ${ohs.map((o) => `${o.opens}-${o.closes}`).join(" / ")}`);
+  t("JSON-LD · addressRegion: Muğla", ld?.address?.addressRegion === "Muğla", `${ld?.address?.addressRegion}`);
 
   // --- KURAL A: "Yakında" rozeti görünen arayüzde
   const soonCounts = {};
@@ -576,8 +583,14 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
     soonCounts[path] = await q7.evaluate(() => document.querySelectorAll("[data-soon]").length);
   }
   const soonTotal = Object.values(soonCounts).reduce((a, c) => a + c, 0);
-  t("KURAL A · 'Yakında' rozeti görünen arayüzde", soonTotal >= 3,
+  // 2026-09-18: saatler geldi → rozet yalnızca gerçekten eksik veride kalmalı:
+  // sipariş linki (InfoModal her sayfada + /contact) ve fiyatsız ürün (/menu Crispy Triangle).
+  t("KURAL A · rozet yalnızca gerçekten eksik veride", soonTotal >= 3 && soonCounts["/tr"] >= 1,
     Object.entries(soonCounts).map(([k, v]) => `${k}:${v}`).join(" · "));
+  const soonWhere = await q7.evaluate(() => [...document.querySelectorAll("[data-soon]")]
+    .map((el) => el.closest("dd")?.previousElementSibling?.textContent?.trim() ?? "ürün fiyatı"));
+  t("KURAL A · saat satırlarında rozet KALMADI", !soonWhere.some((w) => /saat|hours/i.test(w)),
+    soonWhere.join(" | ") || "yok");
 
   // --- focus ring her etkileşimli öğede
   await q7.goto(`${BASE}/tr/contact?nopreload=1`, { waitUntil: "domcontentloaded" });

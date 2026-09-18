@@ -40,8 +40,8 @@ export function pageMetadata(opts: {
  *
  * **Kural 54:** bilinmeyen alan **hiç yazılmaz** — "Yakında", boş string veya tahmin YASAK.
  * Google yapılandırılmış veriyi kelime kelime okur; uydurma değer işletme kartını bozar.
- * Bilerek dışarıda: `openingHours`/`openingHoursSpecification` (saatler yok),
- * `priceRange` (belirlenmedi), `addressRegion` (kullanıcı listesinde yok).
+ * Bilerek dışarıda: `priceRange` (belirlenmedi — sipariş/fiyat sınıfı verisi yok).
+ * `openingHoursSpecification` ve `addressRegion` 2026-09-18'de **eklendi** (veri geldi).
  */
 export function restaurantJsonLd(locale: Locale) {
   const base = site.url;
@@ -57,6 +57,7 @@ export function restaurantJsonLd(locale: Locale) {
       "@type": "PostalAddress",
       streetAddress: site.address.street,
       addressLocality: site.address.city,
+      addressRegion: site.address.region,
       postalCode: site.address.postalCode,
       addressCountry: site.address.country,
     },
@@ -68,9 +69,9 @@ export function restaurantJsonLd(locale: Locale) {
   if (site.hours) {
     data.openingHoursSpecification = site.hours.map((h) => ({
       "@type": "OpeningHoursSpecification",
-      dayOfWeek: h.days,
-      opens: h.open,
-      closes: h.close,
+      dayOfWeek: h.dayOfWeek,
+      opens: h.opens,
+      closes: h.closes,
     }));
   }
   return data;

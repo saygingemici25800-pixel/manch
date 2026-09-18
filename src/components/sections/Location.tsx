@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
 import { Placeholder } from "@/components/ui/Placeholder";
-import { site } from "@/lib/site";
+import { formatHours, site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
 
 const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${site.name} ${site.address.full}`)}&output=embed`;
@@ -14,7 +14,7 @@ const DIRECTIONS = `https://www.google.com/maps/search/?api=1&query=${encodeURIC
 /** Konum — adres, saatler (TODO), tıkla-yükle Google Maps iframe (lazy). */
 export function Location() {
   const t = useTranslations("Home.location");
-  const tc = useTranslations("Common");
+  const locale = useLocale() as "tr" | "en";
   const [loaded, setLoaded] = useState(false);
   const setInfoOpen = useUiStore((s) => s.setInfoOpen);
 
@@ -28,8 +28,8 @@ export function Location() {
             {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
           </address>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-            <dt className="text-mustard">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
-            <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
+            <dt className="text-mustard">{t("hours")}</dt><dd>{formatHours(locale) ?? <SoonBadge />}</dd>
+            <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : <SoonBadge />}</dd>
           </dl>
           <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">
             <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className="group rounded-full bg-mustard px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-ink transition-[transform] duration-300 hover:scale-105">

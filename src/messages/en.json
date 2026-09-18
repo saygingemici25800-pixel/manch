@@ -52,7 +52,6 @@
       "eyebrow": "LOCATION",
       "title": "Find us.",
       "hours": "Hours",
-      "hoursSoon": "Coming soon",
       "phone": "Phone",
       "directions": "Directions",
       "contact": "Contact",
@@ -108,7 +107,6 @@
     "products": "{count, plural, =1 {# item} other {# items}}",
     "quickDetails": "Quick Details",
     "addToCart": "Add to Cart",
-    "todo": "Coming soon",
     "close": "Close",
     "skipToContent": "Skip to content",
     "priceOnRequest": "Ask for price",
@@ -142,7 +140,8 @@
     "phone": "Phone",
     "hours": "Hours",
     "reservation": "Call or WhatsApp us for reservations.",
-    "email": "Email"
+    "email": "Email",
+    "order": "Online ordering"
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -256,7 +255,7 @@
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",
       "title": "A short journey",
-      "items": "2025::The idea — a smash burger zone for Fethiye|Spring 2026::Kitchen tests, sauce trials, Misu & Miyu drawn|June 2026::Teasers: \"coming soon to Fethiye\"|July 2026::Çarşı Cd. 21/b opens — the sweetest work in progress"
+      "items": "2025::The idea — a smash burger zone for Fethiye|Spring 2026::Kitchen tests, sauce trials, Misu & Miyu drawn|June 2026::First teasers and prep|July 2026::Çarşı Cd. 21/b opened|Today::Open daily in Paspatur from 08:30"
     }
   },
   "Contact": {
@@ -271,7 +270,9 @@
     "reservation": "Reservation",
     "directions": "Directions",
     "loadMap": "Load map",
-    "mapTitle": "MANCH — Google Maps"
+    "mapTitle": "MANCH — Google Maps",
+    "order": "Online ordering",
+    "orderNote": "Online ordering runs on WhatsApp for now."
   },
   "NotFound": {
     "title": "This page got smashed.",

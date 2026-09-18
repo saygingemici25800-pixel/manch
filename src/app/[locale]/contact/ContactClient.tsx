@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
 import { KraftCard } from "@/components/ui/KraftCard";
 import { Placeholder } from "@/components/ui/Placeholder";
-import { site } from "@/lib/site";
+import { formatHours, site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
 
 const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${site.name} ${site.address.full}`)}&output=embed`;
@@ -18,7 +18,7 @@ const pill = "group grid place-items-center rounded-full px-[1.6vw] py-[0.8vw] m
 /** /contact — adres kartı, WhatsApp (null → disabled + yakında), InfoModal, sosyal linkler, tıkla-yükle harita. */
 export default function ContactClient() {
   const t = useTranslations("Contact");
-  const tc = useTranslations("Common");
+  const locale = useLocale() as "tr" | "en";
   const [loaded, setLoaded] = useState(false);
   const setInfoOpen = useUiStore((s) => s.setInfoOpen);
 
@@ -30,9 +30,11 @@ export default function ContactClient() {
           {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
         </address>
         <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-          <dt className="text-berry">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
-          <dt className="text-berry">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
-          <dt className="text-berry">{t("email")}</dt><dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
+          <dt className="text-berry">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4">{site.contact.phoneDisplay}</a> : <SoonBadge />}</dd>
+          <dt className="text-berry">{t("hours")}</dt><dd>{formatHours(locale) ?? <SoonBadge />}</dd>
+          {/* Sipariş sağlayıcısı henüz belli değil → rozet; akış WhatsApp'ta. */}
+          <dt className="text-berry">{t("order")}</dt><dd>{site.orderUrl ? <a href={site.orderUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">{t("order")}</a> : <><SoonBadge /> <span className="ml-[0.5vw] max-md:ml-[2vw]">{t("orderNote")}</span></>}</dd>
+          <dt className="text-berry">{t("email")}</dt><dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4 break-all">{site.contact.email}</a> : <SoonBadge />}</dd>
         </dl>
 
         <div className="flex flex-wrap gap-[0.8vw] max-md:gap-[2.5vw]">
@@ -47,7 +49,7 @@ export default function ContactClient() {
 
         <ul className="mt-[0.5vw] flex flex-wrap gap-[1.2vw] max-md:gap-[4vw] text40 text-[1.05vw] max-md:text-[3.6vw]">
           <li><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">Instagram {site.social.instagramHandle}</a></li>
-          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">Facebook</a> : <span className="text-berry">Facebook · {tc("todo")}</span>}</li>
+          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">Facebook</a> : <span className="text-berry">Facebook <SoonBadge className="ml-[0.4vw] max-md:ml-[1.6vw]" /></span>}</li>
         </ul>
       </KraftCard>
 

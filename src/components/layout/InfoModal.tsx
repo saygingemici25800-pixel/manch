@@ -1,19 +1,19 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import clsx from "clsx";
 import { KraftCard } from "@/components/ui/KraftCard";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
-import { site } from "@/lib/site";
+import { formatHours, site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
 import { useDialog } from "@/lib/hooks/useDialog";
 
 /** R17 — iletişim / rezervasyon modalı (kraft kart), "ANLADIM & KAPAT". */
 export default function InfoModal() {
   const t = useTranslations("Modal");
-  const tc = useTranslations("Common");
+  const locale = useLocale() as "tr" | "en";
   const open = useUiStore((s) => s.infoOpen);
   const setOpen = useUiStore((s) => s.setInfoOpen);
   const ref = useRef<HTMLDivElement>(null);
@@ -33,11 +33,14 @@ export default function InfoModal() {
             <dt className="text-berry">{t("address")}</dt>
             <dd>{site.address.full}</dd>
             <dt className="text-berry">{t("phone")}</dt>
-            <dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
+            <dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : <SoonBadge />}</dd>
             <dt className="text-berry">{t("email")}</dt>
-            <dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
+            <dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="underline underline-offset-4 break-all">{site.contact.email}</a> : <SoonBadge />}</dd>
             <dt className="text-berry">{t("hours")}</dt>
-            <dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
+            <dd>{formatHours(locale) ?? <SoonBadge />}</dd>
+            {/* Sipariş sağlayıcısı henüz belli değil (2026-09-18) → Kural 54-A rozeti. */}
+            <dt className="text-berry">{t("order")}</dt>
+            <dd>{site.orderUrl ? <a href={site.orderUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{t("order")}</a> : <SoonBadge />}</dd>
             <dt className="text-berry">Instagram</dt>
             <dd><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{site.social.instagramHandle}</a></dd>
           </dl>

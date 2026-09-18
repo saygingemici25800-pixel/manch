@@ -1,15 +1,27 @@
 {
-  "date": "2026-09-18T02:13:28.046Z",
+  "date": "2026-09-18T02:51:19.118Z",
   "base": "http://localhost:3101",
   "rows": [
     {
-      "path": "/tr/about",
+      "path": "/tr",
       "a11y": 100,
       "seo": 100,
       "fails": []
     },
     {
-      "path": "/en",
+      "path": "/tr/menu",
+      "a11y": 100,
+      "seo": 100,
+      "fails": []
+    },
+    {
+      "path": "/tr/contact",
+      "a11y": 100,
+      "seo": 100,
+      "fails": []
+    },
+    {
+      "path": "/tr/about",
       "a11y": 100,
       "seo": 100,
       "fails": []

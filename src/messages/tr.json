@@ -52,7 +52,6 @@
       "eyebrow": "KONUM",
       "title": "Bizi bul.",
       "hours": "Saatler",
-      "hoursSoon": "Yakında",
       "phone": "Telefon",
       "directions": "Yol tarifi",
       "contact": "İletişim",
@@ -108,7 +107,6 @@
     "products": "{count, plural, =1 {# ürün} other {# ürün}}",
     "quickDetails": "Hızlı Detaylar",
     "addToCart": "Sepete Ekle",
-    "todo": "Yakında",
     "close": "Kapat",
     "skipToContent": "İçeriğe atla",
     "priceOnRequest": "Fiyat için sor",
@@ -142,7 +140,8 @@
     "phone": "Telefon",
     "hours": "Saatler",
     "reservation": "Rezervasyon için ara ya da WhatsApp'tan yaz.",
-    "email": "E-posta"
+    "email": "E-posta",
+    "order": "Online sipariş"
   },
   "Footer": {
     "tape": "SMASHED PATTIES · TOASTED BRIOCHE · EST. 2026 · FETHİYE",
@@ -256,7 +255,7 @@
     "timeline": {
       "eyebrow": "EST. 2026 — FETHİYE",
       "title": "Kısa bir yolculuk",
-      "items": "2025::Fikir — Fethiye'ye bir smash burger zone'u|2026 İlkbahar::Mutfak testleri, sos denemeleri, Misu & Miyu çizildi|2026 Haziran::Teaser'lar: \"çok yakında Fethiye'de\"|2026 Temmuz::Çarşı Cd. 21/b açıldı — The sweetest work in progress"
+      "items": "2025::Fikir — Fethiye'ye bir smash burger zone'u|2026 İlkbahar::Mutfak testleri, sos denemeleri, Misu & Miyu çizildi|2026 Haziran::İlk teaser'lar ve hazırlık|2026 Temmuz::Çarşı Cd. 21/b açıldı|Bugün::Paspatur'da her gün 08:30'dan itibaren açığız"
     }
   },
   "Contact": {
@@ -271,7 +270,9 @@
     "reservation": "Rezervasyon",
     "directions": "Yol tarifi",
     "loadMap": "Haritayı yükle",
-    "mapTitle": "MANCH — Google Haritalar"
+    "mapTitle": "MANCH — Google Haritalar",
+    "order": "Online sipariş",
+    "orderNote": "Online sipariş şimdilik WhatsApp'tan."
   },
   "NotFound": {
     "title": "Bu sayfa smash'lenmiş.",
