@@ -952,6 +952,48 @@ if (runs("gate")) {
     "karakter hatırlanıyor — ikinci girişte seçim atlanıyor",
     `durum ${second}`);
 
+  /* ---- 5.5.11: karakter seçimi PORTREDE kadraja sığmalı ----
+     5.5.11'in gözle bakma turunda yakalandı: `<canvas style={{width,height}}>` üstüne
+     yazılan `max-md:w-[36vw]` sınıfı HİÇ çalışmıyordu (satır içi stil sınıfı ezer), seçim
+     bloğu 390 px viewport'ta 526 px oluyordu — ikinci kart ve başlık kadraj dışındaydı.
+     Hiçbir otomatik kontrol bakmıyordu; bu yüzden buraya kalıcı bekçi kondu.
+     Ölçüm gerçek portre kırılımında yapılır: dar viewport olmadan kusur görünmez. */
+  {
+    const portrait = await browser.newPage({
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 3,
+      isMobile: true,
+      hasTouch: true,
+    });
+    portrait.setDefaultTimeout(90000);
+    await portrait.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+    await portrait.waitForSelector("[data-testid=zone-gate]");
+    await portrait.locator("[data-testid=zone-gate]").click();
+    await portrait.waitForSelector("[data-testid=zone-select]");
+    await portrait.waitForTimeout(700);
+    const fit = await portrait.evaluate(() => {
+      const sel = document.querySelector("[data-testid=zone-select]");
+      const r = sel.getBoundingClientRect();
+      const h2 = sel.querySelector("h2").getBoundingClientRect();
+      const cards = [...document.querySelectorAll("[data-testid^=zone-pick-]")].map((b) => {
+        const q = b.getBoundingClientRect();
+        return { l: q.left, r: q.right };
+      });
+      return {
+        vw: innerWidth,
+        w: +r.width.toFixed(1), l: +r.left.toFixed(1), rr: +r.right.toFixed(1),
+        h2In: h2.left >= -1 && h2.right <= innerWidth + 1,
+        cardsIn: cards.length === 2 && cards.every((c) => c.l >= -1 && c.r <= innerWidth + 1),
+      };
+    });
+    ok(fit.l >= -1 && fit.rr <= fit.vw + 1,
+      "portrede (390) karakter seçimi kadraja SIĞIYOR",
+      `blok ${fit.w}px / viewport ${fit.vw} (sol ${fit.l} → sağ ${fit.rr})`);
+    ok(fit.cardsIn, "portrede iki kartın İKİSİ de tamamen görünür");
+    ok(fit.h2In, "portrede seçim başlığı kadraj dışına taşmıyor");
+    await portrait.close();
+  }
+
   /* ---------------- 5.5.10: StoryBoard × 3 (kapı akışının içinden) ---------------- */
   // Sahnedeyiz (yukarıdaki adım karakteri hatırlayıp doğrudan sahneye soktu).
   await page.waitForFunction(

@@ -82,8 +82,16 @@ export default async function AboutPage({ params }: Props) {
         />
       </section>
 
-      {/* ---------- maskotlar ---------- */}
-      <section className="grid grid-cols-2 items-center gap-[4vw] bg-pink px-[3vw] py-[5vw] max-md:grid-cols-1 max-md:gap-[6vw] max-md:px-[5vw] max-md:py-[13vw]">
+      {/* ---------- maskotlar ----------
+           `id` ŞART: Zone'daki maskot panosunun "TAM SAYFAYA GİT" bağlantısı
+           `/about#mascots`'a gidiyor (lib/zone/frames.ts). Çapa yokken bağlantı sessizce
+           sayfanın BAŞINA düşüyordu — kırık link değil, yanlış yere giden link; hiçbir
+           durum kodu kontrolüne takılmaz, yalnızca gözle bakınca görülür (Kural 59).
+           `scroll-mt` nav yüksekliği payı — diğer çapalarla aynı (Kural 33). */}
+      <section
+        id="mascots"
+        className="grid scroll-mt-[6vw] grid-cols-2 items-center gap-[4vw] bg-pink px-[3vw] py-[5vw] max-md:grid-cols-1 max-md:gap-[6vw] max-md:px-[5vw] max-md:py-[13vw]"
+      >
         <Float amount={12} className="justify-self-center">
           <Image
             src="/images/misu-lockup.png"

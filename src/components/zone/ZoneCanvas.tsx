@@ -169,6 +169,29 @@ export function ZoneCanvas({ className, onReady }: { className?: string; onReady
           max: +Math.max(0, ...ops).toFixed(3),
         };
       })(),
+      /**
+       * Zemin halkaları: dönüş açısı + nabzın ölçeği/opaklığı (spec 5.1, 9).
+       *
+       * 5.5.11'de ölçmek için eklendi: spec "POV'da halka nabzı DURUR" diyor, kod bunu
+       * `FloorMarker` içinde erken `return` ile yapıyor — ama hiç ölçülmemişti. Test iki
+       * örnek alıp değerlerin DEĞİŞMEDİĞİNİ görür; donmuş olması tek başına yetmez, POV
+       * dışında aynı değerlerin DEĞİŞTİĞİ de aynı koşuda kanıtlanır (Kural 60).
+       */
+      markers: (() => {
+        const out: Record<string, { ringRot: number; ringOpacity: number; pulseScale: number; pulseOpacity: number }> = {};
+        for (const f of ["menu", "crew", "mascot", "visit"]) {
+          const ring = liveScene?.getObjectByName(`zone-ring-${f}`) as THREE.Mesh | undefined;
+          const pulse = liveScene?.getObjectByName(`zone-pulse-${f}`) as THREE.Mesh | undefined;
+          if (!ring || !pulse) continue;
+          out[f] = {
+            ringRot: +ring.rotation.z.toFixed(4),
+            ringOpacity: +(ring.material as THREE.MeshBasicMaterial).opacity.toFixed(4),
+            pulseScale: +pulse.scale.x.toFixed(4),
+            pulseOpacity: +(pulse.material as THREE.MeshBasicMaterial).opacity.toFixed(4),
+          };
+        }
+        return out;
+      })(),
       /** Sahnede bırakılmış (ölü) dokuya bağlı materyal sayısı — 0 olmalı. */
       staleMaps: (() => {
         let n = 0;

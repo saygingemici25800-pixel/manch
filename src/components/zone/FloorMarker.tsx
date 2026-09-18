@@ -77,12 +77,12 @@ export function FloorMarker({ frame, reduced }: { frame: ZoneFrame; reduced: boo
 
   return (
     <group>
-      <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.014, z]}>
+      <mesh ref={ring} name={`zone-ring-${frame.id}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.014, z]}>
         <planeGeometry args={[MARKER_SIZE, MARKER_SIZE]} />
         <meshBasicMaterial transparent opacity={0.3} depthWrite={false} toneMapped={false} />
       </mesh>
       {/* Nabız beyaz çizilir, materyalde hardala boyanır. */}
-      <mesh ref={pulse} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.016, z]}>
+      <mesh ref={pulse} name={`zone-pulse-${frame.id}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.016, z]}>
         <planeGeometry args={[MARKER_SIZE, MARKER_SIZE]} />
         <meshBasicMaterial
           color={colors.mustard}

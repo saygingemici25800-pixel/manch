@@ -149,7 +149,13 @@ export function Joystick() {
           }}
         />
       </div>
-      <span className="font-pixel text-[9px] uppercase tracking-[0.18em] text-ink/70 max-md:hidden">
+      {/*
+        Etiket krem hapın İÇİNDE: zemin sabit değil — altından bordo/krem dama geçiyor ve
+        koyu yazı bordo karelerin üstünde okunmuyordu (5.5.11 gözle bakma turunda yakalandı).
+        Ayrıca `text-ink/70` **Kural 40'ı ihlal ediyordu**: metin renginde opaklık yasak,
+        tam palet rengi kullanılır. Hap, `FramePrompt`'un künye hapıyla aynı dili konuşur.
+      */}
+      <span className="rounded-full border-2 border-berry bg-cream px-[8px] py-[2px] font-pixel text-[9px] uppercase tracking-[0.18em] text-berry-dk max-md:hidden">
         {t("hint.joystick")}
       </span>
     </div>

@@ -202,10 +202,21 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   // 2×570 + 1×360 = 1500 TL
   t("Cart · genel toplam 1500 TL", (drawer.total ?? "").includes("1500"), `toplam="${drawer.total}"`);
 
-  const waHref = await q.locator("[data-testid=checkout]").getAttribute("href");
+  /* 5.5.8 (Kural 66): checkout artık `<a href>` DEĞİL — `submitOrder()` adaptörünü çağıran
+     bir <button>. `getAttribute("href")` okuyan eski kontrol bu yüzden düştü: ürün değil
+     TESTİN kendisi bayatlamıştı. Gönderimi gerçek yolundan ölçüyoruz — `window.open`
+     yakalanır, adaptörün açtığı URL denetlenir. Böylece kontrol adaptörün ARKASINDAN değil,
+     tüketicinin gördüğü yerden bakar; yarın kanal değişirse burası da haklı olarak düşer. */
+  await q.evaluate(() => {
+    window.__OPENED__ = null;
+    window.open = (url) => { window.__OPENED__ = String(url); return null; };
+  });
+  await q.locator("[data-testid=checkout]").click();
+  await q.waitForTimeout(300);
+  const waHref = await q.evaluate(() => window.__OPENED__);
   const waOk = waHref && waHref.startsWith("https://wa.me/905054970748?text=");
   const waMsg = waHref ? decodeURIComponent(waHref.split("text=")[1] ?? "") : "";
-  t("Cart · WhatsApp linki doğru numaraya", !!waOk, waHref?.slice(0, 46));
+  t("Cart · sipariş adaptörü doğru numaraya gönderiyor", !!waOk, waHref?.slice(0, 46));
   t("Cart · mesajda ürün + adet + tutar var",
     /Classic Manch Burger/.test(waMsg) && /2/.test(waMsg) && /1500/.test(waMsg),
     waMsg.replace(/\n/g, " | ").slice(0, 110));
@@ -418,7 +429,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   }
   t("İç sayfalar · her sayfada tek h1", h1s.every((n) => n === 1), `h1 sayıları: ${h1s.join(", ")}`);
 
-  // --- /menu: filtresiz 25 kart
+  // --- /menu: filtresiz 28 kart (5.5.1'de içecek kategorisi eklendi: 25 + 3)
   await m.goto(`${BASE}/tr/menu`, { waitUntil: "domcontentloaded" });
   await m.waitForSelector("[data-product-card]");
   await m.waitForTimeout(3200);
@@ -428,9 +439,9 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
              cats: document.querySelectorAll("[data-testid=menu-category]").length,
              tabs: document.querySelectorAll("[data-testid^=tab-]").length };
   });
-  t("/menu · filtresiz 25 kart", menu0.total === 25, `${menu0.total}`);
-  t("Kural 50 · /menu ilk boyamada 25/25 kart GÖRÜNÜR", menu0.shown === 25, `${menu0.shown}/${menu0.total}`);
-  t("/menu · 6 kategori bloğu + 6 sekme", menu0.cats === 6 && menu0.tabs === 6, JSON.stringify(menu0));
+  t("/menu · filtresiz 28 kart", menu0.total === 28, `${menu0.total}`);
+  t("Kural 50 · /menu ilk boyamada 28/28 kart GÖRÜNÜR", menu0.shown === 28, `${menu0.shown}/${menu0.total}`);
+  t("/menu · 7 kategori bloğu + 7 sekme", menu0.cats === 7 && menu0.tabs === 7, JSON.stringify(menu0));
 
   // --- SABOTAJ: ScrollTrigger'lar öldürülse de filtresiz listede hepsi görünür
   await m.evaluate(() => window.__ST_KILL__?.());
@@ -440,7 +451,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
     const c = [...document.querySelectorAll("[data-product-card]")];
     return { st: window.__ST_COUNT__?.() ?? -1, shown: c.filter((x) => Number(getComputedStyle(x).opacity) > 0.99).length, total: c.length };
   });
-  t("Kural 50 · /menu SABOTAJ: ScrollTrigger'sız da 25/25 görünür", sab.shown === 25, `ST=${sab.st} · ${sab.shown}/${sab.total}`);
+  t("Kural 50 · /menu SABOTAJ: ScrollTrigger'sız da 28/28 görünür", sab.shown === 28, `ST=${sab.st} · ${sab.shown}/${sab.total}`);
   await m.reload({ waitUntil: "domcontentloaded" });
   await m.waitForSelector("[data-product-card]");
   await m.waitForTimeout(2600);
@@ -457,7 +468,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
     await m.waitForTimeout(600);
   }
   const back = await m.evaluate(() => document.querySelectorAll("[data-product-card]").length);
-  t("/menu · filtre kapatılınca 25'e döner", back === 25, `${back}`);
+  t("/menu · filtre kapatılınca 28'e döner", back === 28, `${back}`);
 
   // --- disclaimer iki yerde
   const d1 = await m.locator("[data-testid=menu-disclaimer]").count();

@@ -30,7 +30,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.10 bitti, sırada 5.5.11** (performans + Kural 59 gözle bakma). **Zone ana sayfadan girilebiliyor, dört panonun dördü de dolu.**
+- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.11 BİTTİ.** Kabul kriterleri (spec bölüm 11) geçildi;
+  birleştirme kullanıcı onayı bekliyor. **`faz-1-yeniden` production dalı — Zone onaylanana kadar merge/PR YOK.**
 - **Adım sırası değişti (2026-09-18, kullanıcı — kota kısıtı):** 5.5.5 çerçeveler → POV → OrderBoard → ZoneGate/CharacterSelect/ZoneLoader → StoryBoard → Joystick → performans. Gerekçe: **ilk dördü bitince Zone gösterilebilir hale geliyor** (girilir, gezilir, tabloya girilip sipariş verilir). Joystick klavye varken şart değil, StoryBoard içerik — ikisi de eşikten sonraya alındı.
 - **Geliştirme sunucusu `pnpm dev -p 3000` açık tutuluyor** (kullanıcı `http://localhost:3000/tr/lab/zone` adresinden canlı izliyor). Her adım sonunda ayakta olduğu doğrulanır.
 - Dal: **`zone/3d-galeri`** (5.5 çalışması burada). **`faz-1-yeniden` production dalı, canlı site oradan besleniyor — Zone kabul kriterlerini geçene kadar BİRLEŞTİRİLMEZ.**
@@ -39,6 +40,55 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
 - ✅ **Vercel `manch-v2` production branch = `faz-1-yeniden`** (2026-09-18, panodan ayarlandı). Bu dala yapılan push artık doğrudan `manch-v2.vercel.app`'i günceller; doğrulandı (hero düzeltmesi 49 s'de production'a çıktı).
 - **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43). Env **Preview kapsamına da** eklendi — ilk push'ta preview build Kural 57 ile kırılmıştı (koruma çalıştı); eklendikten sonra push → Ready (~40 s), auto-deploy doğrulandı.
+- **Zone durumu (5.5.11 sonu): beş script de yeşil, dört kırılımda gözle geçiş yapıldı.**
+  · `zone-camera-check` **103/103** (+3 yeni portre kontrolü) · `zone-leak-check` doku 21 sabit, kapalıyken 0
+  · `zone-bundle-check` three ana bundle'da yok · **Zone chunk 241.6 kB gz** (limit 260 ✓) · `/tr` 218.4 kB gz
+  · `lab-check` **93/93**, konsol 0 · **`zone-perf-check` 41/41** (yeni script)
+  · **Ana sayfa LCP bozulmadı:** mobil **796 ms** · masaüstü **792 ms** (5.5.9: 772 / 780 — gürültü sınırında)
+- **KARE HIZI ölçüldü (production build, gerçek kullanıcı yolundan; GPU: Apple M1 / ANGLE Metal):**
+  masaüstü 1440 · mobil 390×844 **dpr 3** · mobil dpr3 **CPU 4×** → **üçünde de boşta/yürürken/POV'da 60 fps**,
+  en uzun kare 17.8 ms. **`dt` kırpması (50 ms) hiçbir senaryoda devreye girmedi** — yani simülasyon saati
+  duvar saatine eşit, ölçüm kırpmadan etkilenmemiş (Kural 60). `setPixelRatio 1.5` düşürmesine **gerek yok**.
+  · **CPU throttle gerçekten uygulanıyor** (ayrı sonda: saf JS döngüsü 80 → 326 → 827 ms @ 1×/4×/10×) —
+    4×'te hiçbir şeyin değişmemesi ölçüm hatası değil, sahnenin CPU'ya bağlı olmaması
+  · **Pay sondası (puanlanmıyor): CPU 20×'te 33–36 fps**, kırpma orada devreye giriyor. `dpr` 2 → 1.5
+    bu noktada **hiçbir şey kazandırmıyor** (34.0 → 35.2 boşta, 33.0 → 31.6 yürürken) → spec 9'un
+    "önce `setPixelRatio` 1.5" reçetesi yalnızca **dolgu (fill-rate)** darboğazında işe yarar, CPU'da değil
+  · ⚠️ **Sınır:** ölçüm M1 GPU'da; gerçek telefon GPU'su ölçülemedi. CPU tarafında pay büyük, GPU tarafı açık
+- **POV'da hareket DURUYOR — ölçüldü (5.5.11, daha önce yalnızca kodda vardı):** tuş basılı tutulsa bile
+  karakter yürümüyor/dönmüyor, yeni ayak izi basılmıyor, **dört halkanın dördünün** dönüşü ve nabzı donuyor;
+  sahne render'ı sürüyor (0.6 sn'de 37 kare). Çift yönlü kanıt: aynı koşuda POV DIŞINDA aynı değerlerin
+  **değiştiği** de gösteriliyor (Kural 60 — hep 0 dönen bozuk ölçüm de "donmuş" derdi).
+  · **Gözlem (karar planlayıcıda):** POV'da YENİ iz basılmıyor ama havuzdaki izlerin **sönmesi sürüyor**
+    (en koyu 0.253 → 0). Spec "ayak izi durur" diyor; donmuş iz mi, sönmeye devam mı?
+- **Gözle bakma turu (Kural 59): 4 kırılım × 12 kare × 2 mod = 96 ekran görüntüsü**, zincir kesintisiz
+  (ana sayfa → kapı → seçim → yükleyici → sahne → yürüme → halka/prompt → POV → OrderBoard → StoryBoard →
+  TAM SAYFAYA GİT → geri dönüş → çıkış). Dört kırılımda da **konsol 0, 4xx/5xx 0**.
+  · `docs/screens/faz-5.5.11-{390,768,1440,1920}-01..12-*.png` · reduced-motion: `faz-5.5.11-reduced-*`
+  · **Tur ÜÇ kusur yakaladı** (üçü de düzeltildi, ayrıntı hata günlüğünde): karakter seçimi portrede
+    taşıyordu · `/about#mascots` çapası yoktu · joystick etiketi `text-ink/70` ile Kural 40'ı ihlal ediyordu
+- **MOBİL PORTREDE SALON DARLIĞI — ölçüldü, öneri hazır, DEĞİŞTİRİLMEDİ (karar planlayıcıda):**
+  390×844'te vFOV tavana (72°) dayanıyor, yatay karşılığı **37.1°** (hedef 46°). Ölçüt olarak "salonun
+  yüzde kaçı görünüyor" **yanıltıcı çıktı** — analitik olarak iki aday berabere görünüyordu ama ekranda
+  biri tabloları kesiyordu. Doğru ölçüt: **tablonun ekran dikdörtgeninin kadraja düşen oranı**
+  (`__ZONE_ART_RECT__`):
+
+  | aday | vFOV | yatay | uzak tablolar kadrajda | not |
+  |---|---|---|---|---|
+  | **mevcut** FOV_MAX 72 | 72.0° | 37.1° | **%73** (kesik) | tünel etkisi burada |
+  | FOV_MAX **80** | 80.0° | 42.4° | **%100** | **en küçük yeterli değişiklik — ÖNERİ** |
+  | FOV_MAX 85.1 | 85.1° | 46.0° | %100 | yatay hedefi tam tutturur, %100'e ek katkı yok |
+  | CAM_DIST 7.5 | 72.0° | 37.1° | %100 | kamera salon ucunda **sınıra dayanıyor** (z 19.2), karakter küçülüyor |
+
+  **Öneri: `FOV_MAX` 72 → 80.** Masaüstü etkilenmez (orada alt sınır 48 devrede). Karşılaştırma kareleri:
+  `docs/screens/faz-5.5.11-fov-{A-mevcut-fov72,B1-fovmax80,B2-fovmax85,C-camdist75}-390.png`
+  (`scripts/zone-fov-compare.mjs` — sabiti elle değiştirip koşulur, script hiçbir şeyi değiştirmez)
+- **AÇIK KARAR — Modak'ın SIFIRI okunmuyor.** Sipariş tahtasında adet ve TOPLAM `font-display` (Modak);
+  Modak'ın `0` karakteri dolu bir elips (ince bir eğik çizgi dışında counter kapalı). 1–9 sorunsuz, **yalnız
+  `0`**. Tahta açıldığında 15 satırın hepsi `0`, TOPLAM da `0` → ilk izlenim "● TL". 40 px'te bile böyle,
+  yani boyut meselesi değil, fontun tasarımı. Aday: rakamları `font-ui` (Mouse Memoirs) ya da `font-pixel`
+  ile yazmak (ikisi de `0`'ı temiz veriyor). **Marka tipografisi kararı olduğu için değiştirilmedi.**
+  Aynı durum site sepetindeki TOPLAM'da da var (Zone'a özgü değil).
 - **Zone durumu (5.5.10 sonu): dört panonun dördü de dolu.** `menu` → sipariş tahtası · `crew`/`mascot`/`visit` → hikâye panoları (görsel + başlık + iki paragraf + TAM SAYFAYA GİT). Metinler `Zone.story.<id>.{p1,p2}` — 3 pano × 2 paragraf × 2 dil, anahtarlar simetrik (261/261).
   · `zone-camera-check` → **100/100** · `zone-leak-check` → doku 21 sabit, kapalıyken 0 · `/tr` 218.4 kB gz · **Zone chunk 241.6 kB gz (limit 260 ✓)**
   · **"TAM SAYFAYA GİT" Zone'u kapatıp gezdiriyor** (`TransitionLink` + `exit()`); gezindikten sonra **kaydırma kilidi sayaçta asılı kalmıyor** — 5.5.9'da düzeltilen hatanın tekrar alanı, kalıcı kontrol eklendi
@@ -101,7 +151,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter çizimleri hâlâ yok** — `drawCapy()` geçici sprite üretiyor. PNG yolu (`TextureLoader`) yazıldı **ve uçtan uca denendi** (8 geçici PNG ile: `spriteSource` → `png`, doku sayısı sabit, ölü bağ 0). Çizimler gelince `character.ts`'teki `MASCOT_SPRITE_BASE` sabiti `"/images/mascots"` yapılır — **başka hiçbir şey değişmez**. Otomatik yoklama bilerek yapılmıyor: olmayan PNG'ye istek 404 üretip Kural 53'e takılır. Dev'de `?sprites=<yol>` ile aynı yol denenebilir.
   · Ekranlar: `docs/screens/faz-5.5.3-zone-1440-{baslangic,sag,sol,180,donusta,miyu}.png`, `faz-5.5.3-zone-375{,-180}.png`
   · 5.5.2 ekranları: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
-- Son başarılı build: 2026-09-18 **5.5.10 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- Son başarılı build: 2026-09-18 **5.5.11 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). 5.5.10 kapanış (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
@@ -124,7 +174,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Çalışma saatleri geldi (2026-09-18):** Pzt–Per 08:30–23:30 · Cum–Cmt 08:30–00:00 · Paz 08:30–23:30. `site.hours` dolu, arayüzdeki saat rozetleri kalktı, JSON-LD'ye `openingHoursSpecification` **eklendi**, `addressRegion: "Muğla"` eklendi. Kural 54-B artık saatler için geçerli değil — veri var.
 - **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
-- Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/`; gelene kadar `drawCapy()` geçici sprite üretiyor — geldiğinde tek satır: `character.ts` `MASCOT_SPRITE_BASE = "/images/mascots"`) · **mobil portrede salon dar tünel gibi okunuyor** (FOV 48 *dikey*; 390×844'te yatay FOV ≈ 23°) — 5.5.11'de portrede yatay FOV'u sabitlemek değerlendirilecek, prototipte de aynı · **içecek fiyatları teyit bekliyor** — uydurma değerler KALDIRILDI, üçü de `price: null`; tahtada YAKINDA rozeti, sipariş edilemiyor (karar 2026-09-18) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/`; gelene kadar `drawCapy()` geçici sprite üretiyor — geldiğinde tek satır: `character.ts` `MASCOT_SPRITE_BASE = "/images/mascots"`) · **mobil portrede salon darlığı — 5.5.11'de ÖLÇÜLDÜ, öneri hazır: `FOV_MAX` 72 → 80** (uzak tablolar %73 → %100 kadrajda; masaüstü etkilenmez). Karar planlayıcıda, değiştirilmedi · **Modak'ın `0`'ı okunmuyor** — sipariş tahtasında adet/TOPLAM leke gibi çıkıyor; rakamlar için `font-ui`/`font-pixel` aday, marka kararı bekliyor · **`@react-three/fiber@9.7.0` prod konsoluna `THREE.Clock` deprecation uyarısı basıyor** (kütüphane kaynaklı, 9.7.0 son kararlı sürüm) · **POV'da mevcut ayak izlerinin sönmesi sürüyor** — spec "durur" diyor, karar bekliyor · **içecek fiyatları teyit bekliyor** — uydurma değerler KALDIRILDI, üçü de `price: null`; tahtada YAKINDA rozeti, sipariş edilemiyor (karar 2026-09-18) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 0) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle (Kural 57) · 1) Vercel → `manch-v2` → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -527,7 +577,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] **5.5.8** `OrderBoard` (15 satır, `useCartStore`, `submitOrder` adaptörü, scroll korunması) — 84/84
 - [x] **5.5.9** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağlandı (96/96)
 - [x] **5.5.10** `StoryBoard` × 3 — `crew` · `mascot` · `visit` (100/100)
-- [ ] **5.5.11** Performans + Kural 59 gözle bakma
+- [x] **5.5.11** Performans + Kural 59 gözle bakma — 5 script yeşil, 96 ekran görüntüsü, 3 kusur bulundu ve düzeltildi
 
 > **Sıra bir kez daha değişti (2026-09-18, kullanıcı): `Joystick` öne alındı (5.5.7),
 > `OrderBoard` 5.5.8'e kaydı.** Gerekçe: **kullanıcı üç turdur kontrolün görünmediğini
@@ -538,14 +588,26 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 > gösterilebilir hale geliyor** — girilebiliyor, gezilebiliyor, tabloya girilip sipariş
 > verilebiliyor. `Joystick` ve `StoryBoard` bu eşikten sonraya kaldı: ikisi de Zone'un
 > gösterilebilmesi için şart değil (klavye zaten çalışıyor, hikâye panoları içerik).
-- [ ] ✅ Kabul: `docs/manch-zone-3d.md` bölüm 11
+- [x] ✅ Kabul: `docs/manch-zone-3d.md` bölüm 11 — geçildi (birleştirme kullanıcı onayı bekliyor)
 
 **Her adımda koşulacak script'ler:**
 `node scripts/zone-bundle-check.mjs` (three ana bundle'a sızmadı mı) ·
 `CHROME=… node scripts/zone-leak-check.mjs` (aç-kapa'da `alive` sabit mi) ·
+`BASE=… PROD=… CHROME=… node scripts/zone-perf-check.mjs` (5.5.11: POV donması + kare hızı) ·
 `CHROME=… node scripts/zone-camera-check.mjs` (5.5.3'ten itibaren: üç açı tuzağı + dört yön +
 billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm koşar) ·
 `pnpm lint && pnpm build`
+
+68. **Satır içi `style` sınıfı EZER — kırılıma bağlı ölçü `style` ile verilmez (2026-09-18, 5.5.11).**
+    `style={{ width: 220 }}` + `className="max-md:w-[36vw]"` yazıldığında mobil kural **hiç çalışmaz**:
+    satır içi stilin önceliği her zaman daha yüksektir. `CharacterSelect`'te tam bu oldu — seçim ekranı
+    390 px viewport'ta 526 px genişliğindeydi, ikinci maskot ve başlık kadraj dışındaydı; kusur
+    5.5.9'dan beri duruyordu ve hiçbir otomatik kontrol bakmadığı için görünmedi.
+    Kural 37'nin (sınıf sırası base sınıfı ezemez) kardeşi: **ölçü ya tamamen sınıfla ya tamamen
+    `style` ile verilir, ikisi karıştırılmaz.** Canvas gibi piksel tamponu olan öğelerde tampon JS'te
+    (`c.width = W * dpr`), ekran ölçüsü sınıfta (`aspect-[11/14] w-[220px] max-md:w-[36vw]`) kalır.
+    Bekçi: `zone-camera-check` portre kırılımında seçim bloğunu ölçer — dar viewport olmadan kusur
+    görünmez, bu yüzden kontrol gerçek portre boyutunda koşar.
 
 ---
 
@@ -664,6 +726,14 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.9 | **"TEK KAYNAKTAN YÖNETİLMEYEN GLOBAL DURUM"** — perde kapanınca site kaydırılamaz kalıyordu | `html.style.overflow`'u kaydet/geri-yükle kalıbıyla yöneten İKİ yer vardı: Preloader ve `useDialog`. Ölçülen sıra: preloader kilitli → perde açılıyor ve önceki değeri "hidden" olarak saklıyor → preloader bitip `""` yazıyor ve **perdenin kilidini açıyor** → perde kapanırken "hidden"ı geri yazıyor. İki kilitleyici birbirini eziyor | `lib/scroll-lock.ts`: **sayaçlı** kilit. İlk `lock()`'ta konur, **son** `unlock()`'ta kalkar; sıra bozulamaz. Preloader ve `useDialog` ikisi de onu kullanıyor. Kontrol sayaç derinliğini okuyor |
 | 2026-09-18 | 5.5.9 | `pnpm lint` 8646 sorun bildirdi | ESLint ölçüm build klasörünü (`.next-build`) tarıyordu; `.next` yok sayılıyor, yenisi değil | `eslint.config.mjs` `globalIgnores`'a `.next-build/**` eklendi |
 | 2026-09-18 | 5.5.10 | `visit` panosunun görseli ekran görüntüsünde **boş kutu** çıktı | Görsel aslında yüklenmişti (`complete: true`, 720×720, 4xx yok) — ekran görüntüsü **çözülmeden önce** alınmıştı. Ürün kusuru değil, ölçüm zamanlaması (Kural 60: "ölçtüğün şey ürün mü, ölçüm aracı mı?") | Ekran görüntüsü script'i `img.decode()` bekliyor. Önce ölçüldü, sonra karar verildi — "bozuk görsel" varsayımıyla koda dokunulmadı |
+| 2026-09-18 | 5.5.11 | **Karakter seçimi mobil portrede TAŞIYORDU** — ikinci maskot ve "Kiminle gezelim?" başlığı kadraj dışında; 390'da blok 526 px (viewport 390), 360'ta 520 px | `<canvas style={{width:220,height:280}} className="max-md:w-[36vw]">` — **satır içi stil sınıfı ezer**, yani mobil genişlik kuralı 5.5.9'dan beri hiç çalışmamıştı. Niyet doğru, mekanizma yanlış. Hiçbir otomatik kontrol seçim ekranına portre kırılımında bakmıyordu; **yalnız gözle bakma yakaladı** (Kural 59'un yedinci yakalayışı) | Ölçü tamamen sınıfa taşındı: `aspect-[11/14] w-[220px] max-md:w-[36vw]`; `W/H` yalnız piksel tamponunu belirliyor. 526 → **380.9 px** (390'da), 520 → 352.3 (360'ta). Kural 68 yazıldı; `zone-camera-check`'e portre bekçisi eklendi ve **sabotajla doğrulandı** (eski satır içi stil geri konunca 101/103) |
+| 2026-09-18 | 5.5.11 | Maskot panosundaki **"TAM SAYFAYA GİT" yanlış yere gidiyordu** — `/about#mascots` sayfanın BAŞINA düşüyordu | `/about` sayfasında `id="mascots"` **hiç yoktu**. Kırık link değil — 200 dönen, doğru sayfaya giden ama yanlış yerde duran link. Durum kodu kontrollerine takılmaz, `smoke`/`lab-check` de yakalamaz | Maskot bölümüne `id="mascots"` + `scroll-mt-[6vw]` (Kural 33 ile aynı çapa dili) |
+| 2026-09-18 | 5.5.11 | Joystick'in **"SÜRÜKLE" etiketi bordo dama karelerin üstünde okunmuyordu** | `text-ink/70` — **Kural 40'ın doğrudan ihlali** (metin renginde opaklık yasak). Üstelik zemin sabit değil: altından bordo/krem dama geçiyor, koyu yazı koyu karede kayboluyor. 5.5.7'de eklenmiş, o turda fark edilmemişti | Etiket krem hapın içine alındı (`bg-cream` + `border-berry` + `text-berry-dk`), `FramePrompt`'un künye hapıyla aynı dil. Tüm `src` tarandı: metin renginde opaklık kalan tek yer `disabled:text-berry/30` — devre dışı kontrol, WCAG kontrast şartından muaf, bilerek bırakıldı |
+| 2026-09-18 | 5.5.11 | `lab-check` 86/93'e düştü: sepet WhatsApp kontrolü + `/menu` sayı kontrolleri | İkisi de **testin bayatlaması**, üründe kusur yok: ① 5.5.8'de checkout `<a href>` olmaktan çıkıp `submitOrder()` adaptörünü çağıran `<button>` oldu (Kural 66), test hâlâ `getAttribute("href")` okuyordu ② 5.5.1'de içecek kategorisi eklendi (25 → 28 ürün, 6 → 7 kategori), test eski sayıları bekliyordu. **Testler kırmızı yanarak doğru davrandı** — sessizce geçselerdi asıl sorun o olurdu | Checkout kontrolü gerçek yoldan ölçüyor: `window.open` yakalanıp adaptörün açtığı URL denetleniyor. Sayılar 28/7'ye çekildi. **Sabotajla doğrulandı:** adaptörün gönderimi boşa çıkarılınca iki kontrol de düşüyor (91/93) → 93/93 |
+| 2026-09-18 | 5.5.11 | Gözle bakma script'i **üç kez yanlış özneyi ölçtü** (Kural 60) | ① `img.decode()` tembel görsellerde ASLA çözülmüyor → script ilk koşuda asıldı ② ekran görüntüsü alınırken **tuşlar hâlâ basılıydı**: karakter PNG kodlama süresince yürüyor, yani konumu ÖLÇÜM ARACININ hızına bağlıydı (1920 dsf1 hızlı, 390 dsf3 yavaş) — kırılımlar farklı halkalara varıyordu ③ "halkadan çık" döngüsü 25 adım yürüyüp karakteri salonun dibine dayıyordu (1440'ta bütün halkalar kaçtı) | ① yalnız **kadrajdaki** görseller, her biri zaman aşımlı ② tuşlar ekran görüntüsünden ÖNCE bırakılıyor ③ çıkış **koşula bağlı ama sınırlı**: prompt sönene kadar, en çok 8 adım. Rota artık salonun bilinen geometrisine dayanıyor ve **açılan panoyu okuyor**, tahmin etmiyor → 4 kırılım × 12 kare × 2 mod, sıfır sorun |
+| 2026-09-18 | 5.5.11 | Production konsolunda **uyarı var**: `THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.` | Kaynak **bizim kodumuz değil**: `@react-three/fiber@9.7.0` kendi store'unda `new THREE.Clock()` kuruyor, three r183 `Clock`'u deprecate edip kurulumda uyarı basıyor. 9.7.0 son **kararlı** sürüm (sonrası 10.x canary). Zone her açılışta bir kez. `zone-camera-check` yalnız `error` topladığı, `lab-check` ise Zone'u hiç açmadığı için iki script de görmemişti | `zone-perf-check`'e **birebir metin eşleşen** tek istisna olarak yazıldı (Kural 53: geniş filtre yok, başka hiçbir uyarı gizlenmiyor) ve sayısı raporlanıyor. Kalıcı çözüm bağımlılık kararı — planlayıcıda |
+| 2026-09-18 | 5.5.11 | CPU 4× yavaşlatma kare hızını **hiç değiştirmedi** — "throttle çalışmıyor" şüphesi | Şüphe haklıydı ama sonuç gerçekti: ayrı bir sonda throttle'ın uygulandığını kanıtladı (saf JS döngüsü 80 → 326 → 827 ms @ 1×/4×/10×). Sahne CPU'ya bağlı değil; kare başına iş çok küçük | 20× sondası eklendi → 33–36 fps, pay orada bitiyor. **"Beklenmedik sonuç" önce ölçüm aracına sorulur** (Kural 60/65); bu kez araç sağlamdı, ürün gerçekten hızlıydı |
+| 2026-09-18 | 5.5.11 | Sipariş tahtasında adet ve TOPLAM **siyah bir leke** gibi görünüyor | `font-display` (Modak) — Modak'ın `0` karakteri dolu bir elips, counter'ı kapalı. 1–9 temiz, **yalnız sıfır**. 40 px'te bile böyle → boyut değil font tasarımı. Tahta açıldığında 15 satırın hepsi `0`, TOPLAM da `0` | **Değiştirilmedi — marka tipografisi kararı planlayıcıda.** Ölçüm yapıldı: `font-ui` ve `font-pixel` sıfırı temiz veriyor. Aynı durum site sepetinin TOPLAM'ında da var (Zone'a özgü değil) |
 
 ---
 

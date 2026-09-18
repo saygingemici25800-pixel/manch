@@ -581,19 +581,19 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 
 ## 11. ADIMLAR
 
-- [ ] **5.5.1** Bağımlılıklar + `store/zone.ts` + `lib/zone/frames.ts` + `lib/zone/textures.ts`
+- [x] **5.5.1** Bağımlılıklar + `store/zone.ts` + `lib/zone/frames.ts` + `lib/zone/textures.ts`
       + `menu.ts`'e içecek kategorisi
-- [ ] **5.5.2** `ZoneCanvas` + `Hall` (ön duvar + künye + `document.fonts.ready`) — `/lab/zone`
+- [x] **5.5.2** `ZoneCanvas` + `Hall` (ön duvar + künye + `document.fonts.ready`) — `/lab/zone`
 - [x] **5.5.3** `Character` (4 açılık sprite + **billboard**) + `useZoneControls` + **yön takipli kamera** — `lib/zone/{angles,character,runtime}.ts`, `hooks/{useZoneControls,useFollowCamera}.ts`, `scripts/zone-camera-check.mjs` (32/32)
 - [x] **5.5.4** `Footprints` + `Npc` + ışık bantları — 18'lik havuz, ikinci sprite seti, prototip ölçüsünde bantlar
 - [x] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık — halkanın üstündeki 8 nokta da tetikliyor
 - [x] **5.5.7** `Joystick` + reduced-motion + erişilebilirlik  *(öne alındı)*
 - [x] **5.5.6** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard` kabuğu (odak gidiş-dönüşü dahil)
 - [x] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, **`submitOrder` adaptörü**, scroll korunması
+- [x] **5.5.9** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağlandı
 - [x] **5.5.10** `StoryBoard` × 3 + "TAM SAYFAYA GİT" (Zone'u kapatıp gezdirir)
-- [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
-- [ ] **5.5.11** Performans + Kural 59 gözle bakma (mobil + masaüstü ekran görüntüleri)
-- [ ] ✅ **Kabul:** build temiz · Zone chunk < 180 KB gz · ana sayfa LCP bozulmadı ·
+- [x] **5.5.11** Performans + Kural 59 gözle bakma (mobil + masaüstü ekran görüntüleri)
+- [x] ✅ **Kabul:** build temiz · Zone chunk < 260 KB gz *(revize: 2026-09-18 — bölüm 9'da 180 → 260 yapılmıştı, bu satır güncellenmemişti; ölçülen 241.6)* · ana sayfa LCP bozulmadı ·
       aç-kapa-aç'ta bellek sabit · joystick masaüstünde fareyle çalışıyor, sürükleme pedin dışına
       çıkınca kopmuyor · **kamera yürünen yöne dönüyor, aşağı çekince 180° dönüyor, fırlamıyor,
       duvara girmiyor** · **halkaya basınca prompt kesin açılıyor** · **POV'a girip çıkmak

@@ -31,7 +31,19 @@ function Face({ who }: { who: Character }) {
     x.scale(dpr, dpr);
     drawCapy(x, "front", who, W, H);
   }, [who]);
-  return <canvas ref={canvas} aria-hidden="true" style={{ width: W, height: H }} className="max-md:w-[36vw]" />;
+  /**
+   * CSS ölçüsü YALNIZCA sınıfla verilir, `style` ile DEĞİL.
+   *
+   * İlk hâli `style={{ width: W, height: H }}` + `className="max-md:w-[36vw]"` idi:
+   * satır içi stil sınıfı **her zaman** ezer, yani mobil genişlik kuralı hiç çalışmadı.
+   * Sonuç 390×844'te seçim bloğunun 526 px olması (viewport 390) — ikinci kart ve başlık
+   * kadraj dışında kalıyordu. Kural 37'nin kardeşi: orada sınıf sırası, burada satır içi
+   * stil önceliği aynı kusuru üretiyor.
+   *
+   * `W`/`H` piksel TAMPONUNU belirlemeye devam eder (çizim çözünürlüğü); ekrandaki boyut
+   * sınıflardan gelir, en-boy oranı 220/280 = 11/14 ile korunur.
+   */
+  return <canvas ref={canvas} aria-hidden="true" className="aspect-[11/14] w-[220px] max-md:w-[36vw]" />;
 }
 
 export function CharacterSelect() {
