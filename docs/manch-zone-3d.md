@@ -559,7 +559,11 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - Zone kapanınca `renderer.dispose()`, tüm geometry/material/texture dispose, rAF iptal.
   **Aç-kapa-aç'ta bellek artmamalı**
 - POV'da sahne render'ı durmaz (kenarlarda görünüyor) ama karakter animasyonu, ayak izi ve halka
-  nabzı durur
+  nabzı durur.
+  **"Ayak izi durur" = YENİ iz basılmaz** (netleştirme 2026-09-18, kullanıcı; 5.5.11'de ölçüldü).
+  Havuzdaki mevcut izlerin **sönmesi sürer** — yarı sönmüş bir izi dondurmak ekranda yanlış
+  görünür, POV'dan çıkınca da bayat bir iz izi bırakırdı. Ölçülen davranış zaten budur:
+  POV'da `lastStepRot` değişmiyor (yeni iz yok), `footprints.max` 0.253 → 0 (sönme sürüyor).
 
 ---
 

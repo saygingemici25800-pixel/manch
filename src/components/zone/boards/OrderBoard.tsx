@@ -98,9 +98,10 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
                     >
                       −
                     </button>
+                    {/* Rakam: `font-ui` — gerekçe TOPLAM'ın üstündeki notta. */}
                     <span
                       data-testid="qty-value"
-                      className="w-[1.8vw] min-w-[24px] text-center font-display text-[1.25vw] leading-none text-ink max-md:w-[7vw] max-md:text-[4.4vw]"
+                      className="w-[1.8vw] min-w-[24px] text-center font-ui text-[1.35vw] leading-none text-ink max-md:w-[7vw] max-md:text-[4.8vw]"
                     >
                       {qty}
                     </span>
@@ -128,10 +129,15 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
       <div className="sticky bottom-0 -mx-[1.4vw] -mb-[1.4vw] flex items-center justify-between gap-[1vw] border-t-[3px] border-ink bg-paper px-[1.4vw] py-[0.8vw] max-md:-mx-[4vw] max-md:-mb-[4vw] max-md:px-[4vw] max-md:py-[3vw]">
         <p className="font-ui text-[0.95vw] text-berry-dk max-md:text-[3.2vw]">
           {t("total")}{" "}
+          {/* Rakamlar font-ui (Mouse Memoirs), Modak DEGIL (karar 2026-09-18, kullanici).
+              Modak'in sifiri dolu bir elips: counter'i kapali, 40 px'te bile leke gibi okunuyor
+              (1-9 sorunsuz, yalniz sifir). Tahta acildiginda 15 satirin adedi ve TOPLAM sifir
+              oldugu icin ilk izlenim bir lekeydi. Satis ekraninda okunmayan rakam tipografi
+              tercihi degil kusurdur; Modak basliklarda kalir, rakamlarda kalmaz. */}
           <span
             data-testid="order-total"
             aria-live="polite"
-            className="font-display text-[1.4vw] text-ink max-md:text-[5vw]"
+            className="font-ui text-[1.5vw] text-ink max-md:text-[5.4vw]"
           >
             {total} TL
           </span>

@@ -155,7 +155,9 @@ export default function Cart() {
           {lines.length > 0 && (
             <p data-testid="cart-total" className="flex items-baseline justify-between border-t border-berry/15 pt-[0.8vw] max-md:pt-[3vw] text40 text-[1.2vw] max-md:text-[4.2vw]">
               <span>{t("total")}</span>
-              <span className="font-display text-[1.8vw] max-md:text-[6vw]">{total} TL</span>
+              {/* Rakam: `font-ui` — Modak'ın sıfırı okunmuyor (karar 2026-09-18);
+                  sipariş tahtasıyla aynı kural, tek satış dili. */}
+              <span className="font-ui text-[1.9vw] max-md:text-[6.4vw]">{total} TL</span>
             </p>
           )}
           {canSubmit ? (

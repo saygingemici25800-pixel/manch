@@ -83,11 +83,32 @@ export const CAMERA_FOV = 48;
  *   vFov = 2·atan( tan(FOV_H_TARGET/2) / aspect )   →   clamp(FOV_MIN, FOV_MAX)
  *
  * Masaüstünde (16:9) türetilen değer 27° çıkar ve `FOV_MIN = 48`'e takılır: **masaüstünde
- * hiçbir şey değişmez.** `FOV_MAX = 72` şart — üst sınır olmadan portrede balık gözü olur.
+ * hiçbir şey değişmez.** Bir `FOV_MAX` üst sınırı şart — sınır olmadan portrede balık gözü olur
+ * (390×844'te sınırsız değer 85.1° çıkar); değerin gerekçesi sabitin kendi başında.
  */
 export const FOV_H_TARGET = 46;
 export const FOV_MIN = 48;
-export const FOV_MAX = 72;
+/**
+ * **72 → 80 (karar 2026-09-18, kullanıcı; 5.5.11'de ölçüldü).**
+ *
+ * 72'de portrede (390×844) yatay FOV 37.1° kalıyordu ve yan duvardaki tabloların yalnızca
+ * **%73'ü** kadraja giriyordu — salon tünel gibi okunuyordu. 80'de yatay 42.4°, tablolar
+ * **%100** kadrajda.
+ *
+ * **Ölçüt neden "tablonun kadraja düşen oranı":** ilk denenen ölçüt "bakış mesafesinde
+ * görünen salon genişliğinin yüzdesi" idi ve `FOV_MAX 85.1` ile `CAM_DIST 7.5`'i **berabere**
+ * gösteriyordu; ekranda ise biri tabloları tam gösterirken öteki kesiyordu. Tablolar yan
+ * duvarda BELİRLİ derinliklerde duruyor, ortalama genişlik onların kadraja girip girmediğini
+ * söylemiyor. Ölçüt `__ZONE_ART_RECT__` ile tablonun ekran dikdörtgenine çevrildi.
+ *
+ * **Neden 80, 85.1 değil:** 85.1 yatay hedefi (46°) tam tutturur ama tablo görünürlüğüne
+ * **ek katkı vermez** (ikisi de %100); karşılığında dikey açı daha da genişler.
+ * **Neden FOV, `CAM_DIST` değil:** `CAM_DIST 7.5` de %100 veriyor ama kamerayı salon ucunda
+ * `CAM_Z_BOUND`'a dayıyor (başlangıçta z 19.2'ye kırpılıyor) ve karakteri küçültüyor.
+ *
+ * Masaüstü **etkilenmez**: 16:9'da türetilen değer 27° çıkıp `FOV_MIN = 48`'e takılıyor.
+ */
+export const FOV_MAX = 80;
 
 /** En-boy oranına göre dikey FOV (derece). */
 export function fovForAspect(aspect: number) {

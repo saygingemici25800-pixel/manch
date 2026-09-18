@@ -288,7 +288,14 @@ if (runs("fps")) {
     const clamped = idle.clampedFrames + walk.clampedFrames + (pov?.clampedFrames ?? 0);
     /* SONDA senaryoları puanlanmaz. 20× yavaşlatma gerçek bir cihaz değil, PAYIN nerede
        bittiğini gösteren bir sondadır; kabul kriteri yapmak "geçmesi gerekmeyen bir testi
-       kırmızı yakmak" olurdu. Ölçüm yine de basılır — karar planlayıcıda. */
+       kırmızı yakmak" olurdu. Ölçüm yine de basılır.
+
+       ⚠️ **SONDA OYNAKTIR — tek koşusundan sonuç çıkarma (2026-09-18).** Aynı kodda ardışık
+       iki koşu 14.4 ve 32.8 fps verdi. 20×'te kare bütçesi zaten taşmış durumda; makinedeki
+       her başka yük (ikinci sunucu, paralel tarayıcı) doğrudan buraya yansıyor. İlk koşudaki
+       düşük değer "FOV 80 pahalıya mal oldu" diye yorumlanacaktı — ikinci koşu bunu çürüttü.
+       Hedef senaryolar (1× ve 4×) ise HER koşuda 60 fps, en uzun kare 17.7 ms: kararlı olan
+       ve anlam taşıyan ölçüm o. Sondadan bir sonuç çıkarılacaksa en az üç koşu gerekir. */
     if (sc.probe) {
       console.log(`      → SONDA (puanlanmıyor): boşta ${idle.fps} · yürürken ${walk.fps}` +
         `${pov ? ` · POV ${pov.fps}` : ""} fps · 50 ms'i aşan ${clamped} kare`);

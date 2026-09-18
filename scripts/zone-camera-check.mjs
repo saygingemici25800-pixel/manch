@@ -991,6 +991,37 @@ if (runs("gate")) {
       `blok ${fit.w}px / viewport ${fit.vw} (sol ${fit.l} → sağ ${fit.rr})`);
     ok(fit.cardsIn, "portrede iki kartın İKİSİ de tamamen görünür");
     ok(fit.h2In, "portrede seçim başlığı kadraj dışına taşmıyor");
+
+    /* ---- 5.5.11: portrede salon darlığı — KABUL EDİLEN KARARIN bekçisi ----
+       `FOV_MAX` 72 → 80 (karar 2026-09-18, kullanıcı). Gerekçe ölçüydü: 72'de yan duvardaki
+       uzak tabloların yalnızca **%73'ü** kadraja giriyordu, 80'de **%100**. Sabit hiçbir
+       testte geçmiyordu; biri 72'ye döndürse ya da `CAM_DIST`'i oynatsa kimse fark etmezdi.
+       Ölçüt bilerek "tablonun ekran dikdörtgeninin kadraja düşen oranı" — "salonun yüzde
+       kaçı görünüyor" ölçütü 85.1 ile CAM_DIST 7.5'i berabere gösterip yanıltmıştı. */
+    await portrait.locator("[data-testid=zone-pick-misu]").click();
+    await portrait.waitForFunction(
+      () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
+      { timeout: 60000 },
+    );
+    await portrait.waitForTimeout(1200);
+    const inFrame = await portrait.evaluate(() => {
+      const out = {};
+      for (const id of ["menu", "crew"]) {
+        const r = window.__ZONE_ART_RECT__(id);
+        if (!r) { out[id] = null; continue; }
+        const w = r.right - r.left, h = r.bottom - r.top;
+        const vx = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
+        const vy = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+        out[id] = w > 0 && h > 0 ? Math.round((vx * vy) / (w * h) * 100) : 0;
+      }
+      return out;
+    });
+    ok(inFrame.menu >= 99 && inFrame.crew >= 99,
+      "portrede uzak tablolar TAM kadrajda (FOV_MAX 80 kararı)",
+      `menu %${inFrame.menu} · crew %${inFrame.crew}`);
+    const fov = await portrait.evaluate(() => window.__ZONE_STATS__().cam.fov);
+    ok(Math.abs(fov - 80) < 0.01, "portrede dikey FOV tavanı 80°", `${fov}°`);
+
     await portrait.close();
   }
 

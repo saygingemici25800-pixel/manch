@@ -51,9 +51,13 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   duvar saatine eşit, ölçüm kırpmadan etkilenmemiş (Kural 60). `setPixelRatio 1.5` düşürmesine **gerek yok**.
   · **CPU throttle gerçekten uygulanıyor** (ayrı sonda: saf JS döngüsü 80 → 326 → 827 ms @ 1×/4×/10×) —
     4×'te hiçbir şeyin değişmemesi ölçüm hatası değil, sahnenin CPU'ya bağlı olmaması
-  · **Pay sondası (puanlanmıyor): CPU 20×'te 33–36 fps**, kırpma orada devreye giriyor. `dpr` 2 → 1.5
-    bu noktada **hiçbir şey kazandırmıyor** (34.0 → 35.2 boşta, 33.0 → 31.6 yürürken) → spec 9'un
-    "önce `setPixelRatio` 1.5" reçetesi yalnızca **dolgu (fill-rate)** darboğazında işe yarar, CPU'da değil
+  · **Pay sondası (puanlanmıyor): CPU 20×'te ~25–35 fps**, kırpma orada devreye giriyor. `dpr` 2 → 1.5
+    bu noktada **hiçbir şey kazandırmıyor** → spec 9'un "önce `setPixelRatio` 1.5" reçetesi yalnızca
+    **dolgu (fill-rate)** darboğazında işe yarar, CPU'da değil.
+    ⚠️ **Sonda OYNAK:** aynı kodda ardışık iki koşu 14.4 ve 32.8 fps verdi (20×'te kare bütçesi zaten
+    taşmış, makinedeki her başka yük buraya yansıyor). İlk koşu "FOV 80 pahalıya mal oldu" diye
+    yorumlanacaktı, ikinci koşu çürüttü. **Tek koşusundan sonuç çıkarılmaz.** Hedef senaryolar
+    (1× ve 4×) her koşuda 60 fps — kararlı ve anlamlı olan ölçüm odur
   · ⚠️ **Sınır:** ölçüm M1 GPU'da; gerçek telefon GPU'su ölçülemedi. CPU tarafında pay büyük, GPU tarafı açık
 - **POV'da hareket DURUYOR — ölçüldü (5.5.11, daha önce yalnızca kodda vardı):** tuş basılı tutulsa bile
   karakter yürümüyor/dönmüyor, yeni ayak izi basılmıyor, **dört halkanın dördünün** dönüşü ve nabzı donuyor;
@@ -67,7 +71,24 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · `docs/screens/faz-5.5.11-{390,768,1440,1920}-01..12-*.png` · reduced-motion: `faz-5.5.11-reduced-*`
   · **Tur ÜÇ kusur yakaladı** (üçü de düzeltildi, ayrıntı hata günlüğünde): karakter seçimi portrede
     taşıyordu · `/about#mascots` çapası yoktu · joystick etiketi `text-ink/70` ile Kural 40'ı ihlal ediyordu
-- **MOBİL PORTREDE SALON DARLIĞI — ölçüldü, öneri hazır, DEĞİŞTİRİLMEDİ (karar planlayıcıda):**
+- **KARARLAR KAPANDI (2026-09-18, kullanıcı) — altı madde:**
+  ① **`FOV_MAX` 72 → 80 uygulandı** (portrede uzak tablolar %73 → %100 kadrajda; masaüstü
+  etkilenmez). Ölçütün düzeltilmesi onaylandı: "tablonun kadraja düşen oranı", "salonun yüzdesi"
+  değil. 85.1 ek katkı vermiyor, `CAM_DIST 7.5` kamerayı salon sınırına dayıyor. Gerekçe
+  `frames.ts`'te sabitin başında, bekçi `zone-camera-check`'te.
+  ② **Rakamlar `font-ui`'ye geçti** — sipariş tahtası adedi, sipariş TOPLAM'ı, site sepeti
+  TOPLAM'ı. Modak başlıklarda kalır. "Satış ekranında okunmayan rakam tipografi tercihi değil
+  kusurdur." Tüm `src` tarandı: diğer tüm sayısal değerler zaten `font-ui`/`font-pixel`'di
+  (fiyatlar, sayaçlar, rozet, timeline yılları, künye "2 0 2 6", kicker "01 · SİPARİŞ").
+  **Modak'ta kalan tek rakam: `About.timeline.eyebrow` = "EST. 2026 — FETHİYE"** — dekoratif
+  kicker, satış rakamı değil; `SectionHeader` eyebrow'u tüm sitede ortak olduğu için tek başına
+  değiştirmek bütün bölüm kickerlarını etkilerdi → **dokunulmadı, ayrıca bildirildi.**
+  ③ **POV'da mevcut izler sönmeye devam ediyor** — spec bu cümleyle netleştirildi.
+  ④ **fiber uyarısı kalıcı kabul** (9.7.0 son kararlı sürüm; canary'ye geçilmeyecek).
+  Belgeli birebir metin istisnası `zone-perf-check`'te.
+  ⑤ **Gerçek cihaz testi birleştirmeyi bloklamıyor** — canlıdan bakılacak.
+  ⑥ **`docs/screens/` budanmayacak**, bunun yerine **Kural 69**: faz başına en fazla 2 kare.
+- **MOBİL PORTREDE SALON DARLIĞI — ölçüm (karar ① ile kapandı, `FOV_MAX` 80 uygulandı):**
   390×844'te vFOV tavana (72°) dayanıyor, yatay karşılığı **37.1°** (hedef 46°). Ölçüt olarak "salonun
   yüzde kaçı görünüyor" **yanıltıcı çıktı** — analitik olarak iki aday berabere görünüyordu ama ekranda
   biri tabloları kesiyordu. Doğru ölçüt: **tablonun ekran dikdörtgeninin kadraja düşen oranı**
@@ -80,15 +101,16 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   | FOV_MAX 85.1 | 85.1° | 46.0° | %100 | yatay hedefi tam tutturur, %100'e ek katkı yok |
   | CAM_DIST 7.5 | 72.0° | 37.1° | %100 | kamera salon ucunda **sınıra dayanıyor** (z 19.2), karakter küçülüyor |
 
-  **Öneri: `FOV_MAX` 72 → 80.** Masaüstü etkilenmez (orada alt sınır 48 devrede). Karşılaştırma kareleri:
+  **Uygulandı: `FOV_MAX` 72 → 80.** Masaüstü etkilenmez (orada alt sınır 48 devrede). Karşılaştırma kareleri:
   `docs/screens/faz-5.5.11-fov-{A-mevcut-fov72,B1-fovmax80,B2-fovmax85,C-camdist75}-390.png`
   (`scripts/zone-fov-compare.mjs` — sabiti elle değiştirip koşulur, script hiçbir şeyi değiştirmez)
-- **AÇIK KARAR — Modak'ın SIFIRI okunmuyor.** Sipariş tahtasında adet ve TOPLAM `font-display` (Modak);
+- **KAPANDI (karar ②) — Modak'ın SIFIRI okunmuyor.** Sipariş tahtasında adet ve TOPLAM `font-display` (Modak);
   Modak'ın `0` karakteri dolu bir elips (ince bir eğik çizgi dışında counter kapalı). 1–9 sorunsuz, **yalnız
   `0`**. Tahta açıldığında 15 satırın hepsi `0`, TOPLAM da `0` → ilk izlenim "● TL". 40 px'te bile böyle,
   yani boyut meselesi değil, fontun tasarımı. Aday: rakamları `font-ui` (Mouse Memoirs) ya da `font-pixel`
-  ile yazmak (ikisi de `0`'ı temiz veriyor). **Marka tipografisi kararı olduğu için değiştirilmedi.**
-  Aynı durum site sepetindeki TOPLAM'da da var (Zone'a özgü değil).
+  ile yazmak (ikisi de `0`'ı temiz veriyor). **`font-ui` seçildi ve uygulandı** — sipariş tahtası
+  adedi + TOPLAM'ı ve site sepeti TOPLAM'ı. Mouse Memoirs Modak'tan optik olarak küçük durduğu
+  için punto biraz büyütüldü (1.25 → 1.35vw · 1.4 → 1.5vw · 1.8 → 1.9vw).
 - **Zone durumu (5.5.10 sonu): dört panonun dördü de dolu.** `menu` → sipariş tahtası · `crew`/`mascot`/`visit` → hikâye panoları (görsel + başlık + iki paragraf + TAM SAYFAYA GİT). Metinler `Zone.story.<id>.{p1,p2}` — 3 pano × 2 paragraf × 2 dil, anahtarlar simetrik (261/261).
   · `zone-camera-check` → **100/100** · `zone-leak-check` → doku 21 sabit, kapalıyken 0 · `/tr` 218.4 kB gz · **Zone chunk 241.6 kB gz (limit 260 ✓)**
   · **"TAM SAYFAYA GİT" Zone'u kapatıp gezdiriyor** (`TransitionLink` + `exit()`); gezindikten sonra **kaydırma kilidi sayaçta asılı kalmıyor** — 5.5.9'da düzeltilen hatanın tekrar alanı, kalıcı kontrol eklendi
@@ -174,7 +196,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Çalışma saatleri geldi (2026-09-18):** Pzt–Per 08:30–23:30 · Cum–Cmt 08:30–00:00 · Paz 08:30–23:30. `site.hours` dolu, arayüzdeki saat rozetleri kalktı, JSON-LD'ye `openingHoursSpecification` **eklendi**, `addressRegion: "Muğla"` eklendi. Kural 54-B artık saatler için geçerli değil — veri var.
 - **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
-- Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/`; gelene kadar `drawCapy()` geçici sprite üretiyor — geldiğinde tek satır: `character.ts` `MASCOT_SPRITE_BASE = "/images/mascots"`) · **mobil portrede salon darlığı — 5.5.11'de ÖLÇÜLDÜ, öneri hazır: `FOV_MAX` 72 → 80** (uzak tablolar %73 → %100 kadrajda; masaüstü etkilenmez). Karar planlayıcıda, değiştirilmedi · **Modak'ın `0`'ı okunmuyor** — sipariş tahtasında adet/TOPLAM leke gibi çıkıyor; rakamlar için `font-ui`/`font-pixel` aday, marka kararı bekliyor · **`@react-three/fiber@9.7.0` prod konsoluna `THREE.Clock` deprecation uyarısı basıyor** (kütüphane kaynaklı, 9.7.0 son kararlı sürüm) · **POV'da mevcut ayak izlerinin sönmesi sürüyor** — spec "durur" diyor, karar bekliyor · **içecek fiyatları teyit bekliyor** — uydurma değerler KALDIRILDI, üçü de `price: null`; tahtada YAKINDA rozeti, sipariş edilemiyor (karar 2026-09-18) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/`; gelene kadar `drawCapy()` geçici sprite üretiyor — geldiğinde tek satır: `character.ts` `MASCOT_SPRITE_BASE = "/images/mascots"`) · **`About.timeline.eyebrow` = "EST. 2026 — FETHİYE" hâlâ Modak** — sitede Modak'ta kalan tek rakam. Dekoratif kicker, satış rakamı değil; `SectionHeader` eyebrow'u tüm bölümlerde ortak olduğu için tek başına değiştirmek bütün kickerları etkiler → karar bekliyor · **`@react-three/fiber@9.7.0` prod konsoluna `THREE.Clock` deprecation uyarısı basıyor** (kütüphane kaynaklı, 9.7.0 son kararlı sürüm — **kalıcı kabul edildi**, belgeli istisna) · **içecek fiyatları teyit bekliyor** — uydurma değerler KALDIRILDI, üçü de `price: null`; tahtada YAKINDA rozeti, sipariş edilemiyor (karar 2026-09-18) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 0) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle (Kural 57) · 1) Vercel → `manch-v2` → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -609,6 +631,16 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     Bekçi: `zone-camera-check` portre kırılımında seçim bloğunu ölçer — dar viewport olmadan kusur
     görünmez, bu yüzden kontrol gerçek portre boyutunda koşar.
 
+69. **Ekran görüntüsü: faz başına EN FAZLA 2 commit (karar 2026-09-18, kullanıcı).**
+    Commit edilen kareler yalnızca **kabul edilmiş bir kararı belgeleyenler** olur — "şuna
+    baktım" kareleri değil. Gerekçe: 5.5.11'de gözle bakma turu 96 kare üretti (71 MB);
+    `docs/screens/` zaten 178 MB ve `.git` 271 MB. **Geçmişten silmek depo boyutunu
+    küçültmez** (bu yüzden budama yapılmaz, karar 2026-09-18), git-lfs bu ölçekte gereksiz
+    karmaşa — tek işe yarayan önlem **yenisini eklememek.**
+    Tur kareleri yerelde üretilir, bakılır, commit edilmez; script'i commit etmek yeter
+    (`zone-walkthrough.mjs` aynı kareleri tek komutla yeniden üretir). Faz sonu raporunda
+    kareler **sayıyla** anlatılır, dosyayla değil.
+
 ---
 
 ## 🧠 HATA GÜNLÜĞÜ
@@ -734,6 +766,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.11 | Production konsolunda **uyarı var**: `THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.` | Kaynak **bizim kodumuz değil**: `@react-three/fiber@9.7.0` kendi store'unda `new THREE.Clock()` kuruyor, three r183 `Clock`'u deprecate edip kurulumda uyarı basıyor. 9.7.0 son **kararlı** sürüm (sonrası 10.x canary). Zone her açılışta bir kez. `zone-camera-check` yalnız `error` topladığı, `lab-check` ise Zone'u hiç açmadığı için iki script de görmemişti | `zone-perf-check`'e **birebir metin eşleşen** tek istisna olarak yazıldı (Kural 53: geniş filtre yok, başka hiçbir uyarı gizlenmiyor) ve sayısı raporlanıyor. Kalıcı çözüm bağımlılık kararı — planlayıcıda |
 | 2026-09-18 | 5.5.11 | CPU 4× yavaşlatma kare hızını **hiç değiştirmedi** — "throttle çalışmıyor" şüphesi | Şüphe haklıydı ama sonuç gerçekti: ayrı bir sonda throttle'ın uygulandığını kanıtladı (saf JS döngüsü 80 → 326 → 827 ms @ 1×/4×/10×). Sahne CPU'ya bağlı değil; kare başına iş çok küçük | 20× sondası eklendi → 33–36 fps, pay orada bitiyor. **"Beklenmedik sonuç" önce ölçüm aracına sorulur** (Kural 60/65); bu kez araç sağlamdı, ürün gerçekten hızlıydı |
 | 2026-09-18 | 5.5.11 | Sipariş tahtasında adet ve TOPLAM **siyah bir leke** gibi görünüyor | `font-display` (Modak) — Modak'ın `0` karakteri dolu bir elips, counter'ı kapalı. 1–9 temiz, **yalnız sıfır**. 40 px'te bile böyle → boyut değil font tasarımı. Tahta açıldığında 15 satırın hepsi `0`, TOPLAM da `0` | **Değiştirilmedi — marka tipografisi kararı planlayıcıda.** Ölçüm yapıldı: `font-ui` ve `font-pixel` sıfırı temiz veriyor. Aynı durum site sepetinin TOPLAM'ında da var (Zone'a özgü değil) |
+| 2026-09-18 | 5.5.11 | JSX yorumu `{/* */}` yerine düz `/* */` yazıldı — **`pnpm build` TEMİZ GEÇTİ**, `pnpm lint` yakaladı | `/* ... */` JSX içinde geçerli bir **metin düğümüdür**: derlenir ve ekranda **görünür metin olarak render edilir**. Sipariş tahtasının TOPLAM satırında beş satırlık yorum kullanıcıya gösterilecekti. Build hata vermez çünkü ortada sözdizimi hatası yok | `{/* ... */}` biçimine çevrildi. **Ders: Kural 2'nin "build yetmez" tarafı burada tersine işliyor — build geçiyor ama lint gerekli.** `react/jsx-no-comment-textnodes` tam bu kusur için var; lint'siz zincir kurulmaz |
+| 2026-09-18 | 5.5.11 | CPU 20× pay sondası ardışık iki koşuda **14.4** ve **32.8** fps verdi | Sonda 20×'te kare bütçesini zaten taşırıyor; makinedeki her başka yük (ikinci sunucu, paralel tarayıcı) doğrudan sonuca yansıyor. İlk koşu **"FOV 80 pahalıya mal oldu"** diye yorumlanacaktı ve `dpr` 1.5 kolunun "artık işe yaradığı" sonucu çıkarılacaktı — ikinci koşu ikisini de çürüttü | Sondanın oynaklığı hem script'e hem DURUM'a yazıldı: **tek koşusundan sonuç çıkarılmaz, en az üç koşu gerekir.** Hedef senaryolar (1× ve 4×) her koşuda 60 fps / en uzun kare 17.7 ms — kararlı ve anlamlı olan ölçüm odur. Kural 60'ın "oynak kontrol güvenilmez kontroldür" maddesinin sonda hâli |
 
 ---
 
