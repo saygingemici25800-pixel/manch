@@ -102,7 +102,7 @@ export default function Cart() {
         data-testid="cart-button"
         aria-label={t("open")}
         onClick={() => setOpen(true)}
-        className="fixed bottom-[2vw] right-[2vw] max-md:bottom-[5vw] max-md:right-[5vw] z-60 grid h-[4.2vw] w-[4.2vw] max-md:h-[14vw] max-md:w-[14vw] place-items-center rounded-full bg-berry text-cream shadow-[0_1vw_2vw_-0.6vw_rgba(78,16,48,.6)] transition-transform duration-300 hover:scale-105"
+        className="fixed bottom-[2vw] right-[2vw] max-md:bottom-[14vw] max-md:right-[5vw] z-60 grid h-[4.2vw] w-[4.2vw] max-md:h-[14vw] max-md:w-[14vw] place-items-center rounded-full bg-berry text-cream shadow-[0_1vw_2vw_-0.6vw_rgba(78,16,48,.6)] transition-transform duration-300 hover:scale-105"
       >
         <svg viewBox="0 0 24 24" className="h-[45%] w-[45%]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6.5" />
