@@ -2,6 +2,7 @@
 
 import { useEffect, type RefObject } from "react";
 import { useLenis } from "@/lib/lenis-store";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -17,11 +18,9 @@ export function useDialog(open: boolean, onClose: () => void, ref: RefObject<HTM
     if (!open) return;
     const el = ref.current;
     const previous = document.activeElement as HTMLElement | null;
-    const html = document.documentElement;
-    const prevOverflow = html.style.overflow;
-
     lenis?.stop();
-    html.style.overflow = "hidden";
+    // Sayaçlı kilit: üst üste binen kilitleyiciler birbirini ezmesin (bkz. `scroll-lock.ts`).
+    lockScroll();
 
     const focusables = () => Array.from(el?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
     // İlk odak: bir sonraki frame + geçiş başladıktan sonra tekrar (visibility transition'ı odağı engelleyebilir)
@@ -56,7 +55,7 @@ export function useDialog(open: boolean, onClose: () => void, ref: RefObject<HTM
       cancelAnimationFrame(raf);
       window.clearTimeout(retry);
       document.removeEventListener("keydown", onKey);
-      html.style.overflow = prevOverflow;
+      unlockScroll();
       lenis?.start();
       previous?.focus?.();
     };

@@ -641,7 +641,7 @@
   var npcCv=cv(220,280);
   var npc=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.4),
     new THREE.MeshBasicMaterial({map:tex(npcCv),transparent:true}));
-  npc.position.set(-3.2,.7,-12);scene.add(npc); window.__npc=npc; redrawChars();
+  npc.position.set(-3.2,.7,-12);scene.add(npc); window.__npc=npc;
 
   var shMat=new THREE.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false});
   var shadow=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.1),shMat);

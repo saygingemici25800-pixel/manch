@@ -35,7 +35,7 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale); // Kural 16
 
   // Kural 44: temel namespace'ler + sayfaya özel "Home".
-  const messages = clientMessages(await getMessages(), ["Home"]);
+  const messages = clientMessages(await getMessages(), ["Home", "Zone", "Menu"]);
 
   return (
     <NextIntlClientProvider messages={messages}>

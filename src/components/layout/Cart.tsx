@@ -6,8 +6,8 @@ import clsx from "clsx";
 import { useGsapModule } from "@/lib/hooks/useLazyGsap";
 import { getProduct } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
-import { site } from "@/lib/site";
 import { useCartStore } from "@/lib/cart-store";
+import { orderChannel, orderTotal, submitOrder } from "@/lib/order/submit";
 import { useUiStore } from "@/lib/ui-store";
 import { useDialog } from "@/lib/hooks/useDialog";
 import { useHydrated } from "@/lib/hooks/useHydrated";
@@ -15,16 +15,13 @@ import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
 
-/** WhatsApp sipariş mesajı (wa.me). Numara yoksa null. */
-function buildWaUrl(text: string): string | null {
-  const num = site.contact.whatsapp;
-  if (!num) return null;
-  return `https://wa.me/${num.replace(/[^\d]/g, "")}?text=${encodeURIComponent(text)}`;
-}
-
-/** R12 — sağ altta berry sepet + hardal sayaç, "SEPETE EKLENDİ" toast, kraft drawer, WhatsApp checkout. */
+/** R12 — sağ altta berry sepet + hardal sayaç, "SEPETE EKLENDİ" toast, kraft drawer.
+ *  Gönderme `lib/order/submit` adaptöründe (Kural 66); bu bileşen kanalı bilmez. */
 export default function Cart() {
   const t = useTranslations("Cart");
+  /** Kural 66: gönder düğmesinin metni ve mesajın biçimi adaptörden gelir. */
+  const tAll = useTranslations();
+  const channel = orderChannel();
   const locale = useLocale() as Locale;
   const hydrated = useHydrated();
   const reduced = useReducedMotion();
@@ -67,17 +64,8 @@ export default function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastAdded, locale]);
 
-  const total = lines.reduce((sum, l) => sum + (getProduct(l.slug)?.price ?? 0) * l.qty, 0);
-  const message = [
-    t("waIntro"),
-    ...lines.map((l) => {
-      const p = getProduct(l.slug);
-      const price = p?.price !== null && p?.price !== undefined ? ` — ${p.price * l.qty} TL` : "";
-      return `• ${l.qty}× ${p?.name[locale] ?? l.slug}${price}`;
-    }),
-    t("waTotal", { total }),
-  ].join("\n");
-  const waUrl = buildWaUrl(message);
+  const total = orderTotal(lines);
+  const canSubmit = channel.available && lines.length > 0;
 
   return (
     <div ref={root}>
@@ -167,20 +155,21 @@ export default function Cart() {
           {lines.length > 0 && (
             <p data-testid="cart-total" className="flex items-baseline justify-between border-t border-berry/15 pt-[0.8vw] max-md:pt-[3vw] text40 text-[1.2vw] max-md:text-[4.2vw]">
               <span>{t("total")}</span>
-              <span className="font-display text-[1.8vw] max-md:text-[6vw]">{total} TL</span>
+              {/* Rakam: `font-ui` — Modak'ın sıfırı okunmuyor (karar 2026-09-18);
+                  sipariş tahtasıyla aynı kural, tek satış dili. */}
+              <span className="font-ui text-[1.9vw] max-md:text-[6.4vw]">{total} TL</span>
             </p>
           )}
-          {waUrl && lines.length > 0 ? (
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+          {canSubmit ? (
+            <button
+              type="button"
               data-cursor-hide
               data-testid="checkout"
+              onClick={() => submitOrder(lines, locale, tAll)}
               className="group grid place-items-center rounded-full bg-berry px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink"
             >
-              <RollText>{t("checkout")}</RollText>
-            </a>
+              <RollText>{tAll(channel.labelKey)}</RollText>
+            </button>
           ) : (
             <button
               type="button"
@@ -190,10 +179,10 @@ export default function Cart() {
               className="grid cursor-not-allowed place-items-center rounded-full bg-berry/40 px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] text-cream"
             >
               {lines.length === 0 ? (
-                t("checkout")
+                tAll(channel.labelKey)
               ) : (
                 <>
-                  {t("checkout")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" />
+                  {tAll(channel.labelKey)} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" />
                 </>
               )}
             </button>

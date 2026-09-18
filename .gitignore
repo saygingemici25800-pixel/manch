@@ -42,3 +42,7 @@ next-env.d.ts
 
 # ham kaynak fotoğraflar (repoya girmez)
 ham-fotograflar/
+
+# onizleme artiklari (masaustu uygulamasi uretiyor)
+.pv-*
+.next-build/
