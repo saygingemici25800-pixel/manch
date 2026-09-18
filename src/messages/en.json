@@ -15,39 +15,27 @@
       "sub": "Fethiye's smash burger zone. Smash from the kitchen, first bite from the table.",
       "badge": "MISU & MIYU · THE FACES OF MANCH · ",
       "imageAlt": "MANCH kitchen — smash patties on the grill",
-      "burgerAlt": "Classic Manch Burger"
+      "burgerAlt": "Classic Manch Burger",
+      "imageAltDesktop": "MANCH kitchen — the smash moment"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
       "eyebrow": "THE HITS",
       "title": "Crowd Favorites"
     },
-    "anatomy": {
-      "eyebrow": "SMASH ANATOMY",
-      "title": "Meet the layers of your smash. Handmade in every layer.",
-      "layers": {
-        "bunTop": "Butter brioche",
-        "sauce": "Manch sauce",
-        "cheddar": "Cheddar",
-        "patty1": "Smash patty",
-        "patty2": "Smash patty",
-        "pickle": "Pickles",
-        "lettuce": "Lettuce",
-        "bunBottom": "Brioche"
-      }
-    },
     "handmade": {
       "eyebrow": "HANDMADE",
       "title": "We like our sauces handmade.",
       "body": "Roasted pepper sauce, berry sauce — all made in the MANCH kitchen. Butter brioche, daily patties, gravity-approved cheddar.",
       "cardTitle": "Why different?",
-      "points": "Homemade sauces|Butter brioche, baked daily|120 g beef patty, smashed|Real mascarpone tiramisu"
+      "points": "Homemade sauces|Butter brioche, baked daily|120 g beef patty, smashed|Real mascarpone tiramisu",
+      "imageAlt": "MANCH counter — branded tee"
     },
     "zone": {
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "In the heart of the old bazaar: blue tile walls, pink checkered paper and burgers with flavor levels slightly out of control. Just another chill lunch.",
-      "imageAlt": "MANCH interior photo (coming soon)"
+      "imageAlt": "Classic Manch Burger against the tiled wall"
     },
     "misu": {
       "title": "Not hungry. Just obsessed.",
@@ -58,7 +46,7 @@
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 SHOTS",
-      "alts": "Smashing in the kitchen|Classic Manch Burger|Crispy Triangle|Fig Jam Burger|Tiramisu service|Truffle Manch Burger",
+      "alts": "MANCH tray|Takeaway box|Flat lay|Two at the table|Full table|Tiramisu",
       "cta": "Follow @manch.tr"
     },
     "location": {
@@ -72,6 +60,12 @@
       "loadMap": "Load map",
       "mapTitle": "MANCH — Google Maps",
       "mapNote": "Google Maps loads on click"
+    },
+    "build": {
+      "eyebrow": "THE BUILD",
+      "title": "Meet the layers of your smash.",
+      "steps": "Season it right|Smash it hard|Sauce the bun|Patty and cheddar|Top with short rib|Close it. Serve it.",
+      "alts": "Step 1 — Season it right|Step 2 — Smash it hard|Step 3 — Sauce the bun|Step 4 — Patty and cheddar|Step 5 — Top with short rib|Step 6 — Close it. Serve it."
     }
   },
   "Nav": {

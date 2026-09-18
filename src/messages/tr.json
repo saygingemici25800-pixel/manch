@@ -15,39 +15,27 @@
       "sub": "Fethiye'nin smash burger zone'u. Smash sesi mutfaktan, ilk ısırık masadan.",
       "badge": "MISU & MIYU · MANCH'İN YÜZLERİ · ",
       "imageAlt": "MANCH mutfağı — ızgarada smash köfte",
-      "burgerAlt": "Classic Manch Burger"
+      "burgerAlt": "Classic Manch Burger",
+      "imageAltDesktop": "MANCH mutfağı — tezgahta smash anı"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
       "eyebrow": "THE HITS",
       "title": "En Sevilenler"
     },
-    "anatomy": {
-      "eyebrow": "SMASH ANATOMİSİ",
-      "title": "Smash'inin katmanlarıyla tanış. Hepsi el yapımı.",
-      "layers": {
-        "bunTop": "Tereyağlı brioche",
-        "sauce": "Manch sos",
-        "cheddar": "Cheddar",
-        "patty1": "Smash köfte",
-        "patty2": "Smash köfte",
-        "pickle": "Turşu",
-        "lettuce": "Marul",
-        "bunBottom": "Brioche"
-      }
-    },
     "handmade": {
       "eyebrow": "EL YAPIMI",
       "title": "Hazır soslara biraz uzağız.",
       "body": "Köz biber sosunu da berry sosu da MANCH mutfağında kendimiz hazırlıyoruz. Brioche tereyağlı, köfte günlük, cheddar yer çekimi onaylı.",
       "cardTitle": "Neden farklı?",
-      "points": "Ev yapımı soslar|Tereyağlı brioche, her gün|120 g dana köfte, smash|Gerçek mascarpone tiramisu"
+      "points": "Ev yapımı soslar|Tereyağlı brioche, her gün|120 g dana köfte, smash|Gerçek mascarpone tiramisu",
+      "imageAlt": "MANCH tezgahı — marka tişörtü"
     },
     "zone": {
       "eyebrow": "PASPATUR, FETHİYE",
       "title": "UNITED CHILL BURGER ZONE",
       "body": "Tarihi çarşının ortasında mavi karo duvarlar, pembe dama kağıtlar ve lezzet seviyesi biraz kontrolden çıkmış burgerler. Just another chill lunch.",
-      "imageAlt": "MANCH iç mekan fotoğrafı (yakında)"
+      "imageAlt": "Classic Manch Burger, karo duvar önünde"
     },
     "misu": {
       "title": "Aç değiliz. Sadece takıntılıyız.",
@@ -58,7 +46,7 @@
     "insta": {
       "eyebrow": "INSTAGRAM",
       "counter": "6 KARE",
-      "alts": "Mutfakta smash|Classic Manch Burger|Crispy Triangle|Fig Jam Burger|Tiramisu servisi|Truffle Manch Burger",
+      "alts": "MANCH tepsisi|Paket kutusu|Masada düzen|Masada iki kişi|Dolu masa|Tiramisu",
       "cta": "@manch.tr'yi takip et"
     },
     "location": {
@@ -72,6 +60,12 @@
       "loadMap": "Haritayı yükle",
       "mapTitle": "MANCH — Google Haritalar",
       "mapNote": "Google Haritalar tıklayınca yüklenir"
+    },
+    "build": {
+      "eyebrow": "YAPIM SIRASI",
+      "title": "Smash'inin katmanlarıyla tanış.",
+      "steps": "Tuzu doğru at|Sert smash'le|Sosu ekmeğe sür|Köfte ve cheddar|Kaburgayı üste koy|Kapat ve servis et",
+      "alts": "1. adım — Tuzu doğru at|2. adım — Sert smash'le|3. adım — Sosu ekmeğe sür|4. adım — Köfte ve cheddar|5. adım — Kaburgayı üste koy|6. adım — Kapat ve servis et"
     }
   },
   "Nav": {

@@ -250,6 +250,138 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   await ctx.close();
 }
 
+// ============================ FAZ 5 — ANA SAYFA ============================
+{
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const h = await ctx.newPage();
+  const herrs = [];
+  h.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") herrs.push(m.type() + ": " + m.text()); });
+  h.on("pageerror", (e) => herrs.push("pageerror: " + e.message));
+
+  await h.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await h.waitForSelector("#hits");
+  await h.waitForTimeout(4200);   // preloader + lazy gsap
+
+  // --- bölümler
+  const shape = await h.evaluate(() => ({
+    sections: document.querySelectorAll("main > section").length,
+    ids: [...document.querySelectorAll("section[id]")].map((s) => s.id),
+    broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0).length,
+    overflow: document.documentElement.scrollWidth > window.innerWidth,
+  }));
+  t("Ana sayfa · 8 bölüm", shape.sections === 8, `${shape.sections} bölüm`);
+  t("Ana sayfa · anchor id'leri", ["hits", "build", "zone", "location"].every((i) => shape.ids.includes(i)), shape.ids.join(", "));
+  t("Ana sayfa · kırık görsel yok", shape.broken === 0, `kırık=${shape.broken}`);
+  t("Ana sayfa · yatay taşma yok", !shape.overflow);
+
+  // --- KURAL 50: ProductGrid ilk boyamada kaç kart GÖRÜNÜR?
+  // Beklenen 6/6. Ön-gizleme yapılmadığı için sayfa açılır açılmaz (henüz grid'e
+  // kaydırılmadan, batch tetiklenmeden) tüm kartlar opacity 1 olmalı.
+  const visible = await h.evaluate(() => {
+    const cards = [...document.querySelectorAll("[data-product-card]")];
+    const shown = cards.filter((c) => Number(getComputedStyle(c).opacity) > 0.99);
+    return { total: cards.length, shown: shown.length,
+             opacities: cards.map((c) => Number(getComputedStyle(c).opacity).toFixed(2)) };
+  });
+  t("Kural 50 · ProductGrid ilk boyamada 6/6 kart görünür",
+    visible.total === 6 && visible.shown === 6, `${visible.shown}/${visible.total} · [${visible.opacities.join(" ")}]`);
+
+  // SABOTAJ TESTİ — Kural 50'nin asıl garantisi:
+  // tüm ScrollTrigger'ları öldür, sonra grid'e kaydır. Batch hiç çalışmasa bile
+  // 6 kartın 6'sı görünür kalmalı (eski sitede burada 8'den 1'i görünüyordu).
+  await h.evaluate(() => window.__ST_KILL__?.());
+  await h.evaluate(() => document.querySelector("#hits").scrollIntoView());
+  await h.waitForTimeout(1200);
+  const sabotaged = await h.evaluate(() => {
+    const cards = [...document.querySelectorAll("[data-product-card]")];
+    return { st: window.__ST_COUNT__?.() ?? -1, total: cards.length,
+             shown: cards.filter((c) => Number(getComputedStyle(c).opacity) > 0.99).length };
+  });
+  t("Kural 50 · SABOTAJ: ScrollTrigger'lar öldürülse de 6/6 kart görünür",
+    sabotaged.shown === 6, `ST=${sabotaged.st} · ${sabotaged.shown}/${sabotaged.total}`);
+  await h.reload({ waitUntil: "domcontentloaded" });
+  await h.waitForSelector("#hits");
+  await h.waitForTimeout(3000);
+
+  // fold üstündeki kartlara batch hiç dokunmadı mı (inline transform yok)
+  const untouched = await h.evaluate(() => {
+    const vh = window.innerHeight;
+    return [...document.querySelectorAll("[data-product-card]")]
+      .filter((c) => c.getBoundingClientRect().top < vh)
+      .every((c) => !c.style.opacity && !c.style.transform);
+  });
+  t("Kural 50 · fold üstü kartlara inline stil yazılmadı", untouched);
+
+  // --- R15b BuildSequence: pin YOK
+  const build = await h.evaluate(() => ({
+    frames: document.querySelectorAll("[data-frame]").length,
+    firstVisible: Number(getComputedStyle(document.querySelector("[data-frame='0']")).opacity) > 0.99,
+    pinSpacers: document.querySelectorAll(".pin-spacer").length,
+  }));
+  t("R15b · 6 kare", build.frames === 6, `${build.frames}`);
+  t("R15b · ilk kare animasyonsuz görünür (Kural 50)", build.firstVisible);
+  t("R15b · pin KULLANILMIYOR", build.pinSpacers === 0, `pin-spacer=${build.pinSpacers}`);
+
+  // --- Instagram: 6 gerçek kare foto, kesit/metin kartı yok
+  // NOT: lazy görsellerde `currentSrc` yüklenene kadar boştur → `src` attribute'una bakılır.
+  const insta = await h.evaluate(() => {
+    const imgs = [...document.querySelectorAll("[data-insta-grid] img")];
+    return { n: imgs.length,
+             allSocial: imgs.every((i) => /images%2Fsocial|images\/social/.test(i.getAttribute("src") ?? "")),
+             noCutout: imgs.every((i) => !/\.png|burgers/.test(i.getAttribute("src") ?? "")) };
+  });
+  t("Instagram · kesit/PNG karıştırılmamış", insta.noCutout);
+  t("Instagram · 6 gerçek 1:1 fotoğraf", insta.n === 6 && insta.allSocial, JSON.stringify(insta));
+
+  // --- kart + → sepet
+  await h.evaluate(() => window.__CART__.getState().clear());
+  await h.locator("[data-add-to-cart='classic-manch']").click();
+  await h.waitForTimeout(700);
+  const added = await h.evaluate(() => window.__CART__.getState().lines);
+  t("Ürün kartı · + sepete ekler", added.length === 1 && added[0].slug === "classic-manch", JSON.stringify(added));
+
+  // --- quick details aç/kapa
+  const qd = h.locator("[data-product-card='classic-manch'] button[aria-expanded]").first();
+  await qd.click();
+  await h.waitForTimeout(400);
+  const qdOpen = await h.locator("[data-product-card='classic-manch'] dl").count();
+  t("Ürün kartı · quick details açılır", qdOpen === 1);
+
+  // --- fold altı kartlar scroll ile geliyor mu (menüde 6 kart tek satıra sığmaz)
+  await h.evaluate(() => document.querySelector("#build").scrollIntoView());
+  await h.waitForTimeout(1400);
+  const afterScroll = await h.evaluate(() =>
+    [...document.querySelectorAll("[data-product-card]")].every((c) => Number(getComputedStyle(c).opacity) > 0.99));
+  t("ProductGrid · scroll sonrası da 6/6 görünür", afterScroll);
+
+  // --- harita tıkla-yükle
+  await h.evaluate(() => document.querySelector("#location").scrollIntoView());
+  await h.waitForTimeout(900);
+  const beforeMap = await h.locator("#location iframe").count();
+  await h.locator("[data-testid=map-load]").click();
+  await h.waitForTimeout(900);
+  const afterMap = await h.locator("#location iframe").count();
+  t("Konum · harita tıkla-yükle", beforeMap === 0 && afterMap === 1, `${beforeMap} → ${afterMap}`);
+
+  // --- reduced motion: BuildSequence dikey listeye döner
+  await h.evaluate(() => window.__MOTION__.getState().setForceReduced(true));
+  await h.waitForTimeout(1200);
+  const red = await h.evaluate(() => ({
+    figures: document.querySelectorAll("#build figure").length,
+    stacked: document.querySelectorAll("[data-frame]").length,
+    allVisible: [...document.querySelectorAll("#build img")].every((i) => Number(getComputedStyle(i).opacity) > 0.99),
+    cards: [...document.querySelectorAll("[data-product-card]")].filter((c) => Number(getComputedStyle(c).opacity) > 0.99).length,
+  }));
+  t("reduced · R15b 6 kare dikey liste olur", red.figures === 6 && red.stacked === 0, JSON.stringify(red));
+  t("reduced · R15b tüm kareler görünür", red.allVisible);
+  t("reduced · kartlar 6/6 görünür", red.cards === 6, `${red.cards}/6`);
+  await h.evaluate(() => window.__MOTION__.getState().setForceReduced(null));
+
+  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|detected as LCP/.test(e));
+  t("Ana sayfa · konsol temiz", hf.length === 0, hf.slice(0, 2).join(" | ").slice(0, 150));
+  await ctx.close();
+}
+
 console.log("\n=== GEÇTİ ===");
 ok.forEach((x) => console.log("  ✓ " + x));
 if (bad.length) { console.log("\n=== KALDI ==="); bad.forEach((x) => console.log("  ✗ " + x)); }

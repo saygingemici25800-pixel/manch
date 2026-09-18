@@ -17,11 +17,13 @@ if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
   const w = window as Window & {
     __ST_COUNT?: () => number;
     __ST_REFRESH?: () => void;
+    __ST_KILL__?: () => void;
     __TWEEN_COUNT?: () => number;
     __TICK?: () => number;
   };
   w.__ST_COUNT = () => ScrollTrigger.getAll().length;
   w.__ST_REFRESH = () => ScrollTrigger.refresh();
+  w.__ST_KILL__ = () => ScrollTrigger.getAll().forEach((st) => st.kill());
   w.__TWEEN_COUNT = () => gsap.globalTimeline.getChildren(true, true, true).length;
   w.__TICK = () => gsap.ticker.frame;
 }

@@ -1,0 +1,628 @@
+<title>MANCH Zone</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Modak&family=Mouse+Memoirs&family=Silkscreen:wght@400;700&display=swap">
+<style>
+  :root{
+    --berry:#7A1F4B; --berry-dk:#4E1030; --sky:#C4E4F3; --tile:#8FC3D6;
+    --cream:#F4EEE6; --paper:#E9DCC6; --pink:#E9A3B8; --mustard:#F6C343; --ink:#1B1B1B;
+    --display:'Modak', 'Arial Black', sans-serif;
+    --ui:'Mouse Memoirs', 'Arial Narrow', sans-serif;
+    --pixel:'Silkscreen', monospace;
+  }
+  html,body{height:100%;margin:0;background:var(--ink);color:var(--cream);overscroll-behavior:none}
+  body{font-family:var(--ui);-webkit-font-smoothing:antialiased}
+  #app{position:fixed;inset:0;overflow:hidden}
+  canvas.webgl{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  /* ---------- HERO GATE ---------- */
+  #hero{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    padding:24px;text-align:center;background:
+      radial-gradient(120% 90% at 50% 0%, #9B2A5E 0%, var(--berry) 45%, var(--berry-dk) 100%);}
+  #hero .tape{position:absolute;top:0;left:0;right:0;background:var(--ink);color:var(--mustard);
+    font-family:var(--pixel);font-size:11px;letter-spacing:.18em;padding:7px 0;white-space:nowrap;overflow:hidden}
+  #hero .tape span{display:inline-block;animation:slide 18s linear infinite}
+  @keyframes slide{to{transform:translateX(-50%)}}
+  .wordmark{font-family:var(--display);color:var(--cream);line-height:.82;
+    font-size:clamp(64px,17vw,190px);letter-spacing:.01em;text-shadow:6px 6px 0 var(--berry-dk)}
+  .tagline{font-family:var(--display);color:var(--mustard);font-size:clamp(20px,4.4vw,40px);
+    line-height:1;margin-top:10px;text-wrap:balance;max-width:16ch}
+  .kicker{font-family:var(--pixel);font-size:10px;letter-spacing:.3em;color:var(--pink);margin-bottom:18px}
+  .enter-btn{margin-top:34px;border:0;cursor:pointer;background:var(--mustard);color:var(--berry-dk);
+    font-family:var(--display);font-size:clamp(22px,5vw,34px);padding:16px 40px 12px;border-radius:999px;
+    box-shadow:0 0 0 6px rgba(244,238,230,.14);transition:transform .25s cubic-bezier(.4,1.6,.7,.95),background .2s}
+  .enter-btn:hover,.enter-btn:focus-visible{transform:scale(1.06) rotate(-1.5deg);background:var(--pink)}
+  .enter-btn:focus-visible{outline:3px solid var(--cream);outline-offset:4px}
+  .hero-foot{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));font-family:var(--pixel);
+    font-size:9px;letter-spacing:.22em;color:rgba(244,238,230,.55)}
+
+  /* ---------- CHARACTER SELECT ---------- */
+  #select{position:absolute;inset:0;z-index:45;display:none;flex-direction:column;justify-content:center;align-items:center;
+    gap:26px;padding:24px;background:rgba(78,16,48,.94);backdrop-filter:blur(6px)}
+  #select h2{font-family:var(--display);font-size:clamp(28px,6.5vw,52px);margin:0;color:var(--cream);line-height:1}
+  #select p{margin:0;font-size:20px;letter-spacing:.06em;color:var(--pink)}
+  .picks{display:flex;gap:clamp(14px,4vw,40px);flex-wrap:wrap;justify-content:center}
+  .pick{cursor:pointer;border:3px solid rgba(244,238,230,.3);background:rgba(244,238,230,.06);border-radius:26px;
+    padding:18px 18px 14px;width:min(40vw,190px);display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:transform .3s cubic-bezier(.4,1.6,.7,.95),border-color .2s,background .2s}
+  .pick:hover,.pick:focus-visible{transform:translateY(-8px) rotate(-1deg);border-color:var(--mustard);background:rgba(246,195,67,.12)}
+  .pick:focus-visible{outline:none}
+  .pick canvas{width:100%;height:auto;image-rendering:auto}
+  .pick b{font-family:var(--display);font-size:26px;color:var(--cream);font-weight:400;line-height:1}
+  .pick i{font-style:normal;font-family:var(--pixel);font-size:9px;letter-spacing:.16em;color:var(--sky)}
+
+  /* ---------- LOADER ---------- */
+  #loader{position:absolute;inset:0;z-index:50;display:none;flex-direction:column;justify-content:flex-end;
+    padding:36px 24px calc(40px + env(safe-area-inset-bottom,0px));background:var(--berry-dk)}
+  #loader .msg{font-family:var(--display);font-size:clamp(24px,6vw,46px);color:var(--cream);line-height:1;min-height:1.1em}
+  #loader .bar{height:3px;background:rgba(244,238,230,.2);margin-top:18px}
+  #loader .bar i{display:block;height:100%;width:0%;background:var(--mustard)}
+  #loader .pct{font-family:var(--pixel);font-size:10px;letter-spacing:.2em;color:var(--pink);margin-top:10px}
+
+  /* ---------- IN-SCENE HUD ---------- */
+  #hud{position:absolute;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity .6s}
+  #hud.on{opacity:1}
+  .hud-top{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:16px;right:16px;
+    display:flex;justify-content:space-between;align-items:flex-start}
+  .hud-logo{font-family:var(--display);font-size:26px;color:var(--ink);line-height:1}
+  .hud-exit{pointer-events:all;cursor:pointer;border:2px solid var(--ink);background:transparent;color:var(--ink);
+    font-family:var(--ui);font-size:16px;letter-spacing:.1em;padding:6px 16px 3px;border-radius:999px}
+  .hud-exit:hover{background:var(--ink);color:var(--cream)}
+  .hint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(26px + env(safe-area-inset-bottom,0px));
+    font-family:var(--pixel);font-size:10px;letter-spacing:.18em;color:rgba(27,27,27,.55);text-align:center}
+
+  /* prompt above a frame */
+  #prompt{position:absolute;z-index:22;pointer-events:none;opacity:0;transform:translate(-50%,-100%) scale(.9);
+    transition:opacity .25s,transform .25s cubic-bezier(.4,1.6,.7,.95);text-align:center}
+  #prompt.on{opacity:1;transform:translate(-50%,-100%) scale(1);pointer-events:all}
+  #prompt .lbl{font-family:var(--display);font-size:clamp(22px,4vw,34px);color:var(--berry);line-height:1;
+    text-shadow:2px 2px 0 var(--cream)}
+  #prompt .go{margin-top:8px;display:inline-block;cursor:pointer;border:0;background:var(--mustard);color:var(--berry-dk);
+    font-family:var(--ui);font-size:17px;letter-spacing:.14em;padding:9px 22px 6px;border-radius:999px;
+    box-shadow:0 4px 0 var(--berry-dk)}
+  #prompt .go:active{transform:translateY(3px);box-shadow:0 1px 0 var(--berry-dk)}
+
+  /* joystick */
+  #stick{position:absolute;z-index:24;right:calc(22px + env(safe-area-inset-right,0px));
+    bottom:calc(30px + env(safe-area-inset-bottom,0px));width:112px;height:112px;border-radius:50%;
+    border:2px solid rgba(27,27,27,.55);background:rgba(244,238,230,.35);touch-action:none;display:none;pointer-events:all}
+  #stick b{position:absolute;top:50%;left:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;
+    background:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+  /* ---------- CURTAIN + PAGE PANEL ---------- */
+  #curtain{position:absolute;inset:0;z-index:60;pointer-events:none;display:flex;flex-direction:column}
+  #curtain div{flex:1;transform:scaleY(0);transform-origin:bottom}
+  #panel{position:absolute;inset:0;z-index:55;display:none;overflow-y:auto;background:var(--cream);color:var(--ink);
+    padding:0 0 60px}
+  .panel-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;display:flex;justify-content:space-between;
+    align-items:center;gap:12px;background:var(--berry);color:var(--cream);padding:12px 16px 9px}
+  .panel-bar strong{font-family:var(--display);font-size:24px;font-weight:400;letter-spacing:.01em}
+  .panel-bar button{cursor:pointer;border:2px solid var(--cream);background:transparent;color:var(--cream);
+    font-family:var(--ui);font-size:16px;letter-spacing:.1em;padding:5px 14px 2px;border-radius:999px;white-space:nowrap}
+  .panel-bar button:hover{background:var(--cream);color:var(--berry)}
+  .panel-in{max-width:760px;margin:0 auto;padding:28px 16px 0}
+  .panel-in h3{font-family:var(--display);font-size:clamp(30px,7vw,56px);color:var(--berry);margin:0 0 6px;line-height:.95}
+  .panel-in .sub{font-family:var(--pixel);font-size:10px;letter-spacing:.24em;color:var(--berry-dk);opacity:.7;margin-bottom:26px}
+  .panel-in p{font-size:20px;line-height:1.5;letter-spacing:.02em;max-width:62ch;margin:0 0 16px}
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:8px}
+  .item{background:var(--paper);border-radius:18px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px}
+  .item .thumb{height:96px;border-radius:12px;background:
+    repeating-linear-gradient(45deg,var(--berry) 0 14px,var(--berry-dk) 14px 28px);opacity:.9}
+  .item b{font-family:var(--display);font-size:21px;font-weight:400;color:var(--berry-dk);line-height:1.05}
+  .item span{font-size:17px;line-height:1.35;color:rgba(27,27,27,.75)}
+  .item em{font-style:normal;font-family:var(--pixel);font-size:9px;letter-spacing:.14em;color:var(--berry);margin-top:auto}
+  .rows{border-top:2px solid rgba(27,27,27,.14);margin-top:10px}
+  .row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:2px solid rgba(27,27,27,.14);font-size:19px}
+  .row span:last-child{color:var(--berry);text-align:right}
+  .todo{display:inline-block;font-family:var(--pixel);font-size:9px;letter-spacing:.14em;background:var(--mustard);
+    color:var(--berry-dk);padding:4px 8px 3px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+
+<div id="app">
+  <canvas class="webgl"></canvas>
+
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-logo">MANCH</div>
+      <button class="hud-exit" id="exitZone">ÇIKIŞ</button>
+    </div>
+    <div class="hint" id="hint">WASD / OK TUŞLARI İLE YÜRÜ · TABLOYA YAKLAŞ</div>
+  </div>
+
+  <div id="prompt"><div class="lbl"></div><br><button class="go">GİR</button></div>
+  <div id="stick"><b></b></div>
+
+  <div id="panel">
+    <div class="panel-bar"><strong id="panelTitle"></strong><button id="panelBack">← ZONE'A DÖN</button></div>
+    <div class="panel-in" id="panelBody"></div>
+  </div>
+
+  <div id="curtain"><div></div><div></div><div></div></div>
+
+  <div id="loader">
+    <div class="msg" id="loadMsg">BRIOCHE KIZARIYOR…</div>
+    <div class="bar"><i id="loadBar"></i></div>
+    <div class="pct" id="loadPct">0%</div>
+  </div>
+
+  <div id="select">
+    <p>YOL ARKADAŞINI SEÇ</p>
+    <h2>MISU &amp; MIYU</h2>
+    <div class="picks">
+      <button class="pick" data-who="misu"><canvas width="220" height="280"></canvas><b>MISU</b><i>BERRY CREW</i></button>
+      <button class="pick" data-who="miyu"><canvas width="220" height="280"></canvas><b>MIYU</b><i>SKY CREW</i></button>
+    </div>
+  </div>
+
+  <div id="hero">
+    <div class="tape"><span>HANDMADE HITS DIFFERENT · UNITED CHILL BURGER ZONE · SMASH'İN KATMANLARIYLA TANIŞ · HANDMADE HITS DIFFERENT · UNITED CHILL BURGER ZONE · SMASH'İN KATMANLARIYLA TANIŞ · </span></div>
+    <div class="kicker">FETHİYE · PASPATUR · 2026</div>
+    <div class="wordmark">MANCH</div>
+    <div class="tagline">HANDMADE HITS DIFFERENT</div>
+    <button class="enter-btn" id="enterZone">ZONE'A GİR</button>
+    <div class="hero-foot">PROTOTİP · WEBBER DIGITAL</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var C = {berry:'#7A1F4B', berryDk:'#4E1030', sky:'#C4E4F3', tile:'#8FC3D6',
+           cream:'#F4EEE6', paper:'#E9DCC6', pink:'#E9A3B8', mustard:'#F6C343', ink:'#1B1B1B'};
+
+  /* ============ canvas texture helpers ============ */
+  function cv(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+  function tex(c,rx,ry){var t=new THREE.CanvasTexture(c);t.anisotropy=4;
+    if(rx){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);} return t;}
+
+  function floorTex(){
+    var c=cv(256,256),x=c.getContext('2d');
+    x.fillStyle=C.cream;x.fillRect(0,0,256,256);
+    x.fillStyle=C.berry;x.fillRect(0,0,128,128);x.fillRect(128,128,128,128);
+    x.globalAlpha=.06;x.fillStyle=C.ink;
+    for(var i=0;i<1400;i++){x.fillRect(Math.random()*256,Math.random()*256,2,2);}
+    return tex(c,10,26);
+  }
+  function tileTex(){
+    var c=cv(256,256),x=c.getContext('2d');
+    x.fillStyle=C.tile;x.fillRect(0,0,256,256);
+    x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=6;
+    for(var i=0;i<=256;i+=64){x.beginPath();x.moveTo(i,0);x.lineTo(i,256);x.moveTo(0,i);x.lineTo(256,i);x.stroke();}
+    x.globalAlpha=.05;x.fillStyle=C.ink;
+    for(var j=0;j<900;j++){x.fillRect(Math.random()*256,Math.random()*256,2,2);}
+    return tex(c,6,3);
+  }
+  function wallTextTex(){
+    var c=cv(1024,512),x=c.getContext('2d');
+    x.fillStyle=C.tile;x.fillRect(0,0,1024,512);
+    x.strokeStyle='rgba(255,255,255,.5)';x.lineWidth=8;
+    for(var i=0;i<=1024;i+=128){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();}
+    for(var k=0;k<=512;k+=128){x.beginPath();x.moveTo(0,k);x.lineTo(1024,k);x.stroke();}
+    x.fillStyle=C.berry;x.textAlign='center';
+    x.font='700 120px Modak, Arial Black, sans-serif';
+    x.fillText('THE BURGER',512,230);
+    x.fillText("YOU'LL CRAVE",512,340);
+    x.font='700 88px Modak, Arial Black, sans-serif';
+    x.fillText('AGAIN',512,432);
+    return tex(c);
+  }
+  /* placeholder artwork: no real photos yet (kural 7) */
+  function artTex(title,kicker,bg,fg){
+    var c=cv(420,600),x=c.getContext('2d');
+    x.fillStyle=bg;x.fillRect(0,0,420,600);
+    x.strokeStyle=fg;x.globalAlpha=.25;x.lineWidth=3;
+    for(var i=-600;i<600;i+=26){x.beginPath();x.moveTo(i,0);x.lineTo(i+600,600);x.stroke();}
+    x.globalAlpha=1;
+    x.fillStyle=fg;x.textAlign='center';
+    x.font='400 30px "Mouse Memoirs", Arial, sans-serif';
+    x.fillText(kicker,210,96);
+    x.font='400 86px Modak, Arial Black, sans-serif';
+    var words=title.split(' '),y=300-(words.length-1)*44;
+    words.forEach(function(w){x.fillText(w,210,y);y+=88;});
+    x.globalAlpha=.75;x.font='400 22px "Silkscreen", monospace';
+    x.fillText('GÖRSEL BEKLENİYOR',210,552);
+    return tex(c);
+  }
+  function footTex(){
+    var c=cv(64,64),x=c.getContext('2d');
+    x.clearRect(0,0,64,64);x.fillStyle='rgba(27,27,27,.5)';
+    x.beginPath();x.ellipse(32,26,13,18,0,0,7);x.fill();
+    x.beginPath();x.ellipse(32,50,9,7,0,0,7);x.fill();
+    return tex(c);
+  }
+  function shadowTex(){
+    var c=cv(128,128),x=c.getContext('2d');
+    var g=x.createRadialGradient(64,64,4,64,64,62);
+    g.addColorStop(0,'rgba(27,27,27,.55)');g.addColorStop(1,'rgba(27,27,27,0)');
+    x.fillStyle=g;x.fillRect(0,0,128,128);return tex(c);
+  }
+
+  /* ============ Misu & Miyu (line-art billboard) ============ */
+  function drawChar(x,who,w,h){
+    var accent = who==='misu'? C.berry : C.tile;
+    var cx=w/2, s=w/220;
+    x.clearRect(0,0,w,h);
+    x.lineJoin='round';x.lineCap='round';
+    x.strokeStyle=C.ink;x.fillStyle=C.cream;x.lineWidth=7*s;
+    // body
+    x.beginPath();x.roundRect(cx-42*s,120*s,84*s,110*s,26*s);x.fill();x.stroke();
+    // legs
+    x.beginPath();x.moveTo(cx-20*s,228*s);x.lineTo(cx-20*s,258*s);
+    x.moveTo(cx+20*s,228*s);x.lineTo(cx+20*s,258*s);x.stroke();
+    x.lineWidth=5*s;
+    x.beginPath();x.ellipse(cx-22*s,262*s,13*s,8*s,0,0,7);x.fill();x.stroke();
+    x.beginPath();x.ellipse(cx+22*s,262*s,13*s,8*s,0,0,7);x.fill();x.stroke();
+    // scarf / accent band
+    x.fillStyle=accent;x.lineWidth=6*s;
+    x.beginPath();x.roundRect(cx-44*s,122*s,88*s,26*s,12*s);x.fill();x.stroke();
+    // head
+    x.fillStyle=C.cream;x.lineWidth=7*s;
+    x.beginPath();x.arc(cx,72*s,54*s,0,7);x.fill();x.stroke();
+    // ears
+    x.beginPath();x.moveTo(cx-40*s,34*s);x.lineTo(cx-52*s,2*s);x.lineTo(cx-16*s,18*s);x.closePath();x.fill();x.stroke();
+    x.beginPath();x.moveTo(cx+40*s,34*s);x.lineTo(cx+52*s,2*s);x.lineTo(cx+16*s,18*s);x.closePath();x.fill();x.stroke();
+    // face
+    x.fillStyle=C.ink;
+    x.beginPath();x.arc(cx-19*s,70*s,6.5*s,0,7);x.fill();
+    x.beginPath();x.arc(cx+19*s,70*s,6.5*s,0,7);x.fill();
+    x.lineWidth=5*s;x.beginPath();x.arc(cx,84*s,12*s,.15*Math.PI,.85*Math.PI);x.stroke();
+    x.fillStyle=C.pink;x.globalAlpha=.75;
+    x.beginPath();x.arc(cx-33*s,86*s,8*s,0,7);x.fill();
+    x.beginPath();x.arc(cx+33*s,86*s,8*s,0,7);x.fill();x.globalAlpha=1;
+    // the burger it is holding
+    var bx=cx+56*s, by=190*s;
+    x.lineWidth=5*s;
+    x.fillStyle=C.mustard;x.beginPath();x.arc(bx,by-11*s,17*s,Math.PI,0);x.fill();x.stroke();
+    x.fillStyle=C.berry;x.beginPath();x.roundRect(bx-18*s,by-11*s,36*s,10*s,3*s);x.fill();x.stroke();
+    x.fillStyle=C.mustard;x.beginPath();x.roundRect(bx-18*s,by-1*s,36*s,12*s,6*s);x.fill();x.stroke();
+    // arm to burger
+    x.beginPath();x.moveTo(cx+38*s,170*s);x.lineTo(bx-10*s,by-4*s);x.stroke();
+  }
+  // roundRect polyfill for older engines
+  if(!CanvasRenderingContext2D.prototype.roundRect){
+    CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+      this.beginPath();this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);
+      this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath();return this;};
+  }
+  document.querySelectorAll('.pick canvas').forEach(function(c){
+    drawChar(c.getContext('2d'), c.parentElement.dataset.who, c.width, c.height);
+  });
+
+  /* ============ content for the 4 frames ============ */
+  var FRAMES=[
+    {id:'menu', side:-1, z:-4, kicker:'01 · SİPARİŞ', title:'SİPARİŞ VER', bg:C.berry, fg:C.mustard,
+     art:'SMASH MENÜ'},
+    {id:'crew', side:1, z:-4, kicker:'02 · EKİP', title:'EL YAPIMI', bg:C.ink, fg:C.cream,
+     art:'MUTFAK'},
+    {id:'mascot', side:-1, z:6, kicker:'03 · MASKOTLAR', title:'MISU & MIYU', bg:C.pink, fg:C.berryDk,
+     art:'MISU MIYU'},
+    {id:'visit', side:1, z:6, kicker:'04 · ZİYARET', title:'BİZE GEL', bg:C.tile, fg:C.berry,
+     art:'PASPATUR'}
+  ];
+  var PAGES={
+    menu:{title:'MENÜ', body:
+      '<h3>SMASH MENÜ</h3><div class="sub">FİYATLAR TEYİT BEKLİYOR</div>'+
+      '<p>Smash sesi mutfaktan, ilk ısırık masadan. Aşağıdaki kartlar gerçek menü sayfasının yerini tutuyor — kendi sayfasında filtre, ürün detay modalı ve sepet olacak.</p>'+
+      '<div class="menu-grid">'+
+      card('CLASSIC MANCH','double smash · cheddar · turşu · soğan · marul · Manch sos · brioche','TARZINA YAKIŞAN SMASH')+
+      card('BERRY MANCH','120 gr köfte · Roquefort aioli · yaban mersini reçeli · berry sos · kuzu kulağı · 2 cheddar','İMZA ÜRÜN')+
+      card('KÖZ BİBERLİ SMASH','ev yapımı köz biber sosu · double smash','ACI SEVENE')+
+      card('CRISPY CHICKEN TENDERS','otlu dip sos','CRISPY EDGES')+
+      card('PATATES KIZARTMASI','yanına ne alsan yakışır','SIDES')+
+      card('TİRAMİSU','gerçek mascarpone','TATLIDA İDDİALIYIZ')+
+      '</div>'},
+    crew:{title:'HANDMADE', body:
+      '<h3>HAZIR SOSLARA BİRAZ UZAĞIZ</h3><div class="sub">EKİP · MUTFAK · YÖNTEM</div>'+
+      '<p>Aç değiliz. Sadece takıntılıyız. Brioche burada açılıyor, sos burada çırpılıyor, köfte tezgâhta smash\'leniyor. Bu sayfada ekibin fotoğrafları ve mutfak hikâyesi olacak.</p>'+
+      '<p>Lezzet seviyesi biraz kontrolden çıkmış olabilir.</p>'+
+      '<div class="rows">'+row('Köfte','120 gr · günlük çekim')+row('Brioche','el yapımı tereyağlı')+
+      row('Sos','Manch sos · köz biber · Roquefort aioli')+row('Erime','Gravity approved cheese pull')+'</div>'},
+    mascot:{title:'MISU & MIYU', body:
+      '<h3>MANCH\'İN YÜZLERİ</h3><div class="sub">MASKOT SİSTEMİ</div>'+
+      '<p>Misu berry ekibinde, Miyu sky ekibinde. Zone\'a girerken hangisini seçtiysen salonda o seninle yürüyor; diğeri salonda NPC olarak duruyor ve yanına gidince sana laf atıyor.</p>'+
+      '<p><span class="todo">SONRAKİ ADIM</span> gerçek line-art çizimler geldiğinde bu prototipteki çizim sprite\'ın yerine geçecek — sahne kodu değişmeyecek.</p>'},
+    visit:{title:'BİZE GEL', body:
+      '<h3>UNITED CHILL BURGER ZONE</h3><div class="sub">FETHİYE · PASPATUR</div>'+
+      '<p>Çarşı Cd. 21/b, Fethiye 48300. Açılış 2026 yazı.</p>'+
+      '<div class="rows">'+row('Adres','Çarşı Cd. 21/b · Paspatur')+row('Instagram','@manch.tr')+
+      row('Telefon','<span class="todo">TODO</span>')+row('Çalışma saatleri','<span class="todo">TODO</span>')+
+      row('Sipariş / WhatsApp','<span class="todo">TODO</span>')+'</div>'}
+  };
+  function card(t,d,tag){return '<div class="item"><div class="thumb"></div><b>'+t+'</b><span>'+d+'</span><em>'+tag+'</em></div>';}
+  function row(a,b){return '<div class="row"><span>'+a+'</span><span>'+b+'</span></div>';}
+
+  /* ============ three.js scene ============ */
+  var canvas=document.querySelector('canvas.webgl');
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  var scene=new THREE.Scene();
+  scene.background=new THREE.Color(C.cream);
+  scene.fog=new THREE.Fog(C.cream,26,52);
+  var camera=new THREE.PerspectiveCamera(48,1,.1,120);
+  scene.add(camera);
+
+  var HALF_W=7.2, Z_MIN=-15, Z_MAX=15;
+
+  scene.add(new THREE.AmbientLight(0xffffff,.85));
+  var key=new THREE.DirectionalLight(0xffffff,.55);key.position.set(4,10,6);scene.add(key);
+  var fill=new THREE.DirectionalLight(0xC4E4F3,.35);fill.position.set(-6,6,-8);scene.add(fill);
+
+  // floor
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(HALF_W*2,40),
+    new THREE.MeshStandardMaterial({map:floorTex(),roughness:.7,metalness:0}));
+  floor.rotation.x=-Math.PI/2;scene.add(floor);
+  // ceiling
+  var ceil=new THREE.Mesh(new THREE.PlaneGeometry(HALF_W*2,40),
+    new THREE.MeshStandardMaterial({color:C.cream,roughness:1}));
+  ceil.rotation.x=Math.PI/2;ceil.position.y=6;scene.add(ceil);
+  // mustard light strips
+  [-4,4].forEach(function(x){
+    var s=new THREE.Mesh(new THREE.PlaneGeometry(.5,36),
+      new THREE.MeshBasicMaterial({color:C.mustard}));
+    s.rotation.x=Math.PI/2;s.position.set(x,5.96,0);scene.add(s);
+  });
+  // side walls
+  var wallMat=new THREE.MeshStandardMaterial({map:tileTex(),roughness:.85});
+  [-1,1].forEach(function(sd){
+    var w=new THREE.Mesh(new THREE.PlaneGeometry(40,6),wallMat);
+    w.rotation.y=sd>0? -Math.PI/2 : Math.PI/2;
+    w.position.set(sd*HALF_W,3,0);scene.add(w);
+  });
+  // back wall with the slogan
+  var back=new THREE.Mesh(new THREE.PlaneGeometry(HALF_W*2,6),
+    new THREE.MeshStandardMaterial({map:wallTextTex(),roughness:.9}));
+  back.position.set(0,3,-20);scene.add(back);
+  var front=new THREE.Mesh(new THREE.PlaneGeometry(HALF_W*2,6),
+    new THREE.MeshStandardMaterial({color:C.tile,roughness:.9}));
+  front.position.set(0,3,20);front.rotation.y=Math.PI;scene.add(front);
+  // baseboard
+  [-1,1].forEach(function(sd){
+    var b=new THREE.Mesh(new THREE.BoxGeometry(.12,.35,40),new THREE.MeshStandardMaterial({color:C.ink}));
+    b.position.set(sd*(HALF_W-.06),.17,0);scene.add(b);
+  });
+
+  // frames
+  var frameMeshes=[];
+  FRAMES.forEach(function(f){
+    var g=new THREE.Group();
+    var fw=1.9, fh=2.7;
+    var outer=new THREE.Mesh(new THREE.BoxGeometry(fw+.28,fh+.28,.14),
+      new THREE.MeshStandardMaterial({color:C.ink,roughness:.5}));
+    var mat=new THREE.Mesh(new THREE.PlaneGeometry(fw,fh),
+      new THREE.MeshStandardMaterial({color:C.cream,roughness:.9}));
+    mat.position.z=.08;
+    var art=new THREE.Mesh(new THREE.PlaneGeometry(fw-.34,fh-.5),
+      new THREE.MeshBasicMaterial({map:artTex(f.art,f.kicker,f.bg,f.fg)}));
+    art.position.z=.09;
+    g.add(outer,mat,art);
+    g.position.set(f.side*(HALF_W-.12), 2.65, f.z);
+    g.rotation.y = f.side>0 ? -Math.PI/2 : Math.PI/2;
+    scene.add(g);
+    // spotlight pool on the wall
+    var pool=new THREE.Mesh(new THREE.PlaneGeometry(3.2,.06),
+      new THREE.MeshBasicMaterial({color:C.mustard,transparent:true,opacity:.6}));
+    pool.position.set(f.side*(HALF_W-.1),4.4,f.z);
+    pool.rotation.y=g.rotation.y;scene.add(pool);
+    f.pos=new THREE.Vector3(f.side*(HALF_W-1.6),0,f.z);
+    f.anchor=new THREE.Vector3(f.side*(HALF_W-.4),4.15,f.z);
+    frameMeshes.push(f);
+  });
+
+  // character billboard
+  var charCv=cv(220,280);
+  var charMat=new THREE.MeshBasicMaterial({map:tex(charCv),transparent:true});
+  var hero=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.66),charMat);
+  hero.position.set(0,.83,12);scene.add(hero);
+  // NPC (the other mascot)
+  var npcCv=cv(220,280);
+  var npc=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.4),
+    new THREE.MeshBasicMaterial({map:tex(npcCv),transparent:true}));
+  npc.position.set(-3.2,.7,-12);scene.add(npc);
+
+  var shMat=new THREE.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false});
+  var shadow=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.1),shMat);
+  shadow.rotation.x=-Math.PI/2;shadow.position.y=.02;scene.add(shadow);
+  var npcShadow=shadow.clone();npcShadow.scale.set(.8,.8,.8);
+  npcShadow.position.set(npc.position.x,.02,npc.position.z);scene.add(npcShadow);
+
+  // footprints pool
+  var fpTex=footTex(), footprints=[];
+  for(var i=0;i<18;i++){
+    var fp=new THREE.Mesh(new THREE.PlaneGeometry(.22,.3),
+      new THREE.MeshBasicMaterial({map:fpTex,transparent:true,opacity:0,depthWrite:false}));
+    fp.rotation.x=-Math.PI/2;fp.position.y=.012;scene.add(fp);footprints.push(fp);
+  }
+  var fpIdx=0, fpTimer=0, fpSide=1;
+
+  /* ============ controls ============ */
+  var keys={}, joy={x:0,y:0,active:false};
+  addEventListener('keydown',function(e){
+    keys[e.key.toLowerCase()]=true;
+    if(e.key.toLowerCase()==='e'&&near) openPage(near.id);
+    if(e.key==='Escape'&&panelOpen) closePage();
+    if([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].indexOf(e.key)>-1&&state==='zone') e.preventDefault();
+  });
+  addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+
+  var stick=document.getElementById('stick'), knob=stick.querySelector('b');
+  function stickPos(e){
+    var r=stick.getBoundingClientRect(), t=e.touches?e.touches[0]:e;
+    var dx=t.clientX-(r.left+r.width/2), dy=t.clientY-(r.top+r.height/2);
+    var d=Math.min(Math.hypot(dx,dy), r.width/2-18)||0, a=Math.atan2(dy,dx);
+    var nx=Math.cos(a)*d, ny=Math.sin(a)*d;
+    knob.style.transform='translate('+nx+'px,'+ny+'px)';
+    joy.x=nx/(r.width/2-18); joy.y=ny/(r.width/2-18);
+  }
+  function stickEnd(){joy.x=joy.y=0;joy.active=false;knob.style.transform='translate(0,0)';}
+  ['touchstart','mousedown'].forEach(function(ev){stick.addEventListener(ev,function(e){
+    e.preventDefault();joy.active=true;stickPos(e);});});
+  ['touchmove','mousemove'].forEach(function(ev){stick.addEventListener(ev,function(e){
+    if(joy.active){e.preventDefault();stickPos(e);}});});
+  ['touchend','touchcancel','mouseup','mouseleave'].forEach(function(ev){stick.addEventListener(ev,stickEnd);});
+
+  /* ============ state machine ============ */
+  var state='hero', panelOpen=false, near=null, who='misu', other='miyu';
+  var hud=document.getElementById('hud'), promptEl=document.getElementById('prompt');
+  var loader=document.getElementById('loader');
+
+  document.getElementById('enterZone').onclick=function(){
+    document.getElementById('hero').style.display='none';
+    document.getElementById('select').style.display='flex';
+    state='select';
+  };
+  document.querySelectorAll('.pick').forEach(function(p){
+    p.onclick=function(){
+      who=p.dataset.who; other = who==='misu'?'miyu':'misu';
+      drawChar(charCv.getContext('2d'),who,220,280); charMat.map.needsUpdate=true;
+      drawChar(npcCv.getContext('2d'),other,220,280); npc.material.map.needsUpdate=true;
+      document.getElementById('select').style.display='none';
+      runLoader();
+    };
+  });
+
+  var MSGS=['BRIOCHE KIZARIYOR…',"KÖFTE SMASH'LENİYOR…",'CHEDDAR ERİYOR…','MANCH ALIŞKANLIĞI YÜKLENİYOR…'];
+  function runLoader(){
+    state='load'; loader.style.display='flex';
+    var p=0, mi=0, msg=document.getElementById('loadMsg'),
+        bar=document.getElementById('loadBar'), pct=document.getElementById('loadPct');
+    msg.textContent=MSGS[0];
+    var t=setInterval(function(){
+      p=Math.min(100,p+Math.random()*13+5);
+      bar.style.width=p+'%'; pct.textContent=Math.round(p)+'%';
+      var m=Math.min(MSGS.length-1,Math.floor(p/26));
+      if(m!==mi){mi=m;msg.textContent=MSGS[m];}
+      if(p>=100){clearInterval(t);setTimeout(function(){
+        loader.style.opacity='0';loader.style.transition='opacity .5s';
+        setTimeout(function(){loader.style.display='none';},520);
+        state='zone'; hud.classList.add('on');
+        if(matchMedia('(pointer:coarse)').matches){
+          stick.style.display='block';
+          document.getElementById('hint').textContent='JOYSTICK İLE YÜRÜ · TABLOYA YAKLAŞ';
+        }
+      },420);}
+    },160);
+  }
+
+  document.getElementById('exitZone').onclick=function(){
+    hud.classList.remove('on'); stick.style.display='none'; promptEl.classList.remove('on');
+    state='hero'; document.getElementById('hero').style.display='flex';
+    hero.position.set(0,.83,12); heroAngle=0;
+  };
+  promptEl.querySelector('.go').onclick=function(){ if(near) openPage(near.id); };
+
+  /* curtain transition */
+  var curtains=document.querySelectorAll('#curtain div');
+  var curtainColors=[C.berry,C.pink,C.mustard];
+  curtains.forEach(function(d,i){d.style.background=curtainColors[i];});
+  function curtain(cb){
+    curtains.forEach(function(d,i){
+      d.style.transition='transform .5s cubic-bezier(.76,0,.24,1) '+(i*.06)+'s';
+      d.style.transformOrigin='bottom'; d.style.transform='scaleY(1)';
+    });
+    setTimeout(function(){
+      cb();
+      curtains.forEach(function(d,i){
+        d.style.transition='transform .5s cubic-bezier(.76,0,.24,1) '+(i*.06)+'s';
+        d.style.transformOrigin='top'; d.style.transform='scaleY(0)';
+      });
+    },700);
+  }
+  var panel=document.getElementById('panel');
+  function openPage(id){
+    if(panelOpen) return; panelOpen=true; promptEl.classList.remove('on');
+    curtain(function(){
+      document.getElementById('panelTitle').textContent=PAGES[id].title;
+      document.getElementById('panelBody').innerHTML=PAGES[id].body;
+      panel.style.display='block'; panel.scrollTop=0;
+      document.title='MANCH · '+PAGES[id].title;
+    });
+  }
+  function closePage(){
+    curtain(function(){ panel.style.display='none'; panelOpen=false; document.title='MANCH Zone'; });
+  }
+  document.getElementById('panelBack').onclick=closePage;
+
+  /* ============ loop ============ */
+  var heroAngle=0, bob=0, clock=new THREE.Clock();
+  var camTarget=new THREE.Vector3(), lookTarget=new THREE.Vector3(), tmp=new THREE.Vector3();
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    var w=innerWidth,h=innerHeight;
+    renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+  addEventListener('resize',resize); resize();
+
+  function tick(){
+    var dt=Math.min(clock.getDelta(),.05);
+    if(state==='zone'&&!panelOpen){
+      var ix=0, iz=0;
+      if(keys['a']||keys['arrowleft']) ix-=1;
+      if(keys['d']||keys['arrowright']) ix+=1;
+      if(keys['w']||keys['arrowup']) iz-=1;
+      if(keys['s']||keys['arrowdown']) iz+=1;
+      ix+=joy.x; iz+=joy.y;
+      var len=Math.hypot(ix,iz);
+      if(len>1){ix/=len;iz/=len;len=1;}
+      var speed=4.6;
+      hero.position.x=Math.max(-HALF_W+1,Math.min(HALF_W-1,hero.position.x+ix*speed*dt));
+      hero.position.z=Math.max(Z_MIN,Math.min(Z_MAX,hero.position.z+iz*speed*dt));
+      // bob + lean
+      if(len>.05&&!reduce){
+        bob+=dt*11;
+        hero.position.y=.83+Math.abs(Math.sin(bob))*.07;
+        hero.rotation.z=Math.sin(bob)*.05;
+        fpTimer-=dt;
+        if(fpTimer<=0){
+          fpTimer=.26;
+          var fp=footprints[fpIdx++%footprints.length];
+          fp.position.set(hero.position.x+fpSide*.18,.012,hero.position.z+.25);
+          fp.rotation.z=Math.atan2(ix,iz)+Math.PI;
+          fp.material.opacity=.85; fpSide*=-1;
+        }
+      } else { hero.position.y+= (.83-hero.position.y)*.2; hero.rotation.z*=.85; }
+
+      // proximity to frames
+      var found=null;
+      frameMeshes.forEach(function(f){
+        var d=Math.hypot(hero.position.x-f.pos.x, hero.position.z-f.pos.z);
+        if(d<2.6 && (!found||d<found._d)){found=f;found._d=d;}
+      });
+      if(found!==near){
+        near=found;
+        if(near){
+          promptEl.querySelector('.lbl').textContent=near.title;
+          promptEl.classList.add('on');
+        } else promptEl.classList.remove('on');
+      }
+      if(near){
+        tmp.copy(near.anchor).project(camera);
+        promptEl.style.left=((tmp.x*.5+.5)*innerWidth)+'px';
+        promptEl.style.top=((-tmp.y*.5+.5)*innerHeight)+'px';
+      }
+    }
+    // fade footprints
+    footprints.forEach(function(fp){ if(fp.material.opacity>0) fp.material.opacity=Math.max(0,fp.material.opacity-dt*.28); });
+
+    shadow.position.set(hero.position.x,.02,hero.position.z);
+    shadow.scale.setScalar(1+(hero.position.y-.83)*.6);
+
+    // camera follow
+    if(state==='zone'){
+      camTarget.set(hero.position.x*.55, 2.45, hero.position.z+5.6);
+      lookTarget.set(hero.position.x*.75, 1.5, hero.position.z-3.2);
+    } else {
+      var t=performance.now()*.00012;
+      camTarget.set(Math.sin(t)*3, 2.6, 6+Math.cos(t)*3);
+      lookTarget.set(0,2.2,-8);
+    }
+    camera.position.lerp(camTarget,.09);
+    camera.lookAt(lookTarget);
+
+    if(!reduce){ npc.position.y=.7+Math.sin(performance.now()*.002)*.04; }
+    renderer.render(scene,camera);
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>

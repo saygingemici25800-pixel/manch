@@ -18,3 +18,8 @@ export const useMotionStore = create<MotionState>((set) => ({
 }));
 
 export const useGsapReady = () => useMotionStore((s) => s.gsapReady);
+
+// Dev/QA: scripts/lab-check.mjs reduced-motion override'ını buradan yapar.
+if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+  (window as unknown as Record<string, unknown>).__MOTION__ = useMotionStore;
+}

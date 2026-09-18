@@ -1,7 +1,15 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 
-import { getFeatured, products } from "@/data/menu";
-import { site } from "@/lib/site";
+import { Build } from "@/components/sections/Build";
+import { Handmade } from "@/components/sections/Handmade";
+import { Hero } from "@/components/sections/Hero";
+import { InstagramGrid } from "@/components/sections/InstagramGrid";
+import { Location } from "@/components/sections/Location";
+import { MarqueeBand } from "@/components/sections/MarqueeBand";
+import { MisuMiyu } from "@/components/sections/MisuMiyu";
+import { TheHits } from "@/components/sections/TheHits";
+import { Zone } from "@/components/sections/Zone";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -9,19 +17,22 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale); // Kural 16
 
-  const t = await getTranslations("Home");
+  // Sayfaya özel client namespace'i (Kural 44) — Home'u client component'lere de ver.
+  const messages = await getMessages();
 
   return (
-    <main id="main" className="px-[3vw] pt-[8vw] max-md:px-[5vw] max-md:pt-[24vw]">
-      <h1>{t("hero.title")}</h1>
-      <p>{t("hero.sub")}</p>
-      <p>{t("tagline")}</p>
-      <p>
-        {site.address.full} · {site.contact.phoneDisplay}
-      </p>
-      <p>
-        {products.length} ürün · {getFeatured().length} imza ürün · {locale}
-      </p>
-    </main>
+    <NextIntlClientProvider messages={messages}>
+      <main id="main">
+        <Hero />
+        <MarqueeBand />
+        <TheHits />
+        <Build />
+        <Handmade />
+        <Zone />
+        <MisuMiyu />
+        <InstagramGrid />
+        <Location />
+      </main>
+    </NextIntlClientProvider>
   );
 }
