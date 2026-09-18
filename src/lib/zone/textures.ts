@@ -125,8 +125,13 @@ export interface PlaqueText {
   footer: string;
 }
 
-/** Arka duvar — müze künyesi (spec 4.1). Metin i18n'den gelir. */
-export function backWallTexture(t: PlaqueText) {
+/**
+ * Arka duvar — müze künyesi (spec 4.1). Metin i18n'den gelir.
+ * `revision`: `document.fonts.ready` sonrası yeniden çizimde artar; `texture.userData`'ya
+ * yazılır — hem hangi sürümün ekranda olduğu izlenebilir, hem de useMemo bağımlılığı
+ * gerçekten kullanılmış olur (sahte bağımlılık değil).
+ */
+export function backWallTexture(t: PlaqueText, revision = 0) {
   const W = 2048;
   const H = 854;
   const c = tiledWall(W, H, 160);
@@ -170,11 +175,13 @@ export function backWallTexture(t: PlaqueText) {
   x.font = '400 26px "Press Start 2P", monospace';
   x.fillText(t.footer, left, y + 64);
 
-  return tex(c);
+  const out = tex(c);
+  out.userData.revision = revision;
+  return out;
 }
 
 /** Ön duvar (z = +20) — kamera döndüğü için şart (spec bölüm 4). */
-export function frontWallTexture(lines: readonly [string, string, string]) {
+export function frontWallTexture(lines: readonly [string, string, string], revision = 0) {
   const W = 2048;
   const H = 854;
   const c = tiledWall(W, H, 160);
@@ -186,7 +193,9 @@ export function frontWallTexture(lines: readonly [string, string, string]) {
   x.fillText(lines[1], W / 2, 470);
   x.font = '700 120px Modak, "Arial Black", sans-serif';
   x.fillText(lines[2], W / 2, 600);
-  return tex(c);
+  const out = tex(c);
+  out.userData.revision = revision;
+  return out;
 }
 
 /* -------------------------------- çerçeveler -------------------------------- */
