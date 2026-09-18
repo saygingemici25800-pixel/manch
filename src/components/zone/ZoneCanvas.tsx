@@ -17,7 +17,7 @@ import { angLerp, normalizeAngle, smoothing } from "@/lib/zone/angles";
 import { mirrorFor, viewFor } from "@/lib/zone/character";
 import { CAMERA_FOV, CAM_DIST, CAM_HEIGHT } from "@/lib/zone/frames";
 import { CAM_START_ANG, CHAR_START, resetRuntime, resetZoneDebug, teleport, zoneRuntime } from "@/lib/zone/runtime";
-import { releaseArts } from "@/lib/zone/art";
+import { artSources, releaseArts } from "@/lib/zone/art";
 import { releaseTextureSlots, textureLedger } from "@/lib/zone/textures";
 import { otherCharacter, useZoneStore, type Character as CharacterId } from "@/store/zone";
 import { colors } from "@/styles/tokens";
@@ -164,6 +164,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
           ? { x: +o.position.x.toFixed(2), y: +o.position.y.toFixed(3), z: +o.position.z.toFixed(2), rotY: o.rotation.y }
           : null;
       })(),
+      arts: artSources(),
       nearFrame: useZoneStore.getState().nearFrame,
       zoneState: useZoneStore.getState().state,
       lastStepRot: zoneRuntime().debug.lastStepRot,

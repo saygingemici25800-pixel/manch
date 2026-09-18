@@ -417,6 +417,16 @@ if (runs("scene")) {
   }
   ok(stopsOk, "dört durma noktası doğru çerçeveyi ve promptu açıyor", stopDetail.join(" · "));
 
+  /* Kural 44/55: `drei/<Html>` sahne ağacının içinde ama DOM'a portal ediliyor. next-intl
+     context'i oraya ULAŞIYOR mu? Ulaşmasaydı `MISSING_MESSAGE` konsola düşer ve ekranda
+     anahtarın kendisi ("frames.menu") görünürdü. Metni doğrudan denetliyoruz. */
+  await tp(...STOPS.menu);
+  await page.waitForTimeout(400);
+  const promptText = await page.locator("[data-testid=frame-prompt]").innerText();
+  ok(/SİPARİŞ VER/i.test(promptText) && !/frames\./.test(promptText),
+    "prompt metni i18n'den geliyor (Html portalına next-intl context'i ulaşıyor)",
+    JSON.stringify(promptText));
+
   /* Kabul kriteri: halkanın GÖRÜNÜR yarıçapı 2.3, tetikleme 2.6 — halkanın üstündeki her
      nokta tetiklemenin İÇİNDE olmalı. "Halkanın üstündeyim ama açılmadı" olmamalı. */
   const [mx, mz] = STOPS.menu;

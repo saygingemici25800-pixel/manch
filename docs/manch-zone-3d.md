@@ -94,7 +94,9 @@ CAM_LERP = 0.09
 LOOK_AHEAD = 3.0
 LOOK_HEIGHT = 1.55
 TURN_BASE = 0.15       // kamera dönüşü — bölüm 3.1
-CHAR_TURN_BASE = 0.002 // karakter dönüşü, kameradan hızlı (revize: 2026-09-18, aşağıdaki nota bak)
+CHAR_TURN_BASE = 0.002 // karakter dönüşü, kameradan hızlı (ONAYLANDI 2026-09-18)
+                       // 0.005 denendi, tepe sapma 65.1° — 67.5° `side` eşiğinin
+                       // altında kaldığı için reddedildi.
 FRAME_PROXIMITY = 2.6
 MARKER_SIZE = 4.6      // görünür yarıçap 2.3 < 2.6
 PROMPT_HEIGHT = 1.35
@@ -158,7 +160,7 @@ hızına bağımlıdır. `TURN_BASE = 0.15` ile 180° dönüş ~1.2 sn. İlk den
 
 **Girdi bittiğinde `camAng` yerinde kalır.** Kamera kendi kendine eski yönüne dönmez.
 
-**`CHAR_TURN_BASE` neden 0.002** *(revize: 2026-09-18, ilk değer 0.02)*: sprite'ın hangi görünümde
+**`CHAR_TURN_BASE` neden 0.002** *(ONAYLANDI 2026-09-18, ilk değer 0.02)*: sprite'ın hangi görünümde
 çizileceğini karakter–kamera **ayrışması** belirler (bölüm 8.1). Ayrışmanın tepe değeri
 `dönüş açısı × max_t(TURN_BASE^t − CHAR_TURN_BASE^t)`:
 
@@ -171,6 +173,9 @@ hızına bağımlıdır. `TURN_BASE = 0.15` ile 180° dönüş ~1.2 sn. İlk den
 `side` kovası 67.5°'de başlıyor: **0.005 eşiğin 2.3° altında kalıyor**, `side` yine hiç tetiklenmezdi.
 0.002 eşiği 6.7° payla geçiyor. `front` (≥112.5°) sürekli girdiyle ulaşılamaz — tavan %44.5 → 80°;
 o görünüm `CharacterSelect` ve NPC içindir.
+
+**0.005 denendi, tepe sapma 65.1° — 67.5° `side` eşiğinin altında kaldığı için reddedildi.**
+(Ölçüm modeli doğruladı: tahmin 65.2°, sahnede ölçülen 65.1°.)
 
 **`prefers-reduced-motion` → kamera hiç dönmez.** Ani dönüş, yavaş dönüşten daha rahatsız edicidir.
 
@@ -462,8 +467,10 @@ gelmesini beklemez; dosyalar düşünce `TextureLoader` devreye girer, başka hi
   >   noktada üst üste yığılıyor.
   > · **Görünürlük ölçüldü:** yürürken 8–11 iz canlı, ama kamera karakterin ÖNÜNE baktığı için
   >   aynı anda **yalnızca 1–2'si kadrajda** (portrede 2–3). İzler doğru basılıyor/dönüyor/sönüyor;
-  >   sınırlayan şey kamera geometrisi (CAM_DIST 5.4 arkada, LOOK_AHEAD 3.0 önde). Daha görünür
-  >   istenirse iz ölçüsü (0.22 × 0.3) veya opaklığı (0.85) büyütülür — tasarım kararı.
+  >   sınırlayan şey kamera geometrisi (CAM_DIST 5.4 arkada, LOOK_AHEAD 3.0 önde).
+  > · **KARAR (2026-09-18, kullanıcı): değişiklik yok.** Boyut **0.22 × 0.3**, opaklık **0.85**
+  >   kalır. Az görünmeleri kusur değil, kamera geometrisinin sonucu; **dekoratif bir öğe için
+  >   izi büyütmek karakterle ölçek ilişkisini bozar.** Bu madde kapandı, yeniden açılmasın.
 - `prefers-reduced-motion` → bob, lean, ayak izi ve kamera dönüşü kapalı
 
 **Seçilmeyen maskot** salonun dibinde (x=-3.2, z=-12) NPC, `front` görünümüyle durur, hafif idle.

@@ -70,6 +70,13 @@ export function acquireArt(
   return art;
 }
 
+/** Dev/QA: hangi çerçeve gerçek görseli aldı, hangisi yer tutucuda kaldı. */
+export function artSources(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [id, e] of arts) out[id] = e.art.source;
+  return out;
+}
+
 export function releaseArts() {
   for (const a of arts.values()) a.dispose();
   arts.clear();
