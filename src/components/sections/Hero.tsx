@@ -66,7 +66,10 @@ export async function Hero() {
       </div>
 
       {/* başlık — Kural 47: statik, animasyonsuz */}
-      <div className="relative px-[3vw] pb-[6vw] max-md:px-[5vw] max-md:pb-[18vw]">
+      {/* Mobilde blok yukarı kayar: alttaki çerez şeridinin üstüne binmesin.
+          Hero `min-h-[100svh]` + `justify-end` olduğu için bu dolgu sayfa yüksekliğini
+          DEĞİŞTİRMEZ — blok kendi içinde yukarı kayar, banner `fixed`, CLS riski yok. */}
+      <div className="relative px-[3vw] pb-[7.5vw] max-md:px-[5vw] max-md:pb-[28vw]">
         <h1 className="heading180 max-w-[16ch] text-mustard">{t("hero.title")}</h1>
         <p className="mt-[1vw] max-w-[46ch] text40 text-[1.2vw] text-cream max-md:mt-[4vw] max-md:text-[4vw]">
           {t("hero.sub")}
