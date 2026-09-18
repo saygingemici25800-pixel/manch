@@ -44,6 +44,15 @@ export interface ZoneRuntime {
      */
     peakSpread: number;
     seenViews: Record<CharView, boolean>;
+    /**
+     * Sıfırlamadan bu yana biriken **simülasyon** süresi (sn).
+     *
+     * Duvar saati DEĞİL: `dt` 50 ms'te kırpıldığı için düşük kare hızında dünya, gerçek
+     * zamandan yavaş ilerler. Spec'teki "180° dönüş ~1.2 sn" değeri simülasyon saniyesidir;
+     * duvar saatiyle ölçmek sahne ağırlaştıkça testi oynak yapıyordu (5.5.6'da yaşandı:
+     * aynı kod 1.4 sn yerine 3.0 sn "sürdü").
+     */
+    simTime: number;
   };
 }
 
@@ -85,6 +94,7 @@ const runtime: ZoneRuntime = {
     lastStepRot: null,
     peakSpread: 0,
     seenViews: { back: false, back34: false, side: false, front: false },
+    simTime: 0,
   },
 };
 
@@ -197,6 +207,7 @@ const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi 
  * aradaki fark sprite'ın hangi açıdan çizileceğini belirliyor (spec 8.1).
  */
 export function stepWorld(dt: number, reduced: boolean) {
+  runtime.debug.simTime += dt;
   const { ix, iz, len } = readInput();
   const { char, cam } = runtime;
 
@@ -269,5 +280,6 @@ export function reportSprite(
 /** Test, bir ölçüm penceresine başlarken çağırır. */
 export function resetZoneDebug() {
   runtime.debug.peakSpread = 0;
+  runtime.debug.simTime = 0;
   runtime.debug.seenViews = { back: false, back34: false, side: false, front: false };
 }

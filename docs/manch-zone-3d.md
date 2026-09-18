@@ -292,7 +292,10 @@ girmez, `FloorMarker` halkasıyla dikey olarak hizalanır.
 > çok yaklaşıyor ve prompt görselin alt kısmının üstüne biniyordu. Uygulama: `promptAnchor()`
 > (`lib/zone/frames.ts`).
 >
-> **CSS `-100%` → `0` (kutu aşağı sarkar).** Çapa 0.9 birim öne alındıktan SONRA bile örtüşme
+> **CSS `-100%` → `0` (kutu aşağı sarkar) — ONAYLANDI 2026-09-18, madde kapandı.**
+> Sapma değil **iyileşme**: kutunun aşağı sarkması "promptlar çok üstte, aşağı çekelim"
+> talimatına da hizmet ediyor ve prompt zemin halkasına yaklaşıyor — başlık, GİR butonu ve
+> halka gerçekten **tek bir çağrı** olarak okunuyor. Çapa 0.9 birim öne alındıktan SONRA bile örtüşme
 > sürüyordu: tablonun alt kenarı y=1.55, çapa y=1.35 → duvara dayalı mesafede ekranda yalnızca
 > **~35 px** boşluk kalıyor, kutu ise ~58 px. Yukarı büyüyünce kaçınılmaz olarak biniyordu
 > (ölçüldü: masaüstü 22.6 px, portre 36.4 px). Aşağı sarkınca çapanın dünya konumu ve
@@ -527,7 +530,11 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 ## 10. ERİŞİLEBİLİRLİK
 
 - Zone açılınca `role="dialog"` + `aria-modal="true"`, focus trap, `Esc`
-- POV panosu açılınca odak panonun içine taşınır; kapanınca GİR butonuna döner
+- POV panosu açılınca odak panonun içine taşınır; kapanınca GİR butonuna döner.
+  **`focus({ preventScroll: true })` şart** — kart zaten kadrajın ortasında; odak vermek
+  tarayıcıyı sayfayı kaydırmaya itiyor ve kartın üstü kadrajdan çıkıyor (5.5.6'da ölçüldü).
+  `drei/<Html>` içeriği DOM'a sonradan portal edildiği için geri dönüşte odak birkaç kare
+  denenir, yoksa `body`'de kalır.
 - Sipariş tahtasındaki `+`/`−` klavyeyle erişilebilir, `aria-label` taşır, toplam `aria-live="polite"`
 - Joystick ve GİR klavyeyle erişilebilir, `mustard` focus ring
 - `prefers-reduced-motion` → perde, POV lerp'i, kamera dönüşü, halka ve karakter animasyonları kapalı
@@ -545,7 +552,7 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - [x] **5.5.4** `Footprints` + `Npc` + ışık bantları — 18'lik havuz, ikinci sprite seti, prototip ölçüsünde bantlar
 - [x] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık — halkanın üstündeki 8 nokta da tetikliyor
 - [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
-- [ ] **5.5.7** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard`
+- [x] **5.5.6** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard` kabuğu (odak gidiş-dönüşü dahil)
 - [ ] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, WhatsApp, scroll korunması
 - [ ] **5.5.9** `StoryBoard` × 3 + "TAM SAYFAYA GİT"
 - [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla

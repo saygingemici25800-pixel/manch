@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { Character } from "@/components/zone/Character";
 import { Footprints } from "@/components/zone/Footprints";
+import { FrameBoard } from "@/components/zone/FrameBoard";
 import { FramePrompt } from "@/components/zone/FramePrompt";
 import { Frames } from "@/components/zone/Frames";
 import { Hall } from "@/components/zone/Hall";
@@ -196,6 +197,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
       zoneState: useZoneStore.getState().state,
       lastStepRot: zoneRuntime().debug.lastStepRot,
       peakSpread: zoneRuntime().debug.peakSpread,
+      simTime: zoneRuntime().debug.simTime,
       seenViews: { ...zoneRuntime().debug.seenViews },
       view: zoneRuntime().debug.view,
       mirrored: zoneRuntime().debug.mirrored,
@@ -211,7 +213,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
   }, []);
 
   return (
-    <div ref={rootRef} className={className}>
+    <div ref={rootRef} className={`relative ${className ?? ""}`}>
       <Canvas
         // Kural/spec 9: retina'da 2 ile sınırla, yoksa mobilde fps düşer.
         dpr={typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio, 2)}
@@ -260,6 +262,8 @@ export function ZoneCanvas({ className }: { className?: string }) {
         <FollowCamera />
         <SceneDisposer onDispose={() => { stats.disposed += 1; liveCamera = null; }} />
       </Canvas>
+      {/* POV panosu `<Canvas>` DIŞINDA: kaydırma, odak ve klavye normal DOM'da doğru çalışır. */}
+      <FrameBoard />
     </div>
   );
 }

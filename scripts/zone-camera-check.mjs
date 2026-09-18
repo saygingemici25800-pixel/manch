@@ -173,9 +173,37 @@ function inputForTarget(targetDeg) {
   return best[1];
 }
 
+/**
+ * Koşul sağlanana kadar tuşu basılı tut. Sabit süreli `hold` sahne ağırlaştıkça yetmiyordu:
+ * `dt` 50 ms'te kırpıldığı için düşük kare hızında dünya gerçek zamandan yavaş ilerliyor,
+ * 3.6 sn'lik tutuş 180°'yi tamamlamıyordu. Koşula bağlamak kare hızından bağımsızdır.
+ */
+async function holdUntil(page, keys, done, maxMs = 12000, step = 90) {
+  const list = Array.isArray(keys) ? keys : [keys];
+  const samples = [];
+  for (const k of list) await page.keyboard.down(k);
+  const t0 = Date.now();
+  while (Date.now() - t0 < maxMs) {
+    await page.waitForTimeout(step);
+    const s = { ...(await read(page)), t: Date.now() - t0 };
+    samples.push(s);
+    if (done(s)) break;
+  }
+  for (const k of list) await page.keyboard.up(k);
+  await page.waitForTimeout(250);
+  samples.push({ ...(await read(page)), t: Date.now() - t0 });
+  return samples;
+}
+
 /** Belirli bir açıya yerleşene kadar yürü (testler arası temiz başlangıç). */
 async function settle(page, keys, ms = 3000) {
   await hold(page, keys, ms);
+  await page.waitForTimeout(300);
+}
+
+/** 180°'e (künyeye) yerleş — kare hızından bağımsız. */
+async function settleBack(page) {
+  await holdUntil(page, "ArrowUp", (s) => dd(s.cam.ang, PI) < 8);
   await page.waitForTimeout(300);
 }
 
@@ -192,7 +220,7 @@ if (runs("scene")) {
 
   /* --- aşağı: tam 180° dönüş. Spec'in "aşağı çekince arkaya dönmüyor" vakası. --- */
   await resetDebug(page);
-  const down = await hold(page, "ArrowDown", 3600, 90);
+  const down = await holdUntil(page, "ArrowDown", (s) => dd(s.cam.ang, 0) < 12);
   const end = down.at(-1);
   ok(dd(end.cam.ang, 0) < 12,
     "AŞAĞI: kamera 180° dönüyor (180° → 0°)",
@@ -251,11 +279,12 @@ if (runs("scene")) {
     `görünen: ${down.at(-1).view}`);
 
   // Dönüş süresi: TURN_BASE 0.15 → 180° ≈ 1.2 sn. Sabit katsayıya kaçılırsa bu bozulur.
+  // SİMÜLASYON saniyesi — duvar saati değil (bkz. `debug.simTime`).
   const firstDone = down.find((s) => dd(s.cam.ang, 0) < 12);
-  const turnMs = firstDone ? firstDone.t : null;
+  const turnMs = firstDone ? firstDone.simTime * 1000 : null;
   ok(turnMs !== null && turnMs > 600 && turnMs < 2600,
-    "180° dönüş ~1.2 sn (600–2600 ms arası)",
-    `ölçülen ${turnMs} ms`);
+    "180° dönüş ~1.2 sn simülasyon süresi (600–2600 ms)",
+    `ölçülen ${turnMs === null ? "-" : turnMs.toFixed(0)} ms sim`);
 
   /* --- billboard: sprite her karede kameraya dönmeli (spec 8.3) ---
      Prototipte bu adım yazılmamıştı (`rotation.y` hep 0): kamera karakterin öbür yanına
@@ -291,7 +320,8 @@ if (runs("scene")) {
     ["ArrowDown", 0, "AŞAĞI"],
   ];
   for (const [key, want, label] of dirs) {
-    const s = await hold(page, key, 3600);
+    const target = (want * PI) / 180;
+    const s = await holdUntil(page, key, (x) => dd(x.cam.ang, target) < 12);
     const got = deg(norm(s.at(-1).cam.ang));
     ok(dd(s.at(-1).cam.ang, (want * PI) / 180) < 12,
       `${label}: kamera ${want}° yönüne dönüyor`,
@@ -307,7 +337,7 @@ if (runs("scene")) {
      Bu, dönüşün hangi yöne gittiğinden bağımsızdır. İki çapraz dönüş, iki işareti de görsün diye. */
   const turns = [];
   for (const delta of [-135, +135]) {
-    await settle(page, "ArrowUp");
+    await settleBack(page);
     // Dönüş yönü, o anki kamera açısına göre BELİRLENİR — sabit tuş çifti varsaymak,
     // başlangıç açısı birkaç derece kaydığında yönü ters çeviriyordu (oynak test).
     const from = deg(norm((await read(page)).cam.ang));
@@ -502,6 +532,100 @@ if (runs("scene")) {
   ok(dd(povAng, back.cam.ang) < 0.5,
     "POV'a girip çıkmak `camAng`'ı bozmuyor (spec 6.1)",
     `${deg(povAng).toFixed(0)}° → ${deg(back.cam.ang).toFixed(0)}°`);
+
+  /* ======================= 5.5.6: POV geçişi + FrameBoard ======================= */
+
+  const focused = () =>
+    page.evaluate(() => {
+      const a = document.activeElement;
+      return a ? `${a.tagName.toLowerCase()}:${a.getAttribute("data-testid") ?? a.getAttribute("data-frame") ?? ""}` : null;
+    });
+
+  /* Dördünde de: GİR → odak panoda · GERİ → odak GİR butonunda (spec bölüm 10) */
+  const focusDetail = [];
+  let focusOk = true;
+  for (const [id, [x, z]] of Object.entries(STOPS)) {
+    await tp(x, z);
+    await page.waitForTimeout(350);
+    await page.locator("[data-testid=frame-enter]").focus();
+    await page.locator("[data-testid=frame-enter]").click();
+    await page.waitForTimeout(500);
+    const inBoard = await focused();
+    const boardId = await page.locator("[data-testid=frame-board]").getAttribute("data-frame");
+    await page.locator("[data-testid=frame-board-back]").click();
+    await page.waitForTimeout(600);
+    const backOn = await focused();
+    const okOne = inBoard === "div:frame-board" && boardId === id && backOn === "button:frame-enter";
+    if (!okOne) focusOk = false;
+    focusDetail.push(`${id}:${boardId}/${inBoard}→${backOn}`);
+  }
+  ok(focusOk,
+    "dört tabloda da odak panoya gidiyor ve GERİ'de GİR butonuna dönüyor (spec 10)",
+    focusDetail.join(" · "));
+
+  /* Odak vermek sayfayı KAYDIRMAMALI: kart kadrajın ortasında, kaydırma onu dışarı itiyor.
+     Klavyeyle açılıyor: Playwright'ın `click()`'i butonu görünür kılmak için sayfayı kendisi
+     kaydırıyor ve ürünün davranışını ölçmek yerine sürücünün davranışını ölçmüş oluyorduk
+     (koşular arası oynak sonuç). Gerçek kullanıcı tıklaması sayfayı kaydırmaz. */
+  await tp(...STOPS.menu);
+  await page.waitForTimeout(350);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.keyboard.press("e");
+  await page.waitForTimeout(700);
+  const geom = await page.evaluate(() => {
+    const r = document.querySelector("[data-testid=frame-board]").getBoundingClientRect();
+    return { scrollY: window.scrollY, top: r.top, bottom: r.bottom, vh: window.innerHeight };
+  });
+  ok(geom.scrollY === 0 && geom.top >= 0 && geom.bottom <= geom.vh,
+    "pano açılınca sayfa kaymıyor ve kart tamamen kadrajda",
+    `scrollY ${geom.scrollY} · üst ${geom.top.toFixed(0)} · alt ${geom.bottom.toFixed(0)} / ${geom.vh}`);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+
+  /* Geçiş ORTASINDA Esc: yarım kalan lerp'ten temiz çıkış */
+  await tp(...STOPS.menu);
+  await page.waitForTimeout(350);
+  await page.keyboard.press("e");
+  await page.waitForTimeout(180); // lerp daha bitmedi
+  const mid = await read(page);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+  const afterMid = await read(page);
+  ok(afterMid.zoneState === "zone", "geçişin ortasında Esc temiz çıkıyor", `durum ${afterMid.zoneState}`);
+  ok(dd(mid.cam.ang, afterMid.cam.ang) < 0.5,
+    "yarım geçişten çıkışta kamera açısı bozulmuyor",
+    `${deg(mid.cam.ang).toFixed(0)}° → ${deg(afterMid.cam.ang).toFixed(0)}°`);
+
+  /* E–Esc–E–Esc hızlı ardışık: durum makinesi kilitlenmemeli, hedef karışmamalı */
+  const angBefore = (await read(page)).cam.ang;
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press("e");
+    await page.waitForTimeout(90);
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(90);
+  }
+  await page.waitForTimeout(800);
+  const afterSpam = await read(page);
+  ok(afterSpam.zoneState === "zone" && afterSpam.nearFrame === "menu",
+    "E–Esc dört kez hızlı: durum makinesi kilitlenmiyor",
+    `durum ${afterSpam.zoneState} · yakın ${afterSpam.nearFrame}`);
+  ok((await page.locator("[data-testid=frame-board]").count()) === 0,
+    "hızlı ardışıktan sonra pano kapalı");
+  ok(dd(angBefore, afterSpam.cam.ang) < 0.5,
+    "hızlı ardışıktan sonra kamera hedefi karışmıyor",
+    `${deg(angBefore).toFixed(0)}° → ${deg(afterSpam.cam.ang).toFixed(0)}°`);
+
+  /* POV'da kamera gerçekten hedefe süzülüyor mu (spec 6.1) */
+  await page.keyboard.press("e");
+  await page.waitForTimeout(2500);
+  const settled = await read(page);
+  const menuFrame = { side: -1, z: -4 };
+  const wantX = menuFrame.side * (7.2 - 0.12) - menuFrame.side * 3.25;
+  ok(Math.abs(settled.cam.x - wantX) < 0.15 && Math.abs(settled.cam.z - menuFrame.z) < 0.15,
+    "POV kamerası hedefe yerleşiyor (spec 6.1)",
+    `kamera ${settled.cam.x},${settled.cam.z} · hedef ${wantX.toFixed(2)},${menuFrame.z}`);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
 
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;

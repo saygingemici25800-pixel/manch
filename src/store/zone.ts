@@ -24,6 +24,11 @@ interface ZoneStore {
   pov: FrameId | null;
   /** Loader yüzdesi (0–100). */
   progress: number;
+  /**
+   * POV kapanınca odağın döneceği çerçeve (spec bölüm 10). `openFrame` doldurur,
+   * `FramePrompt` yeniden mount olunca kendi GİR butonuna odağı alır ve temizler.
+   */
+  returnFocus: FrameId | null;
 
   /** "ZONE'A GİR" — karakter hatırlanıyorsa doğrudan yüklemeye geçer. */
   enter: () => void;
@@ -32,6 +37,7 @@ interface ZoneStore {
   ready: () => void;
   setNearFrame: (id: FrameId | null) => void;
   openFrame: (id: FrameId) => void;
+  clearReturnFocus: () => void;
   closeFrame: () => void;
   exit: () => void;
 }
@@ -52,6 +58,7 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
   nearFrame: null,
   pov: null,
   progress: 0,
+  returnFocus: null,
 
   enter: () => {
     const remembered = readCharacter();
@@ -61,6 +68,7 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
       progress: 0,
       nearFrame: null,
       pov: null,
+      returnFocus: null,
     });
   },
 
@@ -81,12 +89,14 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
     if (get().nearFrame !== nearFrame) set({ nearFrame });
   },
 
-  openFrame: (pov) => set({ state: "pov", pov }),
+  openFrame: (pov) => set({ state: "pov", pov, returnFocus: pov }),
+
+  clearReturnFocus: () => set({ returnFocus: null }),
 
   /** POV'dan çıkış — `camAng` DEĞİŞMEMİŞ olmalı (spec 6.1), o kamera hook'unda tutulur. */
   closeFrame: () => set({ state: "zone", pov: null }),
 
-  exit: () => set({ state: "closed", pov: null, nearFrame: null, progress: 0 }),
+  exit: () => set({ state: "closed", pov: null, nearFrame: null, progress: 0, returnFocus: null }),
 }));
 
 /** Seçilmeyen maskot — salonun dibinde NPC olarak durur (spec 8.3). */

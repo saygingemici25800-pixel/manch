@@ -9,11 +9,15 @@ import {
   CAM_DIST,
   CAM_HEIGHT,
   CAM_LERP,
+  getFrame,
   HALF_W,
   LOOK_AHEAD,
   LOOK_HEIGHT,
+  POV_LERP,
+  povTargets,
 } from "@/lib/zone/frames";
 import { zoneRuntime } from "@/lib/zone/runtime";
+import { useZoneStore } from "@/store/zone";
 
 /**
  * Yön takipli 3. şahıs kamera (spec bölüm 3.1).
@@ -48,6 +52,22 @@ export function useFollowCamera() {
 
   useFrame(() => {
     const { char, cam } = zoneRuntime();
+
+    /* ---- POV: kamera tablonun karşısına süzülür (spec 6.1) ----
+       `cam.ang` BURADA DA değiştirilmez; POV'da girdi kapalı olduğu için `stepWorld` onu
+       oynatmıyor. Çıkışta kamera, bıraktığı açıdan takibe devam eder.
+       Yarım kalan geçişten çıkış sorunsuz: iki dal da kameranın O ANKİ konumundan hedefe
+       lerp ediyor, mutlak bir konum ataması yok — `Esc` ne zaman basılırsa basılsın
+       sıçrama olmaz. */
+    const zone = useZoneStore.getState();
+    const povFrame = zone.state === "pov" && zone.pov ? getFrame(zone.pov) : null;
+    if (povFrame) {
+      const { camTarget, lookTarget } = povTargets(povFrame);
+      camera.position.lerp(target.set(...camTarget), POV_LERP);
+      camera.lookAt(...lookTarget);
+      return;
+    }
+
     const fx = Math.sin(cam.ang);
     const fz = Math.cos(cam.ang);
 

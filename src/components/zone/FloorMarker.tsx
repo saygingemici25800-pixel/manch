@@ -49,7 +49,10 @@ export function FloorMarker({ frame, reduced }: { frame: ZoneFrame; reduced: boo
     }
 
     // Store'a ABONE OLMUYORUZ: yakınlık her karede okunuyor ama React render etmiyor.
-    const near = useZoneStore.getState().nearFrame === frame.id ? 1 : 0;
+    const zone = useZoneStore.getState();
+    // spec bölüm 9: POV'da sahne render'ı sürer ama halka nabzı DURUR.
+    if (zone.state === "pov") return;
+    const near = zone.nearFrame === frame.id ? 1 : 0;
     glow.current += (near - glow.current) * Math.min(1, dt * 6);
     const g = glow.current;
 

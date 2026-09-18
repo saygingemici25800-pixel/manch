@@ -2,6 +2,7 @@
 
 import { Html } from "@react-three/drei";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 
 import { getFrame, promptAnchor } from "@/lib/zone/frames";
 import { useZoneStore } from "@/store/zone";
@@ -20,6 +21,41 @@ export function FramePrompt() {
   const nearFrame = useZoneStore((s) => s.nearFrame);
   const state = useZoneStore((s) => s.state);
   const openFrame = useZoneStore((s) => s.openFrame);
+  const returnFocus = useZoneStore((s) => s.returnFocus);
+  const clearReturnFocus = useZoneStore((s) => s.clearReturnFocus);
+  const enterBtn = useRef<HTMLButtonElement>(null);
+
+  /**
+   * POV kapandığında odak, tabloyu AÇAN butona döner (spec bölüm 10). Prompt POV'da
+   * unmount olduğu için odağı geri vermenin yeri burası: yeniden mount olunca `returnFocus`
+   * kendi çerçevesini gösteriyorsa odağı alır ve bayrağı temizler.
+   */
+  useEffect(() => {
+    if (!nearFrame || state !== "zone") return;
+    if (returnFocus !== nearFrame) return;
+
+    /**
+     * `drei/<Html>` içeriğini DOM'a **portal ile sonradan** basıyor: POV kapandıktan hemen
+     * sonraki effect'te buton henüz yok ve `focus()` sessizce boşa gidiyor (odak `body`'de
+     * kalıyordu). Birkaç kare deneyip başarınca bırakıyoruz.
+     */
+    let raf = 0;
+    let tries = 0;
+    const tryFocus = () => {
+      const btn = enterBtn.current;
+      if (btn) {
+        // Sahne içindeki bir butona odak verirken sayfayı kaydırmak anlamsız (bkz. FrameBoard).
+        btn.focus({ preventScroll: true });
+        if (document.activeElement === btn) {
+          clearReturnFocus();
+          return;
+        }
+      }
+      if (++tries < 20) raf = requestAnimationFrame(tryFocus);
+    };
+    raf = requestAnimationFrame(tryFocus);
+    return () => cancelAnimationFrame(raf);
+  }, [nearFrame, state, returnFocus, clearReturnFocus]);
 
   // POV'da gizlenir (spec bölüm 6): pano açıkken çağrı anlamsız.
   if (!nearFrame || state !== "zone") return null;
@@ -55,6 +91,7 @@ export function FramePrompt() {
         </span>
         <button
           type="button"
+          ref={enterBtn}
           data-testid="frame-enter"
           onClick={() => openFrame(frame.id)}
           className="rounded-full border-2 border-berry-dk bg-mustard px-[1.2vw] py-[0.35vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] text-berry-dk max-md:px-[4vw] max-md:py-[1.2vw] max-md:text-[3.2vw]"
