@@ -19,6 +19,7 @@ export const BASE_CLIENT_NAMESPACES = [
   "Preloader",
   "Common",
   "Product",
+  "Order",
 ] as const;
 
 type Messages = Record<string, unknown>;

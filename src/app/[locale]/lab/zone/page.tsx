@@ -15,7 +15,7 @@ export default async function ZoneLabPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale); // Kural 16
 
-  const messages = clientMessages(await getMessages(), ["Zone", "Lab"]);
+  const messages = clientMessages(await getMessages(), ["Zone", "Lab", "Menu"]);
   const t = await getTranslations("Zone");
 
   return (

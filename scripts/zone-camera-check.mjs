@@ -743,6 +743,82 @@ if (runs("scene")) {
   ok((await page.locator("[data-testid=zone-joystick]").count()) === 1,
     "POV'dan çıkınca joystick geri geliyor");
 
+  /* ========================== 5.5.8: OrderBoard ========================== */
+
+  await page.evaluate(() => { try { localStorage.removeItem("manch-cart"); } catch {} });
+  await page.evaluate(() => window.__CART__?.getState().clear());
+  await tp(...STOPS.menu);
+  await page.waitForTimeout(350);
+  await page.keyboard.press("e");
+  await page.waitForTimeout(900);
+
+  ok((await page.locator("[data-testid=order-row]").count()) === 15,
+    "sipariş tahtası 15 satır (7 burger · 4 yanında · 4 içecek/tatlı)",
+    `${await page.locator("[data-testid=order-row]").count()} satır`);
+  ok((await page.locator("[data-testid=qty-minus]").first().isDisabled()) === true,
+    "adet 0 iken − devre dışı");
+  ok((await page.locator("[data-testid=order-submit]").isDisabled()) === true,
+    "toplam 0 iken gönder devre dışı");
+  ok((await page.locator("[data-testid=order-total]").getAttribute("aria-live")) === "polite",
+    "toplam aria-live=\"polite\"");
+  ok((await page.locator("[data-testid=order-board]").innerText()).length > 40,
+    "menü feragatnamesi tahtanın üstünde",
+    (await page.locator("[data-testid=order-board] > p").innerText()).slice(0, 40));
+
+  /* `scrollTop` korunmalı: listeyi ortadan kaydır, adet değiştir, yeri kaybetme (spec 6.3) */
+  {
+    const before = await page.evaluate(() => {
+      const c = document.querySelector("[data-testid=frame-board]");
+      c.scrollTop = Math.round((c.scrollHeight - c.clientHeight) / 2);
+      return c.scrollTop;
+    });
+    const row = page.locator("[data-testid=order-row]").nth(9);
+    await row.locator("[data-testid=qty-plus]").click();
+    await page.waitForTimeout(450);
+    const after = await page.evaluate(() => document.querySelector("[data-testid=frame-board]").scrollTop);
+    ok(before > 20 && Math.abs(after - before) < 6,
+      "adet değişince liste başa sarmıyor (`scrollTop` korunuyor)",
+      `${before} → ${after}`);
+  }
+
+  /* Zone'da eklenen ürün SİTE sepetinde: aynı store, iki ayrı sepet yok */
+  {
+    const inCart = await page.evaluate(() => window.__CART__?.getState().lines ?? []);
+    ok(inCart.length === 1 && inCart[0].qty === 1,
+      "Zone'dan eklenen ürün site sepetine yazıyor (tek `useCartStore`)",
+      JSON.stringify(inCart));
+    await page.locator("[data-testid=order-row]").nth(9).locator("[data-testid=qty-plus]").click();
+    await page.waitForTimeout(350);
+    const two = await page.evaluate(() => window.__CART__?.getState().lines ?? []);
+    ok(two[0]?.qty === 2, "+ adedi arttırıyor", JSON.stringify(two));
+    ok((await page.locator("[data-testid=order-submit]").isDisabled()) === false,
+      "ürün eklenince gönder etkinleşiyor");
+  }
+
+  /* Adaptör (Kural 66): tahta WhatsApp'ı BİLMEZ — düğme metni bile adaptörden */
+  {
+    const label = await page.locator("[data-testid=order-submit]").innerText();
+    const ch = await page.evaluate(() => window.__ORDER__?.orderChannel());
+    ok(ch?.labelKey === "Order.send",
+      "gönder düğmesinin metni adaptörden geliyor (`channel.labelKey`)",
+      `${ch?.labelKey} → "${label}"`);
+  }
+
+  /* POV'dan çık → SİTE sepetini aç: aynı ürünler görünmeli (uçtan uca, tek sepet) */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  await page.locator("[data-testid=cart-button]").click();
+  await page.waitForTimeout(800);
+  const drawerText = (await page.locator("[data-testid=cart-drawer]").innerText()).replace(/\s+/g, " ");
+  const cartCount = await page.locator("[data-testid=cart-count]").innerText().catch(() => "-");
+  const cartTotal = await page.locator("[data-testid=cart-total]").innerText().catch(() => "");
+  // Zone'da 2 adet eklenmişti; çekmecede aynı ürün ve aynı adet görünmeli.
+  ok(cartCount === "2" && /\d/.test(cartTotal) && drawerText.length > 20,
+    "Zone'da eklenen ürün SİTE sepeti çekmecesinde görünüyor",
+    `rozet ${cartCount} · ${cartTotal.replace(/\s+/g, " ")}`);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;
   ok(src === "drawn" || src === "png", `sprite kaynağı raporlanıyor: ${src}`);

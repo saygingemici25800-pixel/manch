@@ -76,7 +76,9 @@ export function ZoneStage() {
 
       {/* Nav (z-80) tıklamayı yakalamasın diye z-90 ve nav'dan uzak köşe — Kural 63 ④ */}
       <div className="absolute bottom-[2vw] left-[2vw] z-90 flex flex-col gap-[0.6vw] max-md:bottom-[5vw] max-md:left-[5vw] max-md:gap-[2vw]">
-        {readout && (
+        {/* POV'da okuma paneli gizlenir: mobilde panonun sticky alt şeridini (TOPLAM + gönder)
+            kapatıyordu. Lab aracı, ürünün birincil eylemini örtmemeli. */}
+        {readout && zoneState !== "pov" && (
           <div
             data-testid="zone-readout"
             className="rounded-[0.6vw] border-2 border-berry bg-cream/90 px-[0.8vw] py-[0.5vw] font-pixel text-[0.6vw] leading-[1.9] text-berry max-md:rounded-[2vw] max-md:px-[3vw] max-md:py-[2vw] max-md:text-[2.2vw]"

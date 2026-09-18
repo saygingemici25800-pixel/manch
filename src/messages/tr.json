@@ -123,9 +123,7 @@
     "more": "Artır",
     "remove": "Kaldır",
     "priceTodo": "Fiyat için sor",
-    "waIntro": "Merhaba MANCH! Sipariş vermek istiyorum:",
-    "total": "Toplam",
-    "waTotal": "Toplam: {total} TL"
+    "total": "Toplam"
   },
   "Cookie": {
     "text": "Çerezleri lezzet için kullanıyoruz.",
@@ -333,5 +331,10 @@
     },
     "less": "Bir azalt",
     "more": "Bir arttır"
+  },
+  "Order": {
+    "intro": "Merhaba MANCH! Sipariş vermek istiyorum:",
+    "total": "Toplam: {total} TL",
+    "send": "WHATSAPP'TAN GÖNDER"
   }
 }

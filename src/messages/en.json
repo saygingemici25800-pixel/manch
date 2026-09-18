@@ -123,9 +123,7 @@
     "more": "Increase",
     "remove": "Remove",
     "priceTodo": "Ask for price",
-    "waIntro": "Hi MANCH! I'd like to order:",
-    "total": "Total",
-    "waTotal": "Total: {total} TL"
+    "total": "Total"
   },
   "Cookie": {
     "text": "We use cookies for flavor.",
@@ -333,5 +331,10 @@
     },
     "less": "Decrease by one",
     "more": "Increase by one"
+  },
+  "Order": {
+    "intro": "Hi MANCH! I'd like to order:",
+    "total": "Total: {total} TL",
+    "send": "SEND VIA WHATSAPP"
   }
 }

@@ -365,9 +365,14 @@ ayran 80 TL örnek değer, `menu.disclaimer` tahtanın üstünde görünür.
 
 **Adet:** `−` ve `+`, `−` adet 0 iken `disabled`. Her değişiklik **mevcut `useCartStore`'a** yazar.
 
-**Alt şerit** (sticky, `paper`, 3px ink üst kenarlık): solda TOPLAM, sağda hardal
-**WHATSAPP'TAN GÖNDER**. Toplam 0 iken `disabled`. Mesaj mevcut `buildWhatsAppMessage()` ile üretilir,
-ikinci formatlayıcı yazılmaz.
+**Alt şerit** (sticky, `paper`, 3px ink üst kenarlık): solda TOPLAM, sağda hardal gönder
+düğmesi. Toplam 0 iken `disabled`.
+
+> **Gönderme adaptör arkasında (Kural 66, 2026-09-18).** Tahta WhatsApp'ı bilmez: tek çağrı
+> `submitOrder(lines, locale, t)`. Düğmenin **metni de** adaptörden gelir
+> (`orderChannel().labelKey` → `Order.send`); bileşene gömülmez, çünkü "WHATSAPP'TAN GÖNDER"
+> yarın "SİPARİŞİ GÖNDER" olacak. Site sepeti **aynı** adaptörü kullanır — ikinci bir
+> gönderme yolu yoktur. Gerçek sipariş sistemi geldiğinde değişecek tek dosya: `lib/order/submit.ts`.
 
 **Yeniden çizim:** adet değişince `scrollTop` korunmalı, yoksa liste başa sarar. Prototipte bu hata
 yapıldı ve düzeltildi.
@@ -558,7 +563,7 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - [x] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık — halkanın üstündeki 8 nokta da tetikliyor
 - [x] **5.5.7** `Joystick` + reduced-motion + erişilebilirlik  *(öne alındı)*
 - [x] **5.5.6** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard` kabuğu (odak gidiş-dönüşü dahil)
-- [ ] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, WhatsApp, scroll korunması
+- [x] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, **`submitOrder` adaptörü**, scroll korunması
 - [ ] **5.5.9** `StoryBoard` × 3 + "TAM SAYFAYA GİT"
 - [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
 - [ ] **5.5.11** Performans + Kural 59 gözle bakma (mobil + masaüstü ekran görüntüleri)
