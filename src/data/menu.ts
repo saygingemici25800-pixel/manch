@@ -5,7 +5,7 @@ import type { Locale } from "@/i18n/routing";
 
 export type Localized = Record<Locale, string>;
 
-export type CategoryId = "burgers" | "sauces" | "extras" | "fries" | "snacks" | "dessert";
+export type CategoryId = "burgers" | "sauces" | "extras" | "fries" | "snacks" | "dessert" | "drinks";
 
 export type Tag = "spicy" | "new" | "signature";
 
@@ -46,6 +46,7 @@ export const categories: Category[] = [
   { id: "extras", name: { tr: "Extras", en: "Extras" } },
   { id: "fries", name: { tr: "Fries", en: "Fries" } },
   { id: "snacks", name: { tr: "Atıştırmalıklar", en: "Snacks" }, cover: "/images/crispy-triangle.jpg" },
+  { id: "drinks", name: { tr: "İçecekler", en: "Drinks" } },
   { id: "dessert", name: { tr: "Tatlı", en: "Dessert" }, cover: "/images/tiramisu.jpg" },
 ];
 
@@ -79,6 +80,9 @@ const DESC: Record<string, Localized> = {
   "chicken-tenders": { tr: "Çıtırlık seviyesi biraz kontrolden çıkmış olabilir.", en: "Crispiness levels may have gotten out of control." },
   "mushroom-arancini": { tr: "Altı adet mantarlı arancini. Beşte durabilirsin. Duramazsın.", en: "Six mushroom arancini. You could stop at five. You won't." },
   "crispy-triangle": { tr: "Basılı menüde yok, Instagram'da efsane.", en: "Not on the printed menu. A legend online." },
+  "limonata": { tr: "Ev yapımı limonata. Smash'in yanına.", en: "Homemade lemonade. Alongside the smash." },
+  "soft-drink": { tr: "Soğuk soft drink.", en: "Cold soft drink." },
+  "ayran": { tr: "Ayran. Tartışma yok.", en: "Ayran. No debate." },
   "tiramisu": { tr: "Tiramisu konusunda biraz iddialıyız. Gerçek mascarpone.", en: "We take tiramisu seriously. Real mascarpone." },
 };
 
@@ -181,6 +185,12 @@ export const products: Product[] = [
   simple("mushroom-arancini", "snacks", { tr: "6 Mantarlı Arancini", en: "Six-Mushroom Arancini" }, 360,
     { tr: ["Kültür mantarı", "Shiitake", "Morel", "Portobello", "İstiridye mantarı", "Trüf", "Parmesan"], en: ["Button mushroom", "Shiitake", "Morel", "Portobello", "Oyster mushroom", "Truffle", "Parmesan"] }, null, 10),
   simple("crispy-triangle", "snacks", { tr: "Crispy Triangle", en: "Crispy Triangle" }, null, { tr: ["Çıtır üçgen", "Parmesan", "Dip sos"], en: ["Crispy triangles", "Parmesan", "Dip"] }, "/images/crispy-triangle.jpg", 8),
+
+  // ---------- İÇECEKLER ----------
+  // Fiyatlar TEYİT BEKLİYOR — örnek değer (spec 6.3). `Menu.disclaimer` sitede zaten görünür.
+  simple("limonata", "drinks", { tr: "Limonata", en: "Lemonade" }, 120, { tr: ["Limon", "Şeker", "Su"], en: ["Lemon", "Sugar", "Water"] }, null, 3),
+  simple("soft-drink", "drinks", { tr: "Soft Drink", en: "Soft Drink" }, 90, { tr: [], en: [] }, null, 1),
+  simple("ayran", "drinks", { tr: "Ayran", en: "Ayran" }, 80, { tr: [], en: [] }, null, 1),
 
   // ---------- TATLI ----------
   simple("tiramisu", "dessert", { tr: "Tiramisu", en: "Tiramisu" }, 360, { tr: ["Mascarpone", "Kahve", "Kakao"], en: ["Mascarpone", "Coffee", "Cocoa"] }, "/images/tiramisu.jpg", 2),

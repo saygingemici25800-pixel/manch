@@ -280,5 +280,58 @@
     "home": "Ana sayfa",
     "metaTitle": "Sayfa bulunamadı",
     "metaDescription": "Aradığın sayfa menüde yok."
+  },
+  "Zone": {
+    "gate": "ZONE'A GİR",
+    "title": "MANCH Zone",
+    "exit": "ÇIKIŞ",
+    "enter": "GİR",
+    "back": "← GERİ",
+    "fullPage": "TAM SAYFAYA GİT →",
+    "allMenu": "TÜM MENÜYÜ GÖR →",
+    "total": "TOPLAM",
+    "sendWhatsapp": "WHATSAPP'TAN GÖNDER",
+    "select": {
+      "title": "Kiminle gezelim?",
+      "misu": "Misu",
+      "misuNote": "Kulaklıklı",
+      "miyu": "Miyu",
+      "miyuNote": "Güneş gözlüklü"
+    },
+    "loader": {
+      "lines": "SALON HAZIRLANIYOR…|KARO DUVARLAR DİZİLİYOR…|IŞIKLAR AÇILIYOR…"
+    },
+    "hint": {
+      "touch": "JOYSTICK İLE YÜRÜ · TABLOYA YAKLAŞ",
+      "mouse": "JOYSTICK'İ SÜRÜKLE VEYA WASD · TABLOYA YAKLAŞ",
+      "joystick": "SÜRÜKLE"
+    },
+    "frames": {
+      "menu": "SİPARİŞ VER",
+      "crew": "EL YAPIMI",
+      "mascot": "MISU & MIYU",
+      "visit": "BİZE GEL"
+    },
+    "kickers": {
+      "menu": "01 · SİPARİŞ",
+      "crew": "02 · EKİP",
+      "mascot": "03 · MASKOTLAR",
+      "visit": "04 · ZİYARET"
+    },
+    "plaque": {
+      "title": "MANCH",
+      "place": "F E T H İ Y E   ·   P A S P A T U R   ·   2 0 2 6",
+      "body": "Bir smash burger, aslında bir sıkışma meselesidir. Köfte tezgâha değdiği anda|yüzeyinde ince bir kabuk oluşur ve tadın çoğunu o kısacık an taşır.||MANCH bu anı ciddiye alan bir mutfak. Brioche burada açılır, sos burada çırpılır,|köfte önceden pişmez. Hepsi aynı sebeple: acele edilen hiçbir şey iyi olmuyor.||Gerisi yendikten sonra konuşulur.",
+      "footer": "el yapımı, her katmanda"
+    },
+    "frontWall": "THE BURGER|YOU’LL CRAVE|AGAIN",
+    "artWaiting": "GÖRSEL BEKLENİYOR",
+    "groups": {
+      "burgers": "SMASH BURGERS",
+      "sides": "YANINDA",
+      "drinks": "İÇECEK & TATLI"
+    },
+    "less": "Bir azalt",
+    "more": "Bir arttır"
   }
 }

@@ -280,5 +280,58 @@
     "home": "Home",
     "metaTitle": "Page not found",
     "metaDescription": "The page you're looking for isn't on the menu."
+  },
+  "Zone": {
+    "gate": "ENTER THE ZONE",
+    "title": "MANCH Zone",
+    "exit": "EXIT",
+    "enter": "ENTER",
+    "back": "← BACK",
+    "fullPage": "GO TO FULL PAGE →",
+    "allMenu": "SEE THE FULL MENU →",
+    "total": "TOTAL",
+    "sendWhatsapp": "SEND VIA WHATSAPP",
+    "select": {
+      "title": "Who's walking with you?",
+      "misu": "Misu",
+      "misuNote": "With headphones",
+      "miyu": "Miyu",
+      "miyuNote": "With sunglasses"
+    },
+    "loader": {
+      "lines": "SETTING UP THE HALL…|LAYING THE TILES…|TURNING ON THE LIGHTS…"
+    },
+    "hint": {
+      "touch": "DRAG THE JOYSTICK · WALK UP TO A FRAME",
+      "mouse": "DRAG THE JOYSTICK OR USE WASD · WALK UP TO A FRAME",
+      "joystick": "DRAG"
+    },
+    "frames": {
+      "menu": "ORDER NOW",
+      "crew": "HANDMADE",
+      "mascot": "MISU & MIYU",
+      "visit": "COME OVER"
+    },
+    "kickers": {
+      "menu": "01 · ORDER",
+      "crew": "02 · CREW",
+      "mascot": "03 · MASCOTS",
+      "visit": "04 · VISIT"
+    },
+    "plaque": {
+      "title": "MANCH",
+      "place": "F E T H İ Y E   ·   P A S P A T U R   ·   2 0 2 6",
+      "body": "A smash burger is really a matter of pressure. The moment the patty meets the griddle|a thin crust forms, and most of the flavour lives in that brief instant.||MANCH is a kitchen that takes that instant seriously. The brioche is opened here, the sauce|whisked here, the patty never cooked ahead. All for the same reason: nothing rushed turns out well.||The rest is discussed after you've eaten.",
+      "footer": "handmade, in every layer"
+    },
+    "frontWall": "THE BURGER|YOU’LL CRAVE|AGAIN",
+    "artWaiting": "IMAGE PENDING",
+    "groups": {
+      "burgers": "SMASH BURGERS",
+      "sides": "ON THE SIDE",
+      "drinks": "DRINKS & DESSERT"
+    },
+    "less": "Decrease by one",
+    "more": "Increase by one"
   }
 }
