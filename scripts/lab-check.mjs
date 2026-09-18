@@ -1,12 +1,16 @@
 // Faz 3 doğrulaması: motion primitive'leri, Kural 50 (fold), reduced-motion, cleanup/sızıntı.
 // Kullanım: pnpm dev -p 3113 çalışırken → CHROME=<chromium yolu> node scripts/lab-check.mjs
 // Kural 45: BROWSER=webkit ile ikinci koşu (Faz 8'de).
-import { chromium } from "playwright-core";
+import { chromium, webkit } from "playwright-core";
+
+// Kural 45: BROWSER=webkit ile Safari/WebKit koşusu (backdrop-blur, svh/dvh, Lenis wheel,
+// sticky sekme, PNG şeffaflık). WebKit'te Tab yalnızca form kontrollerini dolaşır.
+const ENGINE = process.env.BROWSER === "webkit" ? webkit : chromium;
 
 const PORT = process.env.PORT ?? "3113";
 const BASE = `http://localhost:${PORT}`;
 const URL = `${BASE}/tr/lab`;
-const b = await chromium.launch({ executablePath: process.env.CHROME });
+const b = await ENGINE.launch(process.env.BROWSER === "webkit" ? {} : { executablePath: process.env.CHROME });
 const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
 
 const errs = [];
@@ -377,7 +381,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   t("reduced · kartlar 6/6 görünür", red.cards === 6, `${red.cards}/6`);
   await h.evaluate(() => window.__MOTION__.getState().setForceReduced(null));
 
-  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint/.test(e));
+  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|turbopack.*hmr-client|preloaded using link preload/.test(e));
   t("Ana sayfa · konsol temiz", hf.length === 0, hf.slice(0, 2).join(" | ").slice(0, 150));
   await ctx.close();
 }
@@ -509,7 +513,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   }
   t("Nav/Footer/Overlay · tüm iç linkler 200", bad404.length === 0, `${all.length} link · sorunlu: ${bad404.join(", ") || "yok"}`);
 
-  const mf = merrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|Failed to load resource/.test(e));
+  const mf = merrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|Failed to load resource|turbopack.*hmr-client|preloaded using link preload/.test(e));
   t("İç sayfalar · konsol temiz", mf.length === 0, mf.slice(0, 2).join(" | ").slice(0, 160));
   const unexpected = bad4xx.filter((x) => !x.endsWith("/tr/olmayan-sayfa"));
   t("İç sayfalar · kasıtlı 404 dışında 4xx/5xx istek yok", unexpected.length === 0,

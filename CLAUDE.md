@@ -30,8 +30,9 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 7 tamamlandı.** Sıradaki: Faz 8 (Performans & QA) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
-- Son başarılı build: 2026-09-18 Faz 7 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **90/90**; Lighthouse A11y 100 / SEO 100 × 5 sayfa)
+- Aktif faz: **Faz 8 tamamlandı (kısmi kabul).** Sıradaki: Faz 9 (Deploy) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Son başarılı build: 2026-09-18 Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
 - Sayfa LCP'leri (prod, throttled, 3 koşu medyanı): `/` **796/228 ms** · `/menu` **2348/488** · `/about` **1092/252** · `/contact` **752/224** (mobil/masaüstü)
@@ -83,7 +84,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 21. Yeni bir font eklerken TR kapsamını `latin-ext` etiketine güvenmeden doğrula: build sonrası `.next/static/media/*.woff2` dosyalarında cmap union'ı (fontTools) **ve** `/lab` GlyphCheck. Fontlar tek dosyada: `src/styles/fonts.ts`; token listesi `src/styles/tokens.ts` `globals.css` ile senkron tutulur.
 22. Tailwind v4: renkler `@theme`, next/font değişkenlerini tüketen font tokenları `@theme inline`. Özel sınıflar `@utility` ile; `max-md:` karşılığı utility içinde `@media (width < 48rem)`.
 23. `/[locale]/lab` sadece development: sayfa başında `if (process.env.NODE_ENV === "production") notFound()`. Production build'de lab 404 döner; lab doğrulaması `next dev` ile yapılır.
-24. Smooth scroll: **`lenis/react`** (`<ReactLenis root options={{ autoRaf:false }}>` + `useLenis`) — manuel `new Lenis()` değil. Gerekçe: `useLenis` context'i Marquee/JellyWave'in scroll `velocity` okuması için hazır; instance lifecycle'ı React'e bağlı; raf `gsap.ticker`'a **`<ReactLenis>` içindeki çocuk `LenisTicker` component'inde `useLenis()` ile** bağlanır; ticker `update`'i `lenis.raf()` sonrası **`ScrollTrigger.update()`** de çağırır (Lenis scroll event köprüsü tek başına güvenilmez) — `ref.current.lenis` mount anında `undefined`dır, ona güvenme (`lenis.on("scroll", ScrollTrigger.update)`, `lagSmoothing(0)`). Sistem reduced-motion'ı Lenis kendisi izler; lab override'ı için `lerp` elle 1 yapılır.
+24. Smooth scroll: **Lenis çekirdeği lazy** (revize 2026-09-18). `lenis/react` provider'ı KULLANILMIYOR — ilk yükleme JS'ine 21.6 kB gz ekliyordu (Kural 46). Yerine: `SmoothScroll` effect içinde `import("lenis")` eder, örneği `src/lib/lenis-store.ts` (zustand) içine yazar; tüketiciler `useLenis()` ile oradan okur, callback formu için `useLenisScroll(cb)`. Ağaç sarmalanmadığı için `children` normal SSR edilir. Ticker: `lenis.raf()` sonrası **`ScrollTrigger.update()`** de çağrılır (Lenis scroll event köprüsü tek başına güvenilmez); `lagSmoothing(0)`. `lenis` mount anında `null`dır — her tüketici `lenis?.` ile korunur. Sistem reduced-motion'ı Lenis kendisi izler; lab override'ı için `lerp` modül-seviyesi `applyLerp()` ile 1 yapılır (Kural 25).
+
 25. React Compiler lint kuralları aktif (`react-hooks/refs`, `react-hooks/immutability`, `react-hooks/set-state-in-effect`): effect içinde **senkron `setState` yok** (türetilmiş değer kullan ya da `setTimeout(fn, 0)` ile ertele, cleanup'ta temizle); closure'larda `ref.current` **okumak da yazmak da** yasak — closure'larda `document.title =` gibi global mutasyon ve modül-seviyesi `let` ataması da yasak → hepsi ayrı modülde plain fonksiyon (`src/lib/transition-title.ts`), closure sadece çağırır; `ref.current`'i render'da **ve render'da çağrılan closure'larda** (`contextSafe(...)` dahil) okuma → GSAP hedefini `useGSAP({ scope })` selector'ıyla ver (`".wrap"`, `"path"`); dinamik element için `createElement(as, { ref })` değil `const Tag = as; <Tag ref={ref}>`; kütüphane nesnesi mutasyonunu (`lenis.options.x = …`) modül-seviyesi helper fonksiyona taşı.
 26. Her motion primitive `useReducedMotion()` okur (`src/lib/hooks/useReducedMotion.ts` = sistem tercihi ∨ `useMotionStore.forceReduced`), `true` ise GSAP kurmadan statik render eder. GSAP eklentileri sadece `src/lib/gsap.ts` üzerinden import edilir (tek `registerPlugin`).
 27. CursorTrail: `data-cursor-hide` **sadece açıkça işaretlenen** elementlerde (BlobButton, hap butonlar, nav). Otomatik `button, a` selector'ı yok — her yeni etkileşimli bileşen kendi karar verir (karar 2026-09-17).
@@ -117,6 +119,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     **A · Görünen arayüz:** eksik alan boş bırakılmaz, `ui/SoonBadge` ile gösterilir (`Common.soon` → "YAKINDA" / "COMING SOON"; küçük, hardal zemin, pixel font). Rozet kasıtlı durur — eksik veri gibi değil, tasarımın parçası gibi. Kullanıldığı yerler: çalışma saatleri, fiyatı olmayan ürün, devre dışı kanallar.
     **B · Yapılandırılmış veri (JSON-LD):** bilinmeyen alan **tamamen çıkarılır**. "Yakında", boş string, tahmin **YASAK** — Google yapılandırılmış veriyi kelime kelime okur, uydurma değer işletme kartını bozar ve düzeltmesi aylar alır. `restaurantJsonLd` yalnızca bilinen alanı yazar; `openingHours*` ve `priceRange` **hiç yazılmaz**. Telefon yapılandırılmış veride boşluksuz E.164 (`+905054970748`), arayüzde okunur biçim. `lab-check` bunu üç ayrı kontrolle denetler.
 55. Kural 44 daraltması yeni bir layout client component'i eklendiğinde **sessizce kırılır**: namespace `BASE_CLIENT_NAMESPACES`'te yoksa `MISSING_MESSAGE` konsol hatası gelir (2026-09-18'de `CookieBanner` → `Cookie` ile yaşandı, 56 hata). Layout'a client component eklerken `useTranslations("X")` namespace'i listeye eklenir; `client-messages.ts` içindeki denetim yorumu güncel tutulur.
+56. Her lazy `import()` **`.catch()` ile kapatılır**. Hızlı gezinmede uçuştaki chunk isteği iptal olur ve yakalanmamış promise reddine (`ChunkLoadError`) dönüşür — WebKit'te 2026-09-18'de yakalandı. Animasyon/smooth-scroll isteğe bağlı olduğu için sessizce vazgeçilir; sayfa native scroll ile çalışmaya devam eder.
 
 ---
 
@@ -289,16 +292,16 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [ ] ✅ Kabul: build + lint temiz; lab-check 96/96, console 0; Lighthouse A11y 100 / SEO 100 ×3; `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png`
 
 ### Faz 8 — Performans & QA
-- [ ] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
-- [ ] Bundle: `scripts/bundle-report.mjs` (sunucu HTML script'leri, gz, noModule hariç), `@next/bundle-analyzer` (ANALYZE=1); GSAP lazy (Kural 46: `useLazyGsap`, `LayoutDeferred` ssr:false, Preloader CSS) → `/tr` First Load **249.7 → 187.5 kB gz** (≤ 200), lazy gsap 48.9 gz sonradan
-- [ ] NextIntlClientProvider daraltma (Kural 44: layout 7 namespace + sayfa sağlayıcıları)
-- [ ] next/image: AVIF+WebP (`images.formats`), `images.qualities [70,75]`, hero `priority`+`fetchPriority`+`quality 70`, kartlarda ilk kart `priority` / 2–3 `eager`, `sizes` denetimi; AVIF çıktıları doğrulandı (hero 640w 16.5 KB, kesit 384w 9.9 KB)
-- [ ] LCP: Kural 47 — `/tr` mobil LCP elementi hero H1, SplitText'ten çıkarıldı; 3122 → **1672 ms**
-- [ ] CLS: 0 (desktop `/tr/menu` footer 0.006 — karar: kalır)
-- [ ] Safari/WebKit: Playwright `webkit-2359`, `BROWSER=webkit lab-check` (Kural 45: Option+Tab, `priority` preload uyarısı → `eager`)
-- [ ] Görsel kontrol 375/768/1440/1920 (`scripts/screens.mjs`, `docs/screens/faz-8-{w}[-menu].png`): yatay taşma yok
-- [ ] Final `docs/screens/faz-8-final.json` + `faz-8-table.md` (baseline → final)
-- [ ] ✅ Kabul: mobil preloader'sız **perf 100/100/100**, LCP 1672/1259/806 ms, CLS 0; A11y/SEO 100; First Load 187.5 kB gz; lab-check chromium 96/96 + webkit 96/96, console temiz
+- [x] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
+- [x] Bundle: `scripts/bundle-report.mjs` (sunucu HTML script'leri, gz, noModule hariç), `@next/bundle-analyzer` (ANALYZE=1); GSAP lazy (Kural 46: `useLazyGsap`, `LayoutDeferred` ssr:false, Preloader CSS) → `/tr` First Load **249.7 → 187.5 kB gz** (≤ 200), lazy gsap 48.9 gz sonradan
+- [x] NextIntlClientProvider daraltma (Kural 44: layout 7 namespace + sayfa sağlayıcıları)
+- [x] next/image: AVIF+WebP (`images.formats`), `images.qualities [70,75]`, hero `priority`+`fetchPriority`+`quality 70`, kartlarda ilk kart `priority` / 2–3 `eager`, `sizes` denetimi; AVIF çıktıları doğrulandı (hero 640w 16.5 KB, kesit 384w 9.9 KB)
+- [x] LCP: Kural 47 — `/tr` mobil LCP elementi hero H1, SplitText'ten çıkarıldı; 3122 → **1672 ms**
+- [x] CLS: 0 (desktop `/tr/menu` footer 0.006 — karar: kalır)
+- [x] Safari/WebKit: Playwright `webkit-2359`, `BROWSER=webkit lab-check` (Kural 45: Option+Tab, `priority` preload uyarısı → `eager`)
+- [x] Görsel kontrol 375/768/1440/1920 (`scripts/screens.mjs`, `docs/screens/faz-8-{w}[-menu].png`): yatay taşma yok
+- [x] Final `docs/screens/faz-8-final.json` + `faz-8-table.md` (baseline → final)
+- [x] ⚠️ Kabul (kısmi): preloader'sız mobile **perf 98 / 91 / 95** (`/tr`, `/tr/menu`, `/tr/contact`) — **perf ≥ 90 üçünde de sağlandı**; CLS 0–0.001 ✓; A11y/SEO 100 ✓. **LCP hedefi (< 2500 ms) yalnızca `/tr`'de tuttu: 4691 → 2310 ms.** `/tr/menu` 3465, `/tr/contact` 2888 ms. First Load JS 225.9 → **214.6 kB gz** (Kural 46 hedefi ≤ 200 — **tutmadı**). lab-check chromium **93/93** + webkit **93/93**, konsol temiz; 375/768/1440/1920'de yatay taşma yok. Ayrıntı ve geri alınan denemeler: `docs/screens/faz-8-table.md` *(revize: 2026-09-18)*
 
 ### Faz 9 — Deploy
 - [ ] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
@@ -380,6 +383,12 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-18 | 7 | Lighthouse A11y `color-contrast`: BuildSequence adım numarası **1.21:1** | `text-mustard` (#f6c343) `bg-paper` (#e9dcc6) üstünde | Numara `text-berry` (#6a1f3b) → **8.29:1** (Kural 40) |
 | 2026-09-18 | 7 | Lighthouse A11y `/tr/contact` **96**: `target-size` | e-posta / Instagram / Facebook metin linkleri 18–21 px yüksekliğinde, eşik 24 px | Linklere `inline-flex min-h-[24px] items-center` (4 link) |
 | 2026-09-18 | 7 | Kural 44 daraltması açılınca konsolda **56 × `MISSING_MESSAGE: Cookie`** | `CookieBanner` layout'ta mount ediliyor ve `Cookie` namespace'ini kullanıyor; `BASE_CLIENT_NAMESPACES`'te yoktu. Kural 44'ün öngördüğü hata, lab-check yakaladı | `Cookie` listeye eklendi + tüm layout client component'lerinin namespace denetimi `client-messages.ts`'e yorum olarak yazıldı (Kural 55) |
+| 2026-09-18 | 8 | Taban: preloader'sız mobile `/tr` perf **83**, LCP **4691 ms** | (a) Ana sayfada `TheHits` kartına `priority` verilmişti ama kartlar fold ALTINDA — preload hero fontlarıyla yarıştı; (b) 3 font ailesi × 2 dilim = 6 woff2 preload; (c) LCP adayı H1, Modak `swap` ile geç inince yeniden boyanıp LCP'yi öteliyor | Ana sayfada `priority` kaldırıldı, Press Start 2P `preload: false` → perf 83→96, LCP 4691→2799 |
+| 2026-09-18 | 8 | Hero görseline medya koşullu preload eklendi → **kötüleşti** (perf 96→93, LCP 2799→3230) | Preload edilen tam ekran görsel LCP adayı oluyor ve metinden geç boyanıyor | Geri alındı. Ders: LCP'de "daha fazla preload" her zaman iyi değil — ölçmeden ekleme |
+| 2026-09-18 | 8 | Modak `display: "optional"` denendi → perf 96→92, TBT 34→124 | Fallback'e düşünce düzen/boyama işi artıyor; marka fontu da kayboluyordu | Geri alındı, `swap` kaldı |
+| 2026-09-18 | 8 | Tek Lighthouse koşusuyla karar verilirken **gürültüye kanıldı** (aynı yapıda LCP [2194, 2799, 3529]) | Simüle throttling koşular arası ±10 puan / ±1 s oynuyor | `scripts/lighthouse.mjs` varsayılan **3 koşu medyanı** (`RUNS` ile değişir), ham örnekler de raporlanıyor |
+| 2026-09-18 | 8 | **WebKit**: `ChunkLoadError: Failed to load chunk …/gsap` (pageerror) | Hızlı gezinmede uçuştaki lazy `import()` iptal oluyor, `.catch()` olmadığı için yakalanmamış redde dönüşüyor | `useLazyGsap`, `useGsapModule`, `SmoothScroll` ve `gsap.ts`'teki tüm lazy import'lara `.catch(() => {})` (Kural 56). Chromium'da hiç görünmemişti — Kural 45'in WebKit koşusu işe yaradı |
+| 2026-09-18 | 8 | WebKit konsolunda `preloaded using link preload but not used` | Next'in **dev** Turbopack HMR chunk'ı — uygulama kodu değil, prod'da yok | lab-check filtresine belgeli istisna (Kural 45) |
 
 ---
 

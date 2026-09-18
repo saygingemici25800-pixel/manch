@@ -17,7 +17,10 @@ export async function TheHits() {
         title={t("hits.title")}
         counter={tc("products", { count: products.length })}
       />
-      <ProductGrid products={products} priorityFirst />
+      {/* Kural 45/47 (ölçüm 2026-09-18): ana sayfada kartlar fold ALTINDA — `priority`
+          preload'u hero fontlarıyla yarışıp LCP'yi geciktiriyordu. `/menu`'de kartlar
+          fold sınırında olduğu için orada açık kalıyor. */}
+      <ProductGrid products={products} />
     </section>
   );
 }

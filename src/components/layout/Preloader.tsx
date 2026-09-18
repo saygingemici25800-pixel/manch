@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useLenis } from "lenis/react";
+import { useLenis } from "@/lib/lenis-store";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { site } from "@/lib/site";
 import Logo from "@/components/ui/Logo";

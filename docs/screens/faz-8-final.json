@@ -1,444 +1,409 @@
 {
-  "date": "2026-09-17T11:52:48.984Z",
-  "base": "http://localhost:3100",
-  "target": {
-    "accessibility": 95,
-    "seo": 95,
-    "performance": 90,
-    "lcp": 2500,
-    "cls": 0.1
-  },
-  "results": {
-    "mobile|nopreload|/tr": {
-      "form": "mobile",
-      "variant": "nopreload",
+  "date": "2026-09-18T03:11:54.927Z",
+  "base": "http://localhost:3101",
+  "rows": [
+    {
       "path": "/tr",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 1672,
-        "cls": 0,
-        "tbt": 30,
-        "fcp": 915,
-        "si": 2043,
-        "lcpElement": "main#main > section.relative > div.relative > h1.max-w-[80vw]"
-      },
-      "clsItems": [],
-      "failing": [
-        {
-          "id": "interactive",
-          "score": 0.83
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "mobile|nopreload|/tr/menu": {
       "form": "mobile",
       "variant": "nopreload",
-      "path": "/tr/menu",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 1259,
-        "cls": 0,
-        "tbt": 20,
-        "fcp": 760,
-        "si": 896,
-        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
-      },
-      "clsItems": [],
-      "failing": [
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
+      "runs": 3,
+      "perf": 98,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 2310,
+      "cls": 0,
+      "tbt": 42,
+      "fcp": 1101,
+      "perfSamples": [
+        97,
+        98,
+        99
+      ],
+      "lcpSamples": [
+        2596,
+        2310,
+        1868
+      ],
+      "fails": [
+        "first-contentful-paint",
+        "largest-contentful-paint",
+        "speed-index",
+        "max-potential-fid",
+        "interactive",
+        "mainthread-work-breakdown",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
       ]
     },
-    "mobile|nopreload|/tr/contact": {
-      "form": "mobile",
-      "variant": "nopreload",
-      "path": "/tr/contact",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 806,
-        "cls": 0,
-        "tbt": 7,
-        "fcp": 761,
-        "si": 761,
-        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
-      },
-      "clsItems": [],
-      "failing": [
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "mobile|preloader|/tr": {
-      "form": "mobile",
-      "variant": "preloader",
+    {
       "path": "/tr",
-      "scores": {
-        "performance": 99,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 825,
-        "cls": 0,
-        "tbt": 12,
-        "fcp": 771,
-        "si": 3221,
-        "lcpElement": "main#main > section.relative > div.relative > h1.max-w-[80vw]"
-      },
-      "clsItems": [
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
-      ],
-      "failing": [
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "mobile|preloader|/tr/menu": {
       "form": "mobile",
       "variant": "preloader",
-      "path": "/tr/menu",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 979,
-        "cls": 0,
-        "tbt": 17,
-        "fcp": 760,
-        "si": 2756,
-        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
-      },
-      "clsItems": [
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
+      "runs": 3,
+      "perf": 93,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 2745,
+      "cls": 0.0004,
+      "tbt": 35,
+      "fcp": 1221,
+      "perfSamples": [
+        94,
+        87,
+        93
       ],
-      "failing": [
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
+      "lcpSamples": [
+        2660,
+        3485,
+        2745
+      ],
+      "fails": [
+        "first-contentful-paint",
+        "largest-contentful-paint",
+        "speed-index",
+        "max-potential-fid",
+        "interactive",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
       ]
     },
-    "mobile|preloader|/tr/contact": {
+    {
+      "path": "/tr",
+      "form": "desktop",
+      "variant": "nopreload",
+      "runs": 3,
+      "perf": 100,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 695,
+      "cls": 0,
+      "tbt": 0,
+      "fcp": 310,
+      "perfSamples": [
+        100,
+        100,
+        100
+      ],
+      "lcpSamples": [
+        712,
+        584,
+        695
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr",
+      "form": "desktop",
+      "variant": "preloader",
+      "runs": 3,
+      "perf": 98,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 585,
+      "cls": 0.0001,
+      "tbt": 0,
+      "fcp": 257,
+      "perfSamples": [
+        98,
+        98,
+        97
+      ],
+      "lcpSamples": [
+        581,
+        585,
+        710
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "speed-index",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/menu",
+      "form": "mobile",
+      "variant": "nopreload",
+      "runs": 3,
+      "perf": 91,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 3465,
+      "cls": 0.0011,
+      "tbt": 42,
+      "fcp": 916,
+      "perfSamples": [
+        92,
+        91,
+        87
+      ],
+      "lcpSamples": [
+        3418,
+        3465,
+        4097
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "max-potential-fid",
+        "interactive",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/menu",
       "form": "mobile",
       "variant": "preloader",
-      "path": "/tr/contact",
-      "scores": {
-        "performance": 99,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 868,
-        "cls": 0,
-        "tbt": 16,
-        "fcp": 760,
-        "si": 3361,
-        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
-      },
-      "clsItems": [
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
+      "runs": 3,
+      "perf": 85,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 4088,
+      "cls": 0.0015,
+      "tbt": 46,
+      "fcp": 920,
+      "perfSamples": [
+        85,
+        82,
+        88
       ],
-      "failing": [
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
+      "lcpSamples": [
+        4088,
+        4515,
+        3638
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "speed-index",
+        "max-potential-fid",
+        "interactive",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
       ]
     },
-    "desktop|nopreload|/tr": {
-      "form": "desktop",
-      "variant": "nopreload",
-      "path": "/tr",
-      "scores": {
-        "performance": 94,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 1651,
-        "cls": 0,
-        "tbt": 40,
-        "fcp": 633,
-        "si": 633,
-        "lcpElement": "div.absolute > div.inner > div.relative > img.object-contain"
-      },
-      "clsItems": [],
-      "failing": [
-        {
-          "id": "largest-contentful-paint",
-          "score": 0.75
-        },
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "desktop|nopreload|/tr/menu": {
-      "form": "desktop",
-      "variant": "nopreload",
+    {
       "path": "/tr/menu",
-      "scores": {
-        "performance": 97,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 1023,
-        "cls": 0.006,
-        "tbt": 105,
-        "fcp": 699,
-        "si": 1019,
-        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
-      },
-      "clsItems": [
-        {
-          "node": "body.min-h-full > footer.relative",
-          "score": 0.006
-        }
-      ],
-      "failing": [
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "desktop|nopreload|/tr/contact": {
       "form": "desktop",
       "variant": "nopreload",
-      "path": "/tr/contact",
-      "scores": {
-        "performance": 100,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 665,
-        "cls": 0,
-        "tbt": 8,
-        "fcp": 620,
-        "si": 620,
-        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
-      },
-      "clsItems": [],
-      "failing": [
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "desktop|preloader|/tr": {
-      "form": "desktop",
-      "variant": "preloader",
-      "path": "/tr",
-      "scores": {
-        "performance": 92,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 718,
-        "cls": 0,
-        "tbt": 20,
-        "fcp": 627,
-        "si": 3285,
-        "lcpElement": "div.absolute > div.inner > div.relative > img.object-contain"
-      },
-      "clsItems": [
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
+      "runs": 3,
+      "perf": 99,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 933,
+      "cls": 0.0004,
+      "tbt": 0,
+      "fcp": 253,
+      "perfSamples": [
+        99,
+        99,
+        99
       ],
-      "failing": [
-        {
-          "id": "speed-index",
-          "score": 0.2
-        },
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
+      "lcpSamples": [
+        953,
+        933,
+        883
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
       ]
     },
-    "desktop|preloader|/tr/menu": {
-      "form": "desktop",
-      "variant": "preloader",
+    {
       "path": "/tr/menu",
-      "scores": {
-        "performance": 92,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 842,
-        "cls": 0.006,
-        "tbt": 29,
-        "fcp": 620,
-        "si": 2856,
-        "lcpElement": "article.product-card > div.relative > div.relative > img.object-contain"
-      },
-      "clsItems": [
-        {
-          "node": "body.min-h-full > footer.relative",
-          "score": 0.006
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
-      ],
-      "failing": [
-        {
-          "id": "speed-index",
-          "score": 0.31
-        },
-        {
-          "id": "lcp-discovery-insight",
-          "score": 0
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
-      ]
-    },
-    "desktop|preloader|/tr/contact": {
       "form": "desktop",
       "variant": "preloader",
-      "path": "/tr/contact",
-      "scores": {
-        "performance": 91,
-        "accessibility": 100,
-        "seo": 100
-      },
-      "metrics": {
-        "lcp": 736,
-        "cls": 0,
-        "tbt": 61,
-        "fcp": 621,
-        "si": 3495,
-        "lcpElement": "main#main > header.flex > div.flex > h2.text40"
-      },
-      "clsItems": [
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        },
-        {
-          "node": "?",
-          "score": 0
-        }
+      "runs": 3,
+      "perf": 97,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 1032,
+      "cls": 0.0005,
+      "tbt": 0,
+      "fcp": 268,
+      "perfSamples": [
+        96,
+        97,
+        97
       ],
-      "failing": [
-        {
-          "id": "speed-index",
-          "score": 0.16
-        },
-        {
-          "id": "network-dependency-tree-insight",
-          "score": 0
-        }
+      "lcpSamples": [
+        1062,
+        1032,
+        967
+      ],
+      "fails": [
+        "largest-contentful-paint",
+        "speed-index",
+        "unused-javascript",
+        "bf-cache",
+        "image-delivery-insight",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/contact",
+      "form": "mobile",
+      "variant": "nopreload",
+      "runs": 3,
+      "perf": 95,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 2888,
+      "cls": 0.001,
+      "tbt": 21,
+      "fcp": 1216,
+      "perfSamples": [
+        95,
+        99,
+        95
+      ],
+      "lcpSamples": [
+        2888,
+        2120,
+        2889
+      ],
+      "fails": [
+        "first-contentful-paint",
+        "largest-contentful-paint",
+        "speed-index",
+        "max-potential-fid",
+        "interactive",
+        "unused-javascript",
+        "bf-cache",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/contact",
+      "form": "mobile",
+      "variant": "preloader",
+      "runs": 3,
+      "perf": 93,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 2878,
+      "cls": 0.0014,
+      "tbt": 18,
+      "fcp": 1213,
+      "perfSamples": [
+        96,
+        92,
+        93
+      ],
+      "lcpSamples": [
+        2413,
+        2878,
+        2883
+      ],
+      "fails": [
+        "first-contentful-paint",
+        "largest-contentful-paint",
+        "speed-index",
+        "max-potential-fid",
+        "interactive",
+        "unused-javascript",
+        "bf-cache",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/contact",
+      "form": "desktop",
+      "variant": "nopreload",
+      "runs": 3,
+      "perf": 100,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 539,
+      "cls": 0.0002,
+      "tbt": 0,
+      "fcp": 293,
+      "perfSamples": [
+        100,
+        100,
+        100
+      ],
+      "lcpSamples": [
+        434,
+        539,
+        553
+      ],
+      "fails": [
+        "unused-javascript",
+        "bf-cache",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
+      ]
+    },
+    {
+      "path": "/tr/contact",
+      "form": "desktop",
+      "variant": "preloader",
+      "runs": 3,
+      "perf": 98,
+      "a11y": 100,
+      "seo": 100,
+      "lcp": 557,
+      "cls": 0.0003,
+      "tbt": 0,
+      "fcp": 337,
+      "perfSamples": [
+        98,
+        98,
+        97
+      ],
+      "lcpSamples": [
+        671,
+        557,
+        533
+      ],
+      "fails": [
+        "speed-index",
+        "unused-javascript",
+        "bf-cache",
+        "legacy-javascript-insight",
+        "network-dependency-tree-insight",
+        "render-blocking-insight"
       ]
     }
-  }
+  ]
 }

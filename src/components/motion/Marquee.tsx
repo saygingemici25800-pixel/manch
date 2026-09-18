@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useLenis } from "lenis/react";
+import { useLenis } from "@/lib/lenis-store";
 import { useRef } from "react";
 
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useLenis } from "lenis/react";
+import { useLenisScroll } from "@/lib/hooks/useLenisScroll";
 import clsx from "clsx";
 import TransitionLink from "@/components/motion/TransitionLink";
 import { RollText } from "@/components/motion/RollText";
@@ -25,7 +25,7 @@ export default function Nav() {
   const [dark, setDark] = useState(false);
 
   // Lenis durunca direction 0 gelir — o event'lerde durumu değiştirme (aksi halde nav hemen geri gelir)
-  useLenis(({ direction, scroll }) => {
+  useLenisScroll(({ direction, scroll }) => {
     if (direction === 1 && scroll > 80) setHidden(true);
     else if (direction === -1 || scroll <= 80) setHidden(false);
   });

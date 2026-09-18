@@ -30,7 +30,9 @@ if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
 
 // Yüklendiğini store'a bildir (Faz 4 PageTransition buna bakacak).
 if (typeof window !== "undefined") {
-  void import("@/lib/motion-store").then((m) => m.useMotionStore.getState().setGsapReady());
+  void import("@/lib/motion-store")
+    .then((m) => m.useMotionStore.getState().setGsapReady())
+    .catch(() => {});
 }
 
 export { gsap, ScrollTrigger, SplitText, CustomEase };

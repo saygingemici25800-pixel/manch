@@ -1,62 +1,134 @@
 {
-  "date": "2026-09-17T11:51:07.514Z",
-  "base": "http://localhost:3100",
+  "date": "2026-09-18T03:06:52.867Z",
+  "base": "http://localhost:3101",
   "limitGzKB": 200,
   "rows": {
     "/tr": {
-      "initialFiles": 12,
-      "firstLoadRawKB": 612.6,
-      "firstLoadGzKB": 187.5,
-      "totalFiles": 18,
-      "totalRawKB": 772.9,
-      "totalGzKB": 249.7,
-      "lazyTop": [
-        "2wv9zu1kcwojy.js 48.9gz",
-        "0gq3shn_et2g6.js 9.5gz",
-        "2i3wn12a4oxx3.js 1.4gz",
-        "11t_-j-3mob-n.js 1.3gz"
+      "files": 11,
+      "firstLoadRawKB": 685.9,
+      "firstLoadGzKB": 214.6,
+      "top": [
+        {
+          "file": "136ves227d9m_.js",
+          "rawKB": 223.5,
+          "gzKB": 69.7
+        },
+        {
+          "file": "0nwv4rz1bpmbz.js",
+          "rawKB": 167.3,
+          "gzKB": 44.6
+        },
+        {
+          "file": "0cz1d0mv5g_q7.js",
+          "rawKB": 110,
+          "gzKB": 38.6
+        },
+        {
+          "file": "1z_o5uyxkdrnh.js",
+          "rawKB": 42.5,
+          "gzKB": 15.8
+        },
+        {
+          "file": "2c94sz_7_hmmd.js",
+          "rawKB": 38.9,
+          "gzKB": 11.8
+        }
       ]
     },
     "/tr/menu": {
-      "initialFiles": 12,
-      "firstLoadRawKB": 608.6,
-      "firstLoadGzKB": 186.2,
-      "totalFiles": 18,
-      "totalRawKB": 772.9,
-      "totalGzKB": 249.7,
-      "lazyTop": [
-        "2wv9zu1kcwojy.js 48.9gz",
-        "3jsra4l7a29_v.js 10.8gz",
-        "2i3wn12a4oxx3.js 1.4gz",
-        "11t_-j-3mob-n.js 1.3gz"
+      "files": 12,
+      "firstLoadRawKB": 683.8,
+      "firstLoadGzKB": 215.1,
+      "top": [
+        {
+          "file": "136ves227d9m_.js",
+          "rawKB": 223.5,
+          "gzKB": 69.7
+        },
+        {
+          "file": "0nwv4rz1bpmbz.js",
+          "rawKB": 167.3,
+          "gzKB": 44.6
+        },
+        {
+          "file": "0cz1d0mv5g_q7.js",
+          "rawKB": 110,
+          "gzKB": 38.6
+        },
+        {
+          "file": "1z_o5uyxkdrnh.js",
+          "rawKB": 42.5,
+          "gzKB": 15.8
+        },
+        {
+          "file": "2c94sz_7_hmmd.js",
+          "rawKB": 38.9,
+          "gzKB": 11.8
+        }
       ]
     },
     "/tr/about": {
-      "initialFiles": 12,
-      "firstLoadRawKB": 580.7,
-      "firstLoadGzKB": 177.2,
-      "totalFiles": 19,
-      "totalRawKB": 773.4,
-      "totalGzKB": 250.1,
-      "lazyTop": [
-        "2wv9zu1kcwojy.js 48.9gz",
-        "3jsra4l7a29_v.js 10.8gz",
-        "0gq3shn_et2g6.js 9.5gz",
-        "2i3wn12a4oxx3.js 1.4gz"
+      "files": 10,
+      "firstLoadRawKB": 651.1,
+      "firstLoadGzKB": 203,
+      "top": [
+        {
+          "file": "136ves227d9m_.js",
+          "rawKB": 223.5,
+          "gzKB": 69.7
+        },
+        {
+          "file": "0nwv4rz1bpmbz.js",
+          "rawKB": 167.3,
+          "gzKB": 44.6
+        },
+        {
+          "file": "0cz1d0mv5g_q7.js",
+          "rawKB": 110,
+          "gzKB": 38.6
+        },
+        {
+          "file": "1z_o5uyxkdrnh.js",
+          "rawKB": 42.5,
+          "gzKB": 15.8
+        },
+        {
+          "file": "2c94sz_7_hmmd.js",
+          "rawKB": 38.9,
+          "gzKB": 11.8
+        }
       ]
     },
     "/tr/contact": {
-      "initialFiles": 12,
-      "firstLoadRawKB": 585.4,
-      "firstLoadGzKB": 178.6,
-      "totalFiles": 20,
-      "totalRawKB": 778.7,
-      "totalGzKB": 252,
-      "lazyTop": [
-        "2wv9zu1kcwojy.js 48.9gz",
-        "3jsra4l7a29_v.js 10.8gz",
-        "0gq3shn_et2g6.js 9.5gz",
-        "2i3wn12a4oxx3.js 1.4gz"
+      "files": 11,
+      "firstLoadRawKB": 658.1,
+      "firstLoadGzKB": 205.2,
+      "top": [
+        {
+          "file": "136ves227d9m_.js",
+          "rawKB": 223.5,
+          "gzKB": 69.7
+        },
+        {
+          "file": "0nwv4rz1bpmbz.js",
+          "rawKB": 167.3,
+          "gzKB": 44.6
+        },
+        {
+          "file": "0cz1d0mv5g_q7.js",
+          "rawKB": 110,
+          "gzKB": 38.6
+        },
+        {
+          "file": "1z_o5uyxkdrnh.js",
+          "rawKB": 42.5,
+          "gzKB": 15.8
+        },
+        {
+          "file": "2c94sz_7_hmmd.js",
+          "rawKB": 38.9,
+          "gzKB": 11.8
+        }
       ]
     }
   }

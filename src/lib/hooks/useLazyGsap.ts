@@ -24,12 +24,16 @@ export function useLazyGsap(
     let cancelled = false;
     let ctx: gsap.Context | undefined;
     let cleanup: Cleanup;
-    void import("@/lib/gsap").then((g) => {
-      if (cancelled) return;
-      ctx = g.gsap.context(() => {
-        cleanup = setup(g, ctx as gsap.Context);
-      }, scope?.current ?? undefined);
-    });
+    void import("@/lib/gsap")
+      .then((g) => {
+        if (cancelled) return;
+        ctx = g.gsap.context(() => {
+          cleanup = setup(g, ctx as gsap.Context);
+        }, scope?.current ?? undefined);
+      })
+      // Hızlı gezinmede uçuştaki chunk isteği iptal olur (WebKit: ChunkLoadError).
+      // Animasyon isteğe bağlı — sessizce vazgeç, yakalanmamış reddi bırakma.
+      .catch(() => {});
     return () => {
       cancelled = true;
       if (typeof cleanup === "function") cleanup();
@@ -45,9 +49,11 @@ export function useGsapModule(): RefObject<GsapBundle | null> {
   const ready = useGsapReady();
   useEffect(() => {
     let cancelled = false;
-    void import("@/lib/gsap").then((g) => {
-      if (!cancelled) ref.current = g;
-    });
+    void import("@/lib/gsap")
+      .then((g) => {
+        if (!cancelled) ref.current = g;
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };

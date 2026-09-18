@@ -3,10 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 
-import Cart from "@/components/layout/Cart";
-import CookieBanner from "@/components/layout/CookieBanner";
 import Footer from "@/components/layout/Footer";
-import InfoModal from "@/components/layout/InfoModal";
 import LayoutDeferred from "@/components/layout/LayoutDeferred";
 import Nav from "@/components/layout/Nav";
 import Preloader from "@/components/layout/Preloader";
@@ -73,9 +70,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             {children}
             <Footer />
           </SmoothScroll>
-          <Cart />
-          <InfoModal />
-          <CookieBanner />
+          {/* Cart / InfoModal / CookieBanner artık LayoutDeferred içinde (Kural 46). */}
           <LayoutDeferred />
         </NextIntlClientProvider>
       </body>

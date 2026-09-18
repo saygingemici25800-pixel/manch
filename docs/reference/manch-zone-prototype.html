@@ -236,40 +236,44 @@
     for(var k=0;k<=H;k+=step){x.beginPath();x.moveTo(0,k);x.lineTo(W,k);x.stroke();}
     return c;
   }
-  /* ARKA DUVAR — MANCH kimdir + manifesto */
-  var MANIFESTO=[
-    ['01','Ekmeği biz açarız. Brioche her gün burada.'],
-    ['02','Sos hazır gelmez. Manch sos mutfakta çırpılır.'],
-    ['03','Köfte 120 gram. Tezgâhta smash’lenir, önceden pişmez.'],
-    ['04','Cheddar erimeden tabak çıkmaz.'],
-    ['05','Acele yok. Her şey sipariş verilince başlar.']
+  /* ARKA DUVAR — müze künyesi */
+  var WALL_TEXT=[
+    'Bir smash burger, aslında bir sıkışma meselesidir. Köfte tezgâha değdiği anda',
+    'yüzeyinde ince bir kabuk oluşur ve tadın çoğunu o kısacık an taşır.',
+    '',
+    'MANCH bu anı ciddiye alan bir mutfak. Brioche burada açılır, sos burada çırpılır,',
+    'köfte önceden pişmez. Hepsi aynı sebeple: acele edilen hiçbir şey iyi olmuyor.',
+    '',
+    'Gerisi yendikten sonra konuşulur.'
   ];
+  function wrapDraw(x,lines,left,top,lh){
+    var y=top;
+    lines.forEach(function(l){ if(l) x.fillText(l,left,y); y+=l?lh:lh*0.55; });
+    return y;
+  }
   function wallTextTex(){
     var W=2048,H=854,c=tiledWall(W,H,160),x=c.getContext('2d');
-    x.textAlign='center';
+    var left=W/2-560;
+    x.textAlign='left';
     x.fillStyle=C.berry;
-    x.font='700 150px Modak, Arial Black, sans-serif';
-    x.fillText('MANCH KİMDİR?',W/2,168);
-    x.font='400 40px "Mouse Memoirs", Arial, sans-serif';
-    x.fillStyle='rgba(74,16,48,.85)';
-    x.fillText('Fethiye Paspatur’da, el yapımı takıntılı bir smash burger mutfağı.',W/2,226);
-    // bordo pano
-    var px=W/2-660, py=272, pw=1320, ph=470;
-    x.fillStyle='rgba(106,31,59,.94)';
-    x.beginPath();x.roundRect(px,py,pw,ph,18);x.fill();
-    x.fillStyle=C.mustard;x.textAlign='left';
-    x.font='400 30px "Silkscreen", monospace';
-    x.fillText('M A N İ F E S T O',px+56,py+58);
-    var y=py+126;
-    MANIFESTO.forEach(function(m){
-      x.fillStyle='rgba(246,195,67,.9)';
-      x.font='400 34px "Silkscreen", monospace';
-      x.fillText(m[0],px+56,y);
-      x.fillStyle=C.cream;
-      x.font='400 46px "Mouse Memoirs", Arial, sans-serif';
-      x.fillText(m[1],px+134,y+2);
-      y+=72;
-    });
+    x.font='700 116px Modak, Arial Black, sans-serif';
+    x.fillText('MANCH',left,208);
+    x.fillStyle='rgba(106,31,59,.55)';
+    x.font='400 28px "Silkscreen", monospace';
+    x.fillText('F E T H İ Y E   ·   P A S P A T U R   ·   2 0 2 6',left+8,258);
+    // ince ayırıcı
+    x.strokeStyle='rgba(106,31,59,.35)';x.lineWidth=3;
+    x.beginPath();x.moveTo(left,300);x.lineTo(left+1120,300);x.stroke();
+    x.fillStyle='rgba(30,20,26,.88)';
+    x.font='400 46px "Mouse Memoirs", Arial, sans-serif';
+    var end=wrapDraw(x,WALL_TEXT,left,368,62);
+    // sağ alt köşe çizgisi — referanstaki künye kenarlığı
+    x.strokeStyle='rgba(106,31,59,.3)';x.lineWidth=3;
+    x.beginPath();x.moveTo(left+1120,end-46);x.lineTo(left+1120,end+34);
+    x.lineTo(left+760,end+34);x.stroke();
+    x.fillStyle='rgba(106,31,59,.6)';
+    x.font='400 26px "Silkscreen", monospace';
+    x.fillText('el yapımı, her katmanda',left,end+64);
     return tex(c);
   }
   /* ÖN DUVAR — geri dönünce görülecek slogan */
@@ -339,47 +343,38 @@
     x.fillStyle=g;x.fillRect(0,0,128,128);return tex(c);
   }
 
-  /* ============ Misu & Miyu (line-art billboard) ============ */
+  /* ============ Misu & Miyu ============ */
+  /* ---- Misu: logodan kesilmiş gerçek kapibara ---- */
+  var MISU_SRC='data:image/png;base64,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';
+  var misuImg=new Image(); var misuReady=false;
+  misuImg.onload=function(){ misuReady=true; redrawChars(); };
+  misuImg.src=MISU_SRC;
+
   function drawChar(x,who,w,h){
-    var accent = who==='misu'? C.berry : C.tile;
-    var cx=w/2, s=w/220;
     x.clearRect(0,0,w,h);
-    x.lineJoin='round';x.lineCap='round';
-    x.strokeStyle=C.ink;x.fillStyle=C.cream;x.lineWidth=7*s;
-    // body
-    x.beginPath();x.roundRect(cx-42*s,120*s,84*s,110*s,26*s);x.fill();x.stroke();
-    // legs
-    x.beginPath();x.moveTo(cx-20*s,228*s);x.lineTo(cx-20*s,258*s);
-    x.moveTo(cx+20*s,228*s);x.lineTo(cx+20*s,258*s);x.stroke();
-    x.lineWidth=5*s;
-    x.beginPath();x.ellipse(cx-22*s,262*s,13*s,8*s,0,0,7);x.fill();x.stroke();
-    x.beginPath();x.ellipse(cx+22*s,262*s,13*s,8*s,0,0,7);x.fill();x.stroke();
-    // scarf / accent band
-    x.fillStyle=accent;x.lineWidth=6*s;
-    x.beginPath();x.roundRect(cx-44*s,122*s,88*s,26*s,12*s);x.fill();x.stroke();
-    // head
-    x.fillStyle=C.cream;x.lineWidth=7*s;
-    x.beginPath();x.arc(cx,72*s,54*s,0,7);x.fill();x.stroke();
-    // ears
-    x.beginPath();x.moveTo(cx-40*s,34*s);x.lineTo(cx-52*s,2*s);x.lineTo(cx-16*s,18*s);x.closePath();x.fill();x.stroke();
-    x.beginPath();x.moveTo(cx+40*s,34*s);x.lineTo(cx+52*s,2*s);x.lineTo(cx+16*s,18*s);x.closePath();x.fill();x.stroke();
-    // face
-    x.fillStyle=C.ink;
-    x.beginPath();x.arc(cx-19*s,70*s,6.5*s,0,7);x.fill();
-    x.beginPath();x.arc(cx+19*s,70*s,6.5*s,0,7);x.fill();
-    x.lineWidth=5*s;x.beginPath();x.arc(cx,84*s,12*s,.15*Math.PI,.85*Math.PI);x.stroke();
-    x.fillStyle=C.pink;x.globalAlpha=.75;
-    x.beginPath();x.arc(cx-33*s,86*s,8*s,0,7);x.fill();
-    x.beginPath();x.arc(cx+33*s,86*s,8*s,0,7);x.fill();x.globalAlpha=1;
-    // the burger it is holding
-    var bx=cx+56*s, by=190*s;
-    x.lineWidth=5*s;
-    x.fillStyle=C.mustard;x.beginPath();x.arc(bx,by-11*s,17*s,Math.PI,0);x.fill();x.stroke();
-    x.fillStyle=C.berry;x.beginPath();x.roundRect(bx-18*s,by-11*s,36*s,10*s,3*s);x.fill();x.stroke();
-    x.fillStyle=C.mustard;x.beginPath();x.roundRect(bx-18*s,by-1*s,36*s,12*s,6*s);x.fill();x.stroke();
-    // arm to burger
-    x.beginPath();x.moveTo(cx+38*s,170*s);x.lineTo(bx-10*s,by-4*s);x.stroke();
+    if(!misuReady) return;
+    // orana göre sığdır, alta hizala
+    var s=Math.min(w/misuImg.width,(h*0.94)/misuImg.height);
+    var dw=misuImg.width*s, dh=misuImg.height*s;
+    var dx=(w-dw)/2, dy=h-dh;
+    x.drawImage(misuImg,dx,dy,dw,dh);
+    if(who==='miyu'){
+      // Miyu geçici: aynı çizim, karo mavisine boyanmış (gerçek çizimi beklerken)
+      x.globalCompositeOperation='source-in';
+      x.fillStyle=C.tile; x.fillRect(0,0,w,h);
+      x.globalCompositeOperation='source-over';
+    }
   }
+  function redrawChars(){
+    document.querySelectorAll('.pick canvas').forEach(function(c){
+      drawChar(c.getContext('2d'), c.parentElement.dataset.who, c.width, c.height);
+    });
+    if(window.__charMat){
+      drawChar(charCv.getContext('2d'),who,220,280); window.__charMat.map.needsUpdate=true;
+      drawChar(npcCv.getContext('2d'),other,220,280); window.__npc.material.map.needsUpdate=true;
+    }
+  }
+
   // roundRect polyfill for older engines
   if(!CanvasRenderingContext2D.prototype.roundRect){
     CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
@@ -582,13 +577,13 @@
   // character billboard
   var charCv=cv(220,280);
   var charMat=new THREE.MeshBasicMaterial({map:tex(charCv),transparent:true});
-  var hero=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.66),charMat);
+  var hero=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.66),charMat); window.__charMat=charMat;
   hero.position.set(0,.83,12);scene.add(hero);
   // NPC (the other mascot)
   var npcCv=cv(220,280);
   var npc=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.4),
     new THREE.MeshBasicMaterial({map:tex(npcCv),transparent:true}));
-  npc.position.set(-3.2,.7,-12);scene.add(npc);
+  npc.position.set(-3.2,.7,-12);scene.add(npc); window.__npc=npc; redrawChars();
 
   var shMat=new THREE.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false});
   var shadow=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.1),shMat);
