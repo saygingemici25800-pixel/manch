@@ -16,6 +16,7 @@ const ZoneCanvas = dynamic(
 );
 
 interface Readout {
+  nearFrame: string | null;
   char: { x: number; z: number; ang: number };
   cam: { ang: number; x: number | null; z: number | null };
   view: string;
@@ -34,8 +35,24 @@ export function ZoneStage() {
    */
   const [mounted, setMounted] = useState(true);
   const character = useZoneStore((s) => s.character);
+  const zoneState = useZoneStore((s) => s.state);
   const select = useZoneStore((s) => s.select);
   const ready = useZoneStore((s) => s.ready);
+  const closeFrame = useZoneStore((s) => s.closeFrame);
+
+  /**
+   * Lab'da `ZoneGate` yok (5.5.8'de gelecek), ama sahne gerçek durum makinesine göre
+   * davranıyor: `FramePrompt` yalnızca `state === "zone"` iken görünür. Kapıyı taklit
+   * etmek yerine store'u gezilebilir duruma alıyoruz — böylece lab, üründeki akışın
+   * aynısını gösterir.
+   */
+  useEffect(() => {
+    const s = useZoneStore.getState();
+    if (s.state === "closed") {
+      if (!s.character) s.select("misu");
+      s.ready();
+    }
+  }, []);
 
   // 5.5.10'a kadar karakter seçimi yok — lab'da elle seçilir.
   const pick = (who: Character) => {
@@ -72,6 +89,9 @@ export function ZoneStage() {
             <div>
               konum x {readout.char.x.toFixed(1)} z {readout.char.z.toFixed(1)}
             </div>
+            <div>
+              durum {zoneState} · yakın {readout.nearFrame ?? "—"}
+            </div>
           </div>
         )}
 
@@ -90,6 +110,16 @@ export function ZoneStage() {
               {who}
             </button>
           ))}
+          {zoneState === "pov" && (
+            <button
+              type="button"
+              data-testid="zone-close-frame"
+              onClick={closeFrame}
+              className="rounded-full border-2 border-berry-dk bg-mustard px-[1.2vw] py-[0.5vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry-dk max-md:px-[4vw] max-md:py-[2vw] max-md:text-[3vw]"
+            >
+              ← GERİ (POV)
+            </button>
+          )}
           <button
             type="button"
             data-testid="zone-toggle"

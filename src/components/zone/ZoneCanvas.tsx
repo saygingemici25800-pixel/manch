@@ -6,6 +6,8 @@ import * as THREE from "three";
 
 import { Character } from "@/components/zone/Character";
 import { Footprints } from "@/components/zone/Footprints";
+import { FramePrompt } from "@/components/zone/FramePrompt";
+import { Frames } from "@/components/zone/Frames";
 import { Hall } from "@/components/zone/Hall";
 import { Npc } from "@/components/zone/Npc";
 import { useFollowCamera } from "@/hooks/useFollowCamera";
@@ -14,7 +16,8 @@ import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { angLerp, normalizeAngle, smoothing } from "@/lib/zone/angles";
 import { mirrorFor, viewFor } from "@/lib/zone/character";
 import { CAMERA_FOV, CAM_DIST, CAM_HEIGHT } from "@/lib/zone/frames";
-import { CAM_START_ANG, CHAR_START, resetRuntime, resetZoneDebug, zoneRuntime } from "@/lib/zone/runtime";
+import { CAM_START_ANG, CHAR_START, resetRuntime, resetZoneDebug, teleport, zoneRuntime } from "@/lib/zone/runtime";
+import { releaseArts } from "@/lib/zone/art";
 import { releaseTextureSlots, textureLedger } from "@/lib/zone/textures";
 import { otherCharacter, useZoneStore, type Character as CharacterId } from "@/store/zone";
 import { colors } from "@/styles/tokens";
@@ -77,6 +80,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
     w.__ZONE_ANG__ = { angLerp, normalizeAngle, smoothing, viewFor, mirrorFor };
     // Ölçüm penceresi: test tepe ayrışmayı/kovaları kare döngüsünden okur, örneklemeden değil.
     w.__ZONE_DEBUG_RESET__ = resetZoneDebug;
+    w.__ZONE_TELEPORT__ = teleport;
     w.__ZONE_STATS__ = () => ({
       created: stats.created,
       disposed: stats.disposed,
@@ -160,6 +164,8 @@ export function ZoneCanvas({ className }: { className?: string }) {
           ? { x: +o.position.x.toFixed(2), y: +o.position.y.toFixed(3), z: +o.position.z.toFixed(2), rotY: o.rotation.y }
           : null;
       })(),
+      nearFrame: useZoneStore.getState().nearFrame,
+      zoneState: useZoneStore.getState().state,
       lastStepRot: zoneRuntime().debug.lastStepRot,
       peakSpread: zoneRuntime().debug.peakSpread,
       seenViews: { ...zoneRuntime().debug.seenViews },
@@ -171,6 +177,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
       delete w.__ZONE_STATS__;
       delete w.__ZONE_ANG__;
       delete w.__ZONE_DEBUG_RESET__;
+      delete w.__ZONE_TELEPORT__;
     };
   }, []);
 
@@ -211,6 +218,8 @@ export function ZoneCanvas({ className }: { className?: string }) {
         <directionalLight color={colors.sky} intensity={0.35} position={[-6, 6, -8]} />
 
         <Hall />
+        <Frames reduced={reduced} />
+        <FramePrompt />
         {/* Sıra önemli: `Character` simülasyon adımıdır (girdi → konum → İKİ açı),
             `FollowCamera` yalnızca o açıyı kamera konumuna çevirir. R3F `useFrame`
             aboneliklerini mount sırasına göre çalıştırır. */}
@@ -240,6 +249,7 @@ function SceneDisposer({ onDispose }: { onDispose: () => void }) {
       // Yuvalı dokular (salon + ayak izi) sahneye değil, yuva kaydına ait — sahne seviyesinde
       // bırakılırlar. `trackTexture` çift `dispose()`'u bir kez sayar.
       releaseTextureSlots();
+      releaseArts();
       if (liveScene === scene) liveScene = null;
       onDispose();
     };

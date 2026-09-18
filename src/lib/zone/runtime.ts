@@ -114,6 +114,15 @@ export function resetRuntime() {
   step.pending = null;
 }
 
+/**
+ * Dev/QA: karakteri bir noktaya taşır. Testin dört çerçeveyi dolaşması yürüyerek ~30 sn
+ * sürüyor; ölçülen şey yakınlık mantığı, yürüyüş değil.
+ */
+export function teleport(x: number, z: number) {
+  runtime.char.x = clamp(x, -CHAR_BOUND_X, CHAR_BOUND_X);
+  runtime.char.z = clamp(z, Z_MIN, Z_MAX);
+}
+
 /** `Footprints` her karede çağırır: bu karede basılacak iz varsa döner ve kuyruğu boşaltır. */
 export function consumeFootstep(): Footstep | null {
   const s = step.pending;

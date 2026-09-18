@@ -45,3 +45,4 @@ ham-fotograflar/
 
 # onizleme artiklari (masaustu uygulamasi uretiyor)
 .pv-*
+.next-build/

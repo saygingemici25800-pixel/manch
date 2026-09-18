@@ -344,7 +344,7 @@ export function footprintTexture(anisotropy?: number) {
 }
 
 /** Tablonun önündeki halka: kesikli dış çember + ince iç çember + içe bakan 4 ok (spec 5.1). */
-export function markerTexture() {
+export function markerTexture(anisotropy?: number) {
   const c = cv(512, 512);
   const x = c.getContext("2d")!;
   x.clearRect(0, 0, 512, 512);
@@ -378,11 +378,11 @@ export function markerTexture() {
     x.stroke();
     x.restore();
   }
-  return tex(c);
+  return tex(c, undefined, undefined, anisotropy, "marker");
 }
 
 /** Halkanın nabzı — beyaz çizilir, materyalde `mustard` ile renklendirilir. */
-export function pulseTexture() {
+export function pulseTexture(anisotropy?: number) {
   const c = cv(256, 256);
   const x = c.getContext("2d")!;
   x.clearRect(0, 0, 256, 256);
@@ -391,7 +391,7 @@ export function pulseTexture() {
   x.beginPath();
   x.arc(128, 128, 110, 0, Math.PI * 2);
   x.stroke();
-  return tex(c);
+  return tex(c, undefined, undefined, anisotropy, "pulse");
 }
 
 /** Karakterin altındaki yumuşak gölge — gölge haritası kapalı (spec 3.1). */

@@ -398,6 +398,74 @@ if (runs("scene")) {
       `sapma ${dd(st.npc.rotY, aim).toFixed(1)}°`);
   }
 
+  /* ===================== 5.5.5: çerçeveler + halka + prompt ===================== */
+
+  const STOPS = { menu: [-5.6, -4], crew: [5.6, -4], mascot: [-5.6, 6], visit: [5.6, 6] };
+  const tp = (x, z) => page.evaluate(({ x, z }) => window.__ZONE_TELEPORT__(x, z), { x, z });
+  const promptId = () =>
+    page.evaluate(() => document.querySelector("[data-testid=frame-prompt]")?.dataset.frame ?? null);
+
+  let stopsOk = true;
+  const stopDetail = [];
+  for (const [id, [x, z]] of Object.entries(STOPS)) {
+    await tp(x, z);
+    await page.waitForTimeout(400);
+    const near = (await read(page)).nearFrame;
+    const shown = await promptId();
+    if (near !== id || shown !== id) stopsOk = false;
+    stopDetail.push(`${id}:${near}/${shown}`);
+  }
+  ok(stopsOk, "dört durma noktası doğru çerçeveyi ve promptu açıyor", stopDetail.join(" · "));
+
+  /* Kabul kriteri: halkanın GÖRÜNÜR yarıçapı 2.3, tetikleme 2.6 — halkanın üstündeki her
+     nokta tetiklemenin İÇİNDE olmalı. "Halkanın üstündeyim ama açılmadı" olmamalı. */
+  const [mx, mz] = STOPS.menu;
+  const onRing = [];
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    // Duvara doğru taşanları salon içine çekmeye gerek yok: x sınırı −6.2, menu halkası
+    // −5.6 merkezli; 2.3 yarıçapın duvar tarafı kırpılır, kırpılan nokta da halkanın üstüdür.
+    await tp(mx + Math.cos(a) * 2.3, mz + Math.sin(a) * 2.3);
+    await page.waitForTimeout(220);
+    onRing.push((await read(page)).nearFrame);
+  }
+  ok(onRing.every((v) => v === "menu"),
+    "halkanın üstündeki 8 noktanın hepsi tetikliyor (görünür 2.3 < tetikleme 2.6)",
+    onRing.join(", "));
+
+  await tp(mx, mz + 2.8);
+  await page.waitForTimeout(400);
+  const offRing = await read(page);
+  ok(offRing.nearFrame === null && (await promptId()) === null,
+    "halkanın dışında (2.8) prompt kapalı",
+    `yakın ${offRing.nearFrame}`);
+
+  /* E ile gir, Esc ile çık (spec 7.2) — POV görseli 5.5.6'da, durum makinesi şimdi çalışıyor */
+  await tp(mx, mz);
+  await page.waitForTimeout(400);
+  await page.keyboard.press("e");
+  await page.waitForTimeout(400);
+  const inPov = await read(page);
+  ok(inPov.zoneState === "pov", "E tuşu tabloya giriyor", `durum ${inPov.zoneState}`);
+  ok((await promptId()) === null, "POV'da prompt gizleniyor");
+
+  const povAng = inPov.cam.ang;
+  await page.keyboard.down("ArrowRight");
+  await page.waitForTimeout(600);
+  await page.keyboard.up("ArrowRight");
+  const stillPov = await read(page);
+  ok(dd(povAng, stillPov.cam.ang) < 0.5,
+    "POV'da hareket girdileri kapalı (spec 6.1)",
+    `${deg(povAng).toFixed(0)}° → ${deg(stillPov.cam.ang).toFixed(0)}°`);
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+  const back = await read(page);
+  ok(back.zoneState === "zone", "Esc POV'dan çıkıyor", `durum ${back.zoneState}`);
+  ok(dd(povAng, back.cam.ang) < 0.5,
+    "POV'a girip çıkmak `camAng`'ı bozmuyor (spec 6.1)",
+    `${deg(povAng).toFixed(0)}° → ${deg(back.cam.ang).toFixed(0)}°`);
+
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;
   ok(src === "drawn" || src === "png", `sprite kaynağı raporlanıyor: ${src}`);

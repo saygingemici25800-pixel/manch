@@ -30,13 +30,21 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.4 bitti, sırada 5.5.5** (`Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık).
+- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.5 bitti, sırada 5.5.6** (POV geçişi + `FrameBoard`).
+- **Adım sırası değişti (2026-09-18, kullanıcı — kota kısıtı):** 5.5.5 çerçeveler → POV → OrderBoard → ZoneGate/CharacterSelect/ZoneLoader → StoryBoard → Joystick → performans. Gerekçe: **ilk dördü bitince Zone gösterilebilir hale geliyor** (girilir, gezilir, tabloya girilip sipariş verilir). Joystick klavye varken şart değil, StoryBoard içerik — ikisi de eşikten sonraya alındı.
+- **Geliştirme sunucusu `pnpm dev -p 3000` açık tutuluyor** (kullanıcı `http://localhost:3000/tr/lab/zone` adresinden canlı izliyor). Her adım sonunda ayakta olduğu doğrulanır.
 - Dal: **`zone/3d-galeri`** (5.5 çalışması burada). **`faz-1-yeniden` production dalı, canlı site oradan besleniyor — Zone kabul kriterlerini geçene kadar BİRLEŞTİRİLMEZ.**
 - Fazlar 1–9 tamamlandı, site yayında. Kalan: domain bağlama + Faz 8'den devreden performans borcu.
 - **CANLI (yeni site): https://manch-v2.vercel.app** — Vercel projesi `manch-v2`, dal **`faz-1-yeniden`**, build 1 dk, smoke 31/31.
 - **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
 - ✅ **Vercel `manch-v2` production branch = `faz-1-yeniden`** (2026-09-18, panodan ayarlandı). Bu dala yapılan push artık doğrudan `manch-v2.vercel.app`'i günceller; doğrulandı (hero düzeltmesi 49 s'de production'a çıktı).
 - **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43). Env **Preview kapsamına da** eklendi — ilk push'ta preview build Kural 57 ile kırılmıştı (koruma çalıştı); eklendikten sonra push → Ready (~40 s), auto-deploy doğrulandı.
+- **Zone durumu (5.5.5 sonu):** dört tablo duvarda (ink kutu + krem paspartu + **gerçek fotoğraf**, üstünde hardal spot bandı), önlerinde dönen zemin halkası + nabız, yaklaşınca `drei/<Html>` prompt (başlık + GİR). `E` ile girilir, `Esc` ile çıkılır; POV'da hareket kapalı, prompt gizli. Sahne **56 mesh · 21 doku**.
+  · `zone-camera-check` → **52/52** · `zone-leak-check` → 6 tur, **doku 21 sabit**, kapalıyken 0, konsol 0
+  · `zone-bundle-check` → three ana bundle'da yok, `/tr` **215.5 kB gz**
+  · Kabul kriteri doğrulandı: **halkanın üstündeki 8 noktanın hepsi tetikliyor** (görünür yarıçap 2.3 < tetikleme 2.6), 2.8'de kapanıyor
+  · Görseller gerçek dosyalardan yükleniyor (4 çerçeve, 404 yok); `artPlaceholderTexture` yalnızca yüklenemezse devrede kalır
+  · Ekranlar: `docs/screens/faz-5.5.5-zone-1440-{salon,halka,tablo}.png`, `faz-5.5.5-zone-390-halka.png`
 - **Zone durumu (5.5.4 sonu):** salonda iki maskot var — oyuncu yürüyor, **seçilmeyen maskot** salonun dibinde (x −3.2, z −12) `front` görünümüyle idle duruyor; ikisi de billboard yapıyor. Arkada **18'lik ayak izi havuzu** (0.26 sn, sağ/sol dönüşümlü, saniyede 0.28 sönme, **dönüş ve konum hareket yönünden**). Tavan ışık bantları prototip ölçüsünde (0.5 × 36, y 5.96). Sahne 32 mesh · 15 doku.
   · `scripts/zone-camera-check.mjs` → **44/44**, üç ardışık koşu temiz (oynaklık giderildi — Kural 60)
   · `zone-leak-check` → 6 tur: bağlam 1 · canvas 1 · **canlı doku 15 sabit** · ölü bağ 0 · **kapalıyken 0** · konsol 0. Tur içinde kısa yürüyüş var: ayak izi dokusu ilk adımda üretildiği için, yürümeden ölçmek o dokuyu kapsam dışında bırakıyordu
@@ -53,7 +61,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter çizimleri hâlâ yok** — `drawCapy()` geçici sprite üretiyor. PNG yolu (`TextureLoader`) yazıldı **ve uçtan uca denendi** (8 geçici PNG ile: `spriteSource` → `png`, doku sayısı sabit, ölü bağ 0). Çizimler gelince `character.ts`'teki `MASCOT_SPRITE_BASE` sabiti `"/images/mascots"` yapılır — **başka hiçbir şey değişmez**. Otomatik yoklama bilerek yapılmıyor: olmayan PNG'ye istek 404 üretip Kural 53'e takılır. Dev'de `?sprites=<yol>` ile aynı yol denenebilir.
   · Ekranlar: `docs/screens/faz-5.5.3-zone-1440-{baslangic,sag,sol,180,donusta,miyu}.png`, `faz-5.5.3-zone-375{,-180}.png`
   · 5.5.2 ekranları: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
-- Son başarılı build: 2026-09-18 **5.5.4 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- Son başarılı build: 2026-09-18 **5.5.5 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
@@ -183,6 +191,29 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     tek bir nesne + onu değiştiren plain fonksiyonlar (`lib/zone/runtime.ts`); bileşen yalnızca çağırır,
     React hiç render etmez. Sahne tekil olduğu için modül seviyesi doğru modeldir; sahne kurulurken
     `resetRuntime()` alanları **yerinde** sıfırlar (nesne kimliği korunur, bayat referans kalmaz).
+
+64. **Tempo — derinlemesine doğrulama ucuz değil (karar 2026-09-18, kullanıcı).**
+    Haftalık kota sınırlı. **Bir davranış doğru çalışıyorsa daha derin ölçme.** Varsayılan akış:
+    otomatik kontroller yeşil + gözle bakınca doğru görünüyor → **geç**. Piksel farkı, çoklu
+    örnekleme, A/B ekran karşılaştırması gibi ağır doğrulamalar yalnızca **bir kontrol
+    DÜŞTÜĞÜNDE** açılır; hata ayıklama aracıdır, rutin değil.
+    Gerekçe: ayak izi adımında (5.5.4) 28 dakika ve 18 bin token harcandı — iş kaliteliydi ama
+    **süs bir özellik** için ağırdı. Maliyet, özelliğin ağırlığıyla orantılı olmalı.
+    Kural 59 ve 60 geçerliliğini korur: gözle bakmak ve testi sabote etmek ucuzdur, bırakılmaz.
+    Bırakılan şey, zaten geçmiş bir şeyi ikinci/üçüncü yöntemle tekrar kanıtlamaktır.
+
+65. **`pnpm dev` açıkken build almak çıktıyı bozar** — ikisi de varsayılan olarak `.next`
+    klasörünü kullanır. Ölçüm build'leri ayrı klasöre alınır:
+    `NEXT_DIST_DIR=.next-build pnpm build` (+ `pnpm start` aynı env ile). `next.config.ts`
+    `distDir`'i bu değişkenden okur; `.next-build/` `.gitignore`'da.
+    **Ayrıca: ölçümden önce portun boş olduğunu doğrula.** `pkill -f "next start"` her zaman
+    işe yaramıyor; arkada kalan eski sunucu **eski build'i servis etmeye devam ediyor** ve
+    ölçüm sessizce yanlış çıkıyor. 2026-09-18'de bu yaşandı: `/tr` ilk yüklemesi 215 yerine
+    **141 kB** ölçüldü ve %34'lük sahte bir "iyileşme" gibi göründü; gerçekte zombi sunucu
+    bozuk bir build'i servis ediyordu (chunk'lar 500 dönüyordu). Doğru kalıp:
+    `lsof -ti tcp:<port> | xargs kill -9` → portun boşluğunu doğrula → sunucuyu başlat →
+    `Ready` satırını gör → ölç. **Beklenmedik İYİLEŞME de beklenmedik kötüleşme kadar
+    şüphelidir** — açıklanamayan bir kazanç, çoğu zaman ölçümün kendisinin bozulduğunu söyler.
 
 ---
 
@@ -389,13 +420,18 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] **5.5.2** `ZoneCanvas` + `Hall` (10 mesh, ön duvar z=+20 dahil, künye metni i18n'den, `document.fonts.ready` yeniden çizimi) + `/lab/zone`
 - [x] **5.5.3** `Character` (4 açılık sprite, **billboard**) + `useZoneControls` + `useFollowCamera` + `lib/zone/{angles,character,runtime}.ts` + `scripts/zone-camera-check.mjs` (32/32)
 - [x] **5.5.4** `Footprints` (18'lik havuz, hareket yönüne göre) + `Npc` (billboard'lu, idle) + ışık bantları prototip ölçüsünde
-- [ ] **5.5.5** `Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık
-- [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
-- [ ] **5.5.7** POV geçişi + `FrameBoard`
-- [ ] **5.5.8** `OrderBoard` (15 satır, `useCartStore`, WhatsApp, scroll korunması)
-- [ ] **5.5.9** `StoryBoard` × 3
-- [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
+- [x] **5.5.5** `Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık (52/52)
+- [ ] **5.5.6** POV geçişi + `FrameBoard`  *(eski 5.5.7)*
+- [ ] **5.5.7** `OrderBoard` (15 satır, `useCartStore`, WhatsApp, scroll korunması)  *(eski 5.5.8)*
+- [ ] **5.5.8** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla  *(eski 5.5.10)*
+- [ ] **5.5.9** `StoryBoard` × 3  *(eski 5.5.9)*
+- [ ] **5.5.10** `Joystick` + reduced-motion + erişilebilirlik  *(eski 5.5.6)*
 - [ ] **5.5.11** Performans + Kural 59 gözle bakma
+
+> **Sıra değişti (2026-09-18, kullanıcı — kota kısıtı).** Gerekçe: **ilk dördü bitince Zone
+> gösterilebilir hale geliyor** — girilebiliyor, gezilebiliyor, tabloya girilip sipariş
+> verilebiliyor. `Joystick` ve `StoryBoard` bu eşikten sonraya kaldı: ikisi de Zone'un
+> gösterilebilmesi için şart değil (klavye zaten çalışıyor, hikâye panoları içerik).
 - [ ] ✅ Kabul: `docs/manch-zone-3d.md` bölüm 11
 
 **Her adımda koşulacak script'ler:**
@@ -504,6 +540,9 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.4 | Ayak izi görünürlüğünü **piksel farkıyla** ölçmeye çalıştım, sonuç yanıltıcı çıktı | İki kare arasındaki farkın neredeyse tamamı **NPC'nin idle salınımıydı**; izler farkın içinde kayboluyordu. Maske görüntüsü bunu gösterdi: tek küçük küme, hem de kare ortasında (NPC'nin yeri) | Ölçüm doğrudan yapıldı: her izin dünya konumu kameraya **projelendirilip** kadrajda olup olmadığı sayılıyor (`footprints.onScreen`). Sonuç: 8–11 canlı izin yalnızca 1–2'si kadrajda |
 | 2026-09-18 | 5.5.4 | `acquireCharacterSet` tekildi; NPC ikinci maskotu isteyince ikisi birbirinin dokusunu bırakacaktı | Tek yuva, iki tüketici: NPC her karede `acquire` çağırdıkça set sıfırdan üretilir, oyuncununki çöpe giderdi | Setler **karakter başına** `Map`'te; `releaseCharacterSets()` hepsini bırakır. Doku defteri 10 → 14 sabit (2 karakter × 4 + 5 salon + 1 gölge) |
 | 2026-09-18 | 5.5.3/4 | `zone-camera-check` **koşular arası oynadı** — aynı kod bir koşuda 44/44, ötekinde 41/44 | Üçü de ölçüm hatası: ① kare içindeki tepe ayrışma `page.evaluate` ile örnekleniyordu (gidiş-dönüş 70–90 ms, tepe 0.3 sn) → 74° yerine 67° ② süre "örnek sayısı × adım" ile hesaplanıyordu (1.4 sn → 585 ms) ③ aynalama testi dönüş yönünü **varsayıyordu** | ① tepe ve kovalar **kare döngüsünde** birikiyor (`debug.peakSpread`, `seenViews`), test sıfırlayıp okuyor ② gerçek zaman damgası ③ yön ölçülen açıdan türetiliyor + **kuralın kendisi** her örnekte denetleniyor. Işınlanma ölçütü de mesafeden **hıza** çevrildi (sunucu takılınca örnek arası uzuyordu). **Üç ardışık temiz koşu** ile kapatıldı (Kural 60) |
+| 2026-09-18 | 5.5.5 | POV'a girilip **bir daha çıkılamıyordu** (`Esc` çalışmıyordu) | `useZoneControls(!povOpen)` POV'da dinleyicinin TAMAMINI kaldırıyordu; hareket gerçekten duruyordu ama çıkış tuşu da duyulmuyordu. Kapatılacak olan hareket, çıkış değil | Dinleyici her zaman bağlı, durum **tuş tuş** süzülüyor: `Esc` her durumda, hareket yalnızca `state === "zone"` iken. Ayrıca POV'a geçerken basılı tuşlar bırakılıyor (store aboneliği) |
+| 2026-09-18 | 5.5.5 | Lab'da prompt hiç görünmüyordu | `FramePrompt` `state === "zone"` şartına bakıyor (doğru), ama lab'da `ZoneGate` olmadığı için store `"closed"` kalıyordu | Lab sahneyi mount ederken store'u gezilebilir duruma alıyor (`select` + `ready`). Prompt'un üretim kapısı gevşetilmedi |
+| 2026-09-18 | 5.5.5 | Bundle ölçümü `/tr` için **141 kB** dedi (gerçek 215.5) — %34'lük sahte "iyileşme" | 3101 portunda **eski bir `next start` süreci** kalmıştı; `pkill` onu öldürmemişti. Zombi sunucu, dev sunucusu açıkken alınmış BOZUK bir build'i servis ediyordu (chunk'lar 500). Ölçüm doğru çalıştı, yanlış sunucuyu ölçtü | `lsof -ti tcp:<port> | xargs kill -9` + port boşluğu doğrulaması; ölçüm build'leri `NEXT_DIST_DIR=.next-build` ile ayrı klasöre (Kural 65). Beklenmedik iyileşme de araştırıldı — sahte çıktı |
 
 ---
 

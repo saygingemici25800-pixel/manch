@@ -512,7 +512,7 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - [ ] **5.5.2** `ZoneCanvas` + `Hall` (ön duvar + künye + `document.fonts.ready`) — `/lab/zone`
 - [x] **5.5.3** `Character` (4 açılık sprite + **billboard**) + `useZoneControls` + **yön takipli kamera** — `lib/zone/{angles,character,runtime}.ts`, `hooks/{useZoneControls,useFollowCamera}.ts`, `scripts/zone-camera-check.mjs` (32/32)
 - [x] **5.5.4** `Footprints` + `Npc` + ışık bantları — 18'lik havuz, ikinci sprite seti, prototip ölçüsünde bantlar
-- [ ] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık
+- [x] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık — halkanın üstündeki 8 nokta da tetikliyor
 - [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
 - [ ] **5.5.7** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard`
 - [ ] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, WhatsApp, scroll korunması
