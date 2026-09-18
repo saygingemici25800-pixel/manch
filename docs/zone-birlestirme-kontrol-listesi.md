@@ -2,8 +2,13 @@
 
 > Hazırlanma tarihi: **2026-09-18**, Faz 5.5.11 kapanışı · Dal: `zone/3d-galeri`
 > **Güncellendi:** altı kararın uygulanmasından sonra (FOV 80 · rakamlar `font-ui` · spec netleştirmesi).
-> **Bu liste birleştirme YAPMAZ.** `faz-1-yeniden` Vercel production dalıdır; bu dala yapılan
-> her push doğrudan `manch-v2.vercel.app`'i günceller. Merge ve PR **kullanıcı onayına bağlı**.
+> ## ✅ KAPANDI — birleştirme yapıldı (2026-09-18)
+>
+> `zone/3d-galeri` → `faz-1-yeniden`, `--no-ff`, **çakışma yok**, 62 dosya.
+> Birleştirme commit'i **`a21cf82`** · yedek etiketi **`yedek-zone-oncesi`** (`f860aca`, origin'de).
+> **Zone canlı: https://manch-v2.vercel.app** · smoke **31/31** · 12 sayfa regresyon temiz.
+>
+> Aşağıdaki liste kayıt olarak duruyor; bölüm 5'teki adımlar uygulandı.
 
 ---
 
@@ -112,3 +117,30 @@ Birleştirme kararı verilirken bunların canlıda görüneceği bilinerek veril
 4. Beş script yeniden (yukarıdaki komutlar), `BROWSER=webkit node scripts/lab-check.mjs` (Kural 45)
 5. Push → Vercel `manch-v2` otomatik deploy → `node scripts/smoke.mjs https://manch-v2.vercel.app`
 6. **Canlıda gözle bak** (Kural 59): ana sayfa → Zone kapısı → sahne, mobil + masaüstü
+
+---
+
+## 7 · Kapanış notu (2026-09-18)
+
+**Kod tarafı kapalı.** Faz 5.5'in tüm adımları ve spec bölüm 11 kabul kriterleri geçildi;
+birleştirilmiş dalda beş script yeşil, lint + build temiz, production'da gözle bakma yapıldı.
+
+**Kalan üç eksik Saygın'dan bekleniyor — hiçbiri kod işi değil:**
+
+1. **Misu & Miyu'nun 8 çizimi** (4 açı × 2 karakter, `public/images/mascots/`). Gelene kadar
+   `drawCapy()` geçici sprite üretiyor. Geldiğinde değişecek tek şey:
+   `src/lib/zone/character.ts` → `MASCOT_SPRITE_BASE = "/images/mascots"`.
+2. **İçecek fiyatları** (Limonata · Soft Drink · Ayran). Şu an `price: null` → tahtada
+   **YAKINDA** rozeti, `+` devre dışı, toplama girmiyor. `src/data/menu.ts`'e gerçek fiyat
+   girildiği an satır kendiliğinden normale döner — koda dokunulmaz.
+3. **Menü metinlerinin müşteri onayı** (25 ürün TR+EN taslak). `Menu.disclaimer` bunu sitede
+   de duyuruyor: "Menü ve fiyatlar örnek amaçlıdır, değişebilir."
+
+**Kapanan kararlar** (yeniden açılmayacak): FOV_MAX 80 · rakamlar `font-ui` (fiyat/adet/toplam) ·
+"EST. 2026" Modak kalır · POV'da yeni iz basılmaz, mevcut izler söner · fiber `THREE.Clock`
+uyarısı kalıcı kabul · `docs/screens/` budanmaz, Kural 69 geçerli.
+
+**Gerçek cihaz testi** (fiziksel telefon) yapılmadı — karar gereği birleştirmeyi bloklamıyordu,
+canlıdan bakılacak. Otomatik tur mobil kırılımda (390×844, dpr 3) production URL'i üzerinden
+koşuldu ve temiz geçti, ama bu bir **emülasyon**; gerçek cihazda dokunmatik joystick ve
+Safari/WebKit davranışı Saygın tarafından teyit edilmeli.
