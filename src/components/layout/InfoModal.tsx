@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import clsx from "clsx";
 import { KraftCard } from "@/components/ui/KraftCard";
 import { RollText } from "@/components/motion/RollText";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 import { site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
 import { useDialog } from "@/lib/hooks/useDialog";
@@ -36,7 +37,7 @@ export default function InfoModal() {
             <dt className="text-berry">{t("email")}</dt>
             <dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
             <dt className="text-berry">{t("hours")}</dt>
-            <dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
+            <dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
             <dt className="text-berry">Instagram</dt>
             <dd><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{site.social.instagramHandle}</a></dd>
           </dl>

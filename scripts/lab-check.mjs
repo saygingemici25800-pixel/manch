@@ -517,6 +517,105 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   await ctx.close();
 }
 
+// ============================ FAZ 7 — SEO & ERİŞİLEBİLİRLİK ============================
+{
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  const q7 = await ctx.newPage();
+
+  // --- metadata rotaları
+  const meta = [];
+  for (const u of ["/icon/32", "/icon/192", "/icon/512", "/apple-icon", "/manifest.webmanifest",
+                   "/robots.txt", "/sitemap.xml", "/tr/opengraph-image", "/en/opengraph-image"]) {
+    const r = await q7.goto(`${BASE}${u}`);
+    meta.push(`${u}=${r.status()}`);
+  }
+  t("SEO · 9 metadata rotası 200", meta.every((m) => m.endsWith("=200")), meta.filter((m) => !m.endsWith("=200")).join(" ") || "hepsi 200");
+
+  // --- head: canonical + hreflang + og:image (Kural 48: attribute adı case-insensitive)
+  for (const path of ["/tr", "/tr/menu", "/en/about"]) {
+    await q7.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded" });
+    await q7.waitForTimeout(700);
+    const head = await q7.evaluate(() => ({
+      canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
+      langs: [...document.querySelectorAll('link[rel="alternate"]')].map((l) => l.getAttribute("hreflang")).sort(),
+      og: document.querySelector('meta[property="og:image"]')?.getAttribute("content"),
+      tw: document.querySelector('meta[name="twitter:card"]')?.getAttribute("content"),
+      title: document.title,
+    }));
+    const ok = head.canonical?.endsWith(path) &&
+      JSON.stringify(head.langs) === JSON.stringify(["en", "tr", "x-default"]) &&
+      !!head.og && head.tw === "summary_large_image";
+    t(`SEO · ${path} canonical + hreflang(3) + og:image + twitter`, !!ok, `"${head.title}" · ${head.canonical} · ${head.langs.join(",")}`);
+  }
+
+  // --- JSON-LD: KURAL B (bilinmeyen alan YAZILMAZ)
+  await q7.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await q7.waitForTimeout(700);
+  const ld = await q7.evaluate(() => {
+    const el = document.querySelector('script[type="application/ld+json"]');
+    return el ? JSON.parse(el.textContent) : null;
+  });
+  const must = ["@context", "@type", "name", "url", "image", "servesCuisine", "hasMenu", "address", "sameAs", "telephone", "email"];
+  const banned = ["openingHours", "openingHoursSpecification", "priceRange"];
+  t("JSON-LD · Restaurant + 11 bilinen alan", !!ld && ld["@type"] === "Restaurant" && must.every((k) => k in ld),
+    must.filter((k) => !(ld ?? {})[k]).join(", ") || `${Object.keys(ld ?? {}).length} alan`);
+  t("KURAL B · openingHours / priceRange JSON-LD'de YOK", banned.every((k) => !(k in (ld ?? {}))),
+    banned.filter((k) => k in (ld ?? {})).join(", ") || "hiçbiri yok");
+  const emptyish = Object.entries(ld ?? {}).filter(([, v]) => v === "" || v === null ||
+    (typeof v === "string" && /yakında|coming soon|todo/i.test(v)));
+  t("KURAL B · boş string / 'Yakında' değeri yok", emptyish.length === 0, emptyish.map(([k]) => k).join(", ") || "temiz");
+  t("JSON-LD · telefon E.164 (boşluksuz)", /^\+\d+$/.test(ld?.telephone ?? ""), `telephone=${ld?.telephone}`);
+
+  // --- KURAL A: "Yakında" rozeti görünen arayüzde
+  const soonCounts = {};
+  for (const path of ["/tr", "/tr/menu", "/tr/contact"]) {
+    await q7.goto(`${BASE}${path}?nopreload=1`, { waitUntil: "domcontentloaded" });
+    await q7.waitForSelector("footer");
+    await q7.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 60)); } });
+    await q7.waitForTimeout(900);
+    soonCounts[path] = await q7.evaluate(() => document.querySelectorAll("[data-soon]").length);
+  }
+  const soonTotal = Object.values(soonCounts).reduce((a, c) => a + c, 0);
+  t("KURAL A · 'Yakında' rozeti görünen arayüzde", soonTotal >= 3,
+    Object.entries(soonCounts).map(([k, v]) => `${k}:${v}`).join(" · "));
+
+  // --- focus ring her etkileşimli öğede
+  await q7.goto(`${BASE}/tr/contact?nopreload=1`, { waitUntil: "domcontentloaded" });
+  await q7.waitForTimeout(1500);
+  const ring = await q7.evaluate(() => {
+    const els = [...document.querySelectorAll("a[href], button:not([disabled])")].slice(0, 14);
+    let ok = 0;
+    for (const el of els) {
+      el.focus();
+      const cs = getComputedStyle(el);
+      const w = parseFloat(cs.outlineWidth);
+      if (cs.outlineStyle !== "none" && w >= 1) ok++;
+    }
+    return { total: els.length, ok };
+  });
+  t("A11y · focus ring tüm etkileşimli öğelerde", ring.ok === ring.total, `${ring.ok}/${ring.total}`);
+
+  // --- RollText ikinci kopya aria-hidden (Kural 9)
+  await q7.goto(`${BASE}/tr?nopreload=1`, { waitUntil: "domcontentloaded" });
+  await q7.waitForTimeout(2400);
+  const roll = await q7.evaluate(() => {
+    const groups = [...document.querySelectorAll(".group\\/roll")];
+    return { n: groups.length, hidden: groups.filter((g) => g.querySelector("[aria-hidden=true]")).length };
+  });
+  t("Kural 9 · RollText ikinci kopya aria-hidden", roll.n === 0 || roll.n === roll.hidden, `${roll.hidden}/${roll.n}`);
+
+  // --- footer wordmark dekoratif mi (kontrast 1.3:1, karar 2026-09-18)
+  const wm = await q7.evaluate(() => {
+    const f = document.querySelector("footer");
+    const svgs = [...f.querySelectorAll("svg")].sort((a, c) => c.getBoundingClientRect().width - a.getBoundingClientRect().width);
+    return { ariaHidden: svgs[0]?.getAttribute("aria-hidden"), w: Math.round(svgs[0]?.getBoundingClientRect().width ?? 0) };
+  });
+  t("A11y · footer dev wordmark aria-hidden (dekoratif)", wm.ariaHidden === "true", `genişlik ${wm.w}px, aria-hidden=${wm.ariaHidden}`);
+
+  // --- öksüz mesaj anahtarı kalmadı
+  await ctx.close();
+}
+
 console.log("\n=== GEÇTİ ===");
 ok.forEach((x) => console.log("  ✓ " + x));
 if (bad.length) { console.log("\n=== KALDI ==="); bad.forEach((x) => console.log("  ✗ " + x)); }

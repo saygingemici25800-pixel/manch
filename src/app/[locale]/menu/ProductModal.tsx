@@ -7,6 +7,7 @@ import { RollText } from "@/components/motion/RollText";
 import { KraftCard } from "@/components/ui/KraftCard";
 import Image from "next/image";
 import { Placeholder } from "@/components/ui/Placeholder";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
@@ -58,7 +59,7 @@ export function ProductModal({ product, onClose }: Props) {
                 <button type="button" data-cursor-hide data-testid="product-close" onClick={onClose} aria-label={tc("close")} className="text40 text-[1.1vw] max-md:text-[4vw] underline underline-offset-4">✕</button>
               </div>
               <p className="text40 text-[1.2vw] max-md:text-[4.2vw] normal-case tracking-normal">{product.desc[locale]}</p>
-              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} TL` : t("priceTodo")}</p>
+              <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} TL` : <SoonBadge />}</p>
               {/* Faz 4'te eklenen anahtar — 2/2: modalda fiyatın yanında */}
               <p data-testid="modal-disclaimer" className="font-ui text-[0.7vw] max-md:text-[2.6vw] normal-case text-berry-dk">{tm("disclaimer")}</p>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
@@ -27,7 +28,7 @@ export function Location() {
             {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
           </address>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-            <dt className="text-mustard">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : t("hoursSoon")}</dd>
+            <dt className="text-mustard">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
             <dt className="text-mustard">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
           </dl>
           <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">

@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { CheckerBand } from "@/components/ui/CheckerBand";
 import { Placeholder } from "@/components/ui/Placeholder";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
@@ -70,7 +71,7 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
             {p.name[locale]}
           </h3>
           <span className="shrink-0 font-ui text-[1.1vw] text-berry-dk max-md:text-[4vw]">
-            {p.price == null ? t("priceOnRequest") : `${p.price} TL`}
+            {p.price == null ? <SoonBadge /> : `${p.price} TL`}
           </span>
         </div>
         <p className="font-ui text-[0.95vw] leading-snug text-ink max-md:text-[3.4vw]">

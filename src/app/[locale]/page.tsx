@@ -1,5 +1,6 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Build } from "@/components/sections/Build";
 import { Handmade } from "@/components/sections/Handmade";
@@ -10,15 +11,31 @@ import { MarqueeBand } from "@/components/sections/MarqueeBand";
 import { MisuMiyu } from "@/components/sections/MisuMiyu";
 import { TheHits } from "@/components/sections/TheHits";
 import { Zone } from "@/components/sections/Zone";
+import { clientMessages } from "@/i18n/client-messages";
+import type { Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Meta" });
+  // Ana sayfada başlık şablonsuz (Kural 38).
+  return pageMetadata({
+    locale: locale as Locale,
+    path: "",
+    title: t("title"),
+    description: t("description"),
+    absoluteTitle: true,
+  });
+}
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale); // Kural 16
 
-  // Sayfaya özel client namespace'i (Kural 44) — Home'u client component'lere de ver.
-  const messages = await getMessages();
+  // Kural 44: temel namespace'ler + sayfaya özel "Home".
+  const messages = clientMessages(await getMessages(), ["Home"]);
 
   return (
     <NextIntlClientProvider messages={messages}>

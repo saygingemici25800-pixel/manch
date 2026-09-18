@@ -15,8 +15,7 @@
       "sub": "Fethiye's smash burger zone. Smash from the kitchen, first bite from the table.",
       "badge": "MISU & MIYU · THE FACES OF MANCH · ",
       "imageAlt": "MANCH kitchen — smash patties on the grill",
-      "burgerAlt": "Classic Manch Burger",
-      "imageAltDesktop": "MANCH kitchen — the smash moment"
+      "burgerAlt": "Classic Manch Burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
@@ -112,7 +111,8 @@
     "todo": "Coming soon",
     "close": "Close",
     "skipToContent": "Skip to content",
-    "priceOnRequest": "Ask for price"
+    "priceOnRequest": "Ask for price",
+    "soon": "COMING SOON"
   },
   "Cart": {
     "added": "ADDED TO CART",

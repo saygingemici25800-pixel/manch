@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 import { KraftCard } from "@/components/ui/KraftCard";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { site } from "@/lib/site";
@@ -29,24 +30,24 @@ export default function ContactClient() {
           {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
         </address>
         <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-          <dt className="text-berry">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
-          <dt className="text-berry">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : tc("todo")}</dd>
-          <dt className="text-berry">{t("email")}</dt><dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
+          <dt className="text-berry">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4">{site.contact.phoneDisplay}</a> : tc("todo")}</dd>
+          <dt className="text-berry">{t("hours")}</dt><dd>{site.hours ? site.hours.map((h) => `${h.days} ${h.open}–${h.close}`).join(" · ") : <SoonBadge />}</dd>
+          <dt className="text-berry">{t("email")}</dt><dd>{site.contact.email ? <a href={`mailto:${site.contact.email}`} className="inline-flex min-h-[24px] items-center underline underline-offset-4 break-all">{site.contact.email}</a> : tc("todo")}</dd>
         </dl>
 
         <div className="flex flex-wrap gap-[0.8vw] max-md:gap-[2.5vw]">
           {WA ? (
             <a href={WA} target="_blank" rel="noopener noreferrer" data-cursor-hide data-testid="wa-button" className={`${pill} bg-berry text-cream hover:bg-ink`}><RollText>{t("whatsapp")}</RollText></a>
           ) : (
-            <button type="button" disabled aria-disabled="true" data-testid="wa-button" className={`${pill} cursor-not-allowed bg-berry/40 text-cream hover:scale-100`}>{t("whatsapp")} · {tc("todo")}</button>
+            <button type="button" disabled aria-disabled="true" data-testid="wa-button" className={`${pill} cursor-not-allowed bg-berry/40 text-cream hover:scale-100`}>{t("whatsapp")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" /></button>
           )}
           <button type="button" data-cursor-hide data-testid="contact-info" onClick={() => setInfoOpen(true)} className={`${pill} border-[0.15vw] border-berry text-berry hover:bg-berry hover:text-cream`}><RollText>{t("reservation")}</RollText></button>
           <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`${pill} bg-mustard text-ink`}><RollText>{t("directions")}</RollText></a>
         </div>
 
         <ul className="mt-[0.5vw] flex flex-wrap gap-[1.2vw] max-md:gap-[4vw] text40 text-[1.05vw] max-md:text-[3.6vw]">
-          <li><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Instagram {site.social.instagramHandle}</a></li>
-          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Facebook</a> : <span className="text-berry">Facebook · {tc("todo")}</span>}</li>
+          <li><a href={site.social.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">Instagram {site.social.instagramHandle}</a></li>
+          <li>{site.social.facebook ? <a href={site.social.facebook} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[24px] items-center underline underline-offset-4">Facebook</a> : <span className="text-berry">Facebook · {tc("todo")}</span>}</li>
         </ul>
       </KraftCard>
 

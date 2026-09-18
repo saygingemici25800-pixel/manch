@@ -84,7 +84,7 @@ export function BuildSequence() {
               className="w-full rounded-[1.5vw] object-cover max-md:rounded-[4vw]"
             />
             <figcaption className="flex items-baseline gap-[1vw] font-ui text-[1.2vw] uppercase text-berry max-md:text-[4vw]">
-              <span className="font-pixel text-[0.9vw] text-mustard max-md:text-[3vw]">
+              <span className="font-pixel text-[0.9vw] text-berry max-md:text-[3vw]">
                 {String(i + 1).padStart(2, "0")}
               </span>
               {steps[i]}
@@ -127,7 +127,7 @@ export function BuildSequence() {
             className="absolute inset-x-0 top-0 flex flex-col gap-[0.4vw] max-md:gap-[1.5vw]"
             style={i === 0 ? undefined : { opacity: 0 }}
           >
-            <span className="font-pixel text-[2vw] text-mustard max-md:text-[6vw]">
+            <span className="font-pixel text-[2vw] text-berry max-md:text-[6vw]">
               {String(i + 1).padStart(2, "0")}
             </span>
             <span className="font-display text-[1.6vw] leading-tight text-berry max-md:text-[5.5vw]">

@@ -53,7 +53,17 @@ export function SplitReveal({
       // Kural 50: scroll modunda fold üstü → dokunma, zaten görünür.
       if (trigger === "scroll" && el.getBoundingClientRect().top < window.innerHeight) return;
 
-      const split = new g.SplitText(el, { type, mask: type, autoSplit: true });
+      // GSAP SplitText varsayılanı (aria: "auto") kök elemana `aria-label` yazar.
+      // `<p>` role'süz `aria-label` alamaz (axe: aria-prohibited-attr) → satır modunda
+      // kelimeler bölünmediği için aria müdahalesi gereksiz, kapatılır.
+      // Harf modunda kelimeler bölünür, orada aria-label gerekli — ama yalnızca
+      // başlıklarda kullanılır ve başlıklar `aria-label` alabilir.
+      const split = new g.SplitText(el, {
+        type,
+        mask: type,
+        autoSplit: true,
+        aria: type === "lines" ? "none" : "auto",
+      });
       const targets = type === "chars" ? split.chars : split.lines;
       if (!targets?.length) {
         split.revert();

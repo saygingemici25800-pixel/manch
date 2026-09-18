@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+import type { Locale } from "@/i18n/routing";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -17,8 +20,12 @@ const GALLERY = ["01-tray", "02-box", "03-flatlay", "04-couple", "05-table", "06
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "About" });
-  // Faz 7'de canonical/hreflang/OG ile `pageMetadata` üzerinden verilecek.
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({
+    locale: locale as Locale,
+    path: "/about",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  });
 }
 
 export default async function AboutPage({ params }: Props) {

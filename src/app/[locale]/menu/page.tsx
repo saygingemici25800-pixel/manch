@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+
+import type { Locale } from "@/i18n/routing";
+import { clientMessages } from "@/i18n/client-messages";
+import { pageMetadata } from "@/lib/seo";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
@@ -14,14 +18,20 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Menu" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({
+    locale: locale as Locale,
+    path: "/menu",
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  });
 }
 
 export default async function MenuPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale); // Kural 16
 
-  const messages = await getMessages();
+  // Kural 44: temel namespace"ler + "Menu".
+  const messages = clientMessages(await getMessages(), ["Menu"]);
   const t = await getTranslations("Menu");
   const tc = await getTranslations("Common");
 

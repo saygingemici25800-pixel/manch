@@ -13,6 +13,7 @@ import { useDialog } from "@/lib/hooks/useDialog";
 import { useHydrated } from "@/lib/hooks/useHydrated";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { RollText } from "@/components/motion/RollText";
+import { SoonBadge } from "@/components/ui/SoonBadge";
 
 /** WhatsApp sipariş mesajı (wa.me). Numara yoksa null. */
 function buildWaUrl(text: string): string | null {
@@ -150,7 +151,7 @@ export default function Cart() {
               <li key={l.slug} className="flex items-center justify-between gap-[1vw] border-b border-berry/15 pb-[0.8vw] max-md:pb-[3vw]">
                 <div className="flex flex-col">
                   <span className="text40 text-[1.2vw] max-md:text-[4.2vw]">{p?.name[locale] ?? l.slug}</span>
-                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price !== null && p?.price !== undefined ? `${p.price * l.qty} TL` : t("priceTodo")}</span>
+                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price !== null && p?.price !== undefined ? `${p.price * l.qty} TL` : <SoonBadge />}</span>
                 </div>
                 <div className="flex items-center gap-[0.6vw] max-md:gap-[2vw]">
                   <button type="button" aria-label={t("less")} onClick={() => setQty(l.slug, l.qty - 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-berry text-cream">−</button>

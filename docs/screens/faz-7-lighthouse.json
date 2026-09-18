@@ -1,31 +1,18 @@
 {
-  "date": "2026-09-17T09:00:23.646Z",
-  "base": "http://localhost:3100",
-  "target": {
-    "accessibility": 95,
-    "seo": 95
-  },
-  "results": {
-    "/tr": {
-      "scores": {
-        "accessibility": 100,
-        "seo": 100
-      },
-      "failing": []
+  "date": "2026-09-18T02:13:28.046Z",
+  "base": "http://localhost:3101",
+  "rows": [
+    {
+      "path": "/tr/about",
+      "a11y": 100,
+      "seo": 100,
+      "fails": []
     },
-    "/tr/menu": {
-      "scores": {
-        "accessibility": 100,
-        "seo": 100
-      },
-      "failing": []
-    },
-    "/tr/contact": {
-      "scores": {
-        "accessibility": 100,
-        "seo": 100
-      },
-      "failing": []
+    {
+      "path": "/en",
+      "a11y": 100,
+      "seo": 100,
+      "fails": []
     }
-  }
+  ]
 }

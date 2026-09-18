@@ -15,8 +15,7 @@
       "sub": "Fethiye'nin smash burger zone'u. Smash sesi mutfaktan, ilk ısırık masadan.",
       "badge": "MISU & MIYU · MANCH'İN YÜZLERİ · ",
       "imageAlt": "MANCH mutfağı — ızgarada smash köfte",
-      "burgerAlt": "Classic Manch Burger",
-      "imageAltDesktop": "MANCH mutfağı — tezgahta smash anı"
+      "burgerAlt": "Classic Manch Burger"
     },
     "marqueeItems": "CRISPY CHICKEN TENDERS|HANDMADE HITS DIFFERENT|UNITED CHILL BURGER ZONE|JUICY CENTER · CRISPY EDGES · PERFECT MELT",
     "hits": {
@@ -112,7 +111,8 @@
     "todo": "Yakında",
     "close": "Kapat",
     "skipToContent": "İçeriğe atla",
-    "priceOnRequest": "Fiyat için sor"
+    "priceOnRequest": "Fiyat için sor",
+    "soon": "YAKINDA"
   },
   "Cart": {
     "added": "SEPETE EKLENDİ",
