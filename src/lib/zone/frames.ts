@@ -149,6 +149,23 @@ export function frameStop(frame: ZoneFrame): [number, number, number] {
   return [frame.side * (HALF_W - 1.6), 0, frame.z];
 }
 
+/**
+ * Prompt'un dünya çapası (spec 5.2, revize 2026-09-18).
+ *
+ * Tablo düzlemi `side * (HALF_W - 0.12)`'de; prompt oradan salona doğru **0.9 birim önde**
+ * asılır. Gerekçe: prompt tablonun ÜSTÜNDE değil ÖNÜNDE duran bir tabela gibi durur,
+ * karakter duvara dayanınca kamera ile tablo arasına girmez, `FloorMarker` halkasıyla
+ * dikey olarak hizalanır.
+ *
+ * `frameStop` DEĞİL: durma noktası (HALF_W − 1.6) kullanıcının basacağı yer; prompt ise
+ * tabloya daha yakın asılır.
+ */
+export const PROMPT_FORWARD = 0.9;
+
+export function promptAnchor(frame: ZoneFrame): [number, number, number] {
+  return [frame.side * (HALF_W - 0.12 - PROMPT_FORWARD), PROMPT_HEIGHT, frame.z];
+}
+
 /** POV kamera hedefi ve bakış noktası (spec 6.1). */
 export function povTargets(frame: ZoneFrame) {
   const fx = frame.side * (HALF_W - 0.12);

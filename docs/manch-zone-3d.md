@@ -273,11 +273,35 @@ alanının **içinde** kalır; "halkanın üstündeyim ama açılmadı" durumu o
 
 **reduced-motion** → halka dönmez, nabız atmaz; yaklaşınca sabit vurgu (`opacity = glow*0.35`).
 
-### 5.2 Prompt konumu
+### 5.2 Prompt konumu *(revize: 2026-09-18)*
 
-`anchor = (pos.x, PROMPT_HEIGHT, pos.z)`, CSS `translate(-50%, -100%)`.
-İlk tasarımda 4.15'teydi (tavana yakın, bakışın dışında). 1.35'te başlık ve GİR butonu halkayla
-birlikte **tek bir çağrı** olarak okunuyor.
+```ts
+anchor = (side * (HALF_W - 0.12 - 0.9), PROMPT_HEIGHT, frame.z)   // CSS translate(-50%, 0)
+PROMPT_HEIGHT = 1.35   // değişmedi
+```
+
+**Yükseklik** ilk tasarımda 4.15'teydi (tavana yakın, bakışın dışında). 1.35'te başlık ve GİR
+butonu halkayla birlikte **tek bir çağrı** olarak okunuyor.
+
+**Yatayda çapa, durma noktası değil tablo düzlemi referans alınır:** tablo `side*(HALF_W−0.12)`'de,
+prompt oradan salona doğru **0.9 birim önde** asılır. Gerekçe: prompt tablonun **üstünde değil
+önünde** asılı duran bir tabela gibi durur, karakter duvara dayanınca kamera ile tablo arasına
+girmez, `FloorMarker` halkasıyla dikey olarak hizalanır.
+
+> İlk uygulamada çapa `frameStop` (HALF_W−1.6) idi; karakter duvara dayandığında kamera tabloya
+> çok yaklaşıyor ve prompt görselin alt kısmının üstüne biniyordu. Uygulama: `promptAnchor()`
+> (`lib/zone/frames.ts`).
+>
+> **CSS `-100%` → `0` (kutu aşağı sarkar).** Çapa 0.9 birim öne alındıktan SONRA bile örtüşme
+> sürüyordu: tablonun alt kenarı y=1.55, çapa y=1.35 → duvara dayalı mesafede ekranda yalnızca
+> **~35 px** boşluk kalıyor, kutu ise ~58 px. Yukarı büyüyünce kaçınılmaz olarak biniyordu
+> (ölçüldü: masaüstü 22.6 px, portre 36.4 px). Aşağı sarkınca çapanın dünya konumu ve
+> yüksekliği **aynen korunur**, kutu tablonun altında kalır: masaüstü **52 px**, portre
+> **33 px** boşluk. Dört tabloda da duvara dayalı hâlde **sıfır piksel örtüşme**
+> `zone-camera-check` ile denetleniyor.
+>
+> **Görsel materyali `transparent`** olmalı: `misu-lockup.png` alfalı; şeffaflık okunmayınca
+> tablo düz bordo blok olarak çıkıyordu (Kural 59 gözle bakmada yakalandı).
 
 ---
 

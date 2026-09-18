@@ -3,15 +3,15 @@
 import { Html } from "@react-three/drei";
 import { useTranslations } from "next-intl";
 
-import { frameStop, getFrame, PROMPT_HEIGHT } from "@/lib/zone/frames";
+import { getFrame, promptAnchor } from "@/lib/zone/frames";
 import { useZoneStore } from "@/store/zone";
 
 /**
- * Halkanın üstünde beliren çağrı (spec 5.2): başlık + GİR butonu.
+ * Tablonun önünde asılı çağrı (spec 5.2): başlık + GİR butonu.
  *
- * Konum `frameStop` + `PROMPT_HEIGHT` (1.35). İlk tasarımda 4.15'teydi — tavana yakın,
- * bakışın dışında kalıyordu. 1.35'te başlık, buton ve zemin halkası **tek bir çağrı**
- * olarak okunuyor.
+ * Yükseklik `PROMPT_HEIGHT` (1.35) — ilk tasarımda 4.15'teydi, tavana yakın ve bakışın
+ * dışındaydı. Yatayda `promptAnchor`: duvardan 0.9 birim önde, böylece karakter duvara
+ * dayandığında bile prompt kamera ile tablonun arasına girmez.
  *
  * `drei/<Html>` ile normal DOM: TR karakter sorunu yok, klavyeyle erişilebilir (spec bölüm 1).
  */
@@ -25,15 +25,25 @@ export function FramePrompt() {
   if (!nearFrame || state !== "zone") return null;
   const frame = getFrame(nearFrame);
   if (!frame) return null;
-  const [x, , z] = frameStop(frame);
+  const anchor = promptAnchor(frame);
 
   return (
     <Html
-      position={[x, PROMPT_HEIGHT, z]}
+      position={anchor}
       center={false}
       // Tabloya arkası dönükken de okunur kalsın diye sahneye gömülmez.
       zIndexRange={[20, 10]}
-      style={{ transform: "translate(-50%, -100%)", pointerEvents: "auto" }}
+      /**
+       * `translate(-50%, 0)` — kutu çapadan AŞAĞI sarkar.
+       *
+       * Spec 5.2 `-100%` diyordu (yukarı doğru). Çapa 0.9 birim öne alındıktan sonra bile,
+       * karakter duvara dayalıyken tablonun alt kenarının altında ekranda yalnızca ~35 px
+       * boşluk kalıyor; kutu ~58 px olduğu için yukarı doğru büyüyünce görselin üstüne
+       * biniyordu (masaüstü 22.6 px, portre 36.4 px — ölçüldü). Aşağı sarkınca çapa
+       * yüksekliği (1.35) ve dünya konumu AYNEN korunur, kutu tablonun altında kalır ve
+       * zemin halkasıyla dikey hizası daha da netleşir.
+       */
+      style={{ transform: "translate(-50%, 0)", pointerEvents: "auto" }}
     >
       <div
         data-testid="frame-prompt"

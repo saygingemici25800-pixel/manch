@@ -44,6 +44,32 @@ let liveScene: THREE.Scene | null = null;
 /** Dev/QA: aktif kamera — `zone-camera-check` dönüşü buradan ölçer. */
 let liveCamera: THREE.Camera | null = null;
 
+/**
+ * Dev/QA: bir tablo görselinin EKRAN dikdörtgeni (CSS piksel). Prompt'un görselle
+ * örtüşmediğini kanıtlamak için — DOM `getBoundingClientRect()` ile doğrudan karşılaştırılır.
+ */
+function artScreenRect(id: string) {
+  const mesh = liveScene?.getObjectByName(`zone-art-${id}`) as THREE.Mesh | undefined;
+  const canvas = document.querySelector("canvas");
+  if (!mesh || !liveCamera || !canvas) return null;
+  mesh.updateWorldMatrix(true, false);
+  mesh.geometry.computeBoundingBox();
+  const bb = mesh.geometry.boundingBox;
+  if (!bb) return null;
+  const v = new THREE.Vector3();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const cx of [bb.min.x, bb.max.x]) {
+    for (const cy of [bb.min.y, bb.max.y]) {
+      v.set(cx, cy, 0).applyMatrix4(mesh.matrixWorld).project(liveCamera);
+      const px = (v.x * 0.5 + 0.5) * canvas.clientWidth;
+      const py = (-v.y * 0.5 + 0.5) * canvas.clientHeight;
+      minX = Math.min(minX, px); maxX = Math.max(maxX, px);
+      minY = Math.min(minY, py); maxY = Math.max(maxY, py);
+    }
+  }
+  return { left: minX, top: minY, right: maxX, bottom: maxY };
+}
+
 function disposeScene(scene: THREE.Scene) {
   scene.traverse((obj) => {
     const mesh = obj as THREE.Mesh;
@@ -81,6 +107,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
     // Ölçüm penceresi: test tepe ayrışmayı/kovaları kare döngüsünden okur, örneklemeden değil.
     w.__ZONE_DEBUG_RESET__ = resetZoneDebug;
     w.__ZONE_TELEPORT__ = teleport;
+    w.__ZONE_ART_RECT__ = artScreenRect;
     w.__ZONE_STATS__ = () => ({
       created: stats.created,
       disposed: stats.disposed,
@@ -179,6 +206,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
       delete w.__ZONE_ANG__;
       delete w.__ZONE_DEBUG_RESET__;
       delete w.__ZONE_TELEPORT__;
+      delete w.__ZONE_ART_RECT__;
     };
   }, []);
 

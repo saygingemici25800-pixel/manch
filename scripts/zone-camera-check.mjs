@@ -427,6 +427,33 @@ if (runs("scene")) {
     "prompt metni i18n'den geliyor (Html portalına next-intl context'i ulaşıyor)",
     JSON.stringify(promptText));
 
+  /* Prompt, karakter duvara TAM dayalıyken bile tablo görselinin hiçbir pikseliyle
+     örtüşmemeli (karar 2026-09-18). Görselin ekran dikdörtgeni sahneden projelendirilip
+     prompt'un DOM dikdörtgeniyle karşılaştırılır. */
+  let worstGap = Infinity;
+  const gapDetail = [];
+  for (const [id, [sx, sz]] of Object.entries(STOPS)) {
+    const side = Math.sign(sx);
+    await tp(side * 3, sz);
+    await page.keyboard.down(side < 0 ? "ArrowLeft" : "ArrowRight");
+    await page.waitForTimeout(2000);
+    await page.keyboard.up(side < 0 ? "ArrowLeft" : "ArrowRight");
+    await page.waitForTimeout(800);
+    const gap = await page.evaluate((fid) => {
+      const art = window.__ZONE_ART_RECT__(fid);
+      const el = document.querySelector("[data-testid=frame-prompt]");
+      if (!art || !el) return null;
+      const p = el.getBoundingClientRect();
+      return Math.max(art.left - p.right, p.left - art.right, art.top - p.bottom, p.top - art.bottom);
+    }, id);
+    if (gap === null) { worstGap = -Infinity; gapDetail.push(`${id}:ölçülemedi`); continue; }
+    worstGap = Math.min(worstGap, gap);
+    gapDetail.push(`${id}:${gap.toFixed(0)}px`);
+  }
+  ok(worstGap > 0,
+    "duvara dayalıyken prompt tablo görseliyle ÖRTÜŞMÜYOR (dört tabloda da)",
+    gapDetail.join(" · "));
+
   /* Kabul kriteri: halkanın GÖRÜNÜR yarıçapı 2.3, tetikleme 2.6 — halkanın üstündeki her
      nokta tetiklemenin İÇİNDE olmalı. "Halkanın üstündeyim ama açılmadı" olmamalı. */
   const [mx, mz] = STOPS.menu;

@@ -62,10 +62,14 @@ export function Frame({ frame }: { frame: ZoneFrame }) {
           <planeGeometry args={[FW, FH]} />
           <meshStandardMaterial color={colors.cream} roughness={0.9} />
         </mesh>
-        {/* Görsel `useFrame`'de takılır: yer tutucu → gerçek fotoğraf geçişi orada olur. */}
-        <mesh ref={art} position={[0, 0, 0.09]}>
+        {/* Görsel `useFrame`'de takılır: yer tutucu → gerçek fotoğraf geçişi orada olur.
+            `transparent`: görsellerin bir kısmı ALFALI (ör. `misu-lockup.png` şeffaf zeminli
+            bir logo kilidi). Şeffaflık okunmazsa alfa yok sayılıyor ve tablo düz bordo bir
+            blok olarak çıkıyordu — Kural 59 gözle bakmada yakalandı. Şeffaf görsel artık
+            arkasındaki krem paspartunun üstüne bindiriliyor. */}
+        <mesh ref={art} name={`zone-art-${frame.id}`} position={[0, 0, 0.09]}>
           <planeGeometry args={[FW - 0.34, FH - 0.5]} />
-          <meshBasicMaterial toneMapped={false} />
+          <meshBasicMaterial transparent toneMapped={false} />
         </mesh>
       </group>
 
