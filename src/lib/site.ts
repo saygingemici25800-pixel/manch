@@ -1,10 +1,34 @@
 // Tüm marka sabitleri burada. Başka yerde sabit metin/adres/telefon yazma (Kural 6).
 // `null` olan alanlar TODO — kullanıcıdan gelecek.
 
+/**
+ * Canonical/hreflang/sitemap/robots/JSON-LD/OG — hepsi buradan okur.
+ *
+ * Kural 57: değer **yoksa production build KIRILIR**. Sessizce `localhost`a ya da
+ * tahmini bir domaine düşmek en kötü hata sınıfı: site yayına yanlış canonical ile
+ * çıkar, Google onu indeksler ve düzeltmesi haftalar alır.
+ * Development'ta localhost'a düşer ama konsola gürültülü uyarı basar.
+ */
+function siteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (raw) return raw.replace(/\/+$/, "");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXT_PUBLIC_SITE_URL tanımlı değil. Production build'de zorunlu — " +
+        "canonical, hreflang, sitemap, robots, JSON-LD ve OG bu değeri kullanır. " +
+        "Vercel: Settings → Environment Variables. Yerel: `.env.local`.",
+    );
+  }
+  console.warn(
+    "[MANCH] NEXT_PUBLIC_SITE_URL yok → http://localhost:3000 kullanılıyor (yalnızca development).",
+  );
+  return "http://localhost:3000";
+}
+
 export const site = {
   name: "MANCH",
   // TODO: gerçek domain (Cloudflare DNS, Faz 9). Vercel preview'da NEXT_PUBLIC_SITE_URL ile ezilir.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://manch.tr",
+  url: siteUrl(),
   legalName: "MANCH",
   tagline: "United Chill Burger Zone",
   taglineAlt: "Handmade Hits Different",

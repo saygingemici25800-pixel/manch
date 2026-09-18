@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MANCH
 
-## Getting Started
+Fethiye Paspatur'da el yapımı smash burger. İki dilli (TR varsayılan / EN), animasyon ağırlıklı Next.js sitesi.
 
-First, run the development server:
+> Projenin tek doğruluk kaynağı **[`CLAUDE.md`](CLAUDE.md)** — fazlar, kurallar ve hata günlüğü orada.
+
+## Stack
+
+Next.js 16 (App Router, TS, `src/`) · Tailwind v4 · GSAP 3 (lazy) · Lenis (lazy) · next-intl · Zustand · Vercel
+
+## Geliştirme
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local     # NEXT_PUBLIC_SITE_URL'i doldur
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`/tr` ve `/en` açılır. `/tr/lab` tasarım sistemi + motion önizlemesi — **yalnızca development**, production'da 404 (Kural 23).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ortam değişkenleri
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| değişken | zorunlu | açıklama |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | **evet** | Canonical kök. Yoksa production build kırılır (Kural 57). |
+| `NEXT_PUBLIC_ALLOW_NOPRELOAD` | hayır | `?nopreload=1`'i prod build'de açar. Ölçüme özel — **Vercel'e eklenmez** (Kural 43). |
 
-## Learn More
+## Komutlar
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build        # Turbopack prod build (push öncesi ZORUNLU — Kural 2)
+pnpm lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Doğrulama script'leri
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Hepsi `playwright-core` kullanır; Chromium yolu `CHROME` ile verilir.
 
-## Deploy on Vercel
+```bash
+# dev sunucu (3113) çalışırken — 93 kontrol
+CHROME="$CHROME" node scripts/lab-check.mjs
+BROWSER=webkit node scripts/lab-check.mjs        # Kural 45, Safari/WebKit koşusu
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# prod sunucu (3101) çalışırken
+CHROME="$CHROME" node scripts/lighthouse.mjs      # Kural 43, 3 koşu medyanı
+node scripts/bundle-report.mjs                    # Kural 46, First Load JS
+CHROME="$CHROME" node scripts/screens.mjs         # 375/768/1440/1920 taşma kontrolü
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# deploy sonrası
+node scripts/smoke.mjs https://<host>             # Kural 48
+```
+
+## Dizin
+
+```
+src/app/[locale]/     sayfalar (ana, menu, about, contact, lab, 404, catch-all)
+src/components/       layout · sections · motion · ui
+src/data/menu.ts      menü (tek doğruluk kaynağı)
+src/lib/site.ts       marka sabitleri (tek doğruluk kaynağı)
+src/messages/         tr.json · en.json (simetrik)
+scripts/              doğrulama script'leri
+docs/                 brief, kaynak görseller, ekran görüntüleri, ölçümler
+```

@@ -343,37 +343,95 @@
     x.fillStyle=g;x.fillRect(0,0,128,128);return tex(c);
   }
 
-  /* ============ Misu & Miyu ============ */
-  /* ---- Misu: logodan kesilmiş gerçek kapibara ---- */
-  var MISU_SRC='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFkCAYAAABCeqJ+AAAWO0lEQVR4nO3dWZLcuJKFYeS1u49eSO+o9/+e/VBKVYgiSAzu8On/zGQlq0xFcAAOARAEv/7vf/63AQD+9h/rDQAArwhIAOggIAGgg4AEgA4CEgA6/mu9ARDz/fCzr2NbASRCQMb1FIi93yUogQkEZCwzofj07wlKYAABGcNuMPY+L2JQjhyLiPsFhwhIv6RDsfcdEcJk9lhcfz/CPsIhAtKnE+F4/S6PISJ1HDzvIxwjIH05GYy97/YQIlrHwdM+IgDmQfphGY6frEP61NAC8IqAxB2LADn9nYQkXhGQPnisrKe26VSrsffdQBcBiSfaAeIhoCwDGs4RkPaqVk5v++1te+AAAYk3GsHhNYy8bheMEJAA0EFA4jTvrTTv24eDCEiMqBYa1fYXHQSkrWoVMdL+RtpWKCEgMYrAQDk8i20nQ+CwijlSIyAxg1XMUQoBCW0ZWsooijFIG4RGDJyn4ghIAOigi40dT+OLtL4QHi1IrHq7+fI18DuAawQkVlQKPlrChdHFxoxKwQjQggSAHlqQwLso7w+/ehseiLhPRxGQ0MLYna2R43/9HQLzgoDEjGtLihD0Z+ecRG0pqyEgbXy1uOESdbt3RXi2XOLcRNjPYwhIYI7XbunKeOPTvyEoGwEJ7PIQJKvLzv38rGqv4BUBiVVvgVCt0lkFZe84z2zH05BP6XFJAtKO13HIspVByOc51T6WEuF492+un+uhlWyCgES5Qr9g9c79ybCU5PXifRwBWU+kiurB9XjthqXU8ZdsPc58Z6nyQ0DmV6pAH7YSlhJBeSIcaUU2AtKKRsEjCG3NhuVqUJ5sOZYPSQLyHImCFikEs1SulW7lzPSZct3WSAhIXbsBQcXxYbW1NxqUuzdzNMvJ9UJXKtAJSFkrgVimsCWw+hSNVIvy7t9TfhQRkPtWW4kU7PhmW36zLcq3cU3KkDICct5Ot7lagc4yDjliJixXut4wQECOo6W4plJI/hgds9x5Frp6uTqCgHxHMNY1uwJO73dHgnL0cz2UqzI3agjIvtlgLFFgFkVsRfbO587k8LfP9iri+RNBQP5pphBEK+QYN3t3urX1Z7RnUOYOIyD/Eal7E1X2VgivokioekASjLiSONcaYUkZNFA1IOlK28jeiryze6On9xknVTtnv/3HegMMzLQarQtmRhzTubLF8TJUqQU5EowUxto8nX9P21JWhYAkGP3x2NW2KAN3E8W9lUVv5+mo7AG5+rY36PMUktZlwfr7Z0Xb3mVZA3LlHcE4z8NrRykL6Mp4k4ZwjMeqe0tZwKNMLUiCMbZTrUnKwbjyS6xlCUjGGvNgkjXciB6QtBpzu56/si+wh43IAUk41sM5Pad897q1uDdpCEdAD+H4S8QWJOONgB7C8UOkgDz5wnSgIsLxImoXG4AswvFGlICk9Zjbd/Pz2GFFHPuOCF1swjEvKqY96tcD7wHJycsrQzh6XoVnBPXrheeA5OTBiwxh/omZIIO8BiThmJv3GwLZAvEH84cneQxIwjE3D+EjvQ3eyybBuMhjQN7hBGKFhzC2wEvphHgLSO9dL+xZDSxvQeexTK4cI4/74YqngPRWCXAW538dx06Jp4C8wxUOp/TKWubw+W7UsUdeApKuNTRlL0uj+3dXzwjJB1EeNUQOGSpi5H2IvO0mvLQgUUfFrqwnd6/bpRXZ4aEFSfcaremec8IXSzwEJICz7i5GXERuWAckrUd4ljk0qGcDrAPyipMGwA1vAfnp+/IH+Xm6QFYscxX3+ZHngLzi5GGVVPB6CnAJ2fZHXKSARA3SlXbl8ypfjCvv+18sA/J6IkYKMievBouWTdXhHFqRDzy3IDlx2DV60R0JRcpjQRGfpPE86/+nonndvkh+jqHGMl6sl/jMcx07yntA3j0W5Ulv2yhgcqTKwOxncP7gPiB7LAPIc2BnNRuSu+eoWjjyfHaHl4B8OhFeWpEetqGynS737HcArTU/Abni5BWOMSs/Po+vRFhyvv7hpSHiSpSAtDx5o99LRTtvtVXJucIQq4BcvTN5MiSZ+hHH2xqTnCcsidKCvGNZ6KlwMXCesCVaQFqPOVLhkNm1l1b+TraHgPR2AlijEkBrzSYgI9wpIxABuH4W2wrhCPwrQoNGzemAXFnBB8A51MkPli1ITgQA104GZOmmOoB4rFqQtB4BuMdNGgDoICABvCk7PEZAArhiCOwXAhIAOqwCUrvJXrZLACgpWacytyBLnlAAck4GpPVKPADGMQ7ZcrcgAWCLZUDS0gPgGi1IAD3Xbna5Rg0BCQAdBCSQR7kWnjYCEsjh++O/kkFZuptNQALx3YWWdFC+fV9KBCQQ39OcRYkwKzsnkoAEctAOyZJYURzAihL1OXsLssRJBH7RbEWW7GZbPotd8oADiCN7CxKohrFIQQQkgFHlen0EJJBPuSDTkjEgS8/8BxSVq0sZAxIArUgRBCQAdGQNSK6eqODteWvqwSaepAHiewrKr87fMSBrC/KKcEYFTyFJOC6oEpBARnehd6oxUCJwCUggH3pMQghIIDbeN6/IcrGKkgccUGDZ1U6NFiQAdBCQANCRNSDpXvxJ8wVO8IFutoKsAXlVYkpCx3fn7wBeVAnIqgjEOjjXCk4HJHeyAYThoQVJSOrguEJTifLlISBxTuWx2Io435sIyJxKXN1xVMmwJSDrKFnAE+GiZ8AiIC3ma1G4ENn35b84xFMLUvLkV24t3R3Hyscjm9F6cuKcpw/s/1pvAEQRjnVxnhVYtSAtTmb2q132/avMS/h52Y5jPHWxW6ObLY1jkBMXw0MsA5JWpBy61rCStU611vy1IFtLfsAVXI8XL2iqwaqelCpb1gGpfbCzLwGVaV8Ad6wDsjX9EMsaknSra/Fcjr1shzgPAdnD5HHApzIXYi8BaXXAo4YkrceaOMeHeQnIHokAe/uMaCFJOOb2/fFn9Pc98LIdojwFZK+Sr7xPJWohe0M41jJ6vqOU33A8BWRrz5V9JPR2Xk7lvZARjjWsnFOLclCi7Hl8Fvur6XWLP0/q3Wd8N18n/mk/PW0nkJLHgNQyGig/oWQdQL1wtN4uoAyvAfnW0pv9jN7P37rr3h6HJBzR2p9llzKhyGtAfhrpcn/+7uxnt4fPv3uMT5qn9f1gj/LgSISAbO05JCUKymgIS161Z1rGVAZ44/2mpogoAdnaXEty9fPb4HfMtiy1hgkAKIoUkD3SY4UzQfm5DZIIxpoitcq0GywueJsH+eZpMrnGd50OKpYqAxyJ2II8feWSuKM++vnAJ8qGsYgB2XNiWs7181cCk0KPO+m7qxFFDcheK/L03EXCDhKyPEbq7Um0bdHGID+dHI8ETkoVMpFFDsjWKEjI4avzd+8ibeuS6AHZGss/IYcsMxhS1b0MAdmT6kQBTmUI9a4sAcl4JABxWQKyNUISgLBMAdkaIQl4kKa+ZQvI1ghJ4LS0N0ozBmRr/TuCsy/zAjAmZUhmDcgR4U8eAF3ZA1JrnUYAY0LXsewB2dr7BFy63YCMdHMiKwTkj5GTR1AC+K1SQLY2/jgXrUpgTaqbNdUC8sdMV4CgBIqqGpCtzS8OQKsSGJNmLDLqgrmSJF7SlaZAAEpCLqZLQP5r590zn78frhAAClK89ZCAvCcVlnefB1QVrhVJQL6TeKshoQkEREDOkXwF7NO/JzyRQfhuNgG5TnO+19vnEKDAAQSkLIn3Zo+Q+FxCFhZCjUMSkLoku+RANOHLPAF5TqpHsIABjEFC3Oiz4trfAWgJ080mIO3shFyIwgU8CBGSlZ/F9sh9gQEmhS7TBCQAK+7HJwlIP0JfaYEHYcs2AWnD/ZUTOMR1XfAYkKy5COQz8l4od7zcxb47OCzwAOTyNi/S3Z1t6xbk7JWDVb2B2EK9itkyICVWw3F1MAdF3GagJKuAlAyJSIETaVsBLa660U8sxiBX1kF8CxarsYtTQR+mQAGDnt4F5WYs0stNmtaeD8jIi7VOHFSrFiAvCUNWrhe0OB2Qu3em34JSMiTdnrTGS8KAIzy1IGc8XXVWQ1IyEHdCa/UlYQQlIOxkQEq3yCRCcnabToTQ24Tat58RlIjmri67GIfUDMjR8Nnpds+E5Oj2mJ+UByP7Q/cbEbkMSa1pPl7mOM5OLI8UKF8t2KRbYIFpGZYOSOnJ2ycOzlcbCxuv3radkEQU7uqgZECOVMSvNh9IWhU8cijeedofQhKRmZVf7Zs0bwE0+ppUibGITGH4pDcVips4wCSpFqTUyjsalTdbS3FUb79pTcIzV3VVogUpvSxZ7860xyk5Vx7vIN+1KM3vDgKTTMqsxl1siZ3I0J1ebalpLek2OpwBWPNQf1tr+wHpsZKtHlyJffnq/H3lc7SGG4CojueNdAtSsgKersxS3xep9evxAge05uRibr2iuJTduYza3VlPPG8b8OboRX3nJo32hp5cH5HQAPwxXwpNeh7kiUf6CLN95gUPGGT6jLbVcmdv02GovADMeRiDJAxtcfzhnVmv0cuCuRlX2wGg50g3ezUgR26gPO3ASqulQjjyhAtwz2QsciUgR+8uU9HnfH/89/TLxyI8xgkcNzsG2atIs3MQZyuYxwqpOXbnfVzQ+/YBImYC8ikcV7y95jX6Qra7vIeQxvPiwJPjM15GA1I6HL2ZrewaJ+V6LLWOLaEGDNq5i61VgSM9iyw9Xqg9gfvts1feBMmNJZx09GbNSEBKr/eYSYYVd1bGg2mFogQPE8Wt7FTyiBcILnTI4thY5EpASlUqywpbKSx646tZ9xc1uHgWW6srZd1F87DquaXI2w4cY9HFtg7HSjRajtfPJGzhhXi2PAXkicol+dn4E91qZOf2WexRLEJhQyscaT3CO9EpPzMBOfqlPNdrR2tCP8MifcwDtaU67cx6uTMKll8Mh7zjwpGcZUBSyWTtdqup7OtoRfoidj5Ov5OGQiTvZDBy/uCRWjf7RAuSSqUj+wIi3tHiLqDyo4aRSYYjgYoMruVY5AImGZB3U0CofPJOLLV28rsBt2hBxvG2ZuXuxWgmJAlKRLBdTglI/0YCyaKlTkjCG/F6IPHKBegYDUbNcHz7/Kploup+l/N0F5uFUc+TmnIz8jkzg9pfD7/DHED2P63ZaT4zlYGKM8ZqHuLqu8m5aKKMlTHImSkmVKZ7323uZsdMV1rqmPe+j/MMz0QbZW8tSIkWAy3J9daaxPeszA97+25akohiK39Wn6SZ/dJqIWnxvpvRpciexhN3vh9IZyQge62F74+ft87vPP1+NquhaPVmxJ3vpfUIz66ZtdxAG21BPnWpZitLhqDcDQjpfZcOLAIQaPML5kpWnChBKbHPJ/fRYokz7+cQWGpFzo5BjnanZ3gMSm8tRGmS58/7vmqrvv+prd6k0biL+fl5Jwqd5aIPkkb2Q6vLXD0cqu9/ehrrQUosO+R5DGy2Upx+0dWJY1c1GDyXS/zprhE33c2WDsi7L9folp+2G4q9n/EyrTh4o2NBO/MgZ0WaXHxqCsxOWEY5lhkQjkWtBOTOO1CsW5OaBVviiaMfrKDjB8c7l6lutkQXWzJ0Il6ZZxextbypgjm7L0RDcKdf++qt4mu+EXB0sQdvxwT/IBzj2x7WOxmQ3oJg5Mmgla7ubCWyHnbAGMKxoJX1IO/+31vhGa38vc+SHCRfvYmi7XOfvIdl9sVHuCmD1pp+C1JrDuRqBdUOHqmKxJqLdjjOuWx1s6Ve2nVd/PXEm+9WF8m4+rr8WZWplTFyLDIGCeOONQyX3dmAHKk0JyvOaGszSssRdu661ZzXdxkvlL+dvoutobfYxcy456qMFYibRhgVpYwsd7MjBORo8EU5WStO7dvK0zwZLhLclJknsiCtdytjkKcORK+L46nrc3pIQdPbXXRPx10S4YiuneXOrna7uivb4CWcNJdqO706Dzcq8KbMRUWyi60ZDCsvoLJaKcfjAsCjCEdktfSemghjkK29h47HSuz5Knu9sKw+FeRpn1Z4PkdelTpmUQLyx6lVxzW6tSvbbrXqeepC/0upii7Ey5DWMdEC8pNGV/ZUAfDQDZd6ljyichUda6SepHkS5RUDFpXm1CT2602YyMdsF+OsazIet9fyG7kF+Sn6ytx3Lcrd7VpdVSizjJUcirIE5KfR7quHYLzSCMW3z9xZ/zJSuBCO67Icu+mpgRkD8sfpeZkWdl/NELGQr8hSwS1kqi/TMgfkj0wneKRSS7YYZz7XK8JRXqbj9zgfskJAZiARjKOfkwnhuCfqRVEMAenfbjhKBELEihJxmz2pPA3sN8uAzDw2KGVnjFGqIEesKBG32ROO3y+eWpCR3skiQbOwEY5/87zNnlSoe8NOBeTs7fWMrcuTy8RJiBg0GcqJlVM9EmtTWeSpBfkk6kusTheqquFYpXJr4fh1RAnIO7tzAKVkKzyZwtHrNkdS+hieDMil9dg2vutOlKkwVkvYRwvHJxG32QIXmAeRW5ArIpzw0dav9Irq0cIx2vZ6xDH8R7dBcmI1n093N18ijCVaOHlcolWUaNvrUaX3Di07HZDQtRKqkcLm6YLqcXu94gmjQRYByYnACsbKZNBjm+ClBclJ+9fohPndVkCvNeatm/U2DONpWxFTtwxZBWTUeY0Wrsdld9w2Ujf1LRi9ba931LFJ1s9i31V+Cv3fTrwiwdNxZ+IyXPA4zYeQXJvCszr309uxjhLikdByXGQ9BrkzoTu7mTDoDVlECkfGGu1wbDs8tCB7rSUPr0a1NtuSnJlk7kWkEI+I47vBQ0C29hwE1YPyZ79n72g/fZYXVF499MLuhX1p11triaBcK/TejlfUMI+CYBTkKSBbGwuB6kE5wuOxIRh17ay3ig5vAdnaWJfy+vOsJ1zqTrYlglEfx1iJx4D8MRqUn7+ToQBkCMXWaNGcQDAq8xyQP1aC8vPfRZBhbPETFVcfx3hNylcutDb/Ui/vYZktFH9EWZQ4Mo7xIZEC8tNOWI5+7gqpO4gRCzdTdvRxjA+LGpCfJF8Xaz1FImsBz7pfJxGOBjIE5KeI79bOULB5RFBXlNWX0skWkJ+8hmWVQl1lP7V5KrtZDN+oyRyQn94qq2QhrBYMLN+vh5a5vsfjWCUg38yuxC3xOcATypmuoWNovdxZRBROObzV8h7h6AQtSDkU3HGsJH+PO9XOEJDQcBd4tIqeEY4OEZDQQtf5HY8LOscYJHbtVt6KlX9m7LXi8XGDFuSa1cVrs8qymK8mVjcKiICElNmQzB4CqxfQ7MclFAISkkafXsoaAru9iqzHJSwCch3d7DUZQ4DWYlIEJE7KFggEY3IEJDCPsdYiCMg9dLPvSS1g4eVdQ1neE4RJBKQMKoQ8DxcegrE4AnIfleLd7DGyDEdCEb8RkPDGKhwJRvyFgIQnFovvcsMFXQQkTnhbzszinSs8C41XBCSseQxHQhGtNQISOu6mP3noyhKMmEJAooqKz4ZjE+tBQstq6GiEFeGIJQQkNM2Gj3RYvS1MSzjiEV1saPsJoZPzGxlrhAgCEqfchZJGaBKOEENAIgPmNEIFAYnoRsKRYMQSbtLAk9ku90h3mnDEMlqQsLQ7ofzpcwEAAAAAAAAAAAAAABL5f8NiXPpdQzwdAAAAAElFTkSuQmCC';
-  var misuImg=new Image(); var misuReady=false;
-  misuImg.onload=function(){ misuReady=true; redrawChars(); };
-  misuImg.src=MISU_SRC;
+  /* ============ Misu & Miyu — açıya göre sprite seti ============ */
+  /* 4 temel görünüm çizilir, karşı taraf kodda aynalanır.
+     Gerçek çizimler gelince drawCapy yerine TextureLoader gelecek. */
+  var VIEWS=['back','back34','side','front'];
 
-  function drawChar(x,who,w,h){
+  function drawCapy(x,view,who,w,h){
+    var s=w/220, cx=w/2, ground=h-10*s;
     x.clearRect(0,0,w,h);
-    if(!misuReady) return;
-    // orana göre sığdır, alta hizala
-    var s=Math.min(w/misuImg.width,(h*0.94)/misuImg.height);
-    var dw=misuImg.width*s, dh=misuImg.height*s;
-    var dx=(w-dw)/2, dy=h-dh;
-    x.drawImage(misuImg,dx,dy,dw,dh);
-    if(who==='miyu'){
-      // Miyu geçici: aynı çizim, karo mavisine boyanmış (gerçek çizimi beklerken)
-      x.globalCompositeOperation='source-in';
-      x.fillStyle=C.tile; x.fillRect(0,0,w,h);
-      x.globalCompositeOperation='source-over';
-    }
-  }
-  function redrawChars(){
-    document.querySelectorAll('.pick canvas').forEach(function(c){
-      drawChar(c.getContext('2d'), c.parentElement.dataset.who, c.width, c.height);
+    x.lineJoin='round'; x.lineCap='round';
+    x.strokeStyle=C.berry; x.fillStyle='#fff'; x.lineWidth=7*s;
+    var side = (view==='side'), b34=(view==='back34'), front=(view==='front');
+    var lean = side? 26*s : (b34? 13*s : 0);
+
+    // bacaklar
+    x.lineWidth=6*s;
+    [[-26,0],[26,0]].forEach(function(p){
+      x.beginPath();x.ellipse(cx+p[0]*s+lean*0.3,ground-8*s,13*s,9*s,0,0,7);x.fill();x.stroke();
     });
-    if(window.__charMat){
-      drawChar(charCv.getContext('2d'),who,220,280); window.__charMat.map.needsUpdate=true;
-      drawChar(npcCv.getContext('2d'),other,220,280); window.__npc.material.map.needsUpdate=true;
+    // gövde
+    x.lineWidth=7*s;
+    x.beginPath();
+    x.ellipse(cx+lean*0.25, ground-62*s, side?56*s:48*s, 58*s, 0, 0, 7);
+    x.fill();x.stroke();
+    // kafa
+    var hy=ground-156*s, hx=cx+lean;
+    x.beginPath();
+    x.ellipse(hx, hy, side?54*s:52*s, 44*s, 0, 0, 7);
+    x.fill();x.stroke();
+    // burun/ağız kütlesi — sadece yandan ve önden
+    if(side){
+      x.beginPath();x.ellipse(hx-46*s,hy+12*s,26*s,22*s,0,0,7);x.fill();x.stroke();
+    } else if(front){
+      x.beginPath();x.ellipse(hx,hy+20*s,30*s,20*s,0,0,7);x.fill();x.stroke();
+    } else if(b34){
+      x.beginPath();x.ellipse(hx-40*s,hy+14*s,18*s,15*s,0,0,7);x.fill();x.stroke();
     }
+    // kulaklar
+    x.lineWidth=6*s;
+    var ears = side? [[18,-40]] : [[-36,-34],[36,-34]];
+    ears.forEach(function(e){
+      x.beginPath();x.ellipse(hx+e[0]*s,hy+e[1]*s,13*s,11*s,0,0,7);x.fill();x.stroke();
+    });
+    // yüz — arkadan yok
+    x.fillStyle=C.berry;
+    if(front){
+      x.beginPath();x.arc(hx-19*s,hy-2*s,5*s,0,7);x.fill();
+      x.beginPath();x.arc(hx+19*s,hy-2*s,5*s,0,7);x.fill();
+      x.lineWidth=4*s;x.beginPath();x.arc(hx,hy+16*s,9*s,.2*Math.PI,.8*Math.PI);x.stroke();
+    } else if(side){
+      x.beginPath();x.arc(hx-12*s,hy-6*s,5*s,0,7);x.fill();
+    }
+    // aksesuar — karakterin imzası, her açıdan görünür
+    x.fillStyle='#fff'; x.lineWidth=6*s;
+    if(who==='misu'){                       // kulaklık
+      x.beginPath();x.arc(hx,hy-6*s,50*s,Math.PI*1.12,Math.PI*1.88);x.stroke();
+      var cups = side? [[46,-6]] : [[-50,-4],[50,-4]];
+      cups.forEach(function(p){
+        x.beginPath();x.ellipse(hx+p[0]*s,hy+p[1]*s,12*s,17*s,0,0,7);x.fill();x.stroke();
+      });
+    } else {                                // güneş gözlüğü, kafanın üstünde
+      x.beginPath();x.ellipse(hx-20*s,hy-34*s,15*s,11*s,0,0,7);x.fill();x.stroke();
+      x.beginPath();x.ellipse(hx+20*s,hy-34*s,15*s,11*s,0,0,7);x.fill();x.stroke();
+      x.beginPath();x.moveTo(hx-6*s,hy-36*s);x.lineTo(hx+6*s,hy-36*s);x.stroke();
+    }
+    // kolay ayırt edilsin diye ince bir tişört bandı
+    x.strokeStyle=(who==='misu')?C.berry:C.tile; x.lineWidth=9*s;
+    x.beginPath();x.moveTo(cx-34*s+lean*0.25,ground-96*s);x.lineTo(cx+34*s+lean*0.25,ground-96*s);x.stroke();
+    x.strokeStyle=C.berry;
   }
+
+  var SET={};
+  function buildSet(who){
+    if(SET[who]) return SET[who];
+    var o={};
+    VIEWS.forEach(function(v){
+      var c=cv(220,280); drawCapy(c.getContext('2d'),v,who,220,280); o[v]=tex(c);
+    });
+    SET[who]=o; return o;
+  }
+  /* açı → görünüm; |rel| 0=sırt, π=ön. Karşı taraf scale.x ile aynalanır. */
+  var VIEW_BY_BUCKET=['back','back34','side','front','front'];
+  function viewFor(rel){
+    var i=Math.min(4,Math.round(Math.abs(rel)/(Math.PI/4)));
+    return VIEW_BY_BUCKET[i];
+  }
+  function drawChar(x,who,w,h){ drawCapy(x,'front',who,w,h); }   // seçim ekranı için
+  document.querySelectorAll('.pick canvas').forEach(function(c){
+    drawChar(c.getContext('2d'), c.parentElement.dataset.who, c.width, c.height);
+  });
 
   // roundRect polyfill for older engines
   if(!CanvasRenderingContext2D.prototype.roundRect){
@@ -642,8 +700,8 @@
   document.querySelectorAll('.pick').forEach(function(p){
     p.onclick=function(){
       who=p.dataset.who; other = who==='misu'?'miyu':'misu';
-      drawChar(charCv.getContext('2d'),who,220,280); charMat.map.needsUpdate=true;
-      drawChar(npcCv.getContext('2d'),other,220,280); npc.material.map.needsUpdate=true;
+      buildSet(who); buildSet(other);
+      npc.material.map = SET[other].front; npc.material.needsUpdate=true;
       document.getElementById('select').style.display='none';
       runLoader();
     };
@@ -738,6 +796,7 @@
   /* ============ loop ============ */
   var heroAngle=0, bob=0, clock=new THREE.Clock();
   var camAng=0;                       // kameranın baktığı yön (radyan), 0 = -z
+  var charAng=0;                      // karakterin baktığı yön — kameradan hızlı döner
   function angLerp(a,b,t){            // en kısa yoldan dön, ±π sınırında zıplamasın
     var d=((b-a+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
     // tam 180°: iki yön de eşit uzaklıkta, taraf seçilemezse titrer — sabit yön ver
@@ -770,7 +829,11 @@
       // kamera yürünen yöne döner — sağa basınca sağa bakarız, yengeç gibi kaymayız
       // reduced-motion: kamera hiç dönmez, eski sabit bakış korunur (ani dönüş rahatsız eder)
       // 0.15 → 180°'lik dönüş ~1.2 sn sürer. Küçültmek hızlandırır, büyütmek yavaşlatır.
-      if(len>.05 && !reduce) camAng = angLerp(camAng, Math.atan2(ix,iz), 1-Math.pow(.15,dt));
+      if(len>.05){
+        var want=Math.atan2(ix,iz);
+        charAng = angLerp(charAng, want, 1-Math.pow(.02,dt));   // karakter hızlı döner
+        if(!reduce) camAng = angLerp(camAng, want, 1-Math.pow(.15,dt)); // kamera geriden takip eder
+      }
       // bob + lean
       if(len>.05&&!reduce){
         bob+=dt*11;
@@ -822,6 +885,13 @@
       f.pulse.material.opacity = (1-ph)*(.22+f.glow*.5);
     });
 
+    // açıya göre sprite: |rel| 0=sırt … π=ön, karşı taraf aynalanır
+    if(SET[who]){
+      var rel=((charAng-camAng+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+      var v=viewFor(rel);
+      if(hero.material.map!==SET[who][v]){ hero.material.map=SET[who][v]; hero.material.needsUpdate=true; }
+      hero.scale.x = (rel<0 && v!=='back' && v!=='front') ? -1 : 1;
+    }
     shadow.position.set(hero.position.x,.02,hero.position.z);
     shadow.scale.setScalar(1+(hero.position.y-.83)*.6);
 
