@@ -30,12 +30,18 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 9 tamamlandı — tüm fazlar (1–9) bitti.** Kalan: domain bağlama + Faz 8'den devreden performans borcu.
+- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1 ve 5.5.2 bitti, sırada 5.5.3** (Character + kontroller + yön takipli kamera).
+- Dal: **`zone/3d-galeri`** (5.5 çalışması burada). **`faz-1-yeniden` production dalı, canlı site oradan besleniyor — Zone kabul kriterlerini geçene kadar BİRLEŞTİRİLMEZ.**
+- Fazlar 1–9 tamamlandı, site yayında. Kalan: domain bağlama + Faz 8'den devreden performans borcu.
 - **CANLI (yeni site): https://manch-v2.vercel.app** — Vercel projesi `manch-v2`, dal **`faz-1-yeniden`**, build 1 dk, smoke 31/31.
 - **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
 - ✅ **Vercel `manch-v2` production branch = `faz-1-yeniden`** (2026-09-18, panodan ayarlandı). Bu dala yapılan push artık doğrudan `manch-v2.vercel.app`'i günceller; doğrulandı (hero düzeltmesi 49 s'de production'a çıktı).
 - **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43). Env **Preview kapsamına da** eklendi — ilk push'ta preview build Kural 57 ile kırılmıştı (koruma çalıştı); eklendikten sonra push → Ready (~40 s), auto-deploy doğrulandı.
-- Son başarılı build: 2026-09-18 Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- **Zone durumu (5.5.2 sonu):** `/lab/zone` salonu duruyor — 10 mesh (zemin · tavan · 2 ışık bandı · 2 yan duvar · arka duvar künyesi · **ön duvar z=+20** · 2 süpürgelik), künye metni i18n'den, `document.fonts.ready` yeniden çizimi çalışıyor, fog 26–52, dpr min(dPR,2). **Kamera sabit, karakter/hareket yok.**
+  · `node scripts/zone-bundle-check.mjs` → three ana bundle'da **yok** (`/tr` 215.1 kB gz)
+  · `CHROME=… node scripts/zone-leak-check.mjs` → 6 tur aç-kapa, `alive` sabit 1, canvas 1, konsol 0
+  · Ekranlar: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
+- Son başarılı build: 2026-09-18 **5.5.2 kapanış** (`pnpm lint` + `pnpm build` temiz; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
@@ -58,7 +64,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Çalışma saatleri geldi (2026-09-18):** Pzt–Per 08:30–23:30 · Cum–Cmt 08:30–00:00 · Paz 08:30–23:30. `site.hours` dolu, arayüzdeki saat rozetleri kalktı, JSON-LD'ye `openingHoursSpecification` **eklendi**, `addressRegion: "Muğla"` eklendi. Kural 54-B artık saatler için geçerli değil — veri var.
 - **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
-- Açık TODO'lar: **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
+- Açık TODO'lar: **Misu & Miyu'nun 4 açılık çizimleri** (8 dosya, `public/images/mascots/` — 5.5.3'ün önkoşulu; gelmezse prototipteki `drawCapy()` geçici sprite üretir) · **içecek fiyatları teyit bekliyor** (limonata 120 / soft drink 90 / ayran 80 örnek değer) · **`hero-cook.jpg` ve `team-kitchen.jpg` aynı fotoğrafın iki kopyası** — tek kaynağa indirmek değerlendirilecek (şu an mobilde biri, masaüstünde diğeri yükleniyor) · **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
 - **Cloudflare DNS adımları (domain gelince):** 0) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle (Kural 57) · 1) Vercel → `manch-v2` → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
@@ -127,6 +133,25 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 57. `NEXT_PUBLIC_SITE_URL` **zorunlu**: `src/lib/site.ts#siteUrl()` değer yoksa production build'i `throw` ile kırar; development'ta `http://localhost:3000`a düşer ama konsola gürültülü uyarı basar. Sessizce tahmini bir domaine düşmek en kötü hata sınıfı — site yanlış canonical ile yayına çıkar, Google onu indeksler, düzeltmesi haftalar alır. canonical · hreflang · sitemap · robots · Restaurant JSON-LD · OG hepsi bu tek değerden okur (2026-09-18).
 58. **Bir repoyu iki Vercel projesine bağlarken `vercel.json` ORTAKTIR.** `git.deploymentEnabled` gibi bir ayar her iki projeyi birden etkiler — yeni projeyi korumak için eklenen kısıt eski projenin auto-deploy'unu kırar. Proje bazlı ayar (production branch, ignored build step) yalnızca pano/proje ayarlarından yapılır; `PATCH /v9/projects/:id` bu alanları kabul etmiyor (denendi 2026-09-18).
 59. **Gözle bakma zorunlu.** Otomatik kontroller (lab-check, Lighthouse, smoke) yapıyı, durum kodlarını, erişilebilirlik ağacını ve metrikleri doğrular; **görselin içeriğini doğrulamaz**. Fotoğrafın üstündeki silinmemiş yazı, yanlış kadraj, bozuk kesit — hiçbiri teste takılmaz. Her faz sonunda **canlı/preview sayfalara gözle bakılır** (en az mobil + masaüstü hero ve değişen bölümler); ekran görüntüsü `docs/screens/` altına konur (2026-09-18).
+60. **Testin kendisini test et.** Bir kontrol yazdıktan sonra onu **kasıtlı olarak bozup yakaladığını doğrula**;
+    yakalamıyorsa o kontrol olmamasından kötüdür — yeşil rapor verir, koruduğunu sandığın şey korunmaz.
+    Bu oturumda üç kez yaşandı (2026-09-18): ① deploy bekleme döngüsü başarısız deploy'u başarılıdan
+    ayırt edemiyordu · ② three.js sızıntı kontrolü ilk sabotajı yakalamadı (yanlış yere konmuştu) ·
+    ③ Zone sızıntı testi sayfa navigasyonuyla ölçtüğü için sayaçları sıfırlıyor, sızıntı olsa da geçiyordu.
+    Kural 59 (gözle bak) bunun görsel tarafı; bu madde otomatik tarafı.
+61. **İstemci bundle'ına yalnızca client component'ten sızılır.** Ağır bir kütüphaneyi (three, vb.) bir
+    **Server Component**'te statik import etmek onu istemci paketine SOKMAZ — server bundle'da kalır.
+    Sızıntı kontrolü bu yüzden client component üzerinden test edilir; server component'te test edilirse
+    "temiz" der ve hiçbir şey kanıtlamaz (2026-09-18).
+62. **Mount/unmount ölçümü navigasyonla yapılmaz.** Tam sayfa yüklemesi modül seviyesi sayaçları sıfırlar.
+    Aç-kapa-aç testi aynı sayfada bir aç/kapa düğmesiyle kurulur — zaten ürünün gerçek davranışı da budur
+    (Zone ana sayfada açılıp kapanıyor, navigasyonla değil). `scripts/zone-leak-check.mjs` (2026-09-18).
+63. **R3F/Three notları:** ① `useMemo` bağımlılığı **dizi literali** olmalı (React Compiler) → `useTexture(make, deps)`
+    gibi jenerik doku hook'u yazılamaz, her çağrı yerinde açık `useMemo([...])` kullanılır. ② Aşağı bakan yüzey
+    (tavan) `meshStandardMaterial` ile yalnızca ambient alır ve **gri** görünür; düz marka rengi isteniyorsa
+    `meshBasicMaterial`. ③ R3F, JSX ile tanımlanan geometry/material'ı unmount'ta bırakır; **elle üretilen
+    dokuları bırakmaz** — sahneyi dolaşan bir disposer şart. ④ `/lab` sayfalarında sahne üstü test düğmeleri
+    nav'ın (z-80) altında kalırsa tıklama engellenir; z-90 ve nav'dan uzak köşe (2026-09-18).
 
 ---
 
@@ -323,6 +348,32 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 
 ---
 
+### Faz 5.5 — MANCH Zone (3D galeri)
+
+> Tam spesifikasyon: **`docs/manch-zone-3d.md`** · görsel/davranış referansı: `docs/reference/manch-zone-prototype.html`
+> Dal: **`zone/3d-galeri`**. `faz-1-yeniden` (production) ancak kabul kriterleri geçince birleşir.
+> Ölçüler prototipten, **renkler `tokens.ts`'ten** (prototip eski `berry #7A1F4B` kullanıyor).
+
+- [x] **5.5.1** Bağımlılıklar (three 0.186 · fiber 9.7 · drei 10.7) + `store/zone.ts` + `lib/zone/frames.ts` + `lib/zone/textures.ts` + `menu.ts` içecek kategorisi (28 ürün) + `Zone` namespace (37 anahtar)
+- [x] **5.5.2** `ZoneCanvas` + `Hall` (10 mesh, ön duvar z=+20 dahil, künye metni i18n'den, `document.fonts.ready` yeniden çizimi) + `/lab/zone`
+- [ ] **5.5.3** `Character` (4 açılık sprite) + `useZoneControls` + yön takipli kamera
+- [ ] **5.5.4** `Footprints` + `Npc` + ışık bantları
+- [ ] **5.5.5** `Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık
+- [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
+- [ ] **5.5.7** POV geçişi + `FrameBoard`
+- [ ] **5.5.8** `OrderBoard` (15 satır, `useCartStore`, WhatsApp, scroll korunması)
+- [ ] **5.5.9** `StoryBoard` × 3
+- [ ] **5.5.10** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
+- [ ] **5.5.11** Performans + Kural 59 gözle bakma
+- [ ] ✅ Kabul: `docs/manch-zone-3d.md` bölüm 11
+
+**Her adımda koşulacak üç script:**
+`node scripts/zone-bundle-check.mjs` (three ana bundle'a sızmadı mı) ·
+`CHROME=… node scripts/zone-leak-check.mjs` (aç-kapa'da `alive` sabit mi) ·
+`pnpm lint && pnpm build`
+
+---
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -402,6 +453,13 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-18 | 9 | `manch-v2`'nin production dalı `main` kaldı (API kabul etmedi) | `PATCH /v9/projects/:id` `gitRepository`/`productionBranch`/`link` alanlarını reddediyor; `POST /v4/projects/:id/link` çağrıyı kabul edip değeri yok sayıyor | **Panodan tek tıkla** değiştirilecek (Settings → Git → Production Branch → `faz-1-yeniden`). `vercel.json` ile engellenemez — dosya iki proje arasında ortak (Kural 58) |
 | 2026-09-18 | 9 | İlk auto-deploy **hata verdi** (preview, 21 s) | `NEXT_PUBLIC_SITE_URL` yalnızca **Production** kapsamına eklenmişti; preview build'de yok → `siteUrl()` throw etti. **Kural 57 koruması tam istendiği gibi çalıştı** — sessizce yanlış canonical'la yayına çıkmak yerine build kırıldı | Env Preview kapsamına da eklendi; sonraki push Ready (~40 s). Ders: env kapsamları (Production/Preview/Development) ayrı ayrı ayarlanır, biri diğerini kapsamaz |
 | 2026-09-18 | 9 | **90 otomatik kontrolün hepsi yeşilken** canlı sitede hero fotoğrafının üstünde silinmemiş overlay yazı ("Behind Every Great Burger") duruyordu; kullanıcı fark etti | Testler DOM yapısını, durum kodlarını, erişilebilirlik ağacını ve metrikleri doğruluyor — **piksellere bakmıyor**. Kırık görsel yok, alt metni var, boyutu doğru: hiçbir kontrolün tetiklenmesi için sebep yok | Fotoğraf değiştirildi. **Ders: otomatik testler yapıyı doğrular, görünüşü doğrulamaz — her faz sonunda canlı/preview sayfalara gözle bakılmalı** (Kural 59) |
+| 2026-09-18 | 5.5.1 | Referans prototip (`manch-zone-prototype.html`) **hiç açılmıyordu** | Satır 644'te tanımsız `redrawChars()` çağrısı `ReferenceError` atıp sahneyi başlatmıyordu — eski sürümden kalma artık çağrı; sprite'lar zaten `buildSet()`/`SET[who]` ile atanıyor | Çağrı kaldırıldı, prototip çalışıyor ve gezildi |
+| 2026-09-18 | 5.5.1 | Faz 9'daki deploy bekleme döngüsü **başarısız deploy'u başarılıdan ayırt edemiyordu** (sonunda sebepsiz `exit 1`) | `vercel ls` çıktısını awk/grep ile ayrıştırmak hangi satırın YENİ deployment olduğunu söylemiyor | `scripts/deploy-wait.mjs`: Vercel API'sinden **SHA eşleşmesi**; READY→0, ERROR→1, zaman aşımı→2. Üç yol da test edildi (Kural 60) |
+| 2026-09-18 | 5.5.1 | three sızıntı kontrolü sabotajı **yakalamadı** | Geçici statik `three` importu `page.tsx`'e (Server Component) konmuştu → three server bundle'da kaldı, istemci paketine hiç girmedi | Sabotaj client component'e (`ProductCard.tsx`) taşındı: bundle 215 → **342.8 kB gz**, kontrol yakaladı (Kural 61) |
+| 2026-09-18 | 5.5.2 | Zone sızıntı testi **sızıntı olsa da geçerdi** | `/lab/zone` ↔ `/lab` navigasyonuyla ölçüyordu; tam sayfa yüklemesi modül sayaçlarını sıfırlıyor, her tur `created=1 disposed=0` çıkıyordu | Sayfa içi aç/kapa düğmesiyle gerçek mount/unmount döngüsüne çevrildi; sabotajla doğrulandı: `alive` 2→3→4, exit 1 (Kural 60, 62) |
+| 2026-09-18 | 5.5.2 | `pnpm lint`: "Expected the dependency list for useMemo to be an array literal" | React Compiler kuralı — jenerik `useTexture(make, deps)` hook'u bağımlılığı değişken olarak geçiyordu | Hook kaldırıldı, her doku çağrı yerinde açık `useMemo([...])` ile; yeniden çizim anahtarı `revision` parametresi olarak **gerçekten kullanılıyor** (sahte bağımlılık değil) — Kural 63 |
+| 2026-09-18 | 5.5.2 | Tavan **gri** görünüyordu (spec: düz krem) | Aşağı bakan yüzey `meshStandardMaterial` ile yalnızca ambient alıyor | `meshBasicMaterial` + `toneMapped={false}` (ışık bantlarıyla aynı yaklaşım). **Kural 59 gözle bakma sayesinde yakalandı** |
+| 2026-09-18 | 5.5.2 | Sızıntı testi tıklamada zaman aşımına düştü | `/lab/zone`'daki aç/kapa düğmesi sağ üstteydi, nav'ın MENÜ butonu (z-80) tıklamayı yakalıyordu | Düğme sol alta + z-90 (Kural 63) |
 
 ---
 
