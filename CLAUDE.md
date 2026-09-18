@@ -30,7 +30,11 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 8 tamamlandı (kısmi kabul).** Sıradaki: Faz 9 (Deploy) — kullanıcı onayı bekleniyor, kendiliğinden geçilmez.
+- Aktif faz: **Faz 9 tamamlandı — tüm fazlar (1–9) bitti.** Kalan: domain bağlama + Faz 8'den devreden performans borcu.
+- **CANLI (yeni site): https://manch-v2.vercel.app** — Vercel projesi `manch-v2`, dal **`faz-1-yeniden`**, build 1 dk, smoke 31/31.
+- **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
+- ⚠️ **PANODAN YAPILACAK TEK ADIM:** `manch-v2` → Settings → Git → **Production Branch = `faz-1-yeniden`** (şu an `main`). Yapılmazsa `main`'e atılacak bir push `manch-v2`'ye **eski siteyi** deploy eder. API kabul etmiyor (Kural 58).
+- **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43).
 - Son başarılı build: 2026-09-18 Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
@@ -55,7 +59,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Sipariş linki hâlâ YOK:** Google'daki buton Google'ın ara sayfasına gidiyor, gerçek sağlayıcı belli değil → `site.orderUrl` `null`, `SoonBadge` orada duruyor, sipariş akışı WhatsApp'ta.
 - **Kararlar (2026-09-18, kullanıcı):** ① ~~Smash Anatomy (R15)~~ **iptal** → yerine **R15b BuildSequence** (6 kare yapım sırası, pin yok; gerekçe: gerçek katman fotoğrafı yok + eski pinned hatası). ② Instagram grid **6 gerçek 1:1 fotoğrafla** dolduruldu; kesit/metin kartı karıştırılmaz. ③ 25 ürün açıklaması TR+EN girildi (taslak, onay bekliyor).
 - Açık TODO'lar: **menü metinleri taslak — müşteri onayı bekliyor** (25 ürün TR+EN, 2026-09-18'de girildi; `Menu.disclaimer` bunu sitede de duyurur) · **orijinal vektör logo + marka renk kılavuzu isteniyor** (kalan 8 renk tokeninin teyidi buna bağlı) · **çalışma saatleri** (`site.hours` null) · **sipariş linki** (`site.orderUrl` null) · domain (Cloudflare adımları aşağıda) · Crispy Triangle fiyatı yok (`price: null`) · **16 üründe fotoğraf yok** — 8 burgerden tek görselsiz olan **Guacamole Burger** (Placeholder ile çalışıyor); ayrıca ( 6 sos, 4 extra, 2 fries, corn ribs, tenders, arancini) · orijinal fotoğraflar (kaynaklar ekran görüntüsü 749–1222 px) · maskot vektörü (`misu-miyu.png` 472×270) · logo orijinal vektörü (şimdiki SVG'ler potrace izi) · renk kodlarının logodan teyidi · Webber Digital URL · Google Place ID · **5 üründe açıklama aynı** (jenerik metin — ADIM 5 bulgusu)
-- **Cloudflare DNS adımları (domain gelince):** 1) Vercel → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
+- **Cloudflare DNS adımları (domain gelince):** 0) `NEXT_PUBLIC_SITE_URL`'i yeni domaine güncelle (Kural 57) · 1) Vercel → `manch-v2` → Settings → Domains → alan adını ekle · 2) Cloudflare DNS → `CNAME` `@`/`www` → `cname.vercel-dns.com` (proxy **kapalı**, DNS only) · 3) Vercel doğrulaması yeşil · 4) `NEXT_PUBLIC_SITE_URL` güncelle · 5) redeploy · 6) `node scripts/smoke.mjs https://<domain>`
 
 ---
 
@@ -120,6 +124,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     **B · Yapılandırılmış veri (JSON-LD):** bilinmeyen alan **tamamen çıkarılır**. "Yakında", boş string, tahmin **YASAK** — Google yapılandırılmış veriyi kelime kelime okur, uydurma değer işletme kartını bozar ve düzeltmesi aylar alır. `restaurantJsonLd` yalnızca bilinen alanı yazar; `openingHours*` ve `priceRange` **hiç yazılmaz**. Telefon yapılandırılmış veride boşluksuz E.164 (`+905054970748`), arayüzde okunur biçim. `lab-check` bunu üç ayrı kontrolle denetler.
 55. Kural 44 daraltması yeni bir layout client component'i eklendiğinde **sessizce kırılır**: namespace `BASE_CLIENT_NAMESPACES`'te yoksa `MISSING_MESSAGE` konsol hatası gelir (2026-09-18'de `CookieBanner` → `Cookie` ile yaşandı, 56 hata). Layout'a client component eklerken `useTranslations("X")` namespace'i listeye eklenir; `client-messages.ts` içindeki denetim yorumu güncel tutulur.
 56. Her lazy `import()` **`.catch()` ile kapatılır**. Hızlı gezinmede uçuştaki chunk isteği iptal olur ve yakalanmamış promise reddine (`ChunkLoadError`) dönüşür — WebKit'te 2026-09-18'de yakalandı. Animasyon/smooth-scroll isteğe bağlı olduğu için sessizce vazgeçilir; sayfa native scroll ile çalışmaya devam eder.
+57. `NEXT_PUBLIC_SITE_URL` **zorunlu**: `src/lib/site.ts#siteUrl()` değer yoksa production build'i `throw` ile kırar; development'ta `http://localhost:3000`a düşer ama konsola gürültülü uyarı basar. Sessizce tahmini bir domaine düşmek en kötü hata sınıfı — site yanlış canonical ile yayına çıkar, Google onu indeksler, düzeltmesi haftalar alır. canonical · hreflang · sitemap · robots · Restaurant JSON-LD · OG hepsi bu tek değerden okur (2026-09-18).
+58. **Bir repoyu iki Vercel projesine bağlarken `vercel.json` ORTAKTIR.** `git.deploymentEnabled` gibi bir ayar her iki projeyi birden etkiler — yeni projeyi korumak için eklenen kısıt eski projenin auto-deploy'unu kırar. Proje bazlı ayar (production branch, ignored build step) yalnızca pano/proje ayarlarından yapılır; `PATCH /v9/projects/:id` bu alanları kabul etmiyor (denendi 2026-09-18).
 
 ---
 
@@ -304,15 +310,15 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] ⚠️ Kabul (kısmi): preloader'sız mobile **perf 98 / 91 / 95** (`/tr`, `/tr/menu`, `/tr/contact`) — **perf ≥ 90 üçünde de sağlandı**; CLS 0–0.001 ✓; A11y/SEO 100 ✓. **LCP hedefi (< 2500 ms) yalnızca `/tr`'de tuttu: 4691 → 2310 ms.** `/tr/menu` 3465, `/tr/contact` 2888 ms. First Load JS 225.9 → **214.6 kB gz** (Kural 46 hedefi ≤ 200 — **tutmadı**). lab-check chromium **93/93** + webkit **93/93**, konsol temiz; 375/768/1440/1920'de yatay taşma yok. Ayrıntı ve geri alınan denemeler: `docs/screens/faz-8-table.md` *(revize: 2026-09-18)*
 
 ### Faz 9 — Deploy
-- [ ] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
-- [ ] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
-- [ ] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
-- [ ] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
-- [ ] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
-- [ ] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
-- [ ] Preview/canlı URL DURUM'da
-- [ ] Domain (Cloudflare DNS) — TODO'daki adım listesi
-- [ ] ✅ Kabul: production build Vercel'de yeşil (canlı: https://manch-eight.vercel.app)
+- [x] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
+- [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
+- [x] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
+- [x] `sharp` **dependency** (devDependency değil — Vercel prod install'ında `next/image` optimizasyonu için); `vercel.json` gerekmedi (Next preset yeterli)
+- [x] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
+- [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
+- [x] Preview/canlı URL DURUM'da
+- [x] Domain (Cloudflare DNS) — TODO'daki adım listesi
+- [x] ✅ Kabul: Vercel build **yeşil (1 dk)** · `scripts/smoke.mjs` canlıda **31/31 ✓, 0 uyarı** · dört sayfa × iki dil 200 · JSON-LD 12 alan, `priceRange` yok, saatler 7 gün · **sepet → WhatsApp canlıda çalışıyor** (25/25 kart görünür, toast, rozet 3, drawer 2 satır, 1500 TL, `wa.me/905054970748` doğru mesajla; konsol 0 hata). `docs/screens/faz-9-cart-live.png` *(revize: 2026-09-18)*
 
 ---
 
@@ -389,6 +395,10 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | 2026-09-18 | 8 | Tek Lighthouse koşusuyla karar verilirken **gürültüye kanıldı** (aynı yapıda LCP [2194, 2799, 3529]) | Simüle throttling koşular arası ±10 puan / ±1 s oynuyor | `scripts/lighthouse.mjs` varsayılan **3 koşu medyanı** (`RUNS` ile değişir), ham örnekler de raporlanıyor |
 | 2026-09-18 | 8 | **WebKit**: `ChunkLoadError: Failed to load chunk …/gsap` (pageerror) | Hızlı gezinmede uçuştaki lazy `import()` iptal oluyor, `.catch()` olmadığı için yakalanmamış redde dönüşüyor | `useLazyGsap`, `useGsapModule`, `SmoothScroll` ve `gsap.ts`'teki tüm lazy import'lara `.catch(() => {})` (Kural 56). Chromium'da hiç görünmemişti — Kural 45'in WebKit koşusu işe yaradı |
 | 2026-09-18 | 8 | WebKit konsolunda `preloaded using link preload but not used` | Next'in **dev** Turbopack HMR chunk'ı — uygulama kodu değil, prod'da yok | lab-check filtresine belgeli istisna (Kural 45) |
+| 2026-09-18 | 9 | Tahmin edilen preview URL 404 | Ekip slug'ı `saygingemici25800-pixels-projects` sanılmıştı, gerçeği `saygingemici25800-2823s-projects` | `vercel project ls` ile doğrulandı; URL tahmin edilmez, listelenir |
+| 2026-09-18 | 9 | Dal push'u preview üretti ama **canonical yanlış olacaktı** | Mevcut `manch` projesinde `NEXT_PUBLIC_SITE_URL` Production **+ Preview** kapsamında `https://manch-eight.vercel.app` (eski site) — preview onu miras alıyor | **Ayrı Vercel projesi** (`manch-v2`) açıldı, kendi env'i ile. Eski site hiç etkilenmedi |
+| 2026-09-18 | 9 | Deployment URL'i 302 döndü, smoke koşulamadı | Vercel Authentication deployment URL'lerinde varsayılan açık; **production alias** (`manch-v2.vercel.app`) herkese açık | Smoke alias'a koşulur, `manch-v2-<hash>` URL'ine değil |
+| 2026-09-18 | 9 | `manch-v2`'nin production dalı `main` kaldı (API kabul etmedi) | `PATCH /v9/projects/:id` `gitRepository`/`productionBranch`/`link` alanlarını reddediyor; `POST /v4/projects/:id/link` çağrıyı kabul edip değeri yok sayıyor | **Panodan tek tıkla** değiştirilecek (Settings → Git → Production Branch → `faz-1-yeniden`). `vercel.json` ile engellenemez — dosya iki proje arasında ortak (Kural 58) |
 
 ---
 
