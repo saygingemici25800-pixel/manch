@@ -627,6 +627,122 @@ if (runs("scene")) {
   await page.keyboard.press("Escape");
   await page.waitForTimeout(600);
 
+  /* =========================== 5.5.7: Joystick =========================== */
+
+  const padBox = async () => {
+    const b = await page.locator("[data-testid=zone-joystick] > div").boundingBox();
+    return { cx: b.x + b.width / 2, cy: b.y + b.height / 2, r: b.width / 2 };
+  };
+  const knobXY = () =>
+    page.evaluate(() => {
+      const k = document.querySelector("[data-testid=zone-joystick-knob]");
+      const m = new DOMMatrixReadOnly(getComputedStyle(k).transform);
+      return { x: +m.m41.toFixed(1), y: +m.m42.toFixed(1) };
+    });
+
+  ok((await page.locator("[data-testid=zone-joystick]").count()) === 1,
+    "joystick masaüstünde görünür (dokunmatik koşulu yok)");
+
+  /* ÜSTÜNÜ bir şey kapatmamalı: sitenin sepet düğmesi (`fixed z-60`) aynı köşede ve
+     joystick onun altında kalıyordu — topuz ve etiket görünmüyordu (Kural 59). */
+  {
+    const hit = await page.evaluate(() => {
+      const pad = document.querySelector("[data-testid=zone-joystick] > div").getBoundingClientRect();
+      const el = document.elementFromPoint(pad.x + pad.width / 2, pad.y + pad.height / 2);
+      return el?.closest("[data-testid=zone-joystick]") ? "joystick" : (el?.tagName.toLowerCase() ?? "yok");
+    });
+    ok(hit === "joystick", "joystick'in üstünü başka bir arayüz kapatmıyor", `merkezde: ${hit}`);
+  }
+
+  /* Sürüklemeyi pedin DIŞINA taşı, düğmeyi dışarıda bırak → merkeze döner, karakter durur.
+     Dinleyiciler tabana bağlı olsaydı imleç pedi terk ettiği anda sürükleme ölürdü. */
+  {
+    const pad = await padBox();
+    await page.mouse.move(pad.cx, pad.cy);
+    await page.mouse.down();
+    await page.mouse.move(pad.cx + pad.r * 4, pad.cy + pad.r * 4, { steps: 6 });
+    await page.waitForTimeout(220);
+    const outside = await read(page);
+    const knobOut = await knobXY();
+    ok(outside.joy.x > 0.6 && outside.joy.y > 0.6,
+      "sürükleme ped DIŞINDA da yaşıyor (dinleyiciler window'da)",
+      `joy ${outside.joy.x.toFixed(2)},${outside.joy.y.toFixed(2)}`);
+    ok(Math.hypot(knobOut.x, knobOut.y) <= pad.r - 17,
+      "topuz taban yarıçapıyla sınırlı",
+      `uzaklık ${Math.hypot(knobOut.x, knobOut.y).toFixed(1)}px · sınır ${(pad.r - 18).toFixed(0)}`);
+
+    await page.mouse.up();            // düğme PEDİN DIŞINDA bırakıldı
+    await page.waitForTimeout(350);
+    const released = await read(page);
+    const knobHome = await knobXY();
+    ok(released.joy.x === 0 && released.joy.y === 0 && released.input.len === 0,
+      "dışarıda bırakınca kontrol sıfırlanıyor, karakter duruyor",
+      `joy ${released.joy.x},${released.joy.y} · len ${released.input.len}`);
+    ok(Math.hypot(knobHome.x, knobHome.y) < 1,
+      "topuz merkeze döndü", `${knobHome.x},${knobHome.y}`);
+  }
+
+  /* Sekiz yön: joystick vektörü klavye eşdeğeriyle AYNI `want` açısını üretmeli (spec 7.4). */
+  {
+    const DIRS = [
+      [0, -1, 180, "yukarı"], [1, -1, 135, "sağ-yukarı"], [1, 0, 90, "sağ"], [1, 1, 45, "sağ-aşağı"],
+      [0, 1, 0, "aşağı"], [-1, 1, -45, "sol-aşağı"], [-1, 0, -90, "sol"], [-1, -1, -135, "sol-yukarı"],
+    ];
+    const bad = [];
+    for (const [ux, uy, wantDeg, label] of DIRS) {
+      const pad = await padBox();
+      await page.mouse.move(pad.cx, pad.cy);
+      await page.mouse.down();
+      await page.mouse.move(pad.cx + ux * pad.r * 2, pad.cy + uy * pad.r * 2, { steps: 4 });
+      await page.waitForTimeout(220);
+      const st = await read(page);
+      // `want` = atan2(ix, iz) — klavyenin kullandığı formülün aynısı
+      const got = (Math.atan2(st.input.ix, st.input.iz) * 180) / Math.PI;
+      if (Math.abs(((got - wantDeg + 540) % 360) - 180) > 8) bad.push(`${label}: ${got.toFixed(0)}° (bekl. ${wantDeg}°)`);
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+    }
+    ok(bad.length === 0,
+      "sekiz yönün sekizi de klavye ile aynı yön vektörünü üretiyor (dünya-göreli, spec 7.4)",
+      bad.join(" · "));
+  }
+
+  /* Aşağı çekince 180° dönüş — süre SİMÜLASYON saatiyle (bu turda öğrenildi). */
+  {
+    await settleBack(page);
+    await resetDebug(page);
+    const pad = await padBox();
+    await page.mouse.move(pad.cx, pad.cy);
+    await page.mouse.down();
+    await page.mouse.move(pad.cx, pad.cy + pad.r * 2, { steps: 4 });
+    let turned = null;
+    for (let i = 0; i < 120; i++) {
+      await page.waitForTimeout(90);
+      const st = await read(page);
+      if (dd(st.cam.ang, 0) < 12) { turned = st; break; }
+    }
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+    ok(turned !== null, "joystick aşağı: kamera 180° dönüyor",
+      turned ? `${deg(norm(turned.cam.ang)).toFixed(0)}°` : "dönmedi");
+    const simMs = turned ? turned.simTime * 1000 : null;
+    ok(simMs !== null && simMs > 600 && simMs < 2600,
+      "joystick 180° dönüşü ~1.2 sn simülasyon süresi",
+      `${simMs === null ? "-" : simMs.toFixed(0)} ms sim`);
+  }
+
+  /* POV'da gizlenir */
+  await tp(...STOPS.menu);
+  await page.waitForTimeout(350);
+  await page.keyboard.press("e");
+  await page.waitForTimeout(500);
+  ok((await page.locator("[data-testid=zone-joystick]").count()) === 0,
+    "POV'da / pano açıkken joystick gizleniyor");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+  ok((await page.locator("[data-testid=zone-joystick]").count()) === 1,
+    "POV'dan çıkınca joystick geri geliyor");
+
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;
   ok(src === "drawn" || src === "png", `sprite kaynağı raporlanıyor: ${src}`);

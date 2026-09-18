@@ -18,6 +18,9 @@ import { useZoneStore } from "@/store/zone";
  * İçerik panoları ayrı adımlarda geliyor (`OrderBoard` 5.5.7, `StoryBoard` 5.5.9); burası
  * onların kabuğu — başlık şeridi, kapatma ve gövde.
  *
+ * Yığın sırası: sitenin sepet düğmesi (`fixed z-60`) panonun üstüne binmesin diye z-75.
+ * Zone tam ekran kapısı geldiğinde (5.5.9) site kromu zaten perdenin altında kalacak.
+ *
  * Odak (spec bölüm 10): açılınca odak panoya taşınır, kapanınca **tetikleyen çerçevenin**
  * GİR butonuna döner (`returnFocus`, `FramePrompt` tarafında tamamlanır).
  */
@@ -45,7 +48,7 @@ export function FrameBoard() {
   if (!frame) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-50 grid place-items-center p-[2vw] max-md:p-[4vw]">
+    <div className="pointer-events-none absolute inset-0 z-75 grid place-items-center p-[2vw] max-md:p-[4vw]">
       <div
         ref={card}
         tabIndex={-1}

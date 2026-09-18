@@ -8,6 +8,7 @@ import { Character } from "@/components/zone/Character";
 import { Footprints } from "@/components/zone/Footprints";
 import { FrameBoard } from "@/components/zone/FrameBoard";
 import { FramePrompt } from "@/components/zone/FramePrompt";
+import { Joystick } from "@/components/zone/Joystick";
 import { Frames } from "@/components/zone/Frames";
 import { Hall } from "@/components/zone/Hall";
 import { Npc } from "@/components/zone/Npc";
@@ -183,6 +184,7 @@ export function ZoneCanvas({ className }: { className?: string }) {
         return n;
       })(),
       input: { ...zoneRuntime().input },
+      joy: { ...zoneRuntime().joy },
       /** Billboard açısı — sprite kameraya dönmezse `FrontSide` onu kırpar (spec 8.3). */
       heroRotY: liveScene?.getObjectByName("zone-char")?.rotation.y ?? null,
       /** NPC: konum + billboard açısı (kameraya dönmeli — Kural 63 ⑤). */
@@ -262,7 +264,9 @@ export function ZoneCanvas({ className }: { className?: string }) {
         <FollowCamera />
         <SceneDisposer onDispose={() => { stats.disposed += 1; liveCamera = null; }} />
       </Canvas>
-      {/* POV panosu `<Canvas>` DIŞINDA: kaydırma, odak ve klavye normal DOM'da doğru çalışır. */}
+      {/* Joystick ve pano `<Canvas>` DIŞINDA: işaretçi olayları, kaydırma, odak ve klavye
+          normal DOM'da doğru çalışır. */}
+      <Joystick />
       <FrameBoard />
     </div>
   );

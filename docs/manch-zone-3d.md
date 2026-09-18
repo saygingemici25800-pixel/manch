@@ -402,8 +402,13 @@ Etiket  altında pixel fontla "SÜRÜKLE" (mobilde gizli)
 - POV'da gizlenir, `zone`'a dönünce gelir
 - `touch-action: none`, `mousemove` `{ passive:false }` + `preventDefault()`
 
-**Erişilebilirlik:** `role="application"` + `aria-label`, `tabindex="0"`; odaklıyken ok tuşları aynı
-vektörü üretir, `mustard` focus ring.
+**Erişilebilirlik — REVİZE (2026-09-18, kullanıcı):** joystick **`aria-hidden`**'dır ve
+odaklanabilir DEĞİLDİR. Klavye zaten WASD/ok tuşlarıyla **global olarak** çalışıyor; ekran
+okuyucuya aynı işi yapan ikinci bir kontrol sunmak yalnızca kafa karıştırır. (Spec'in ilk
+hâlindeki `role="application"` + `tabindex="0"` önerisi bu maddeyle değişti.)
+
+**Yığın sırası:** sitenin sepet düğmesi `fixed z-60` ve tam aynı köşede duruyor. Joystick z-70,
+`FrameBoard` z-75 — yoksa joystick sepetin altında kalıyor ve görünmüyor (5.5.7'de yaşandı).
 
 ### 7.2 Klavye
 
@@ -551,7 +556,7 @@ ulaşılmaz** (tepe ayrışma %44.5 → 80°, eşik 112.5°) — `CharacterSelec
 - [x] **5.5.3** `Character` (4 açılık sprite + **billboard**) + `useZoneControls` + **yön takipli kamera** — `lib/zone/{angles,character,runtime}.ts`, `hooks/{useZoneControls,useFollowCamera}.ts`, `scripts/zone-camera-check.mjs` (32/32)
 - [x] **5.5.4** `Footprints` + `Npc` + ışık bantları — 18'lik havuz, ikinci sprite seti, prototip ölçüsünde bantlar
 - [x] **5.5.5** `Frame` × 4 + **`FloorMarker`** + `FramePrompt` + yakınlık — halkanın üstündeki 8 nokta da tetikliyor
-- [ ] **5.5.6** `Joystick` + reduced-motion + erişilebilirlik
+- [x] **5.5.7** `Joystick` + reduced-motion + erişilebilirlik  *(öne alındı)*
 - [x] **5.5.6** POV geçişi — `state:'pov'`, kamera lerp, HUD gizleme, `FrameBoard` kabuğu (odak gidiş-dönüşü dahil)
 - [ ] **5.5.8** `OrderBoard` — 15 satır, `useCartStore`, toplam, WhatsApp, scroll korunması
 - [ ] **5.5.9** `StoryBoard` × 3 + "TAM SAYFAYA GİT"

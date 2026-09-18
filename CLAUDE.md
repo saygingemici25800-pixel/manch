@@ -30,7 +30,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.6 bitti, sırada 5.5.7** (`OrderBoard`).
+- Aktif faz: **Faz 5.5 (MANCH Zone) — 5.5.1–5.5.7 bitti, sırada 5.5.8** (`OrderBoard`).
 - **Adım sırası değişti (2026-09-18, kullanıcı — kota kısıtı):** 5.5.5 çerçeveler → POV → OrderBoard → ZoneGate/CharacterSelect/ZoneLoader → StoryBoard → Joystick → performans. Gerekçe: **ilk dördü bitince Zone gösterilebilir hale geliyor** (girilir, gezilir, tabloya girilip sipariş verilir). Joystick klavye varken şart değil, StoryBoard içerik — ikisi de eşikten sonraya alındı.
 - **Geliştirme sunucusu `pnpm dev -p 3000` açık tutuluyor** (kullanıcı `http://localhost:3000/tr/lab/zone` adresinden canlı izliyor). Her adım sonunda ayakta olduğu doğrulanır.
 - Dal: **`zone/3d-galeri`** (5.5 çalışması burada). **`faz-1-yeniden` production dalı, canlı site oradan besleniyor — Zone kabul kriterlerini geçene kadar BİRLEŞTİRİLMEZ.**
@@ -39,6 +39,14 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 - **Eski site dokunulmadı: https://manch-eight.vercel.app** (Vercel projesi `manch`, dal `main`). İki proje aynı GitHub reposunu paylaşır.
 - ✅ **Vercel `manch-v2` production branch = `faz-1-yeniden`** (2026-09-18, panodan ayarlandı). Bu dala yapılan push artık doğrudan `manch-v2.vercel.app`'i günceller; doğrulandı (hero düzeltmesi 49 s'de production'a çıktı).
 - **Vercel env:** `manch-v2` → `NEXT_PUBLIC_SITE_URL=https://manch-v2.vercel.app` ✓ (Production). `NEXT_PUBLIC_ALLOW_NOPRELOAD` **eklenmedi** (Kural 43). Env **Preview kapsamına da** eklendi — ilk push'ta preview build Kural 57 ile kırılmıştı (koruma çalıştı); eklendikten sonra push → Ready (~40 s), auto-deploy doğrulandı.
+- **Zone durumu (5.5.7 sonu):** **Joystick ekranda** — sağ altta (right 22 + safe-area, bottom 30 + safe-area), 112 px taban + 50 px topuz, masaüstünde de görünür ve fareyle sürüklenir. Çıktı dünya-göreli, `readInput()` içinde klavyeyle **toplanıyor**: sekiz yönün sekizi de `S`/`D`/ok tuşlarıyla **birebir aynı yön vektörünü** üretiyor. Sahne 21 doku (değişmedi).
+  · `zone-camera-check` → **73/73**
+  · **Dinleyiciler `window`'da**, tabana değil: sürükleme pedin dışına çıkınca ölmüyor; düğme **pedin dışında** bırakılınca kontrol sıfırlanıyor, karakter duruyor, topuz merkeze dönüyor. `blur` da bırakıyor
+  · Topuz taban yarıçapıyla sınırlı (merkeze uzaklık ≤ r−18) · joystick aşağı → **180° dönüş**, süre simülasyon saatiyle ölçülüyor
+  · POV'da / pano açıkken gizleniyor, çıkınca geri geliyor · reduced-motion'da topuzun merkeze dönüş geçişi kapanıyor, **kontrol çalışmaya devam ediyor**
+  · **`aria-hidden`** (karar 2026-09-18, kullanıcı — spec 7.1'deki `role="application"` + `tabindex` önerisinin yerine): klavye zaten WASD/ok ile global çalışıyor, ekran okuyucuya ikinci kontrol sunulmuyor. Odaklanabilir olmadığı için güvenli
+  · **Yığın sırası düzeltildi:** sitenin sepet düğmesi `fixed z-60` ve tam aynı köşede; joystick `z-40` iken onun altında kalıyordu (topuz ve "SÜRÜKLE" görünmüyordu). Joystick z-70, `FrameBoard` z-75. Kontrol eklendi: joystick merkezinde `elementFromPoint` joystick'i dönmeli
+  · Ekranlar: `docs/screens/faz-5.5.7-joystick-{1440,390}.png` (sürükleme hâlinde)
 - **Zone durumu (5.5.6 sonu):** tabloya girilince kamera `POV_LERP` (.055) ile karşısına süzülüyor, prompt/halka nabzı duruyor, ortada **`FrameBoard`** kartı açılıyor (min(92vw,720px), 14px ink kenarlık, sticky berry şerit, ← GERİ; kenarlarda 3D sahne görünmeye devam ediyor). İçerik panoları 5.5.7 ve 5.5.9'da; şu an kabuk künye + başlık + görsel gösteriyor. Sahne **21 doku** (değişmedi).
   · `zone-camera-check` → **62/62**, üç ardışık temiz koşu
   · **Odak (spec 10)**: dört tabloda da GİR → odak panoda, GERİ → odak GİR butonunda. `focus({preventScroll:true})` şart: odak vermek sayfayı kaydırıp kartın üstünü kadrajdan çıkarıyordu (`scrollY` 0→123, kart üstü −32)
@@ -72,7 +80,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter çizimleri hâlâ yok** — `drawCapy()` geçici sprite üretiyor. PNG yolu (`TextureLoader`) yazıldı **ve uçtan uca denendi** (8 geçici PNG ile: `spriteSource` → `png`, doku sayısı sabit, ölü bağ 0). Çizimler gelince `character.ts`'teki `MASCOT_SPRITE_BASE` sabiti `"/images/mascots"` yapılır — **başka hiçbir şey değişmez**. Otomatik yoklama bilerek yapılmıyor: olmayan PNG'ye istek 404 üretip Kural 53'e takılır. Dev'de `?sprites=<yol>` ile aynı yol denenebilir.
   · Ekranlar: `docs/screens/faz-5.5.3-zone-1440-{baslangic,sag,sol,180,donusta,miyu}.png`, `faz-5.5.3-zone-375{,-180}.png`
   · 5.5.2 ekranları: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
-- Son başarılı build: 2026-09-18 **5.5.6 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- Son başarılı build: 2026-09-18 **5.5.7 kapanış** (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden):** ① `/tr/menu` mobil LCP **3465 ms** ve `/tr/contact` **2888 ms** (hedef < 2500) — perf ikisinde de ≥ 90. ② First Load JS **214.6 kB gz** (hedef ≤ 200). İkisinin de kökü aynı: simüle yavaş 4G'de ~215 kB JS, font ve görselle bant genişliği paylaşıyor. Kalan yük React+Next+next-intl çatısı (en büyük üç chunk 71.4 / 45.6 / 39.4 kB gz) — daha fazlası çatı seviyesi müdahale ister.
 - **Demo sunumu için:** eksik bilgiler arayüzde `SoonBadge` ile gösteriliyor (Kural 54-A), yapılandırılmış veride hiç yazılmıyor (Kural 54-B). Footer'daki dev MANCH wordmark **kasıtlı dekoratif filigran** — kontrast 1.3:1 ama `aria-hidden="true"`, metin değil, marka adı nav logosunun erişilebilir adında var; axe/Lighthouse temiz (karar 2026-09-18). `/menu`'deki `<h1>` metin içeriği boş, adı SVG `aria-label`'ından geliyor → axe **100** veriyor, sorun değil.
 - **priority kararı (/menu, ölçüldü 2026-09-18):** filtresiz ilk kartta `priority` **AÇIK** kalıyor — ilk boyama her zaman filtresizdir (filtre hydrate sonrası uygulanır), dolayısıyla sunucunun yaydığı preload ilk boyamada doğru karta işaret eder. Ölçüm: AÇIK mobil 2536 / masaüstü 476 ms · KAPALI 2752 / 524 ms. `/about`'ta `team-counter` LCP adayı → priority eklendi (1552 → 1092 ms).
@@ -185,6 +193,23 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     dönüş 585 ms görünüyordu) → gerçek zaman damgası. ③ **Testin yön/başlangıç varsayması**
     ("aşağı+sağ negatif yönde döner") → yön, ölçülen açıdan türetilir; ya da varsayım yerine
     **kuralın kendisi** her örnekte denetlenir. Düzeltme sonrası **üç ardışık temiz koşu** şart.
+
+    **"Ölçtüğün şey ürün mü, ölçüm aracı mı?" (2026-09-18, 5.5.6).** Oynak kontrollerin en sinsi
+    sınıfı: test doğru çalışıyor ama **yanlış özneyi** ölçüyor. İki yüzü yaşandı —
+    ① **Duvar saati / simülasyon saati karışması.** Sahne ağırlaştıkça kare hızı düşüyor; `dt`
+    50 ms'te kırpıldığı için dünya gerçek zamandan yavaş ilerliyor. Spec'teki "180° dönüş
+    ~1.2 sn" **simülasyon** saniyesi, test ise **duvar saati** ölçüyordu → aynı kod 1.4 sn
+    yerine 3.0 sn "sürdü" ve kontrol kırmızı yandı. Ürün değişmemişti, ortam değişmişti.
+    Çözüm: süre `debug.simTime` ile kare döngüsünde birikir; tutuşlar süreye değil **koşula**
+    bağlanır (`holdUntil`).
+    ② **Sürücünün yan etkisi ürünün davranışı sanıldı.** Playwright `locator.click()` elemanı
+    görünür kılmak için **sayfayı kendisi kaydırıyor**; "pano açılınca sayfa kaymıyor"
+    kontrolü bir koşuda `scrollY 607` gördü. Gerçek kullanıcı tıklaması sayfayı kaydırmaz —
+    ölçülen şey üründe olmayan bir davranıştı. Çözüm: kontrol ürünün gerçek yolundan
+    (klavye) açar.
+    **Kural:** bir kontrol kırmızı yandığında önce "bu değer neyin fonksiyonu?" diye sor.
+    Cevapta **ortam** (kare hızı, sunucu yükü) ya da **sürücü** (otomasyon aracının kendi
+    davranışı) varsa, ölçüm yanlış öznededir; ürünü düzeltmeden önce ölçümü düzelt.
 61. **İstemci bundle'ına yalnızca client component'ten sızılır.** Ağır bir kütüphaneyi (three, vb.) bir
     **Server Component**'te statik import etmek onu istemci paketine SOKMAZ — server bundle'da kalır.
     Sızıntı kontrolü bu yüzden client component üzerinden test edilir; server component'te test edilirse
@@ -439,12 +464,17 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] **5.5.4** `Footprints` (18'lik havuz, hareket yönüne göre) + `Npc` (billboard'lu, idle) + ışık bantları prototip ölçüsünde
 - [x] **5.5.5** `Frame` × 4 + `FloorMarker` + `FramePrompt` + yakınlık (52/52)
 - [x] **5.5.6** POV geçişi + `FrameBoard` kabuğu — odak gidiş-dönüşü, yarım geçişte Esc, hızlı E–Esc (62/62)  *(eski 5.5.7)*
-- [ ] **5.5.7** `OrderBoard` (15 satır, `useCartStore`, WhatsApp, scroll korunması)  *(eski 5.5.8)*
-- [ ] **5.5.8** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla  *(eski 5.5.10)*
-- [ ] **5.5.9** `StoryBoard` × 3  *(eski 5.5.9)*
-- [ ] **5.5.10** `Joystick` + reduced-motion + erişilebilirlik  *(eski 5.5.6)*
+- [x] **5.5.7** `Joystick` — window dinleyicileri, 8 yön klavyeyle birebir, POV'da gizli, `aria-hidden` (73/73)  *(öne alındı)*
+- [ ] **5.5.8** `OrderBoard` (15 satır, `useCartStore`, WhatsApp, scroll korunması)
+- [ ] **5.5.9** `ZoneGate` + `CharacterSelect` + `ZoneLoader` — ana sayfaya bağla
+- [ ] **5.5.10** `StoryBoard` × 3
 - [ ] **5.5.11** Performans + Kural 59 gözle bakma
 
+> **Sıra bir kez daha değişti (2026-09-18, kullanıcı): `Joystick` öne alındı (5.5.7),
+> `OrderBoard` 5.5.8'e kaydı.** Gerekçe: **kullanıcı üç turdur kontrolün görünmediğini
+> fark ediyor** — klavye çalışıyor ama ekranda karşılığı yok. Zone'un gezilebilir olduğu
+> ancak görünür bir kontrol varsa anlaşılıyor.
+>
 > **Sıra değişti (2026-09-18, kullanıcı — kota kısıtı).** Gerekçe: **ilk dördü bitince Zone
 > gösterilebilir hale geliyor** — girilebiliyor, gezilebiliyor, tabloya girilip sipariş
 > verilebiliyor. `Joystick` ve `StoryBoard` bu eşikten sonraya kaldı: ikisi de Zone'un
@@ -568,6 +598,7 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-18 | 5.5.6 | POV kapanınca odak **GİR butonuna dönmüyordu** (`body`'de kalıyordu) | `drei/<Html>` içeriğini DOM'a portal ile SONRADAN basıyor; POV kapandıktan hemen sonraki effect'te buton henüz yok, `focus()` sessizce boşa gidiyor | Odak birkaç kare boyunca `requestAnimationFrame` ile deneniyor, başarınca bayrak temizleniyor |
 | 2026-09-18 | 5.5.6 | `zone-camera-check` yine oynadı: 180° dönüş **3013 ms** ölçüldü (sınır 2600), billboard değişimi 16° | Sahne ağırlaştıkça dev sunucuda kare hızı düştü; `dt` 50 ms'te kırpıldığı için dünya gerçek zamandan yavaş ilerliyor. Test **duvar saati** ölçüyordu — spec'teki "1.2 sn" ise **simülasyon** saniyesi. Sabit süreli tutuşlar da 180°'yi tamamlamıyordu | `debug.simTime` (kare döngüsünde birikiyor) ile simülasyon süresi ölçülüyor; tutuşlar süreye değil **koşula** bağlandı (`holdUntil`). Üç ardışık temiz koşu |
 | 2026-09-18 | 5.5.6 | "Pano açılınca sayfa kaymıyor" kontrolü bir koşuda `scrollY 607` dedi | **Test artefaktı:** Playwright `locator.click()` elemanı görünür kılmak için sayfayı KENDİ kaydırıyor; ürünün değil sürücünün davranışı ölçülüyordu. Gerçek kullanıcı tıklaması sayfayı kaydırmaz | Kontrol klavye yolundan (`E`) açıyor. Ekran görüntüsü script'i de aynı nedenle klavyeye çevrildi |
+| 2026-09-18 | 5.5.7 | Joystick ekranda **görünmüyordu** — topuz ve "SÜRÜKLE" etiketi kayıptı | Sitenin sepet düğmesi `fixed z-60` ve tam olarak aynı köşede (sağ alt). Joystick `z-40` ve kapsayıcısı yığın bağlamı **oluşturmadığı** için doğrudan onunla yarışıp altında kalıyordu. Otomatik kontrollerin hepsi yeşildi (DOM'da var, sürükleme çalışıyor) — yine **yalnızca gözle** görülüyordu (Kural 59) | Zone'un DOM katmanı site kromunun üstüne alındı: joystick z-70, `FrameBoard` z-75 (nav z-80'in altında). Kalıcı kontrol: joystick merkezinde `elementFromPoint` joystick'i dönmeli. 5.5.9'daki tam ekran kapısı site kromunu zaten perdenin altında bırakacak |
 
 ---
 
