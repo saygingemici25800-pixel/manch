@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLenis } from "@/lib/lenis-store";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { site } from "@/lib/site";
 import Logo from "@/components/ui/Logo";
@@ -28,11 +29,10 @@ export default function Preloader() {
   // scroll kilidi
   useEffect(() => {
     if (!visible) return;
-    const html = document.documentElement;
-    html.style.overflow = "hidden";
+    lockScroll();
     lenis?.stop();
     return () => {
-      html.style.overflow = "";
+      unlockScroll();
       lenis?.start();
     };
   }, [visible, lenis]);

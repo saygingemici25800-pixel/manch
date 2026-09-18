@@ -63,19 +63,27 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
               const p = getProduct(slug);
               if (!p) return null;
               const qty = qtyOf(slug);
+              /**
+               * **Fiyatı bilinmeyen satır sipariş edilemez** (karar 2026-09-18).
+               * Koşul VERİDEN türer (`price == null`) — kodda slug listesi yok. Fiyat
+               * `menu.ts`'e girildiği an satır kendiliğinden normale döner, bu dosya
+               * değişmez. Rozet Kural 54-A, toplama girmemesi `orderTotal` tarafında.
+               */
+              const orderable = p.price != null;
               return (
                 <li
                   key={slug}
                   data-testid="order-row"
                   data-slug={slug}
                   data-qty={qty}
+                  data-orderable={orderable}
                   className="flex items-center justify-between gap-[1vw] border-b border-berry/15 py-[0.5vw] max-md:gap-[3vw] max-md:py-[2vw]"
                 >
                   <span className="min-w-0 flex-1 font-ui text-[1vw] text-ink max-md:text-[3.6vw]">
                     {p.name[locale]}
                   </span>
                   <span className="shrink-0 font-ui text-[0.95vw] text-berry max-md:text-[3.4vw]">
-                    {p.price != null ? `${p.price} TL` : <SoonBadge />}
+                    {orderable ? `${p.price} TL` : <SoonBadge />}
                   </span>
                   <span className="flex shrink-0 items-center gap-[0.4vw] max-md:gap-[2vw]">
                     <button
@@ -99,9 +107,12 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
                     <button
                       type="button"
                       data-testid="qty-plus"
-                      aria-label={`${p.name[locale]} — ${t("more")}`}
-                      onClick={() => change(slug, qty + 1)}
-                      className="grid h-[2vw] min-h-[26px] w-[2vw] min-w-[26px] place-items-center rounded-full border-2 border-berry bg-berry font-display text-[1.1vw] leading-none text-cream max-md:h-[8vw] max-md:w-[8vw] max-md:text-[4vw]"
+                      aria-label={`${p.name[locale]} — ${orderable ? t("more") : t("priceSoon")}`}
+                      disabled={!orderable}
+                      aria-disabled={!orderable}
+                      title={orderable ? undefined : t("priceSoon")}
+                      onClick={() => (orderable ? change(slug, qty + 1) : undefined)}
+                      className="grid h-[2vw] min-h-[26px] w-[2vw] min-w-[26px] place-items-center rounded-full border-2 border-berry bg-berry font-display text-[1.1vw] leading-none text-cream disabled:cursor-not-allowed disabled:border-berry/30 disabled:bg-berry/30 max-md:h-[8vw] max-md:w-[8vw] max-md:text-[4vw]"
                     >
                       +
                     </button>

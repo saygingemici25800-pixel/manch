@@ -2,6 +2,8 @@
 // Zone `next/dynamic` ile ayrı chunk olacak; bu script her adımda çalıştırılır.
 //
 // Kullanım: pnpm start -p 3101 çalışırken → node scripts/zone-bundle-check.mjs
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
 const BASE = process.env.BASE ?? "http://localhost:3101";
@@ -15,7 +17,8 @@ const THREE_SIGNS = ["WebGLRenderer", "BufferGeometry", "PerspectiveCamera", "Qu
 
 const g = (buf) => +(gzipSync(buf, { level: 9 }).length / 1024).toFixed(1);
 
-let fail = 0;
+let leaks = 0;
+let oversize = 0;
 console.log("sayfa        | ilk yükleme gz | three imzası");
 console.log("-------------|----------------|--------------------------");
 
@@ -41,13 +44,56 @@ for (const path of PAGES) {
 
   const leaked = hits.length > 0;
   const over = gz > LIMIT_MAIN;
-  if (leaked) fail++;
+  if (leaked) leaks++;
   console.log(`${path.padEnd(12)} | ${String(gz).padStart(9)} ${over ? "✗" : "✓"}    | ${leaked ? "✗ SIZDI: " + hits.join(" · ") : "✓ yok"}`);
 }
 
 console.log(`\nana bundle limiti ${LIMIT_MAIN} kB gz · Zone chunk limiti ${LIMIT_ZONE} kB gz`);
-if (fail) {
-  console.error(`\n✗ three.js ${fail} sayfanın ilk yüklemesine SIZDI — Zone'u next/dynamic + { ssr:false } ile yükleyin`);
-  process.exit(1);
+
+/* ---------------------------------------------------------------------------
+   Zone chunk'ı: `next/dynamic` ile ayrılan, three/fiber/drei taşıyan parçalar.
+   Ana bundle'da three ARAMAK yetmez — "sızmadı" demek "ne kadar" demek değil.
+   Build çıktısındaki chunk'lar taranır; three imzası taşıyanların gz toplamı Zone yüküdür.
+--------------------------------------------------------------------------- */
+const DIST = process.env.NEXT_DIST_DIR ?? ".next";
+const CHUNK_DIR = join(DIST, "static", "chunks");
+
+function walk(dir) {
+  const out = [];
+  let entries;
+  try { entries = readdirSync(dir); } catch { return out; }
+  for (const name of entries) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...walk(full));
+    else if (full.endsWith(".js")) out.push(full);
+  }
+  return out;
 }
-console.log("\n✓ three.js hiçbir sayfanın ilk yüklemesinde yok");
+
+const files = walk(CHUNK_DIR);
+if (files.length === 0) {
+  console.log(`\nZone chunk ölçülemedi: ${CHUNK_DIR} bulunamadı (NEXT_DIST_DIR doğru mu?)`);
+} else {
+  const zoneChunks = [];
+  for (const f of files) {
+    const buf = readFileSync(f);
+    const text = buf.toString("utf8");
+    const found = THREE_SIGNS.filter((sig) => text.includes(sig));
+    if (found.length >= 2) zoneChunks.push({ file: f.split("/").pop(), gz: g(buf) });
+  }
+  const zoneGz = +zoneChunks.reduce((n, c) => n + c.gz, 0).toFixed(1);
+  console.log(`\nZone chunk (three imzalı ${zoneChunks.length} parça): ${zoneGz} kB gz ${zoneGz <= LIMIT_ZONE ? "✓" : "✗ LİMİT AŞILDI"}`);
+  for (const c of zoneChunks.sort((a, b) => b.gz - a.gz).slice(0, 5)) {
+    console.log(`   ${String(c.gz).padStart(7)} kB gz  ${c.file}`);
+  }
+  if (zoneGz > LIMIT_ZONE) oversize = zoneGz;
+}
+// İki ayrı kusur, iki ayrı mesaj: "sızdı" ile "büyük" aynı şey değil.
+if (leaks) {
+  console.error(`\n✗ three.js ${leaks} sayfanın ilk yüklemesine SIZDI — Zone'u next/dynamic + { ssr:false } ile yükleyin`);
+}
+if (oversize) {
+  console.error(`\n✗ Zone chunk ${oversize} kB gz — limit ${LIMIT_ZONE} kB (sızıntı YOK, yalnızca boyut)`);
+}
+if (leaks || oversize) process.exit(1);
+console.log("\n✓ three.js hiçbir sayfanın ilk yüklemesinde yok · Zone chunk limit içinde");

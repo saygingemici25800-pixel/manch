@@ -761,6 +761,34 @@ if (runs("scene")) {
     "toplam 0 iken gönder devre dışı");
   ok((await page.locator("[data-testid=order-total]").getAttribute("aria-live")) === "polite",
     "toplam aria-live=\"polite\"");
+  /* Fiyatı bilinmeyen satır sipariş EDİLEMEZ — sayı veriden türer, koda gömülü değil. */
+  {
+    const rows = await page.locator("[data-testid=order-row]").evaluateAll((els) =>
+      els.map((e) => ({ slug: e.dataset.slug, orderable: e.dataset.orderable === "true" })),
+    );
+    const priceless = rows.filter((r) => !r.orderable).map((r) => r.slug);
+    const expected = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-testid=order-row]")]
+        .filter((e) => e.querySelector("[data-testid=qty-plus]").disabled)
+        .map((e) => e.dataset.slug),
+    );
+    ok(priceless.length > 0 && JSON.stringify(priceless) === JSON.stringify(expected),
+      "fiyatsız satırlarda + devre dışı (sayı veriden türüyor)",
+      `fiyatsız: ${priceless.join(", ") || "yok"}`);
+
+    const before = await page.evaluate(() => JSON.stringify(window.__CART__.getState().lines));
+    const btn = page.locator(`[data-testid=order-row][data-slug="${priceless[0]}"] [data-testid=qty-plus]`);
+    await btn.click({ force: true }).catch(() => {});
+    await page.waitForTimeout(400);
+    const after = await page.evaluate(() => JSON.stringify(window.__CART__.getState().lines));
+    ok(before === after,
+      "fiyatsız satırın + düğmesi sepeti DEĞİŞTİRMİYOR",
+      `${priceless[0]}: ${before === after ? "değişmedi" : before + " → " + after}`);
+    ok((await btn.getAttribute("aria-disabled")) === "true" && Boolean(await btn.getAttribute("title")),
+      "fiyatsız + düğmesi aria-disabled ve sebebi belirtiyor",
+      `title="${await btn.getAttribute("title")}"`);
+  }
+
   ok((await page.locator("[data-testid=order-board]").innerText()).length > 40,
     "menü feragatnamesi tahtanın üstünde",
     (await page.locator("[data-testid=order-board] > p").innerText()).slice(0, 40));
@@ -852,6 +880,80 @@ if (runs("reduced")) {
   ok(after.npc && Math.abs(after.npc.y - 0.7) < 0.001,
     "reduced-motion: NPC idle durdu",
     `y ${after.npc?.y}`);
+  await page.close();
+}
+
+/* ===================== 5.5.9: ZoneGate (ana sayfadan) ===================== */
+if (runs("gate")) {
+  console.log("\n— Zone kapısı (ana sayfa)");
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  page.setDefaultTimeout(90000);
+  const errs = [];
+  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("pageerror", (e) => errs.push("pageerror: " + e.message));
+  await page.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2500);
+  await page.evaluate(() => { try { sessionStorage.removeItem("manch_char"); } catch {} });
+
+  ok((await page.locator("[data-testid=zone-gate]").count()) === 1, "ana sayfada ZONE'A GİR düğmesi var");
+
+  await page.locator("[data-testid=zone-gate]").click();
+  await page.waitForTimeout(700);
+  const curtain = page.locator("[data-testid=zone-curtain]");
+  ok((await curtain.getAttribute("role")) === "dialog" && (await curtain.getAttribute("aria-modal")) === "true",
+    "perde role=dialog + aria-modal (spec 10)");
+  ok((await page.evaluate(() => document.documentElement.style.overflow)) === "hidden"
+      && (await page.evaluate(() => window.__SCROLL_LOCK__?.() ?? 0)) > 0,
+    "perde açıkken sayfa kaydırma kilitli",
+    `overflow=${await page.evaluate(() => document.documentElement.style.overflow || "(yok)")} · derinlik=${await page.evaluate(() => window.__SCROLL_LOCK__?.())}`);
+
+  // Site kromu perdenin ALTINDA kalmalı — joystick kusurunun kökeni buydu
+  const corners = await page.evaluate(() =>
+    [[innerWidth - 40, innerHeight - 40], [innerWidth - 40, 40], [40, innerHeight - 40]].map(([x, y]) => {
+      const el = document.elementFromPoint(x, y);
+      if (el?.closest("[data-testid=zone-curtain]")) return "perde";
+      // `nextjs-portal` = Next dev araç katmanı; prod'da yok (Kural 45 kalıbı, belgeli istisna).
+      const tag = el?.tagName.toLowerCase() ?? "?";
+      return tag === "nextjs-portal" ? "perde" : (el?.getAttribute("data-testid") ?? tag);
+    }),
+  );
+  ok(corners.every((c) => c === "perde"),
+    "site kromu (sepet, nav, çerez) perdenin ALTINDA — hiçbiri sızmıyor",
+    corners.join(", "));
+
+  // Focus trap: Tab perdenin dışına çıkmamalı
+  for (let i = 0; i < 8; i++) await page.keyboard.press("Tab");
+  ok(await page.evaluate(() => Boolean(document.activeElement?.closest("[data-testid=zone-curtain]"))),
+    "Tab odağı perdenin içinde tutuyor (focus trap)");
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  ok((await page.locator("[data-testid=zone-curtain]").count()) === 0, "Esc perdeyi kapatıyor");
+  ok((await page.evaluate(() => window.__SCROLL_LOCK__?.() ?? 0)) === 0
+      && (await page.evaluate(() => document.documentElement.style.overflow)) !== "hidden",
+    "kapanınca kaydırma kilidi kalkıyor (sayaç 0)",
+    `overflow=${await page.evaluate(() => document.documentElement.style.overflow || "(yok)")} · derinlik=${await page.evaluate(() => window.__SCROLL_LOCK__?.())}`);
+
+  // Karakter hatırlanıyor: ikinci girişte seçim atlanır (sessionStorage manch_char)
+  await page.locator("[data-testid=zone-gate]").click();
+  await page.waitForTimeout(500);
+  await page.locator("[data-testid=zone-pick-miyu]").click();
+  await page.waitForFunction(
+    () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
+    { timeout: 60000 },
+  );
+  await page.waitForTimeout(800);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  await page.locator("[data-testid=zone-gate]").click();
+  await page.waitForTimeout(700);
+  const second = await page.locator("[data-testid=zone-curtain]").getAttribute("data-state");
+  ok(second !== "select" && (await page.locator("[data-testid=zone-select]").count()) === 0,
+    "karakter hatırlanıyor — ikinci girişte seçim atlanıyor",
+    `durum ${second}`);
+
+  const clean = errs.filter((e) => !/Download the React DevTools|Failed to load resource/.test(e));
+  ok(clean.length === 0, "kapı akışında konsol temiz", clean.slice(0, 2).join(" | "));
   await page.close();
 }
 

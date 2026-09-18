@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Parallax } from "@/components/motion/Parallax";
 import { SplitReveal } from "@/components/motion/SplitReveal";
 import { OrderCta } from "@/components/sections/OrderCta";
+import { ZoneGate } from "@/components/zone/ZoneGate";
 import { TileWall } from "@/components/ui/TileWall";
 import { site } from "@/lib/site";
 
@@ -34,6 +35,7 @@ export async function Zone() {
           </p>
           <div className="mt-[2vw] max-md:mt-[7vw]">
             <OrderCta />
+            <ZoneGate />
           </div>
         </div>
 

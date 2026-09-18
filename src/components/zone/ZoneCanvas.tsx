@@ -89,7 +89,7 @@ function disposeScene(scene: THREE.Scene) {
   scene.clear();
 }
 
-export function ZoneCanvas({ className }: { className?: string }) {
+export function ZoneCanvas({ className, onReady }: { className?: string; onReady?: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const character = useZoneStore((s) => s.character);
@@ -242,6 +242,8 @@ export function ZoneCanvas({ className }: { className?: string }) {
           gl.setClearColor(colors.cream);
           scene.fog = new THREE.Fog(colors.cream, 26, 52);
           liveCamera = camera;
+          // Yükleme ekranı sahte bir sayaçla değil, sahne GERÇEKTEN kurulunca kalkar.
+          onReady?.();
           camera.lookAt(CHAR_START.x, 1.55, CHAR_START.z - CAM_DIST);
         }}
       >

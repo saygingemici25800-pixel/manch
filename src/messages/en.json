@@ -330,7 +330,8 @@
       "drinks": "DRINKS & DESSERT"
     },
     "less": "Decrease by one",
-    "more": "Increase by one"
+    "more": "Increase by one",
+    "priceSoon": "Price coming soon — not orderable yet"
   },
   "Order": {
     "intro": "Hi MANCH! I'd like to order:",

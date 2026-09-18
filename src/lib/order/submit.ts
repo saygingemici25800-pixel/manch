@@ -40,9 +40,16 @@ export function orderChannel(): OrderChannel {
   };
 }
 
-/** Sepet satırlarının toplam tutarı (fiyatı olmayan ürün 0 sayılır). */
+/**
+ * Sepet satırlarının toplam tutarı. **Fiyatı bilinmeyen ürün toplama girmez** — uydurma bir
+ * rakamla toplamı şişirmektense o satır 0 sayılır (karar 2026-09-18; içecek fiyatları teyit
+ * bekliyor). Arayüz zaten böyle bir satırı sepete eklettirmiyor.
+ */
 export function orderTotal(lines: CartLine[]): number {
-  return lines.reduce((sum, l) => sum + (getProduct(l.slug)?.price ?? 0) * l.qty, 0);
+  return lines.reduce((sum, l) => {
+    const price = getProduct(l.slug)?.price;
+    return price == null ? sum : sum + price * l.qty;
+  }, 0);
 }
 
 function buildMessage(lines: CartLine[], locale: Locale, t: Translate): string {

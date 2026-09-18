@@ -12,7 +12,7 @@
  * `resetRuntime()` sahne her kurulduğunda çağrılır (yerinde sıfırlar, kimlik değişmez).
  */
 import { angLerp, smoothing, wantedAngle } from "@/lib/zone/angles";
-import type { CharView } from "@/lib/zone/character";
+import type { CharView } from "@/lib/zone/capy";
 import { CHAR_BOUND_X, CHAR_TURN_BASE, SPEED, TURN_BASE, Z_MAX, Z_MIN } from "@/lib/zone/frames";
 
 export interface ZoneRuntime {

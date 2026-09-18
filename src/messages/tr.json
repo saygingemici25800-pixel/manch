@@ -330,7 +330,8 @@
       "drinks": "İÇECEK & TATLI"
     },
     "less": "Bir azalt",
-    "more": "Bir arttır"
+    "more": "Bir arttır",
+    "priceSoon": "Fiyat yakında — şimdilik sipariş edilemiyor"
   },
   "Order": {
     "intro": "Merhaba MANCH! Sipariş vermek istiyorum:",

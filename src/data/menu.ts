@@ -188,9 +188,9 @@ export const products: Product[] = [
 
   // ---------- İÇECEKLER ----------
   // Fiyatlar TEYİT BEKLİYOR — örnek değer (spec 6.3). `Menu.disclaimer` sitede zaten görünür.
-  simple("limonata", "drinks", { tr: "Limonata", en: "Lemonade" }, 120, { tr: ["Limon", "Şeker", "Su"], en: ["Lemon", "Sugar", "Water"] }, null, 3),
-  simple("soft-drink", "drinks", { tr: "Soft Drink", en: "Soft Drink" }, 90, { tr: [], en: [] }, null, 1),
-  simple("ayran", "drinks", { tr: "Ayran", en: "Ayran" }, 80, { tr: [], en: [] }, null, 1),
+  simple("limonata", "drinks", { tr: "Limonata", en: "Lemonade" }, null, { tr: ["Limon", "Şeker", "Su"], en: ["Lemon", "Sugar", "Water"] }, null, 3),
+  simple("soft-drink", "drinks", { tr: "Soft Drink", en: "Soft Drink" }, null, { tr: [], en: [] }, null, 1),
+  simple("ayran", "drinks", { tr: "Ayran", en: "Ayran" }, null, { tr: [], en: [] }, null, 1),
 
   // ---------- TATLI ----------
   simple("tiramisu", "dessert", { tr: "Tiramisu", en: "Tiramisu" }, 360, { tr: ["Mascarpone", "Kahve", "Kakao"], en: ["Mascarpone", "Coffee", "Cocoa"] }, "/images/tiramisu.jpg", 2),
