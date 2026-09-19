@@ -31,7 +31,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 ## 📍 DURUM
 
 - Aktif faz: **Fazlar 1–9 + 5.5 KAPALI (2026-09-19).** Site canlı, kalan iş sahibinden gelecek
-  içeriğe ve sipariş sistemi kararına bağlı. Devir notu: **`claude/manch-devir.md`** (yeni bir
+  içeriğe ve sipariş sistemi kararına bağlı. Devir notu: **`docs/manch-devir.md`** (yeni bir
   oturuma hızlı giriş; tek doğruluk kaynağı yine bu dosyadır). Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
   yeniden doğrulandı ve kapatıldı (2026-09-18): envanter + iki boşluk (fiyatsız ürün koruması,
   `/about` → Zone dönüşü). `faz6-check` 227/227 · `lab-check` 99/99 · Zone 105/105.
@@ -821,6 +821,24 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     · Lighthouse skoru (perf/LCP) raporda **bilgi olarak** durur; A11y ve SEO için kapı
       olmayı sürdürür (onlar model değil, denetim).
 
+73. **Yedek uzakta değilse yedek değildir; kutu sonucu doğrulanmadan işaretlenmez
+    (karar 2026-09-19).** Faz 9'un yeniden doğrulamasında iki ayrı kayıt gerçeğe uymuyordu —
+    ikisi de "yapıldı" görünüyordu:
+
+    · **`yedek-faz-9` etiketi YALNIZCA YERELDEYDİ.** `git tag` onu listeliyordu, `CLAUDE.md`
+      onu güvenlik ağı olarak anıyordu, ama `git ls-remote --tags origin` çıktısında yoktu.
+      Bu makine gitse yedek de giderdi. **Yedek oluşturan her adım `git push origin <etiket>`
+      ile biter ve `ls-remote` ile doğrulanır** — "oluşturdum" yetmez, "uzakta duruyor" gerekir.
+    · **Domain kutusu `[x]` işaretliydi, domain yoktu.** İşaretlenen şey aslında "Cloudflare
+      adım listesini yazdım"dı; alan adı hiç bağlanmamıştı. Kutuya bakan (insan ya da sonraki
+      oturum) domainin hazır olduğunu sanıyordu.
+
+    **Kural:** bir kutu, **sonucu dışarıdan doğrulanabilen bir kanıt** varsa işaretlenir —
+    komut çıktısı, canlı yanıt, ölçüm. "Adımları yazdım", "kodu ekledim", "çalışması lazım"
+    işaretlemek için yeterli değil. Doğrulanamıyorsa kutu açık kalır ve yanına neyin eksik
+    olduğu yazılır. Faz kapanışında kutular **tek tek** kanıtla gözden geçirilir (Faz 6, 7 ve
+    9'da bu üç kez yapıldı ve üçünde de gerçeğe uymayan kayıt çıktı).
+
 ---
 
 ## 🧠 HATA GÜNLÜĞÜ
@@ -969,6 +987,9 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-19 | 8 | `lab-check` 96/99: `NEXT_PUBLIC_SITE_URL yok` uyarıları + `priceRange YOK` kontrolü | İkisi de **benim yaptığım değişikliklerin sonucu**: ① ölçüm için kapattığım dev sunucusunu env değişkeni olmadan geri açmıştım (Kural 57 gereği gürültülü uyarı basıyor; `.env.local`'da tanımlı değil, kullanıcı satır içi veriyormuş) ② `priceRange` artık bilerek VAR | ① dev `NEXT_PUBLIC_SITE_URL=http://localhost:3000` ile yeniden başlatıldı ② kontrol tersine çevrildi: "yok mu" değil **"var mı ve gerçek fiyat aralığıyla tutarlı mı"** — uydurma bir aralık sızamaz. Ayrı kontrol: geo/rezervasyon/puan hâlâ yok. 100/100 |
 | 2026-09-19 | 8 | 768 px'te ürün kartının `+` düğmesi **18 px** — Kural 40 eşiği 24 | `h-[2.4vw]` 768'de 18.4 px ediyor. Lighthouse mobil form faktörü 412 px'te ölçtüğü için görmüyordu; 768 tablet portre **dokunmatik** | `min-h-[26px] min-w-[26px]` (5.5.8'de `OrderBoard`'a uygulanan aynı çözüm). 6 kırılımda doğrulandı |
 | 2026-09-19 | 8 | **Üç tur boyunca yanlış özneye çalışıldı:** LCP "hedef altı" sanıldı, optimizasyon oraya harcandı | İki katman üst üste binmişti. ① Ölçüm sırasında kullanıcının dev sunucusu açıktı; Lighthouse simüle throttling CPU yüküne duyarlı → `/tr` 3482 ms görünüyordu, dev kapatılınca **1746 ms** (perf 91 → 99). ② Kalan fark Lantern modelinin kötümserliğiydi: gerçek CDP throttling'de aynı sayfa **836 ms**. Yani "yavaş" olan ne sayfaydı ne de kod — biri ortam, öteki modeldi | Kural 71 (ölçüm hijyeni) + Kural 72 (kabul kapısı gerçek throttling). **Ders: bir metrik üç tur üst üste hedefi tutmuyorsa, önce metriğin kendisi sorgulanır** — Kural 60'ın "ölçtüğün şey ürün mü, ölçüm aracı mı?" sorusu yalnız kırmızı yanan kontroller için değil, ısrarla kötü çıkan SAYILAR için de geçerli |
+| 2026-09-19 | 9 | `yedek-faz-9` etiketi **yalnız yereldeydi**; `CLAUDE.md` onu güvenlik ağı sayıyordu | Etiket oluşturulmuş ama `git push origin <etiket>` yapılmamıştı. `git tag` yerel listeyi gösterdiği için "var" görünüyordu; `ls-remote` ile bakılmamıştı. Bu makine gitse yedek de giderdi | Etiket push edildi, `ls-remote` ile doğrulandı (uzakta artık `yedek-faz-9` + `yedek-zone-oncesi`). **Kural 73** yazıldı |
+| 2026-09-19 | 9 | Faz 9'da **domain kutusu `[x]`** işaretliydi ama alan adı hiç bağlanmamıştı | İşaretlenen şey "Cloudflare adım listesini yazdım"dı, sonucu değil. Kutuya bakan domainin hazır olduğunu sanıyordu — kayıt üç faz boyunca yanlış durdu | Kutu `[ ]`'ya çevrildi, gerekçesi yanına yazıldı. **Kural 73'ün ikinci yarısı:** kutu ancak dışarıdan doğrulanabilir bir kanıtla işaretlenir |
+| 2026-09-19 | kapanış | Kural 72 kapısı (LCP) bu turda **geçerli ölçülemedi** | Makine boşta değildi: önce benim bıraktığım **19 artık tarayıcı süreci** (öldürüldü), sonra macOS'un kendi arka plan işleri — `diskimagesiod` %171, `mediaanalysisd` %126 (Photos indeksleme). Yük 7.8 → 16.6. Örnekler saçıldı: `/menu` [3164, 3592, 4976], sapma **1812 ms** — Kural 72'nin kendi güvenilirlik eşiği (200 ms) bunu reddediyor | Sayı **raporlanmadı**. Kural 72'nin sapma şartı tam bunun için var: kötü bir ölçümü "sonuç" diye yazmak yerine geçersiz saydı. Bu turda `src/` hiç değişmediği (yalnız belge + Kural 73) için son geçerli ölçüm aynen geçerli: **836 / 2084 / 820 ms**. **Ders: ölçüm bitince tarayıcı süreçlerinin kapandığı doğrulanmalı** — birikenler sonraki ölçümleri sessizce bozuyor |
 
 ---
 

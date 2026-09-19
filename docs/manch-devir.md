@@ -1,6 +1,6 @@
 # MANCH — devir notu
 
-> **Tarih: 2026-09-19.** Tek doğruluk kaynağı hâlâ kökteki `CLAUDE.md`'dir; bu dosya onun
+> **Tarih: 2026-09-19** (konum: `docs/manch-devir.md`; ilk yazıldığında `claude/` altındaydı, 2026-09-19'da taşındı). Tek doğruluk kaynağı hâlâ kökteki `CLAUDE.md`'dir; bu dosya onun
 > özeti ve yeni bir oturuma/kişiye hızlı giriştir. Çelişki olursa `CLAUDE.md` geçerlidir.
 >
 > ⚠️ **Not:** Bu dosya 2026-09-19'da **sıfırdan yazıldı.** Daha önce bir devir notu olduğu
@@ -52,7 +52,7 @@ yapılamaz (Kural 58).
 
 ## 3. Bu oturumda eklenen kurallar
 
-`CLAUDE.md > 📏 KURALLAR` 72 madde. Bu oturumda eklenenler/revize edilenler:
+`CLAUDE.md > 📏 KURALLAR` **73 madde**. Bu oturumda eklenenler/revize edilenler:
 
 | # | Özet |
 |---|---|
@@ -61,6 +61,7 @@ yapılamaz (Kural 58).
 | **70** | Auto-deploy'lu dala **kademeli push YASAK** — her ara push ayrı deploy tetikler |
 | **71** | Ölçüm hijyeni: ağır ölçüm canlıya karşı değil, yerel prod build'de, dev sunucusu kapalı |
 | **72** | LCP kabul kapısı **gerçek CDP throttling**, Lighthouse'un simüle değeri değil |
+| **73** | Uzakta olmayan yedek yedek değildir · kutu ancak sonucu doğrulanınca işaretlenir |
 | **2** *(revize)* | Kapı `lint && build` — ikisi farklı sınıf hata yakalar |
 | **46** *(revize)* | First Load hedefi **200 → 220 kB gz**, gerekçesiyle |
 | **56** *(ek)* | `.catch()` zorunluluğu `next/dynamic` yükleyicilerini de kapsar |
