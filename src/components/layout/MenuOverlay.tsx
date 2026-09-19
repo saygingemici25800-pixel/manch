@@ -31,7 +31,8 @@ export default function MenuOverlay() {
       id="menu-overlay"
       ref={ref}
       role="dialog"
-      aria-modal="true"
+      aria-modal={open || undefined}
+      inert={!open}
       aria-label={t("menuButton")}
       data-state={open ? "open" : "closed"}
       className={clsx(

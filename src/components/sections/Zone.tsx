@@ -5,12 +5,15 @@ import { Parallax } from "@/components/motion/Parallax";
 import { SplitReveal } from "@/components/motion/SplitReveal";
 import { OrderCta } from "@/components/sections/OrderCta";
 import { ZoneGate } from "@/components/zone/ZoneGate";
+import { ZONE_FRAMES } from "@/lib/zone/frames";
+import TransitionLink from "@/components/motion/TransitionLink";
 import { TileWall } from "@/components/ui/TileWall";
 import { site } from "@/lib/site";
 
 /** R13 — dalgalı üst kenar, karo duvar zemin, parallax burger, blob CTA. */
 export async function Zone() {
   const t = await getTranslations("Home");
+  const tz = await getTranslations("Zone");
 
   return (
     <section id="zone" data-nav-dark="" className="relative scroll-mt-[6vw]">
@@ -37,6 +40,24 @@ export async function Zone() {
             <OrderCta />
             <ZoneGate />
           </div>
+
+          {/* Spec bölüm 10: **Zone SEO'ya dahil değil.** 3D sahne WebGL'dir — tarayıcı
+              da ekran okuyucu da içindeki dört durağı göremez. Aynı dört hedef burada
+              `sr-only` gerçek `<Link>` olarak duruyor: tarama yapan bot ve klavye/ekran
+              okuyucu kullanıcısı sahneye girmeden de menüye, hakkımızda'ya, maskotlara
+              ve iletişime ulaşabiliyor. POV panosu bu sayfaların YERİNE geçmez, onlara
+              ek bir sunumdur. `sr-only` görünümü etkilemez, odak alınca da gizli kalır —
+              görsel tasarımda bir değişiklik yok. */}
+          <nav aria-label={tz("title")} className="sr-only">
+            <p>{tz("srOnlyIntro")}</p>
+            <ul>
+              {ZONE_FRAMES.map((f) => (
+                <li key={f.id}>
+                  <TransitionLink href={f.href}>{tz(`frames.${f.id}`)}</TransitionLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
         <Parallax distance={70}>

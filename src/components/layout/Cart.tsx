@@ -113,9 +113,16 @@ export default function Cart() {
       {/* kraft drawer */}
       <div
         ref={drawer}
+      /* Kapalıyken klavyeye ve ekran okuyucuya KAPALI (Faz 7, 2026-09-19).
+         Panel kapalıyken de DOM'da duruyor (geçiş animasyonu için) ve odaklanabilir
+         çocukları vardı: Tab ile ekran DIŞINDAKİ panele giriliyordu — odak kayboluyor,
+         kullanıcı nerede olduğunu göremiyordu. `inert` hem tab sırasından hem erişilebilirlik
+         ağacından çıkarır; `aria-hidden` tek başına yetmez (odaklanabilir öğede axe ihlali).
+         `aria-modal` da yalnız açıkken anlamlı — kapalı panel modalite iddia etmemeli. */
         role="dialog"
         data-testid="cart-drawer"
-        aria-modal="true"
+        aria-modal={open || undefined}
+        inert={!open}
         aria-label={t("title")}
         data-state={open ? "open" : "closed"}
         className={clsx(

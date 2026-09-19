@@ -25,7 +25,7 @@ export default function InfoModal() {
       className={clsx("fixed inset-0 z-73 grid place-items-center bg-berry-dk/50 p-[4vw] transition-opacity duration-300", open ? "opacity-100" : "pointer-events-none opacity-0")}
       onClick={(e) => e.target === e.currentTarget && close()}
     >
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="info-title" data-state={open ? "open" : "closed"} className={clsx("w-[34vw] max-md:w-[88vw] transition-transform duration-400", open ? "scale-100" : "scale-95")}>
+      <div ref={ref} role="dialog" aria-modal={open || undefined} inert={!open} aria-labelledby="info-title" data-state={open ? "open" : "closed"} className={clsx("w-[34vw] max-md:w-[88vw] transition-transform duration-400", open ? "scale-100" : "scale-95")}>
         <KraftCard tilt={-1} className="flex flex-col gap-[1vw] max-md:gap-[3.5vw]">
           <h2 id="info-title" className="font-display text-[2.4vw] max-md:text-[8vw] leading-none">{t("title")}</h2>
           <p className="text40 text-[1.2vw] max-md:text-[4vw] normal-case tracking-normal">{t("subtitle")}</p>

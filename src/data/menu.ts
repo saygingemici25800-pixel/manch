@@ -54,7 +54,7 @@ const BRIOCHE: Localized = { tr: "El yapımı brioche", en: "Handmade brioche" }
 const DOUBLE: Localized = { tr: "2 × 60 g dana", en: "2 × 60 g beef" };
 const CHICKEN: Localized = { tr: "Çıtır tavuk", en: "Crispy chicken" };
 const NONE: Localized = { tr: "—", en: "—" };
-/** Ürün açıklamaları — müşteri tarafından verilen taslak metinler (2026-09-18). */
+/** Ürün açıklamaları — müşteri onayı bekliyor; kayıt: `src/content-status.ts`. */
 const DESC: Record<string, Localized> = {
   "classic-manch": { tr: "Tarzına yakışan smash. Fazlası yok, eksiği hiç yok.", en: "The smash that suits you. Nothing extra, nothing missing." },
   "truffle-manch": { tr: "Trüf konusunda ölçüyü biraz kaçırdık. Pişman değiliz.", en: "We may have overdone the truffle. No regrets." },
