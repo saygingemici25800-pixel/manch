@@ -821,6 +821,14 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     · Lighthouse skoru (perf/LCP) raporda **bilgi olarak** durur; A11y ve SEO için kapı
       olmayı sürdürür (onlar model değil, denetim).
 
+    **Kapı NE ZAMAN açılır (revize: 2026-09-19).** Her turda değil, **`src/` değiştiğinde.**
+    Kod değişmediyse son geçerli ölçüm geçerlidir; yük altındaki bir makinede yeniden ölçmek
+    **Kural 60 ihlalidir** — ürünü değil ortamı ölçer ve elde bir de kötü sayı kalır.
+    Kanıt: 2026-09-19 kapanış turunda `src/` hiç değişmemişken ölçüm tekrarlandı, makine
+    yük altındaydı (macOS `diskimagesiod` %171, `mediaanalysisd` %126) ve sapma **1812 ms**
+    çıktı — Kural 72'nin kendi 200 ms eşiği bunu reddetti, sayı raporlanmadı.
+    **Kabul edilen son temiz ölçüm: `/tr` 836 · `/tr/menu` 2084 · `/tr/contact` 820 ms.**
+
 73. **Yedek uzakta değilse yedek değildir; kutu sonucu doğrulanmadan işaretlenmez
     (karar 2026-09-19).** Faz 9'un yeniden doğrulamasında iki ayrı kayıt gerçeğe uymuyordu —
     ikisi de "yapıldı" görünüyordu:
