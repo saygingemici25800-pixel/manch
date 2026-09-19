@@ -612,6 +612,13 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 >   hiçbir şey göstermez, yalnız hangi metnin onay beklediğini kodda görünür kılar).
 > `geo` JSON-LD'ye **eklenmedi**: koordinat verisi yok, Kural 54-B uydurmayı yasaklıyor.
 > Yeni bekçi: `scripts/a11y-check.mjs` **39/39** — gerçek klavye turu, focus ring, tuzak, kontrast.
+> **Canlı kabul (2026-09-19):** Lighthouse **A11y 100 / SEO 100** — `/tr`, `/tr/menu`, `/tr/about`,
+> `/tr/contact`, `/en` (beşi de). `a11y-check` canlıda da **39/39**. `smoke` 31/31.
+> **Google Rich Results Test** (`/tr`): **2 geçerli öğe, hata YOK** — Yerel işletmeler (Restaurant)
+> + Kuruluş. Tek kritik olmayan uyarı: **"`priceRange` alanı eksik (isteğe bağlı)"** — Kural 54-B
+> gereği bilerek yazılmıyor. **Karar bekliyor:** menüde 24 gerçek fiyat var (160–790 TL), yani
+> türetilebilir; ama fiyatlar müşteri onayı beklediği için yapılandırılmış veriye yazmak erken.
+> Google yapılandırılmış veriyi uzun süre önbellekte tutar — Kural 54-B'nin uyardığı risk tam bu.
 - [x] Dokümanlar → Kural 38 (sitemap/robots/manifest kök `app/`, `alternates.languages`, title şablonu), Kural 39 (`next/og` Node runtime + Modak TTF `src/assets/fonts`, `generateImageMetadata` ikonlar) *(revize: 2026-09-17)*
 - [x] Metin geçişi: tr/en 209 anahtar simetrik; US yazım (Favorites, gravity-approved), kısa sayfa başlıkları, placeholder metinler `[TODO]` önekli (Common.todo, hoursSoon, priceTodo, checkoutSoon, Modal.reservation, görsel alt'ları), marka sesi cümleleri brief ile eşleşiyor
 - [x] SEO: `src/lib/seo.ts#pageMetadata` (canonical + hreflang tr/en/x-default + OG/Twitter, `%s | MANCH`), `[locale]/opengraph-image.tsx` (1200×630, berry + Modak), `Restaurant` JSON-LD (telefon/saat null → yazılmaz), `app/sitemap.ts` (8 URL + hreflang), `app/robots.ts` (lab disallow), proxy matcher metadata rotalarını hariç tutar
