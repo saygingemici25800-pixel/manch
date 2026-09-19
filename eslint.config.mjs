@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     // Kural 65: ölçüm build'i ayrı klasöre alınıyor (dev sunucusu açıkken `.next` bozuluyor).
     // Lint'in üretilmiş çıktıyı taraması anlamsız — 8600 uyarı/hata üretiyordu.
-    ".next-build/**",
+    ".next-build/**", ".next-V*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

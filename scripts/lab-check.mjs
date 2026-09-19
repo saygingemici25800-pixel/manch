@@ -17,6 +17,19 @@ const errs = [];
 p.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); });
 p.on("pageerror", (e) => errs.push("pageerror: " + e.message));
 
+/* Kural 45 · dev-only konsol artıkları — TEK yerde, iki bölüm de bunu kullanır.
+   WebKit eki (2026-09-19): Next dev'in catch-all 404 ölçümü Chromium'da
+   "CatchAll … negative time stamp" derken WebKit'te yalnızca "TypeError: Type error"
+   diyor; yığın `react-server-dom-turbopack` içindeki `measure`'ı gösteriyor. Aynı dev
+   artığı, farklı metin. Ayrıca `__nextjs_original-stack-frames`: dev hata katmanının
+   sembol çözme uç noktası (adı gereği dev-only). Üçüncüsü: WebKit'te hızlı gezinme
+   sırasında Turbopack'in KENDİ dev chunk'ı iptal olup `ChunkLoadError` atıyor — filtre
+   yalnızca `node_modules/.pnpm` altındaki Next iç chunk'larını susturur; **bizim**
+   `[project]/src/...` chunk'larımız filtrelenmez, onlar için Kural 56 koruması sürüyor
+   (LayoutDeferred/ZoneGate `dynamic()` yükleyicileri `.catch()` ile kapatıldı). Production build'de WebKit 4 sayfada 0 pageerror (ölçüldü),
+   yani ürün kodu temiz — filtre yalnız dev gürültüsünü susturuyor (Kural 53: dar tut). */
+const DEV_ARTIFACT = /CatchAll|negative time stamp|DevTools|Largest Contentful Paint|turbopack.*hmr-client|preloaded using link preload|react-server-dom-turbopack.*measure|Type error|__nextjs_original-stack-frames|Failed to load chunk[^|]*node_modules[^|]*\.pnpm/;
+
 const ok = [], bad = [];
 const t = (name, cond, extra = "") => (cond ? ok : bad).push(name + (extra ? ` — ${extra}` : ""));
 
@@ -392,7 +405,13 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   t("reduced · kartlar 6/6 görünür", red.cards === 6, `${red.cards}/6`);
   await h.evaluate(() => window.__MOTION__.getState().setForceReduced(null));
 
-  const hf = herrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|turbopack.*hmr-client|preloaded using link preload/.test(e));
+  /* Kural 45 · dev-only istisnalar. WebKit eki (2026-09-19): Next dev'in catch-all 404
+     ölçümü Chromium'da "CatchAll … negative time stamp" derken WebKit'te yalnızca
+     "TypeError: Type error" diyor; yığın `react-server-dom-turbopack` içindeki `measure`
+     fonksiyonunu gösteriyor. Aynı dev artığı, farklı metin — mevcut filtre tutmuyordu.
+     Dar tutuldu: yalnız bu yığın imzası. Production build'de WebKit 4 sayfada 0 pageerror
+     (ölçüldü), yani ürün kodu temiz. */
+  const hf = herrs.filter((e) => !DEV_ARTIFACT.test(e));
   t("Ana sayfa · konsol temiz", hf.length === 0, hf.slice(0, 2).join(" | ").slice(0, 150));
   await ctx.close();
 }
@@ -590,7 +609,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   }
   t("Nav/Footer/Overlay · tüm iç linkler 200", bad404.length === 0, `${all.length} link · sorunlu: ${bad404.join(", ") || "yok"}`);
 
-  const mf = merrs.filter((e) => !/CatchAll|negative time stamp|DevTools|Largest Contentful Paint|Failed to load resource|turbopack.*hmr-client|preloaded using link preload/.test(e));
+  const mf = merrs.filter((e) => !DEV_ARTIFACT.test(e) && !/Failed to load resource/.test(e));
   t("İç sayfalar · konsol temiz", mf.length === 0, mf.slice(0, 2).join(" | ").slice(0, 160));
   const unexpected = bad4xx.filter((x) => !x.endsWith("/tr/olmayan-sayfa"));
   t("İç sayfalar · kasıtlı 404 dışında 4xx/5xx istek yok", unexpected.length === 0,

@@ -21,7 +21,14 @@ import { useZoneStore } from "@/store/zone";
  * `useDialog`: Esc, Tab focus trap, `<html>` overflow kilidi ve Lenis durdurma — sitenin
  * diğer modalleriyle aynı davranış, ikinci bir gerçekleme yok.
  */
-const ZoneCanvas = dynamic(() => import("@/components/zone/ZoneCanvas").then((m) => m.ZoneCanvas), {
+/* Kural 56: iptal olan chunk isteği yakalanmamış redde dönüşmesin. Sahne gelmezse
+   perde boş kalır — kullanıcı ÇIKIŞ ile kapatabilir, sayfa kilitlenmez. */
+const ZoneCanvas = dynamic(
+  () =>
+    import("@/components/zone/ZoneCanvas")
+      .then((m) => m.ZoneCanvas)
+      .catch(() => (() => null) as unknown as typeof import("@/components/zone/ZoneCanvas").ZoneCanvas),
+  {
   ssr: false,
   loading: () => null,
 });

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { loadGsap } from "@/lib/gsap-loader";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { useLenisStore } from "@/lib/lenis-store";
 
@@ -28,7 +29,12 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     let dispose: (() => void) | undefined;
 
-    void Promise.all([import("lenis"), import("@/lib/gsap")])
+    /* Lenis + GSAP de ilk boyamadan SONRA (Kural 46 · `lib/gsap-loader`): ikisi birlikte
+       ~70 kB gz ve hydration anında inince LCP görseliyle bant genişliği yarışıyorlar.
+       Gelene kadar sayfa NATIVE scroll ile çalışır — tüketiciler zaten `lenis?.` ile
+       korunuyor (Kural 24), yani eksik bir davranış oluşmaz, yalnızca yumuşatma geç başlar. */
+    void loadGsap()
+      .then((g) => Promise.all([import("lenis"), Promise.resolve(g)]))
       .then(
       ([{ default: Lenis }, { gsap, ScrollTrigger }]) => {
         if (cancelled) return;

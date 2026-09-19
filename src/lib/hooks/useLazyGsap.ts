@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 
+import { loadGsap } from "@/lib/gsap-loader";
 import { useGsapReady } from "@/lib/motion-store";
 
 /** `@/lib/gsap` modülü — lazy import edilir, ilk yükleme JS'ine girmez (Kural 46). */
-export type GsapBundle = typeof import("@/lib/gsap");
+export type { GsapBundle } from "@/lib/gsap-loader";
+import type { GsapBundle } from "@/lib/gsap-loader";
 type Cleanup = void | (() => void);
 
 /**
@@ -24,7 +26,7 @@ export function useLazyGsap(
     let cancelled = false;
     let ctx: gsap.Context | undefined;
     let cleanup: Cleanup;
-    void import("@/lib/gsap")
+    void loadGsap()
       .then((g) => {
         if (cancelled) return;
         ctx = g.gsap.context(() => {
@@ -49,7 +51,7 @@ export function useGsapModule(): RefObject<GsapBundle | null> {
   const ready = useGsapReady();
   useEffect(() => {
     let cancelled = false;
-    void import("@/lib/gsap")
+    void loadGsap()
       .then((g) => {
         if (!cancelled) ref.current = g;
       })
