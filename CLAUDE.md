@@ -678,7 +678,7 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 > ① **Ölçüm hijyeni kurala bağlandı (Kural 71)** — ve hemen karşılığını verdi: dev sunucusu
 >   KAPALI ölçümde `/tr` LCP **3482 → 1746 ms, perf 99**. Önceki "hedef altı" sonucun büyük
 >   kısmı makine yüküymüş.
-> ② **`priceRange` eklendi** — `menu.ts`'teki gerçek fiyatlardan hesaplanıyor (`35–790 TL`),
+> ② **`priceRange` eklendi** — Rich Results'taki tek kritik olmayan uyarı **kalktı** (canlıda doğrulandı: 2 geçerli öğe, sorun yok). `menu.ts`'teki gerçek fiyatlardan hesaplanıyor (`35–790 TL`),
 >   elle yazılmıyor. Rich Results'ın tek kritik olmayan uyarısı buydu.
 > ③ **Bundle:** son bir tur bakıldı, kesilecek şey bulunamadı (modal ertelemesi 1.2 kB —
 >   geri alındı). **Kural 46 hedefi 200 → 220 kB gz** olarak revize edildi, gerekçesiyle.

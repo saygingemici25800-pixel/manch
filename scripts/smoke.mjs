@@ -74,7 +74,16 @@ for (const l of LOCALES) {
   const must = ["name", "url", "image", "address", "telephone", "email", "sameAs", "hasMenu", "servesCuisine", "openingHoursSpecification"];
   const missing = must.filter((k) => !ld?.[k]);
   t(ld?.["@type"] === "Restaurant" && missing.length === 0, "Restaurant JSON-LD", missing.length ? `eksik: ${missing.join(", ")}` : `${Object.keys(ld ?? {}).length} alan`);
-  t(!("priceRange" in (ld ?? {})), "KURAL B · priceRange yazılmamış", "priceRange" in (ld ?? {}) ? "VAR (olmamalı)" : "yok ✓");
+  /* priceRange 2026-09-19'da EKLENDİ (karar: kullanıcı): `menu.ts`'teki gerçek fiyatlardan
+     hesaplanıyor, uydurulmuyor. Kontrol "yok mu" değil **"var mı ve iki sayılı bir aralık mı"**
+     diye sorar; boş/uydurma bir değer buradan geçemez. Bilinmeyen alanlar hâlâ yasak. */
+  {
+    const pr = ld?.priceRange;
+    const n = String(pr ?? "").match(/\d+/g)?.map(Number) ?? [];
+    t(n.length === 2 && n[0] < n[1], "KURAL B · priceRange gerçek fiyat aralığından", `priceRange="${pr}"`);
+    const uydurma = ["geo", "acceptsReservations", "potentialAction", "aggregateRating"].filter((k) => k in (ld ?? {}));
+    t(uydurma.length === 0, "KURAL B · bilinmeyen alan yazılmamış", uydurma.join(", ") || "yok ✓");
+  }
   const days = (ld?.openingHoursSpecification ?? []).flatMap((o) => o.dayOfWeek ?? []);
   t(days.length === 7, "JSON-LD saatleri 7 günü kapsıyor", `${days.length} gün`);
   if (ld?.url && !ld.url.startsWith(BASE)) wr("JSON-LD url host ≠ ölçülen host", `${ld.url} vs ${BASE}`);
