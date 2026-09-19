@@ -30,7 +30,9 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 8 kapandı (2026-09-19).** Sıradaki tur kullanıcı onayı bekliyor. Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
+- Aktif faz: **Fazlar 1–9 + 5.5 KAPALI (2026-09-19).** Site canlı, kalan iş sahibinden gelecek
+  içeriğe ve sipariş sistemi kararına bağlı. Devir notu: **`claude/manch-devir.md`** (yeni bir
+  oturuma hızlı giriş; tek doğruluk kaynağı yine bu dosyadır). Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
   yeniden doğrulandı ve kapatıldı (2026-09-18): envanter + iki boşluk (fiyatsız ürün koruması,
   `/about` → Zone dönüşü). `faz6-check` 227/227 · `lab-check` 99/99 · Zone 105/105.
 - Faz 5.5 (MANCH Zone) **kapandı ve `faz-1-yeniden`'e birleştirildi**
@@ -698,7 +700,14 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] Final `docs/screens/faz-8-final.json` + `faz-8-table.md` (baseline → final)
 - [x] ⚠️ Kabul (kısmi): preloader'sız mobile **perf 98 / 91 / 95** (`/tr`, `/tr/menu`, `/tr/contact`) — **perf ≥ 90 üçünde de sağlandı**; CLS 0–0.001 ✓; A11y/SEO 100 ✓. **LCP hedefi (< 2500 ms) yalnızca `/tr`'de tuttu: 4691 → 2310 ms.** `/tr/menu` 3465, `/tr/contact` 2888 ms. First Load JS 225.9 → **214.6 kB gz** (Kural 46 hedefi ≤ 200 — **tutmadı**). lab-check chromium **93/93** + webkit **93/93**, konsol temiz; 375/768/1440/1920'de yatay taşma yok. Ayrıntı ve geri alınan denemeler: `docs/screens/faz-8-table.md` *(revize: 2026-09-18)*
 
-### Faz 9 — Deploy
+### Faz 9 — Deploy — **yeniden doğrulandı (2026-09-19)**
+> · GitHub `saygingemici25800-pixel/manch` · uzak `faz-1-yeniden` = yerel HEAD, fark 0 ✓
+> · Yedek etiketleri **uzakta**: `yedek-faz-9`, `yedek-zone-oncesi` (ilki yalnız yereldeydi,
+>   bu turda push edildi — uzakta olmayan yedek yedek değildir)
+> · **Vercel auto-deploy çalışıyor**, token artık geçerli: `deploy-wait.mjs` QUEUED →
+>   BUILDING → READY izledi, build **43 s** ✓
+> · Production build temiz (21 rota + `ƒ Proxy`) · canlı 200 · eski site (`manch-eight`) 200, dokunulmadı
+> · **Domain hâlâ YOK** — kutusu bu turda `[ ]`'ya çevrildi (yanlış işaretlenmişti).
 - [x] GitHub repo `saygingemici25800-pixel/manch` (origin main) + push
 - [x] Vercel'e bağlı (auto-deploy); env **`NEXT_PUBLIC_SITE_URL=https://manch-eight.vercel.app`** eklendi ve redeploy edildi → canonical/hreflang/sitemap canlı host'u gösteriyor *(revize: 2026-09-17 — faz tanımındaki "env yok" yanlıştı)*
 - [x] Vercel koşulu yerelde simüle edildi: `git clone . /tmp/manch-clone && pnpm install --frozen-lockfile && NEXT_PUBLIC_SITE_URL=… pnpm build` → temiz (install 0, build 0, 20 rota)
@@ -706,8 +715,8 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] `.env.example` + README ortam değişkenleri tablosu (`NEXT_PUBLIC_ALLOW_NOPRELOAD` prod'da tanımlanmaz)
 - [x] `scripts/smoke.mjs` (Kural 48) — canlıda **10/10 ✓, 0 uyarı** (canonical `https://manch-eight.vercel.app`, hreflang `en,tr,x-default`, og:image, Restaurant JSON-LD)
 - [x] Preview/canlı URL DURUM'da
-- [x] Domain (Cloudflare DNS) — TODO'daki adım listesi
-- [x] ✅ Kabul: Vercel build **yeşil (1 dk)** · `scripts/smoke.mjs` canlıda **31/31 ✓, 0 uyarı** · dört sayfa × iki dil 200 · JSON-LD 12 alan, `priceRange` yok, saatler 7 gün · **sepet → WhatsApp canlıda çalışıyor** (25/25 kart görünür, toast, rozet 3, drawer 2 satır, 1500 TL, `wa.me/905054970748` doğru mesajla; konsol 0 hata). `docs/screens/faz-9-cart-live.png` *(revize: 2026-09-18)*
+- [ ] Domain (Cloudflare DNS) — **YAPILMADI, TODO'da kalıyor** *(düzeltme 2026-09-19: kutu `[x]` işaretliydi ama yalnız adım listesi yazılmıştı; özel alan adı hâlâ bağlı değil, site `manch-v2.vercel.app` üzerinde)*
+- [x] ✅ Kabul: Vercel build **yeşil (43 s)** · `scripts/smoke.mjs` canlıda **32/32 ✓, 0 uyarı** *(2026-09-19'da yeniden doğrulandı; kontrol sayısı `priceRange` ile 31 → 32)* · dört sayfa × iki dil 200 · JSON-LD 12 alan, `priceRange` yok, saatler 7 gün · **sepet → WhatsApp canlıda çalışıyor** (25/25 kart görünür, toast, rozet 3, drawer 2 satır, 1500 TL, `wa.me/905054970748` doğru mesajla; konsol 0 hata). `docs/screens/faz-9-cart-live.png` *(revize: 2026-09-18)*
 
 ---
 
@@ -797,6 +806,20 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     · **Canlıda yalnız SON doğrulama, tek koşu**: smoke + bir gözle bakma.
     · Deploy beklerken çapa **sunucuda render edilen** bir şey olmalı — `ssr:false` bileşenin
       özniteliği çapa olamaz (2026-09-19'da `inert` seçilip boşa beklendi).
+
+72. **LCP kabul kriteri GERÇEK CDP throttling ölçümüdür, Lighthouse'un simüle (Lantern)
+    değeri değil (karar 2026-09-19, kullanıcı).**
+    Lantern bir **tahmin modelidir**: kritik zinciri kötümser serileştirir. 2026-09-19'da
+    aynı sayfalara iki yöntem ayrıştı — `/menu` 3900 vs **2084 ms**, `/contact` 2968 vs
+    **820 ms** (~2×) — üstelik LCP öğeleri **metin** ve Lighthouse'un kendi kırılımındaki
+    alt kalemler toplamı yalnızca 230–360 ms'ti. Yani fark ölçülen sayfadan değil modelden
+    geliyordu.
+    · **Kapı:** gerçek CDP throttling (yavaş 4G: 150 ms RTT / 1.6 Mbps, 4× CPU), **3 koşu
+      medyanı**, sapma > 200 ms ise ölçüm güvenilmez sayılır ve mekanizma ölçülür.
+    · **Koşul:** Kural 71 — yerel prod build (`NEXT_DIST_DIR=.next-build`), dev sunucusu
+      KAPALI, makine boşta.
+    · Lighthouse skoru (perf/LCP) raporda **bilgi olarak** durur; A11y ve SEO için kapı
+      olmayı sürdürür (onlar model değil, denetim).
 
 ---
 
@@ -945,6 +968,7 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-19 | 8 | `zone-perf-check` bütün senaryolarda tam **30 fps** verdi, hepsi kırmızı | Tam yarılanma (30.0/30.1/30.2, en uzun kare 34.4 ms) kademeli yavaşlama değil **vsync yarılanması**. Boş `about:blank` sayfası da 30 fps verdi → compositor sistem genelinde 30 Hz'e düşmüş (uzun oturum, yük 4.5–5.2). Ürün değişmemişti | Script **ortam farkındalığı** kazandı: önce boş sayfada rAF tavanı ölçülür, < 55 ise senaryolar **puanlanmaz** ve sebebi yazılır. Ayrıca "POV'da render durmuyor" eşiği 60 Hz'e kalibreydi (20 kare/0.6 sn); iddia "donmuyor" olduğu için >8'e çekildi. **Ortamı üründen ayıramayan kontrol güvenilmezdir** |
 | 2026-09-19 | 8 | `lab-check` 96/99: `NEXT_PUBLIC_SITE_URL yok` uyarıları + `priceRange YOK` kontrolü | İkisi de **benim yaptığım değişikliklerin sonucu**: ① ölçüm için kapattığım dev sunucusunu env değişkeni olmadan geri açmıştım (Kural 57 gereği gürültülü uyarı basıyor; `.env.local`'da tanımlı değil, kullanıcı satır içi veriyormuş) ② `priceRange` artık bilerek VAR | ① dev `NEXT_PUBLIC_SITE_URL=http://localhost:3000` ile yeniden başlatıldı ② kontrol tersine çevrildi: "yok mu" değil **"var mı ve gerçek fiyat aralığıyla tutarlı mı"** — uydurma bir aralık sızamaz. Ayrı kontrol: geo/rezervasyon/puan hâlâ yok. 100/100 |
 | 2026-09-19 | 8 | 768 px'te ürün kartının `+` düğmesi **18 px** — Kural 40 eşiği 24 | `h-[2.4vw]` 768'de 18.4 px ediyor. Lighthouse mobil form faktörü 412 px'te ölçtüğü için görmüyordu; 768 tablet portre **dokunmatik** | `min-h-[26px] min-w-[26px]` (5.5.8'de `OrderBoard`'a uygulanan aynı çözüm). 6 kırılımda doğrulandı |
+| 2026-09-19 | 8 | **Üç tur boyunca yanlış özneye çalışıldı:** LCP "hedef altı" sanıldı, optimizasyon oraya harcandı | İki katman üst üste binmişti. ① Ölçüm sırasında kullanıcının dev sunucusu açıktı; Lighthouse simüle throttling CPU yüküne duyarlı → `/tr` 3482 ms görünüyordu, dev kapatılınca **1746 ms** (perf 91 → 99). ② Kalan fark Lantern modelinin kötümserliğiydi: gerçek CDP throttling'de aynı sayfa **836 ms**. Yani "yavaş" olan ne sayfaydı ne de kod — biri ortam, öteki modeldi | Kural 71 (ölçüm hijyeni) + Kural 72 (kabul kapısı gerçek throttling). **Ders: bir metrik üç tur üst üste hedefi tutmuyorsa, önce metriğin kendisi sorgulanır** — Kural 60'ın "ölçtüğün şey ürün mü, ölçüm aracı mı?" sorusu yalnız kırmızı yanan kontroller için değil, ısrarla kötü çıkan SAYILAR için de geçerli |
 
 ---
 
