@@ -80,7 +80,17 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
           {p.desc[locale]}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-[1vw] pt-[0.6vw] max-md:pt-[2vw]">
+        {/* Mobilde SAĞ KORİDOR: sepet FAB'ı `fixed` bottom-right (55×55, sağdan 20) ve
+            kartın `+` düğmesi de sağ kenarda (35×35, sağdan 35) — 35 px tam çakışma ve
+            **28 kartın 28'i** aynı sütunda, yani arıza ara sıra değil yapısal (ölçüldü).
+            Koridor `+`'yı FAB sütununun soluna alır; hiçbir kart kontrolü altında kalmaz.
+
+            Neden önerilen iki yol değil: ① "grid'e alt boşluk" yalnız SON kartı kurtarır,
+            aradaki kartlar kaydırırken yine FAB'ın altından geçer ② "kaydırırken FAB'ı
+            gizle" kullanıcı durunca FAB geri geldiği için o anki `+`'ı yine örter — oysa
+            kullanıcı tam da durduğunda tıklar. Koridor tek deterministik çözüm; sepetin
+            konumunu, klavye erişimini ve focus ring'ini hiç değiştirmez. */}
+        <div className="mt-auto flex items-center justify-between gap-[1vw] pt-[0.6vw] max-md:pt-[2vw] pr-[3.6vw] max-md:pr-[48px]">
           <button
             type="button"
             data-cursor-hide
@@ -105,7 +115,10 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
             title={orderable ? undefined : t("priceSoon")}
             onClick={() => (orderable ? add(p.slug) : undefined)}
             aria-label={`${p.name[locale]} — ${orderable ? t("addToCart") : t("priceSoon")}`}
-            className="grid h-[2.4vw] w-[2.4vw] place-items-center rounded-full bg-mustard text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-mustard/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
+            /* Kural 40: dokunma hedefi ≥ 24 px. 2.4vw, 768 px'te 18 px ediyordu — tablet portrede
+               dokunmatik ve eşiğin altında. Taban `min-h/min-w` ile konuyor (5.5.8'de
+               `OrderBoard`'un −/+ düğmelerinde aynı çözüm uygulanmıştı). */
+            className="grid h-[2.4vw] w-[2.4vw] min-h-[26px] min-w-[26px] place-items-center rounded-full bg-mustard text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-mustard/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
           >
             +
           </button>

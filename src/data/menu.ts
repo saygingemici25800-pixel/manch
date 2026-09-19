@@ -207,3 +207,16 @@ export function getFeatured(): Product[] {
 export function getProductsByCategory(category: CategoryId): Product[] {
   return products.filter((p) => p.category === category);
 }
+
+/**
+ * Menüdeki gerçek fiyatların aralığı — JSON-LD `priceRange` bundan türer (Faz 8).
+ *
+ * `menu.ts`'ten HESAPLANIR, elle yazılmaz: fiyat değişince yapılandırılmış veri de
+ * kendiliğinden doğru kalır. Fiyatı `null` olan ürünler (henüz belli değil) hesaba GİRMEZ —
+ * Kural 54-B'nin yasakladığı şey tahmindir; burada kaynak gerçek veridir, uydurma yok.
+ */
+export function priceRange(): { min: number; max: number } | null {
+  const fiyatlar = products.map((p) => p.price).filter((n): n is number => n != null);
+  if (!fiyatlar.length) return null;
+  return { min: Math.min(...fiyatlar), max: Math.max(...fiyatlar) };
+}

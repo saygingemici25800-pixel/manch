@@ -30,7 +30,7 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- Aktif faz: **Faz 8 (bir sonraki tur — kullanıcı onayı bekliyor).** Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
+- Aktif faz: **Faz 8 kapandı (2026-09-19).** Sıradaki tur kullanıcı onayı bekliyor. Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
   yeniden doğrulandı ve kapatıldı (2026-09-18): envanter + iki boşluk (fiyatsız ürün koruması,
   `/about` → Zone dönüşü). `faz6-check` 227/227 · `lab-check` 99/99 · Zone 105/105.
 - Faz 5.5 (MANCH Zone) **kapandı ve `faz-1-yeniden`'e birleştirildi**
@@ -180,7 +180,24 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · **Karakter çizimleri hâlâ yok** — `drawCapy()` geçici sprite üretiyor. PNG yolu (`TextureLoader`) yazıldı **ve uçtan uca denendi** (8 geçici PNG ile: `spriteSource` → `png`, doku sayısı sabit, ölü bağ 0). Çizimler gelince `character.ts`'teki `MASCOT_SPRITE_BASE` sabiti `"/images/mascots"` yapılır — **başka hiçbir şey değişmez**. Otomatik yoklama bilerek yapılmıyor: olmayan PNG'ye istek 404 üretip Kural 53'e takılır. Dev'de `?sprites=<yol>` ile aynı yol denenebilir.
   · Ekranlar: `docs/screens/faz-5.5.3-zone-1440-{baslangic,sag,sol,180,donusta,miyu}.png`, `faz-5.5.3-zone-375{,-180}.png`
   · 5.5.2 ekranları: `docs/screens/faz-5.5.2-zone-1440.png`, `faz-5.5.2-zone-375.png`
-- Son başarılı build: 2026-09-18 **Faz 6 kapanışı** (`pnpm lint` + `pnpm build` temiz; `faz6-check` 227/227 · `lab-check` 99/99 · `zone-camera-check` 105/105 · Zone chunk 241.6 kB gz). Faz 5.5 birleştirme kapanışı (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`; birleştirilmiş dalda 5 script yeşil: camera 105/105 · leak temiz · bundle 241.6 kB gz · lab-check 93/93 · perf 41/41). 5.5.11 kapanış (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). 5.5.10 kapanış (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- Son başarılı build: 2026-09-19 **Faz 8 kapanışı** (`pnpm lint` + `pnpm build` temiz; lab-check 100/100 chromium + 100/100 webkit · a11y 39/39 · faz6 227/227 · zone-camera 105/105 · zone-leak temiz · zone-perf 29/29 · bundle ✓). Faz 6 kapanışı (`pnpm lint` + `pnpm build` temiz; `faz6-check` 227/227 · `lab-check` 99/99 · `zone-camera-check` 105/105 · Zone chunk 241.6 kB gz). Faz 5.5 birleştirme kapanışı (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`; birleştirilmiş dalda 5 script yeşil: camera 105/105 · leak temiz · bundle 241.6 kB gz · lab-check 93/93 · perf 41/41). 5.5.11 kapanış (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). 5.5.10 kapanış (`pnpm lint` + `pnpm build` temiz, 0 uyarı; 21 rota + `ƒ Proxy`). Faz 8 kapanış (`pnpm build` + `pnpm lint` temiz, 0 uyarı; 20 rota + `ƒ Proxy`; `scripts/lab-check.mjs` **93/93 chromium + 93/93 webkit**; Lighthouse A11y 100 / SEO 100)
+- **PERFORMANS DURUMU (2026-09-19, Kural 71'e uygun ölçüm — dev sunucusu KAPALI, makine boşta):**
+
+  | sayfa | Lighthouse simüle LCP | perf | GERÇEK throttling LCP (medyan, 3 koşu) | CLS |
+  |---|---|---|---|---|
+  | `/tr` | **1746 ms ✓** | **99** | **836 ms ✓** (sapma 120) | 0 |
+  | `/tr/menu` | 3900 ms ✗ | 88 | **2084 ms ✓** (sapma 40) | 0.0011 |
+  | `/tr/contact` | 2968 ms ✗ | 95 | **820 ms ✓** (sapma 32) | 0.0010 |
+
+  **İki ölçüm aynı koşulları (yavaş 4G + 4× CPU) iddia ediyor ama ayrışıyor.** Gerçek CDP
+  throttling'de üç sayfa da hedefin **altında**; Lighthouse'un Lantern simülasyonu `/menu` ve
+  `/contact`'ta ~2× daha kötümser. Kırılıma bakıldı: LCP öğeleri artık **metin** (kart başlığı,
+  saat satırı), alt kalemler toplamı 230–360 ms — yani fark ölçülen sayfadan değil **modelden**
+  geliyor. Kalan simüle gecikme 218 kB JS'in Lantern'daki serileştirilmesi; bundan fazlası
+  çatı seviyesi müdahale ister (Kural 46).
+  **Karar bekliyor:** kabul ölçütü hangi yöntemle değerlendirilsin? Gerçek cihaz/alan verisi
+  (CrUX) kullanıcının yaşadığına daha yakın.
+- **KAPANAN BORÇ:** ~~sepet FAB'ı `+` düğmesini örtüyor~~ **çözüldü** (sağ koridor, 6 kırılımda 0/56).
 - **AÇIK PERFORMANS BORCU (Faz 8'den devreden, 2026-09-19'da yeniden ölçüldü):**
   ① **LCP hedefi (< 2.5 s) hâlâ TUTMUYOR** — Lighthouse simüle mobil, preloader'sız:
   `/tr` **3482** · `/tr/menu` **3890** · `/tr/contact` **3036** ms. CLS ✓ (0–0.0011), perf 88–94.
@@ -291,7 +308,21 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     çağırır — her biri kendi `import()`'unu tetiklemez. Güvenli olmasının sebebi Kural 50:
     içerik animasyonsuz görünür başlar; gelmezse hareket geç başlar, eksik kalmaz.
     Ölçülen: `/tr/menu` LCP 4356 → 3706 ms (dönüşümlü A/B, aynı oturum).
-46. GSAP ilk yükleme JS'inde **yoktur**: `@/lib/gsap` (tek `registerPlugin` noktası) yalnızca `useLazyGsap` / `useGsapModule` (`src/lib/hooks/useLazyGsap.ts`) ile effect içinde `import()` edilir; hiçbir component `@/lib/gsap` veya `@gsap/react`'i statik import etmez (grep ile denetlenir). SSR içeriği olan primitive'ler (SplitReveal, Float, Parallax, Marquee, JellyWave, Juggle, SmashAnatomy, ProductGrid) normal render eder, animasyon modül gelince başlar. SSR'a gerek olmayan layout parçaları (CursorTrail, MenuOverlay, PageTransition) `LayoutDeferred` içinde `next/dynamic` `ssr:false`. Preloader GSAP kullanmaz (CSS keyframe + timer). `TransitionLink` `gsapReady` (motion-store) false iken perdesiz normal navigasyon yapar; PageTransition `api.current` yoksa doğrudan `router.push`. **First Load JS hedefi: ana sayfa ≤ 200 kB gzip** (karar 2026-09-17; Next'in kendi metriği de gzip'tir; React+Next çatısı tek başına ~112 kB gz). Ölçüm `scripts/bundle-report.mjs` (gerçek yükleme, `nomodule` polyfill hariç, gz sütunu esas).
+46. GSAP ilk yükleme JS'inde **yoktur**: `@/lib/gsap` (tek `registerPlugin` noktası) yalnızca `useLazyGsap` / `useGsapModule` (`src/lib/hooks/useLazyGsap.ts`) ile effect içinde `import()` edilir; hiçbir component `@/lib/gsap` veya `@gsap/react`'i statik import etmez (grep ile denetlenir). SSR içeriği olan primitive'ler (SplitReveal, Float, Parallax, Marquee, JellyWave, Juggle, SmashAnatomy, ProductGrid) normal render eder, animasyon modül gelince başlar. SSR'a gerek olmayan layout parçaları (CursorTrail, MenuOverlay, PageTransition) `LayoutDeferred` içinde `next/dynamic` `ssr:false`. Preloader GSAP kullanmaz (CSS keyframe + timer). `TransitionLink` `gsapReady` (motion-store) false iken perdesiz normal navigasyon yapar; PageTransition `api.current` yoksa doğrudan `router.push`. **First Load JS hedefi: ana sayfa ≤ 220 kB gzip** *(revize: 2026-09-19, kullanıcı onayı; önceki değer 200)*.
+
+    **Neden 200 → 220.** 200, Faz 8'de ölçüm yapılmadan konmuş bir hedefti ve üç turda da
+    tutmadı (218–219 kB gz). Kalan ağırlık **çatının kendisi**: React 63 + Next çalışma
+    zamanı 83 + next-intl/zustand ≈ 46 kB gz. 2026-09-19'da son bir tur daha bakıldı ve
+    **kesilecek bir şey bulunamadı**:
+    · GSAP, Lenis, three ilk yüklemede **yok** (imzayla doğrulandı) — hepsi lazy
+    · Ertelenebilir her layout parçası zaten `LayoutDeferred`'da (`ssr:false`)
+    · `/menu`'nün modalı ertelenmeye çalışıldı: kazanç **1.2 kB gz** (216.6 → 215.1).
+      Derin linke chunk yükleme riski eklemek bu kazanca değmedi → **geri alındı**
+    Bundan fazlası çatı seviyesi müdahale ister (React/Next sürüm veya mimari değişikliği).
+
+    **Bayt hedefi tek başına ölçüt değil.** Asıl ölçüt LCP: gerçek CDP throttling'de
+    (yavaş 4G + 4× CPU) canlıda `/tr/menu` **2392 ms**, yani hedefin altında — 218 kB
+    kullanıcıyı yavaşlatmıyor. Lighthouse'un simüle değeri makine yüküne duyarlı (Kural 71). Ölçüm `scripts/bundle-report.mjs` (gerçek yükleme, `nomodule` polyfill hariç, gz sütunu esas).
 47. LCP: `/tr` mobil LCP elementi **hero H1**'dir (fotoğraf değil — `hero-cook.jpg` 750w WebP ≈ 36 KB, `priority` + `fetchPriority="high"` + `quality 70`). H1 **SplitText ile animasyonlanmaz** (statik `<h1>`): split → char span'ları → yeniden boyama LCP adayını animasyon sonuna (3.2 s) kaydırıyordu. Hero hareketi dekoratif elemanlarda (rozet spin, kesit Float). Karar (a) uygulandı (sizes/kalite/AVIF/fetchpriority); (b) (mobilde fotoğrafsız hero) gerekmedi. `next.config` `images.formats: ["image/avif","image/webp"]`, **`images.qualities: [70, 75]`** (kullanılan her `quality` listede olmalı, yoksa 400); `next/image` çıktıları prod'da `curl -H "Accept: image/avif"` ile doğrulanır (hero 640w, kesit 384/750w). Genel kural: LCP adayı olan başlık/görsel ilk boyamadan sonra DOM'u değişen bir animasyona sokulmaz.
 48. Deploy duman testi `scripts/smoke.mjs <url>`: sayfalar/sitemap/robots/OG 200, bilinmeyen yol 404, head'de canonical + hreflang + og:image + Restaurant JSON-LD. HTML attribute'larını **case-insensitive** ara (Next 16 `hrefLang` yazar). `canonical` host ölçülen host'tan farklıysa **uyarı** (env eksik), hata değil. Vercel'de `NEXT_PUBLIC_SITE_URL` ayarlanınca yeniden koşulur.
 49. CLAUDE.md'yi script ile düzenlerken başlık aramaları **satır başına çapalı regex** olmalı (`re.search(r"^## 📍 DURUM$", s, re.M)`) — düz `str.index("## …")` dosyanın başındaki HATA PROTOKOLÜ maddelerinde geçen **başlık alıntılarını** yakalar. İki sınırla dilim alırken `assert a < b` şart: sınırlar ters dönerse `s[:a] + s[b:]` aradaki metni **ikizler** (sessiz bozulma). Yazımdan sonra `- [x]` / `- [ ]` ve başlık sayıları grep ile doğrulanır (karar 2026-09-18).
@@ -642,7 +673,20 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 - [x] Görseller `next/image` (hero cook + classic kesit, Instagram 6, kartlar/modal, kategori kapakları, maskot) *(canlı ana sayfa 22 görselin 22'si `/_next/image`, 0 kırık; `/about` aynı)*
 - [x] ✅ Kabul: build + lint temiz; lab-check **93/93** *(96 değil — script o gün 96 kontrol içeriyordu, sonraki fazlarda birleşti/yenilendi; sayı değişti, **hepsi yeşil**)*, console 0; Lighthouse A11y 100 / SEO 100 ×3 **canlıda yeniden ölçüldü** (`/tr`, `/tr/menu`, `/tr/contact` — Zone'lu ana sayfa dahil); `[TODO]` grep boş; `docs/screens/icerik-{burgers,home,menu,og}.png` dördü de var
 
-### Faz 8 — Performans & QA
+### Faz 8 — Performans & QA — **borç kapatıldı, kısmi kabul tamamlandı (2026-09-19)**
+> Faz 8 ⚠️ kısmi kabulle kapanmıştı (LCP yalnız `/tr`'de tutmuş, First Load 214.6). Bu turda:
+> ① **Ölçüm hijyeni kurala bağlandı (Kural 71)** — ve hemen karşılığını verdi: dev sunucusu
+>   KAPALI ölçümde `/tr` LCP **3482 → 1746 ms, perf 99**. Önceki "hedef altı" sonucun büyük
+>   kısmı makine yüküymüş.
+> ② **`priceRange` eklendi** — `menu.ts`'teki gerçek fiyatlardan hesaplanıyor (`35–790 TL`),
+>   elle yazılmıyor. Rich Results'ın tek kritik olmayan uyarısı buydu.
+> ③ **Bundle:** son bir tur bakıldı, kesilecek şey bulunamadı (modal ertelemesi 1.2 kB —
+>   geri alındı). **Kural 46 hedefi 200 → 220 kB gz** olarak revize edildi, gerekçesiyle.
+> ④ **Sepet FAB'ı çözüldü** — kart alt satırına sağ koridor; 6 kırılımda çakışma 0/56.
+>   Yan bulgu: 768'de `+` dokunma hedefi 18 px'ti (Kural 40 eşiği 24) → `min-h/min-w 26px`.
+> ⑤ **3 kullanılmayan görsel silindi** (261 kB): `tile-wall.png`, `07-extra.{jpg,webp}`.
+> ⑥ `zone-perf-check` **ortam farkındalığı** kazandı: rAF tavanı < 55 fps ise senaryolar
+>   puanlanmaz (uzun oturumda compositor 30 Hz'e düşüp ürün kusursuzken kırmızı yakıyordu).
 - [x] Ölçüm stratejisi Kural 43 (`scripts/lighthouse.mjs`: perf/a11y/seo × mobile/desktop × preloader'lı/sız, prod build, `?nopreload=1` yalnızca `NEXT_PUBLIC_ALLOW_NOPRELOAD=1` ile); baseline `docs/screens/faz-8-baseline.json` *(revize: 2026-09-17)*
 - [x] Bundle: `scripts/bundle-report.mjs` (sunucu HTML script'leri, gz, noModule hariç), `@next/bundle-analyzer` (ANALYZE=1); GSAP lazy (Kural 46: `useLazyGsap`, `LayoutDeferred` ssr:false, Preloader CSS) → `/tr` First Load **249.7 → 187.5 kB gz** (≤ 200), lazy gsap 48.9 gz sonradan
 - [x] NextIntlClientProvider daraltma (Kural 44: layout 7 namespace + sayfa sağlayıcıları)
@@ -738,6 +782,21 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 
     Kalıcı önlem: büyük ikili dosyalar (ekran görüntüleri) repoya girmesin — Kural 69 ve
     `.gitignore`'daki `docs/screens/_tur/`.
+
+71. **Ölçüm hijyeni: ağır ölçüm CANLIYA karşı yapılmaz (karar 2026-09-19).**
+    Vercel'in bot koruması eşiği var; 2026-09-19'da bir turda canlıya 5 sayfa × 3 koşu
+    Lighthouse + gözle bakma turu + a11y turu + smoke + onlarca `curl` gidince site
+    otomasyona **HTTP 403 "Vercel Security Checkpoint"** dönmeye başladı. (Gerçek kullanıcı
+    etkilenmedi — tarayıcı JS sınamasını çözüyor — ama bütün otomatik kontroller kırıldı.)
+
+    Kalıp:
+    · **Ağır ölçüm (Lighthouse, tur, A/B) → yerel prod build**: `NEXT_DIST_DIR=.next-build`
+      (Kural 65) + `pnpm start`, **dev sunucusu KAPALI** ve makine boşta. Dev açıkken
+      Lighthouse'un simüle throttling'i CPU yüküne duyarlıdır; 2026-09-19'da aynı kod
+      ardışık koşularda ±350 ms oynadı ve bir kazanç sahte çıktı.
+    · **Canlıda yalnız SON doğrulama, tek koşu**: smoke + bir gözle bakma.
+    · Deploy beklerken çapa **sunucuda render edilen** bir şey olmalı — `ssr:false` bileşenin
+      özniteliği çapa olamaz (2026-09-19'da `inert` seçilip boşa beklendi).
 
 ---
 
@@ -882,6 +941,10 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-19 | 7 | `getComputedStyle(el, ":focus-visible")` boş dönüyor | `:focus-visible` bir pseudo-**SINIF**; `getComputedStyle`'ın ikinci argümanı yalnız pseudo-**ELEMENT** alır (`::before`). Kural okunamaz | Halka gerçek `Tab` ile odaklanıp `outlineWidth` okunarak ölçülür — ürünün gerçek yolu zaten bu |
 | 2026-09-19 | 7 | Canlı site curl'e **HTTP 403 "Vercel Security Checkpoint"** dönmeye başladı; otomatik kontroller ve deploy bekleme çapaları kırıldı | **Kendi otomasyonum tetikledi:** bu turda canlıya Lighthouse (5 sayfa × 3 koşu), a11y turu, gözle bakma turu, smoke ve onlarca `curl` gitti — Vercel bot koruması eşiği aştı. Gerçek kullanıcı ETKİLENMİYOR: tarayıcı JS sınamasını çözüp geçiyor (gerçek tarayıcıda doğrulandı — sayfa tam açıldı, `sr-only` linkleri ve `inert` diyaloglar yerinde) | Canlı doğrulama, curl yerine **gerçek tarayıcıdan** yapıldı. Ders: canlıya karşı ölçüm **bütçelidir** — aynı turda hem Lighthouse hem tur hem smoke koşturmak koruma tetikler. Ağır ölçümler yerel prod build'de (Kural 65), canlıda yalnız son doğrulama |
 | 2026-09-19 | 7 | Deploy bekleme çapası olarak `inert` seçildi, **hiç görünmedi**, "zaman aşımı" dedi | `inert` taşıyan bileşenler (`Cart`, `InfoModal`, `MenuOverlay`) `LayoutDeferred` içinde `next/dynamic` + `ssr:false` ile yükleniyor — **sunucu HTML'inde hiç yoklar**. Çapa, sunucudan gelen HTML'de aranıyor; client-only bir öznitelik çapa olamaz | Çapa sunucuda render edilen bir şeyden seçildi (Zone `sr-only` metni). Kural 60'ın deploy hâli: çapa seçerken "bu şey sunucu HTML'inde var mı?" diye sorulur |
+| 2026-09-19 | 8 | Dev sunucusu açıkken ölçülen LCP'ler **hedefin çok üstünde** görünüyordu (`/tr` 3482 ms) | Lighthouse simüle throttling CPU ölçümüne dayanır; makinede dev sunucusu + prod sunucusu + tarayıcılar varken model kötümserleşiyor. Üç turdur bu sayılara bakıp "hedef tutmadı" deniyordu | Kural 71 yazıldı, dev KAPATILIP ölçüldü: `/tr` **3482 → 1746 ms, perf 91 → 99**. Ölçümden sonra dev geri açıldı. **Aynı kodda 2× fark: ortam, üründen daha çok konuşuyordu** |
+| 2026-09-19 | 8 | `zone-perf-check` bütün senaryolarda tam **30 fps** verdi, hepsi kırmızı | Tam yarılanma (30.0/30.1/30.2, en uzun kare 34.4 ms) kademeli yavaşlama değil **vsync yarılanması**. Boş `about:blank` sayfası da 30 fps verdi → compositor sistem genelinde 30 Hz'e düşmüş (uzun oturum, yük 4.5–5.2). Ürün değişmemişti | Script **ortam farkındalığı** kazandı: önce boş sayfada rAF tavanı ölçülür, < 55 ise senaryolar **puanlanmaz** ve sebebi yazılır. Ayrıca "POV'da render durmuyor" eşiği 60 Hz'e kalibreydi (20 kare/0.6 sn); iddia "donmuyor" olduğu için >8'e çekildi. **Ortamı üründen ayıramayan kontrol güvenilmezdir** |
+| 2026-09-19 | 8 | `lab-check` 96/99: `NEXT_PUBLIC_SITE_URL yok` uyarıları + `priceRange YOK` kontrolü | İkisi de **benim yaptığım değişikliklerin sonucu**: ① ölçüm için kapattığım dev sunucusunu env değişkeni olmadan geri açmıştım (Kural 57 gereği gürültülü uyarı basıyor; `.env.local`'da tanımlı değil, kullanıcı satır içi veriyormuş) ② `priceRange` artık bilerek VAR | ① dev `NEXT_PUBLIC_SITE_URL=http://localhost:3000` ile yeniden başlatıldı ② kontrol tersine çevrildi: "yok mu" değil **"var mı ve gerçek fiyat aralığıyla tutarlı mı"** — uydurma bir aralık sızamaz. Ayrı kontrol: geo/rezervasyon/puan hâlâ yok. 100/100 |
+| 2026-09-19 | 8 | 768 px'te ürün kartının `+` düğmesi **18 px** — Kural 40 eşiği 24 | `h-[2.4vw]` 768'de 18.4 px ediyor. Lighthouse mobil form faktörü 412 px'te ölçtüğü için görmüyordu; 768 tablet portre **dokunmatik** | `min-h-[26px] min-w-[26px]` (5.5.8'de `OrderBoard`'a uygulanan aynı çözüm). 6 kırılımda doğrulandı |
 
 ---
 

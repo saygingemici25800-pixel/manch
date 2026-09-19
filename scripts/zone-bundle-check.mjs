@@ -8,7 +8,7 @@ import { gzipSync } from "node:zlib";
 
 const BASE = process.env.BASE ?? "http://localhost:3101";
 const PAGES = process.argv.slice(2).length ? process.argv.slice(2) : ["/tr", "/tr/menu", "/tr/about", "/tr/contact"];
-const LIMIT_MAIN = 200;   // Kural 46
+const LIMIT_MAIN = 220;   // Kural 46 (revize 2026-09-19: 200 → 220, gerekçe kuralda)
 const LIMIT_ZONE = 260;   // spec bölüm 9 (180 → 260, karar 2026-09-18)
 
 // Minify sonrası hayatta kalan, three'ye özgü diziler. Dinamik import'un chunk ADI da

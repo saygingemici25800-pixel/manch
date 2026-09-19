@@ -658,11 +658,19 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   // 2026-09-18: saatler geldi → openingHoursSpecification artık ZORUNLU, yasaklı değil.
   const must = ["@context", "@type", "name", "url", "image", "servesCuisine", "hasMenu", "address",
                 "sameAs", "telephone", "email", "openingHoursSpecification"];
-  const banned = ["priceRange"];
   t("JSON-LD · Restaurant + 12 bilinen alan", !!ld && ld["@type"] === "Restaurant" && must.every((k) => k in ld),
     must.filter((k) => !(ld ?? {})[k]).join(", ") || `${Object.keys(ld ?? {}).length} alan`);
-  t("KURAL B · priceRange JSON-LD'de YOK (veri yok)", banned.every((k) => !(k in (ld ?? {}))),
-    banned.filter((k) => k in (ld ?? {})).join(", ") || "hiçbiri yok");
+  /* priceRange 2026-09-19'da EKLENDİ (karar: kullanıcı) — Kural 54-B ihlali değil, değer
+     `menu.ts`'teki gerçek fiyatlardan hesaplanıyor. Kontrol artık "yok mu" değil,
+     "VAR mı ve VERİYLE TUTARLI mı" diye soruyor: uydurma bir aralık buraya sızamaz. */
+  {
+    const pr = ld.priceRange;
+    const sayilar = String(pr ?? "").match(/\d+/g)?.map(Number) ?? [];
+    t("KURAL B · priceRange var ve gerçek fiyat aralığından", sayilar.length === 2 && sayilar[0] < sayilar[1], `priceRange="${pr}"`);
+  }
+  t("KURAL B · hâlâ uydurma alan yok (geo/rezervasyon/puan)",
+    !("geo" in ld) && !("acceptsReservations" in ld) && !("potentialAction" in ld) && !("aggregateRating" in ld),
+    Object.keys(ld).filter((k) => ["geo", "acceptsReservations", "potentialAction", "aggregateRating"].includes(k)).join(",") || "yok");
   const emptyish = Object.entries(ld ?? {}).filter(([, v]) => v === "" || v === null ||
     (typeof v === "string" && /yakında|coming soon|todo/i.test(v)));
   t("KURAL B · boş string / 'Yakında' değeri yok", emptyish.length === 0, emptyish.map(([k]) => k).join(", ") || "temiz");

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { routing, type Locale } from "@/i18n/routing";
+import { priceRange } from "@/data/menu";
 import { site } from "@/lib/site";
 
 /** Kural 38 — her sayfa: canonical + hreflang (tr/en/x-default) + OG/Twitter. Title şablonu layout'ta ("%s | MANCH"). */
@@ -40,7 +41,10 @@ export function pageMetadata(opts: {
  *
  * **Kural 54:** bilinmeyen alan **hiç yazılmaz** — "Yakında", boş string veya tahmin YASAK.
  * Google yapılandırılmış veriyi kelime kelime okur; uydurma değer işletme kartını bozar.
- * Bilerek dışarıda: `priceRange` (belirlenmedi — sipariş/fiyat sınıfı verisi yok).
+ * `priceRange` 2026-09-19'da **eklendi** (karar: kullanıcı). Kural 54-B ihlali değil —
+ * değer uydurulmuyor, `menu.ts`'teki GERÇEK fiyatlardan hesaplanıyor; fiyatı bilinmeyen
+ * ürünler hesaba girmiyor. Fiyat değişince JSON-LD de kendiliğinden doğru kalır.
+ * Google Rich Results bu alanı "isteğe bağlı, eksik" diye uyarıyordu.
  * `openingHoursSpecification` ve `addressRegion` 2026-09-18'de **eklendi** (veri geldi).
  */
 export function restaurantJsonLd(locale: Locale) {
@@ -63,6 +67,11 @@ export function restaurantJsonLd(locale: Locale) {
     },
     sameAs: [site.social.instagram, site.social.facebook].filter(Boolean),
   };
+  /* Fiyat aralığı gerçek menüden. Biçim: para birimi + min–max (schema.org `priceRange`
+     serbest metin kabul eder; "₺₺" gibi bant yerine sayısal aralık daha bilgilendirici
+     ve doğrulanabilir). */
+  const pr = priceRange();
+  if (pr) data.priceRange = `${pr.min}–${pr.max} TL`;
   // Yapılandırılmış veride boşluksuz E.164 (görünen arayüzde okunur biçim kalır).
   if (site.contact.phone) data.telephone = site.contact.phone.replace(/\s+/g, "");
   if (site.contact.email) data.email = site.contact.email;

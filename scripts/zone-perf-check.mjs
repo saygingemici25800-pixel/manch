@@ -126,7 +126,11 @@ if (runs("pov")) {
     const tick = () => { n++; if (performance.now() - t0 < 600) requestAnimationFrame(tick); else res(n); };
     requestAnimationFrame(tick);
   }));
-  ok(rendering > 20, "POV'da sahne render'ı DURMUYOR (spec 9)", `${rendering} kare / 0.6 sn`);
+  /* İddia "60 fps" değil, "DONMUYOR". Eşik 20 kare/0.6 sn idi ve 60 Hz'e göre kalibreydi;
+     ortam 30 Hz'e düşünce 0.6 sn zaten 18 kare ediyor ve kontrol ürün kusursuzken kırmızı
+     yanıyordu (2026-09-19). Eşik iddiaya uyduruldu: >8 kare ≈ 13 fps üzeri — donmuş bir
+     sahne 0–1 kare verir, aradaki fark tartışmasız. */
+  ok(rendering > 8, "POV'da sahne render'ı DURMUYOR (spec 9)", `${rendering} kare / 0.6 sn`);
 
   /* --- (c) Çıkışta her şey geri geliyor mu? */
   await page.keyboard.press("Escape");
@@ -177,6 +181,25 @@ if (runs("fps")) {
       clampedFrames: d.filter((x) => x > 50).length,
     };
   };
+
+  /* ÖNCE TAVANI ÖLÇ (Kural 60 + 71). Sahne asla tarayıcının rAF tavanından hızlı olamaz;
+     tavan düşmüşse "30 fps" ürünün değil ORTAMIN sonucudur. 2026-09-19'da tam bu yaşandı:
+     uzun oturumun sonunda compositor 30 Hz'e düştü, boş `about:blank` bile 30 fps verdi ve
+     bütün senaryolar kırmızı yandı — oysa aynı kod daha önce 60 fps ölçülmüştü.
+     Tavan < 55 ise senaryolar PUANLANMAZ, ölçüm yine basılır ve neden atlandığı yazılır. */
+  const tavan = await (async () => {
+    const p = await browser.newPage();
+    await p.goto("about:blank");
+    const f = await p.evaluate(() => new Promise((r) => {
+      let n = 0; const t0 = performance.now();
+      const t = () => { n++; if (performance.now() - t0 < 1200) requestAnimationFrame(t); else r(+(n / ((performance.now() - t0) / 1000)).toFixed(1)); };
+      requestAnimationFrame(t);
+    }));
+    await p.close();
+    return f;
+  })();
+  const tavanSaglikli = tavan >= 55;
+  console.log(`  tarayıcı rAF tavanı: ${tavan} fps ${tavanSaglikli ? "✓" : "✗ ORTAM DÜŞÜK — senaryolar puanlanmayacak"}`);
 
   const scenarios = [
     { name: "masaüstü 1440×810 dpr2", width: 1440, height: 810, dsf: 2, cpu: 1 },
@@ -296,8 +319,8 @@ if (runs("fps")) {
        düşük değer "FOV 80 pahalıya mal oldu" diye yorumlanacaktı — ikinci koşu bunu çürüttü.
        Hedef senaryolar (1× ve 4×) ise HER koşuda 60 fps, en uzun kare 17.7 ms: kararlı olan
        ve anlam taşıyan ölçüm o. Sondadan bir sonuç çıkarılacaksa en az üç koşu gerekir. */
-    if (sc.probe) {
-      console.log(`      → SONDA (puanlanmıyor): boşta ${idle.fps} · yürürken ${walk.fps}` +
+    if (sc.probe || !tavanSaglikli) {
+      console.log(`      → ${sc.probe ? "SONDA" : "ORTAM TAVANI DÜŞÜK"} (puanlanmıyor): boşta ${idle.fps} · yürürken ${walk.fps}` +
         `${pov ? ` · POV ${pov.fps}` : ""} fps · 50 ms'i aşan ${clamped} kare`);
     } else {
       ok(idle.fps >= TARGET, `${sc.name} · boşta ≥ ${TARGET} fps`, `${idle.fps}`);
