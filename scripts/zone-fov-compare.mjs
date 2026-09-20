@@ -7,6 +7,7 @@
 //
 // Kullanım: LABEL=mevcut CHROME=<yol> node scripts/zone-fov-compare.mjs
 import { mkdirSync } from "node:fs";
+import { hazir, kosul } from "./_bekle.mjs";
 import { chromium } from "playwright-core";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
@@ -31,7 +32,7 @@ page.setDefaultTimeout(90000);
 await fetch(`${BASE}/tr/lab/zone`).catch(() => {});
 await page.goto(`${BASE}/tr/lab/zone`, { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => window.__ZONE_STATS__?.().canvases === 1);
-await page.waitForTimeout(2000);
+await hazir(page); // Kural 75: sabit 2000 ms yerine koşul
 
 // Lab kromu ölçümü kirletmesin (5.5.8: lab aracı ürünün eylemini örtüyordu).
 await page.evaluate(() => {
@@ -40,7 +41,7 @@ await page.evaluate(() => {
   }
 });
 // Salonun ortasında, künyeye bakan başlangıç duruşu — kırılımlar arası aynı kare.
-await page.waitForTimeout(600);
+await kosul(page, () => (window.__ZONE_STATS__?.().meshes?.length ?? 0) > 0);
 const s = await page.evaluate(() => window.__ZONE_STATS__());
 const aspect = 390 / 844;
 const hFov = (2 * Math.atan(Math.tan((s.cam.fov * Math.PI) / 180 / 2) * aspect) * 180) / Math.PI;

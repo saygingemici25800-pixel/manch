@@ -17,6 +17,7 @@
 // Kural 45: WebKit'te Tab yalnız form kontrollerini dolaşır → klavye turu chromium'da.
 // Kullanım: BASE=http://localhost:3101 CHROME=<yol> node scripts/a11y-check.mjs
 import { chromium } from "playwright-core";
+import { hazir, durumBekle, kosul, varOl, yokOl, pencere } from "./_bekle.mjs";
 import { colors } from "../src/styles/tokens.ts";
 
 const BASE = process.env.BASE ?? "http://localhost:3101";
@@ -54,7 +55,7 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   const p = await br.newPage({ viewport: { width: 1440, height: 900 } });
   p.setDefaultTimeout(45000);
   await p.goto(`${BASE}${path}?nopreload=1`, { waitUntil: "domcontentloaded" });
-  await p.waitForTimeout(2400);
+  await hazir(p); // Kural 75: sabit 2400 ms yerine koşul
 
   const durak = [];
   for (let i = 0; i < 30; i++) {
@@ -88,7 +89,7 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   p.setDefaultTimeout(45000);
   const DIALOG_OPEN = "[role=dialog][data-state=open]";
   await p.goto(`${BASE}/tr?nopreload=1`, { waitUntil: "domcontentloaded" });
-  await p.waitForTimeout(2500);
+  await hazir(p); // Kural 75: sabit 2500 ms yerine koşul
 
   /* Diyaloglar kapalıyken de DOM'da durur (geçiş animasyonu) — "kapandı mı" sorusu
      ELEMAN SAYISIYLA sorulamaz, `data-state` ile sorulur. İlk yazımda sayıya bakıyordum
@@ -97,28 +98,32 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
 
   // menü overlay
   await p.locator("[data-testid=menu-toggle]").click();
-  await p.waitForTimeout(900);
+  await kosul(p, () => document.querySelectorAll("[role=dialog][data-state=open]").length >= 1);
   ok((await p.locator(`${DIALOG_OPEN}`).count()) >= 1, "menü overlay açıldı (role=dialog aria-modal)");
+  /* Tab turundan önce ODAK'ın içeri taşınmasını bekle: `data-state=open` açılışın
+     BAŞINDA yazılıyor, odak tuzağı ise kurulum bitince devreye giriyor. Erken başlayan
+     Tab'lar perdenin dışına kaçıyordu (ilk çevrimde bu yüzden kırmızı yandı). */
+  await kosul(p, () => !!document.querySelector("[role=dialog][data-state=open]")?.contains(document.activeElement));
   for (let i = 0; i < 14; i++) await p.keyboard.press("Tab");
   ok(await p.evaluate((d) => !!document.querySelector(d)?.contains(document.activeElement), DIALOG_OPEN),
     "menü overlay focus trap (14 Tab sonrası içeride)");
   await p.keyboard.press("Escape");
-  await p.waitForTimeout(800);
+  await kosul(p, () => document.querySelectorAll("[role=dialog][data-state=open]").length === 0);
   ok((await p.locator(DIALOG_OPEN).count()) === 0, "menü overlay Esc ile kapandı");
 
   // sepet drawer
   await p.locator("[data-testid=cart-button]").click();
-  await p.waitForTimeout(1000);
+  await durumBekle(p, "[data-testid=cart-drawer]", "open");
   ok((await durum("[data-testid=cart-drawer]")) === "open", "sepet drawer açıldı");
   await p.keyboard.press("Escape");
-  await p.waitForTimeout(900);
+  await durumBekle(p, "[data-testid=cart-drawer]", "closed");
   ok((await durum("[data-testid=cart-drawer]")) === "closed", "sepet drawer Esc ile kapandı");
 
   /* KAPALI diyalogların klavyeye kapalı olması — Faz 7'de bulunan gerçek kusur:
      kapalı sepet çekmecesine ve InfoModal'a Tab ile giriliyordu, odak ekran dışına
      düşüyordu. `inert` ile kapatıldı; bekçi burada. */
   await p.goto(`${BASE}/tr?nopreload=1`, { waitUntil: "domcontentloaded" });
-  await p.waitForTimeout(2200);
+  await hazir(p); // Kural 75: sabit 2200 ms yerine koşul
   const kacak = [];
   for (let i = 0; i < 60; i++) {
     await p.keyboard.press("Tab");
@@ -145,7 +150,7 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   p.setDefaultTimeout(60000);
   await p.goto(`${BASE}/tr?nopreload=1`, { waitUntil: "domcontentloaded" });
   await p.waitForSelector("[data-testid=zone-gate]");
-  await p.waitForTimeout(1500);
+  await hazir(p); // Kural 75: sabit 1500 ms yerine koşul
 
   const sr = await p.evaluate(() => {
     const nav = [...document.querySelectorAll("nav")].find((n) => n.className.includes("sr-only"));
@@ -158,7 +163,7 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
 
   await p.locator("[data-testid=zone-gate]").click();
   await p.waitForSelector("[data-testid=zone-pick-misu]");
-  await p.waitForTimeout(600);
+  await kosul(p, () => document.activeElement !== document.body);
   // perde trapı (spec 10: perde role=dialog + aria-modal + focus trap)
   for (let i = 0; i < 12; i++) await p.keyboard.press("Tab");
   ok(await p.evaluate(() => !!document.querySelector("[data-testid=zone-curtain]")?.contains(document.activeElement)),
@@ -173,8 +178,9 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
 
   await p.locator("[data-testid=zone-pick-misu]").click();
   await p.waitForSelector("[data-testid=zone-curtain][data-state=zone]", { timeout: 60000 });
-  await p.waitForTimeout(1500);
-  const tap = async (k, ms) => { await p.keyboard.down(k); await p.waitForTimeout(ms); await p.keyboard.up(k); };
+  await kosul(p, () => window.__ZONE_STATS__?.().canvases === 1, null, 30000);
+  // ÖLÇÜM PENCERESİ: tuşu ms kadar basılı tutmak "koşul bekleme" değil, girdi süresidir.
+  const tap = async (k, ms) => { await p.keyboard.down(k); await pencere(p, ms); await p.keyboard.up(k); };
   for (let i = 0; i < 16 && !(await p.locator("[data-testid=frame-enter]").count()); i++) await tap("a", 180);
   for (let i = 0; i < 22 && !(await p.locator("[data-testid=frame-enter]").count()); i++) await tap("w", 180);
   ok((await p.locator("[data-testid=frame-enter]").count()) > 0, "halkada GİR düğmesi göründü");
@@ -199,13 +205,20 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
 
   await p.keyboard.press("e");
   await p.waitForSelector("[data-testid=frame-board]", { timeout: 20000 }).catch(() => {});
-  await p.waitForTimeout(1600);
+  await varOl(p, "[data-testid=frame-board]");
+  // odak panoya TAŞINANA kadar bekle (asıl iddia bir alttaki ok(...))
+  await kosul(p, () => !!document.querySelector("[data-testid=frame-board]")?.contains(document.activeElement));
   ok((await p.locator("[data-testid=frame-board]").count()) === 1, "POV panosu açıldı");
   ok(await p.evaluate(() => !!document.querySelector("[data-testid=frame-board]")?.contains(document.activeElement)),
     "POV panosu açılınca odak İÇİNE taşındı (spec 10)");
   await p.keyboard.press("Escape");
-  await p.waitForTimeout(1000);
+  await yokOl(p, "[data-testid=frame-board]");
   ok((await p.locator("[data-testid=frame-board]").count()) === 0, "POV panosu Esc ile kapandı");
+  /* Odak, pano DOM'dan çıktığı KARE'de dönmüyor: `drei/<Html>` portalı yüzünden buton
+     birkaç kare sonra doğuyor ve odak `requestAnimationFrame` döngüsüyle veriliyor
+     (5.5.6 hata günlüğü). Panoyu beklemek yetmez — ODAĞIN KENDİSİ beklenir. Tavanlı,
+     yani odak hiç dönmezse bekleme biter ve aşağıdaki iddia yine düşer. */
+  await kosul(p, () => document.activeElement?.getAttribute("data-testid") === "frame-enter");
   const geri = await p.evaluate(() => document.activeElement?.getAttribute("data-testid"));
   ok(geri === "frame-enter", "kapanınca odak GİR butonuna döndü (spec 10)", `odak=${geri}`);
   await p.close();

@@ -12,6 +12,7 @@
 // değişmediyse son geçerli ölçüm geçerlidir, yük altında tekrar ölçmek Kural 60 ihlalidir.
 // Kullanım: CHROME=<yol> BASE=http://localhost:3101 node scripts/lcp-check.mjs [/tr]
 import { chromium } from "playwright-core";
+import { pencere } from "./_bekle.mjs";
 
 const BASE = process.env.BASE ?? "http://localhost:3101";
 const PATHS = process.argv.slice(2).length ? process.argv.slice(2) : ["/tr"];
@@ -33,7 +34,9 @@ async function lcpOnce(url, mobile) {
   });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await p.goto(url, { waitUntil: "load", timeout: 120000 });
-  await p.waitForTimeout(3500);
+  // ÖLÇÜM PENCERESİ (Kural 75 istisnası): LCP adayı geç değişebilir — beklenen bir
+  // koşul yok, ölçülen şeyin kendisi süredir. Kısaltmak LCP'yi olduğundan iyi gösterir.
+  await pencere(p, 3500);
   const lcp = await p.evaluate(
     () =>
       new Promise((res) => {

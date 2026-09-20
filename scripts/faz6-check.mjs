@@ -2,6 +2,7 @@
 // 4 kırılım × (menu, about, contact, 404) × TR/EN. Kareler yok sayılan _tur/'a düşer (Kural 69).
 // Kullanım: BASE=http://localhost:3101 CHROME=<yol> node scripts/faz6-check.mjs
 import { mkdirSync } from "node:fs";
+import { hazir } from "./_bekle.mjs";
 import { chromium } from "playwright-core";
 
 const BASE = process.env.BASE ?? "http://localhost:3101";
@@ -37,7 +38,7 @@ for (const [w,h,dsf] of BPS) {
       p.on("pageerror", e => errs.push("pageerror: "+e.message.slice(0,80)));
       p.on("response", r => { if (r.status()>=400 && !r.url().includes("yok-boyle-sayfa")) net.push(`${r.status()} ${r.url().replace(BASE,"")}`); });
       const res = await p.goto(`${BASE}/${loc}${path}?nopreload=1`, { waitUntil:"domcontentloaded" });
-      await p.waitForTimeout(name==="404" ? 1800 : 2600);
+      await hazir(p); // Kural 75: sabit 1800/2600 ms yerine koşul
       await p.evaluate(() => Promise.all([...document.images].filter(i=>i.src&&i.getBoundingClientRect().top<innerHeight)
         .map(i=>Promise.race([i.decode().catch(()=>{}), new Promise(r=>setTimeout(r,2500))]))));
       const m = await p.evaluate(() => ({
@@ -68,7 +69,7 @@ for (const [w,h,dsf] of BPS) {
   /* Hash sorgudan SONRA gelmeli: `…/about#mascots?nopreload=1` yazıldığında fragment
      "mascots?nopreload=1" olur ve hiçbir elemanla eşleşmez — ürün değil, URL yazım hatası. */
   await p.goto(`${BASE}/tr/about?nopreload=1#mascots`, { waitUntil:"domcontentloaded" });
-  await p.waitForTimeout(2500);
+  await hazir(p); // Kural 75: sabit 2500 ms yerine koşul
   const r = await p.evaluate(() => {
     const el = document.querySelector("#mascots");
     if (!el) return null;
@@ -79,7 +80,7 @@ for (const [w,h,dsf] of BPS) {
   ok(!!r?.kadrajda, "#mascots çapası hedefe iniyor", JSON.stringify(r));
   // /about → Zone dönüş bağlantısı
   await p.goto(`${BASE}/tr/about?nopreload=1`, { waitUntil:"domcontentloaded" });
-  await p.waitForTimeout(2000);
+  await hazir(p); // Kural 75: sabit 2000 ms yerine koşul
   const cta = await p.locator("[data-testid=about-zone-cta]").getAttribute("href").catch(()=>null);
   /* next-intl `Link` locale önekini kendisi ekler: `/#zone` → `/tr#zone`. Beklenti
      bu yüzden "ana sayfa + #zone" olarak yazılır, birebir dizge olarak değil. */

@@ -8,6 +8,7 @@
 //
 // Kullanım: pnpm dev -p 3113 çalışırken → CHROME=<yol> node scripts/zone-camera-check.mjs
 import { chromium } from "playwright-core";
+import { hazir, pencere } from "./_bekle.mjs";
 
 const BASE = process.env.BASE ?? "http://localhost:3113";
 const URL_ZONE = `${BASE}/tr/lab/zone`;
@@ -126,7 +127,11 @@ async function openZone(opts = {}) {
   page.on("response", (r) => { if (r.status() >= 400) bad.push(`${r.status()} ${r.url().replace(BASE, "")}`); });
   await page.goto(URL_ZONE, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => window.__ZONE_STATS__ != null);
-  await page.waitForTimeout(1500);
+  /* Doğru koşul SAHNE'nin kurulması — `hazir()` (gsapReady) yetmiyor: o hydration'ı
+     ölçer, three.js sahnesini değil. İlk denemede `hazir()` konmuştu ve 9 kontrol
+     düştü (karakter henüz yokken hareket ölçülüyordu). Kural 75'in kendi tuzağı:
+     koşula çevirmek yetmez, DOĞRU koşul seçilir. */
+  await page.waitForFunction(() => (window.__ZONE_STATS__?.().canvases ?? 0) === 1 && (window.__ZONE_STATS__?.().meshes?.length ?? 0) > 10, null, { timeout: 60000 });
   return { page, errs, bad };
 }
 
@@ -147,11 +152,11 @@ async function hold(page, keys, ms, step = 90) {
   for (const k of list) await page.keyboard.down(k);
   const t0 = Date.now();
   for (let t = 0; t < ms; t += step) {
-    await page.waitForTimeout(step);
+    await pencere(page, step);
     samples.push({ ...(await read(page)), t: Date.now() - t0 });
   }
   for (const k of list) await page.keyboard.up(k);
-  await page.waitForTimeout(250);
+  await pencere(page, 250);
   samples.push({ ...(await read(page)), t: Date.now() - t0 });
   return samples;
 }
@@ -184,13 +189,13 @@ async function holdUntil(page, keys, done, maxMs = 12000, step = 90) {
   for (const k of list) await page.keyboard.down(k);
   const t0 = Date.now();
   while (Date.now() - t0 < maxMs) {
-    await page.waitForTimeout(step);
+    await pencere(page, step);
     const s = { ...(await read(page)), t: Date.now() - t0 };
     samples.push(s);
     if (done(s)) break;
   }
   for (const k of list) await page.keyboard.up(k);
-  await page.waitForTimeout(250);
+  await pencere(page, 250);
   samples.push({ ...(await read(page)), t: Date.now() - t0 });
   return samples;
 }
@@ -198,13 +203,13 @@ async function holdUntil(page, keys, done, maxMs = 12000, step = 90) {
 /** Belirli bir açıya yerleşene kadar yürü (testler arası temiz başlangıç). */
 async function settle(page, keys, ms = 3000) {
   await hold(page, keys, ms);
-  await page.waitForTimeout(300);
+  await pencere(page, 300);
 }
 
 /** 180°'e (künyeye) yerleş — kare hızından bağımsız. */
 async function settleBack(page) {
   await holdUntil(page, "ArrowUp", (s) => dd(s.cam.ang, PI) < 8);
-  await page.waitForTimeout(300);
+  await pencere(page, 300);
 }
 
 if (runs("scene")) {
@@ -306,7 +311,7 @@ if (runs("scene")) {
 
   /* --- girdi bitince kamera yerinde kalır (spec 3.1) --- */
   const held = (await read(page)).cam.ang;
-  await page.waitForTimeout(1200);
+  await pencere(page, 1200);
   const later = (await read(page)).cam.ang;
   ok(dd(held, later) < 0.5,
     "girdi bitince kamera yerinde kalır, eski yönüne dönmez",
@@ -397,7 +402,7 @@ if (runs("scene")) {
     "izlerden en az biri kadrajda (kamera karakterin önüne bakıyor — çoğu arkada kalır)",
     `en çok ${peakOnScreen} iz ekranda`);
 
-  await page.waitForTimeout(4200); // 0.85 opaklık, saniyede 0.28 → ~3 sn
+  await pencere(page, 4200); // 0.85 opaklık, saniyede 0.28 → ~3 sn
   const faded = await read(page);
   ok(faded.footprints?.visible === 0,
     "durunca izler tamamen sönüyor (havuz yeniden kullanılabilir)",
@@ -413,7 +418,7 @@ if (runs("scene")) {
   // Yarım periyodu tarayıp salınım genişliğine bakıyoruz.
   const ys = [];
   for (let i = 0; i < 8; i++) {
-    await page.waitForTimeout(200);
+    await pencere(page, 200);
     ys.push((await read(page)).npc?.y ?? 0);
   }
   const swing = Math.max(...ys) - Math.min(...ys);
@@ -439,7 +444,7 @@ if (runs("scene")) {
   const stopDetail = [];
   for (const [id, [x, z]] of Object.entries(STOPS)) {
     await tp(x, z);
-    await page.waitForTimeout(400);
+    await pencere(page, 400);
     const near = (await read(page)).nearFrame;
     const shown = await promptId();
     if (near !== id || shown !== id) stopsOk = false;
@@ -451,7 +456,7 @@ if (runs("scene")) {
      context'i oraya ULAŞIYOR mu? Ulaşmasaydı `MISSING_MESSAGE` konsola düşer ve ekranda
      anahtarın kendisi ("frames.menu") görünürdü. Metni doğrudan denetliyoruz. */
   await tp(...STOPS.menu);
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   const promptText = await page.locator("[data-testid=frame-prompt]").innerText();
   ok(/SİPARİŞ VER/i.test(promptText) && !/frames\./.test(promptText),
     "prompt metni i18n'den geliyor (Html portalına next-intl context'i ulaşıyor)",
@@ -466,9 +471,9 @@ if (runs("scene")) {
     const side = Math.sign(sx);
     await tp(side * 3, sz);
     await page.keyboard.down(side < 0 ? "ArrowLeft" : "ArrowRight");
-    await page.waitForTimeout(2000);
+    await pencere(page, 2000);
     await page.keyboard.up(side < 0 ? "ArrowLeft" : "ArrowRight");
-    await page.waitForTimeout(800);
+    await pencere(page, 800);
     const gap = await page.evaluate((fid) => {
       const art = window.__ZONE_ART_RECT__(fid);
       const el = document.querySelector("[data-testid=frame-prompt]");
@@ -493,7 +498,7 @@ if (runs("scene")) {
     // Duvara doğru taşanları salon içine çekmeye gerek yok: x sınırı −6.2, menu halkası
     // −5.6 merkezli; 2.3 yarıçapın duvar tarafı kırpılır, kırpılan nokta da halkanın üstüdür.
     await tp(mx + Math.cos(a) * 2.3, mz + Math.sin(a) * 2.3);
-    await page.waitForTimeout(220);
+    await pencere(page, 220);
     onRing.push((await read(page)).nearFrame);
   }
   ok(onRing.every((v) => v === "menu"),
@@ -501,7 +506,7 @@ if (runs("scene")) {
     onRing.join(", "));
 
   await tp(mx, mz + 2.8);
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   const offRing = await read(page);
   ok(offRing.nearFrame === null && (await promptId()) === null,
     "halkanın dışında (2.8) prompt kapalı",
@@ -509,16 +514,16 @@ if (runs("scene")) {
 
   /* E ile gir, Esc ile çık (spec 7.2) — POV görseli 5.5.6'da, durum makinesi şimdi çalışıyor */
   await tp(mx, mz);
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   await page.keyboard.press("e");
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   const inPov = await read(page);
   ok(inPov.zoneState === "pov", "E tuşu tabloya giriyor", `durum ${inPov.zoneState}`);
   ok((await promptId()) === null, "POV'da prompt gizleniyor");
 
   const povAng = inPov.cam.ang;
   await page.keyboard.down("ArrowRight");
-  await page.waitForTimeout(600);
+  await pencere(page, 600);
   await page.keyboard.up("ArrowRight");
   const stillPov = await read(page);
   ok(dd(povAng, stillPov.cam.ang) < 0.5,
@@ -526,7 +531,7 @@ if (runs("scene")) {
     `${deg(povAng).toFixed(0)}° → ${deg(stillPov.cam.ang).toFixed(0)}°`);
 
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   const back = await read(page);
   ok(back.zoneState === "zone", "Esc POV'dan çıkıyor", `durum ${back.zoneState}`);
   ok(dd(povAng, back.cam.ang) < 0.5,
@@ -546,14 +551,14 @@ if (runs("scene")) {
   let focusOk = true;
   for (const [id, [x, z]] of Object.entries(STOPS)) {
     await tp(x, z);
-    await page.waitForTimeout(350);
+    await pencere(page, 350);
     await page.locator("[data-testid=frame-enter]").focus();
     await page.locator("[data-testid=frame-enter]").click();
-    await page.waitForTimeout(500);
+    await pencere(page, 500);
     const inBoard = await focused();
     const boardId = await page.locator("[data-testid=frame-board]").getAttribute("data-frame");
     await page.locator("[data-testid=frame-board-back]").click();
-    await page.waitForTimeout(600);
+    await pencere(page, 600);
     const backOn = await focused();
     const okOne = inBoard === "div:frame-board" && boardId === id && backOn === "button:frame-enter";
     if (!okOne) focusOk = false;
@@ -568,10 +573,10 @@ if (runs("scene")) {
      kaydırıyor ve ürünün davranışını ölçmek yerine sürücünün davranışını ölçmüş oluyorduk
      (koşular arası oynak sonuç). Gerçek kullanıcı tıklaması sayfayı kaydırmaz. */
   await tp(...STOPS.menu);
-  await page.waitForTimeout(350);
+  await pencere(page, 350);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.keyboard.press("e");
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   const geom = await page.evaluate(() => {
     const r = document.querySelector("[data-testid=frame-board]").getBoundingClientRect();
     return { scrollY: window.scrollY, top: r.top, bottom: r.bottom, vh: window.innerHeight };
@@ -580,16 +585,16 @@ if (runs("scene")) {
     "pano açılınca sayfa kaymıyor ve kart tamamen kadrajda",
     `scrollY ${geom.scrollY} · üst ${geom.top.toFixed(0)} · alt ${geom.bottom.toFixed(0)} / ${geom.vh}`);
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
 
   /* Geçiş ORTASINDA Esc: yarım kalan lerp'ten temiz çıkış */
   await tp(...STOPS.menu);
-  await page.waitForTimeout(350);
+  await pencere(page, 350);
   await page.keyboard.press("e");
-  await page.waitForTimeout(180); // lerp daha bitmedi
+  await pencere(page, 180); // lerp daha bitmedi
   const mid = await read(page);
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   const afterMid = await read(page);
   ok(afterMid.zoneState === "zone", "geçişin ortasında Esc temiz çıkıyor", `durum ${afterMid.zoneState}`);
   ok(dd(mid.cam.ang, afterMid.cam.ang) < 0.5,
@@ -600,11 +605,11 @@ if (runs("scene")) {
   const angBefore = (await read(page)).cam.ang;
   for (let i = 0; i < 4; i++) {
     await page.keyboard.press("e");
-    await page.waitForTimeout(90);
+    await pencere(page, 90);
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(90);
+    await pencere(page, 90);
   }
-  await page.waitForTimeout(800);
+  await pencere(page, 800);
   const afterSpam = await read(page);
   ok(afterSpam.zoneState === "zone" && afterSpam.nearFrame === "menu",
     "E–Esc dört kez hızlı: durum makinesi kilitlenmiyor",
@@ -617,7 +622,7 @@ if (runs("scene")) {
 
   /* POV'da kamera gerçekten hedefe süzülüyor mu (spec 6.1) */
   await page.keyboard.press("e");
-  await page.waitForTimeout(2500);
+  await pencere(page, 2500);
   const settled = await read(page);
   const menuFrame = { side: -1, z: -4 };
   const wantX = menuFrame.side * (7.2 - 0.12) - menuFrame.side * 3.25;
@@ -625,7 +630,7 @@ if (runs("scene")) {
     "POV kamerası hedefe yerleşiyor (spec 6.1)",
     `kamera ${settled.cam.x},${settled.cam.z} · hedef ${wantX.toFixed(2)},${menuFrame.z}`);
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(600);
+  await pencere(page, 600);
 
   /* =========================== 5.5.7: Joystick =========================== */
 
@@ -661,7 +666,7 @@ if (runs("scene")) {
     await page.mouse.move(pad.cx, pad.cy);
     await page.mouse.down();
     await page.mouse.move(pad.cx + pad.r * 4, pad.cy + pad.r * 4, { steps: 6 });
-    await page.waitForTimeout(220);
+    await pencere(page, 220);
     const outside = await read(page);
     const knobOut = await knobXY();
     ok(outside.joy.x > 0.6 && outside.joy.y > 0.6,
@@ -672,7 +677,7 @@ if (runs("scene")) {
       `uzaklık ${Math.hypot(knobOut.x, knobOut.y).toFixed(1)}px · sınır ${(pad.r - 18).toFixed(0)}`);
 
     await page.mouse.up();            // düğme PEDİN DIŞINDA bırakıldı
-    await page.waitForTimeout(350);
+    await pencere(page, 350);
     const released = await read(page);
     const knobHome = await knobXY();
     ok(released.joy.x === 0 && released.joy.y === 0 && released.input.len === 0,
@@ -694,13 +699,13 @@ if (runs("scene")) {
       await page.mouse.move(pad.cx, pad.cy);
       await page.mouse.down();
       await page.mouse.move(pad.cx + ux * pad.r * 2, pad.cy + uy * pad.r * 2, { steps: 4 });
-      await page.waitForTimeout(220);
+      await pencere(page, 220);
       const st = await read(page);
       // `want` = atan2(ix, iz) — klavyenin kullandığı formülün aynısı
       const got = (Math.atan2(st.input.ix, st.input.iz) * 180) / Math.PI;
       if (Math.abs(((got - wantDeg + 540) % 360) - 180) > 8) bad.push(`${label}: ${got.toFixed(0)}° (bekl. ${wantDeg}°)`);
       await page.mouse.up();
-      await page.waitForTimeout(150);
+      await pencere(page, 150);
     }
     ok(bad.length === 0,
       "sekiz yönün sekizi de klavye ile aynı yön vektörünü üretiyor (dünya-göreli, spec 7.4)",
@@ -717,12 +722,12 @@ if (runs("scene")) {
     await page.mouse.move(pad.cx, pad.cy + pad.r * 2, { steps: 4 });
     let turned = null;
     for (let i = 0; i < 120; i++) {
-      await page.waitForTimeout(90);
+      await pencere(page, 90);
       const st = await read(page);
       if (dd(st.cam.ang, 0) < 12) { turned = st; break; }
     }
     await page.mouse.up();
-    await page.waitForTimeout(250);
+    await pencere(page, 250);
     ok(turned !== null, "joystick aşağı: kamera 180° dönüyor",
       turned ? `${deg(norm(turned.cam.ang)).toFixed(0)}°` : "dönmedi");
     const simMs = turned ? turned.simTime * 1000 : null;
@@ -733,13 +738,13 @@ if (runs("scene")) {
 
   /* POV'da gizlenir */
   await tp(...STOPS.menu);
-  await page.waitForTimeout(350);
+  await pencere(page, 350);
   await page.keyboard.press("e");
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   ok((await page.locator("[data-testid=zone-joystick]").count()) === 0,
     "POV'da / pano açıkken joystick gizleniyor");
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   ok((await page.locator("[data-testid=zone-joystick]").count()) === 1,
     "POV'dan çıkınca joystick geri geliyor");
 
@@ -748,9 +753,9 @@ if (runs("scene")) {
   await page.evaluate(() => { try { localStorage.removeItem("manch-cart"); } catch {} });
   await page.evaluate(() => window.__CART__?.getState().clear());
   await tp(...STOPS.menu);
-  await page.waitForTimeout(350);
+  await pencere(page, 350);
   await page.keyboard.press("e");
-  await page.waitForTimeout(900);
+  await pencere(page, 900);
 
   ok((await page.locator("[data-testid=order-row]").count()) === 15,
     "sipariş tahtası 15 satır (7 burger · 4 yanında · 4 içecek/tatlı)",
@@ -779,7 +784,7 @@ if (runs("scene")) {
     const before = await page.evaluate(() => JSON.stringify(window.__CART__.getState().lines));
     const btn = page.locator(`[data-testid=order-row][data-slug="${priceless[0]}"] [data-testid=qty-plus]`);
     await btn.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(400);
+    await pencere(page, 400);
     const after = await page.evaluate(() => JSON.stringify(window.__CART__.getState().lines));
     ok(before === after,
       "fiyatsız satırın + düğmesi sepeti DEĞİŞTİRMİYOR",
@@ -802,7 +807,7 @@ if (runs("scene")) {
     });
     const row = page.locator("[data-testid=order-row]").nth(9);
     await row.locator("[data-testid=qty-plus]").click();
-    await page.waitForTimeout(450);
+    await pencere(page, 450);
     const after = await page.evaluate(() => document.querySelector("[data-testid=frame-board]").scrollTop);
     ok(before > 20 && Math.abs(after - before) < 6,
       "adet değişince liste başa sarmıyor (`scrollTop` korunuyor)",
@@ -816,7 +821,7 @@ if (runs("scene")) {
       "Zone'dan eklenen ürün site sepetine yazıyor (tek `useCartStore`)",
       JSON.stringify(inCart));
     await page.locator("[data-testid=order-row]").nth(9).locator("[data-testid=qty-plus]").click();
-    await page.waitForTimeout(350);
+    await pencere(page, 350);
     const two = await page.evaluate(() => window.__CART__?.getState().lines ?? []);
     ok(two[0]?.qty === 2, "+ adedi arttırıyor", JSON.stringify(two));
     ok((await page.locator("[data-testid=order-submit]").isDisabled()) === false,
@@ -834,9 +839,9 @@ if (runs("scene")) {
 
   /* POV'dan çık → SİTE sepetini aç: aynı ürünler görünmeli (uçtan uca, tek sepet) */
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(600);
+  await pencere(page, 600);
   await page.locator("[data-testid=cart-button]").click();
-  await page.waitForTimeout(800);
+  await pencere(page, 800);
   const drawerText = (await page.locator("[data-testid=cart-drawer]").innerText()).replace(/\s+/g, " ");
   const cartCount = await page.locator("[data-testid=cart-count]").innerText().catch(() => "-");
   const cartTotal = await page.locator("[data-testid=cart-total]").innerText().catch(() => "");
@@ -845,7 +850,7 @@ if (runs("scene")) {
     "Zone'da eklenen ürün SİTE sepeti çekmecesinde görünüyor",
     `rozet ${cartCount} · ${cartTotal.replace(/\s+/g, " ")}`);
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
 
   /* --- sprite kaynağı raporlanıyor (çizimler gelince 'png' olacak) --- */
   const src = (await read(page)).spriteSource;
@@ -892,13 +897,14 @@ if (runs("gate")) {
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
   page.on("pageerror", (e) => errs.push("pageerror: " + e.message));
   await page.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2500);
+  await hazir(page);
+  await page.locator("[data-testid=zone-gate]").first().waitFor({ state: "attached", timeout: 30000 }).catch(() => {});
   await page.evaluate(() => { try { sessionStorage.removeItem("manch_char"); } catch {} });
 
   ok((await page.locator("[data-testid=zone-gate]").count()) === 1, "ana sayfada ZONE'A GİR düğmesi var");
 
   await page.locator("[data-testid=zone-gate]").click();
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   const curtain = page.locator("[data-testid=zone-curtain]");
   ok((await curtain.getAttribute("role")) === "dialog" && (await curtain.getAttribute("aria-modal")) === "true",
     "perde role=dialog + aria-modal (spec 10)");
@@ -927,7 +933,7 @@ if (runs("gate")) {
     "Tab odağı perdenin içinde tutuyor (focus trap)");
 
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(600);
+  await pencere(page, 600);
   ok((await page.locator("[data-testid=zone-curtain]").count()) === 0, "Esc perdeyi kapatıyor");
   ok((await page.evaluate(() => window.__SCROLL_LOCK__?.() ?? 0)) === 0
       && (await page.evaluate(() => document.documentElement.style.overflow)) !== "hidden",
@@ -936,17 +942,17 @@ if (runs("gate")) {
 
   // Karakter hatırlanıyor: ikinci girişte seçim atlanır (sessionStorage manch_char)
   await page.locator("[data-testid=zone-gate]").click();
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   await page.locator("[data-testid=zone-pick-miyu]").click();
   await page.waitForFunction(
     () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
     { timeout: 60000 },
   );
-  await page.waitForTimeout(800);
+  await pencere(page, 800);
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(600);
+  await pencere(page, 600);
   await page.locator("[data-testid=zone-gate]").click();
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   const second = await page.locator("[data-testid=zone-curtain]").getAttribute("data-state");
   ok(second !== "select" && (await page.locator("[data-testid=zone-select]").count()) === 0,
     "karakter hatırlanıyor — ikinci girişte seçim atlanıyor",
@@ -970,7 +976,7 @@ if (runs("gate")) {
     await portrait.waitForSelector("[data-testid=zone-gate]");
     await portrait.locator("[data-testid=zone-gate]").click();
     await portrait.waitForSelector("[data-testid=zone-select]");
-    await portrait.waitForTimeout(700);
+    await pencere(portrait, 700);
     const fit = await portrait.evaluate(() => {
       const sel = document.querySelector("[data-testid=zone-select]");
       const r = sel.getBoundingClientRect();
@@ -1003,7 +1009,7 @@ if (runs("gate")) {
       () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
       { timeout: 60000 },
     );
-    await portrait.waitForTimeout(1200);
+    await pencere(portrait, 1200);
     const inFrame = await portrait.evaluate(() => {
       const out = {};
       for (const id of ["menu", "crew"]) {
@@ -1031,7 +1037,7 @@ if (runs("gate")) {
     () => document.querySelector("[data-testid=zone-curtain]")?.dataset.state === "zone",
     { timeout: 60000 },
   );
-  await page.waitForTimeout(800);
+  await pencere(page, 800);
 
   const STORY = { crew: [5.6, -4], mascot: [-5.6, 6], visit: [5.6, 6] };
   const tpGate = (x, z) => page.evaluate(({ x, z }) => window.__ZONE_TELEPORT__(x, z), { x, z });
@@ -1040,9 +1046,9 @@ if (runs("gate")) {
   let storyOk = true;
   for (const [id, [x, z]] of Object.entries(STORY)) {
     await tpGate(x, z);
-    await page.waitForTimeout(400);
+    await pencere(page, 400);
     await page.keyboard.press("e");
-    await page.waitForTimeout(900);
+    await pencere(page, 900);
     const board = page.locator("[data-testid=story-board]");
     const shown = await board.getAttribute("data-frame").catch(() => null);
     const paras = await board.locator("p").count().catch(() => 0);
@@ -1052,7 +1058,7 @@ if (runs("gate")) {
     // Panodan Zone'a dönüş: karakter ve konum korunmalı
     const before = await read(page);
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(600);
+    await pencere(page, 600);
     const after = await read(page);
     if (Math.abs(before.char.x - after.char.x) > 0.01 || Math.abs(before.char.z - after.char.z) > 0.01) storyOk = false;
   }
@@ -1061,11 +1067,11 @@ if (runs("gate")) {
 
   /* "TAM SAYFAYA GİT" Zone'u KAPATIP gezinmeli — kilit sayaçta asılı kalmamalı (Kural 67) */
   await tpGate(...STORY.visit);
-  await page.waitForTimeout(400);
+  await pencere(page, 400);
   await page.keyboard.press("e");
-  await page.waitForTimeout(900);
+  await pencere(page, 900);
   await page.locator("[data-testid=story-fullpage]").click();
-  await page.waitForTimeout(3000);
+  await pencere(page, 3000);
   const url = page.url();
   ok(url.includes("/contact"), "tam sayfa linki hedefe gidiyor", url.replace(BASE, ""));
   ok((await page.locator("[data-testid=zone-curtain]").count()) === 0, "gezinirken Zone kapanıyor");

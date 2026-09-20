@@ -31,6 +31,9 @@ for (const path of PAGES) {
   rows[path] = { files: uniq.length, firstLoadRawKB: +(raw / 1024).toFixed(1), firstLoadGzKB: +(gz / 1024).toFixed(1), top: files.slice(0, 5) };
 }
 
+/* Limit, LCP'nin ERKEN UYARI VEKİLİDİR — amacın kendisi değil (Kural 46).
+   Bayt hedefi tek başına ölçüt olsaydı 218 kB'lik bir sayfa "başarısız" sayılırdı;
+   oysa gerçek kapı Kural 72'nin LCP ölçümü. */
 const LIMIT = 220; // Kural 46 (revize 2026-09-19)
 /* UYARI eşiği (karar 2026-09-20): limitin %98'i. Pay 0.7 kB'ye indiğinde fark edilmesi
    için — sınıra dayandığımızı AŞMADAN ÖNCE görmek istiyoruz. Uyarı çıkış kodunu
@@ -47,6 +50,13 @@ for (const [p, r] of Object.entries(rows)) {
 console.log("\n/tr en büyük 5 chunk (gz):");
 for (const f of rows["/tr"]?.top ?? []) console.log(`  ${String(f.gzKB).padStart(6)} kB  ${f.file}`);
 writeFileSync(OUT, JSON.stringify({ date: new Date().toISOString(), base: BASE, limitGzKB: LIMIT, warnGzKB: WARN, rows }, null, 2));
-if (sinirda) console.log(`\n⚠ ${sinirda} sayfa limitin %98'inde — sıradaki client kodu limiti aşabilir (Kural 46).`);
+if (sinirda)
+  console.log(
+    `\n⚠ ${sinirda} sayfa limitin %98'inde. Bu "aşmak üzeresin" demek DEĞİL —\n` +
+      `  sıradaki özellik ağırlığını HAK ETMELİ demek.\n` +
+      `  220'yi gerçekten aşan bir değişiklik geldiğinde kapı otomatik kırmızı sayılmaz:\n` +
+      `  Kural 72 koşullarında LCP yeniden ölçülür, hedefin altındaysa limit KANITLA revize\n` +
+      `  edilir. Limit, rahatsız ettiği için yükseltilmez.`,
+  );
 if (asan) console.error(`\n✗ ${asan} sayfa ${LIMIT} kB gz limitini AŞIYOR (Kural 46).`);
 console.log(`\n→ ${OUT}`);

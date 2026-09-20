@@ -13,6 +13,7 @@
 // Kullanım: PROD=http://localhost:3101 CHROME=<yol> node scripts/zone-walkthrough.mjs
 //           REDUCED=1 ile aynı zincir reduced-motion'da koşar.
 import { mkdirSync } from "node:fs";
+import { pencere } from "./_bekle.mjs";
 import { chromium } from "playwright-core";
 
 const PROD = process.env.PROD ?? "http://localhost:3101";
@@ -89,13 +90,13 @@ for (const bp of BREAKPOINTS) {
   await page.goto(`${PROD}/tr?nopreload=1`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("[data-testid=zone-gate]");
   await page.locator("#zone").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(REDUCED ? 600 : 1400);
+  await pencere(page, REDUCED ? 600 : 1400);
   await shot("01", "anasayfa-zone");
 
   /* --- 2 · karakter seçimi --- */
   await page.locator("[data-testid=zone-gate]").click();
   await page.waitForSelector("[data-testid=zone-select]");
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   await shot("02", "secim");
 
   /* --- 3 · yükleyici (geçici: seçimden hemen sonra yakalanır) --- */
@@ -107,7 +108,7 @@ for (const bp of BREAKPOINTS) {
 
   /* --- 4 · sahne --- */
   await page.waitForSelector("[data-testid=zone-curtain][data-state=zone]", { timeout: 60000 });
-  await page.waitForTimeout(1200);
+  await pencere(page, 1200);
   await shot("04", "sahne");
 
   /* --- 5 · yürüyüş (ayak izi + kamera dönüşü) --- */
@@ -118,7 +119,7 @@ for (const bp of BREAKPOINTS) {
      davranışı sanılmamalı. Ayak izleri ~3 sn yaşadığı için kare yine "yürürken" görünür. */
   await page.keyboard.down("w");
   await page.keyboard.down("a");
-  await page.waitForTimeout(1100);
+  await pencere(page, 1100);
   await page.keyboard.up("w");
   await page.keyboard.up("a");
   await shot("05", "yuruyus");
@@ -135,7 +136,7 @@ for (const bp of BREAKPOINTS) {
        ② "halkadan çık" döngüsü 25 adım yürüyordu; karakter salonun dibine dayanıp
           hiçbir halkaya dönemiyordu (1440'ta tam bu oldu). Çıkış 4 adımla sınırlı. */
   const tap = async (key, ms) => {
-    await page.keyboard.down(key); await page.waitForTimeout(ms); await page.keyboard.up(key);
+    await page.keyboard.down(key); await pencere(page, ms); await page.keyboard.up(key);
   };
   const promptOn = async () => (await page.locator("[data-testid=frame-prompt]").count()) > 0;
 
@@ -171,7 +172,7 @@ for (const bp of BREAKPOINTS) {
       page.waitForSelector("[data-testid=order-board]", { timeout: 15000 }).then(() => "order"),
       page.waitForSelector("[data-testid=story-board]", { timeout: 15000 }).then(() => "story"),
     ]).catch(() => null);
-    if (which) await page.waitForTimeout(1600);
+    if (which) await pencere(page, 1600);
     return which;
   };
 
@@ -186,7 +187,7 @@ for (const bp of BREAKPOINTS) {
     if (w1 === "story") { gotStory = true; await shot("09", "storyboard"); }
     else if (w1 === "order") { gotOrder = true; await shot("07", "orderboard"); }
     else problems.push(`[${bp.name}] 1. halkada pano açılmadı`);
-    if (w1) { await page.keyboard.press("Escape"); await page.waitForTimeout(900); }
+    if (w1) { await page.keyboard.press("Escape"); await pencere(page, 900); }
   } else problems.push(`[${bp.name}] 1. halkaya ulaşılamadı`);
 
   // ② aynı duvarda ileri: menu (sipariş tahtası)
@@ -196,9 +197,9 @@ for (const bp of BREAKPOINTS) {
       gotOrder = true;
       await shot("07", "orderboard");
       const plus = page.locator("[data-testid=qty-plus]:not([aria-disabled=true])").first();
-      if (await plus.count()) { await plus.click(); await page.waitForTimeout(600); await shot("08", "orderboard-adet"); }
+      if (await plus.count()) { await plus.click(); await pencere(page, 600); await shot("08", "orderboard-adet"); }
     } else if (w2 === "story" && !gotStory) { gotStory = true; await shot("09", "storyboard"); }
-    if (w2) { await page.keyboard.press("Escape"); await page.waitForTimeout(900); }
+    if (w2) { await page.keyboard.press("Escape"); await pencere(page, 900); }
   }
 
   // ③ karşı duvara geç: crew (hikâye) → TAM SAYFAYA GİT
@@ -209,12 +210,12 @@ for (const bp of BREAKPOINTS) {
       if (!gotStory) { gotStory = true; await shot("09", "storyboard"); }
       await page.locator("[data-testid=story-fullpage]").click();
       await page.waitForURL(/\/(about|menu|contact)/, { timeout: 20000 }).catch(() => {});
-      await page.waitForTimeout(REDUCED ? 900 : 2200);
+      await pencere(page, REDUCED ? 900 : 2200);
       await shot("10", "tam-sayfa");
       gotFullpage = true;
     } else if (w3 === "order" && !gotOrder) {
       gotOrder = true; await shot("07", "orderboard");
-      await page.keyboard.press("Escape"); await page.waitForTimeout(900);
+      await page.keyboard.press("Escape"); await pencere(page, 900);
     }
   }
   if (!gotOrder) problems.push(`[${bp.name}] sipariş tahtası yakalanamadı`);
@@ -227,13 +228,13 @@ for (const bp of BREAKPOINTS) {
   await page.locator("[data-testid=zone-gate]").click();
   const reSelect = await page.locator("[data-testid=zone-select]").count();
   await page.waitForSelector("[data-testid=zone-curtain][data-state=zone]", { timeout: 60000 });
-  await page.waitForTimeout(1200);
+  await pencere(page, 1200);
   await shot("11", "geri-donus");
   if (reSelect > 0) problems.push(`[${bp.name}] geri dönüşte karakter seçimi YİNE soruldu`);
 
   /* --- 12 · çıkış: sayfa kaydırılabilir kalmalı (Kural 67) --- */
   await page.locator("[data-testid=zone-exit]").click();
-  await page.waitForTimeout(900);
+  await pencere(page, 900);
   const locked = await page.evaluate(() => {
     const d = window.__SCROLL_LOCK__ ? window.__SCROLL_LOCK__() : null;
     return { depth: d, overflow: getComputedStyle(document.documentElement).overflow };

@@ -26,6 +26,7 @@
 //   POV : BASE=http://localhost:3000 CHROME=<yol> ONLY=pov  node scripts/zone-perf-check.mjs
 //   FPS : PROD=http://localhost:3101 CHROME=<yol> ONLY=fps  node scripts/zone-perf-check.mjs
 import { chromium } from "playwright-core";
+import { hazir, kosul, pencere } from "./_bekle.mjs";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const PROD = process.env.PROD ?? "http://localhost:3101";
@@ -50,18 +51,18 @@ if (runs("pov")) {
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
   await page.goto(`${BASE}/tr/lab/zone`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => window.__ZONE_STATS__?.().canvases === 1);
-  await page.waitForTimeout(1200);
+  await hazir(page); // Kural 75: sabit 1200 ms yerine koşul
 
   const stats = () => page.evaluate(() => window.__ZONE_STATS__());
   /** Karakterin önündeki halkaya ışınlan: ölçülen şey donma, yürüyüş değil. */
   await page.evaluate(() => window.__ZONE_TELEPORT__(-5.6, -4));
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
 
   /* --- (a) ÖNCE: POV DIŞINDA bu değerler gerçekten DEĞİŞİYOR mu?
          Bu adım olmadan "POV'da donuyor" bir şey kanıtlamaz — hiç güncellenmeyen
          bozuk bir alan da donmuş görünür. */
   const zoneA = await stats();
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   const zoneB = await stats();
   const mA = zoneA.markers.menu, mB = zoneB.markers.menu;
   ok(mA && mB, "halka ölçülebiliyor (markers alanı dolu)");
@@ -72,7 +73,7 @@ if (runs("pov")) {
 
   // Yürüyünce ayak izi basılıyor mu (ölçüm canlı)
   await page.keyboard.down("w");
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   await page.keyboard.up("w");
   const walked = await stats();
   ok(walked.footprints.visible > 0, "POV DIŞINDA ayak izi basılıyor (ölçüm canlı)",
@@ -80,18 +81,19 @@ if (runs("pov")) {
 
   // Halkanın üstüne geri dön
   await page.evaluate(() => window.__ZONE_TELEPORT__(-5.6, -4));
-  await page.waitForTimeout(500);
+  await pencere(page, 500);
   ok((await stats()).nearFrame === "menu", "halkanın üstünde (prompt açık)");
 
   /* --- (b) POV'a gir. Tuş BASILI girilir: çıkışta karakterin kendiliğinden yürümemesi
          de aynı anda sınanır (`releaseAllInput` store aboneliği). */
   await page.keyboard.down("w");
   await page.keyboard.press("e");
-  await page.waitForTimeout(1400);       // POV lerp'inin oturması
+  // Koşul: pano DOM'a girdi (Kural 75). Lerp süresi kare hızına bağlı, sabit ms değil.
+  await kosul(page, () => !!document.querySelector("[data-testid=frame-board]"), null, 20000);
   ok((await stats()).zoneState === "pov", "POV açıldı");
 
   const povA = await stats();
-  await page.waitForTimeout(900);        // POV'DA: tuş hâlâ basılı
+  await pencere(page, 900);        // POV'DA: tuş hâlâ basılı
   const povB = await stats();
   await page.keyboard.up("w");
 
@@ -134,9 +136,9 @@ if (runs("pov")) {
 
   /* --- (c) Çıkışta her şey geri geliyor mu? */
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(900);
+  await pencere(page, 900);
   const outA = await stats();
-  await page.waitForTimeout(700);
+  await pencere(page, 700);
   const outB = await stats();
   ok(outA.zoneState === "zone", "Esc ile Zone'a dönüldü");
   ok(outA.markers.menu.ringRot !== outB.markers.menu.ringRot, "çıkışta halka yeniden dönüyor");
@@ -261,41 +263,41 @@ if (runs("fps")) {
       const d = gl?.getExtension("WEBGL_debug_renderer_info");
       return d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : "?";
     });
-    await page.waitForTimeout(900);          // sahne otursun
+    await kosul(page, () => (window.__ZONE_STATS__?.().meshes?.length ?? 0) > 0, null, 20000); // sahne kuruldu
 
     // --- (1) boşta
     await page.evaluate(START);
-    await page.waitForTimeout(2500);
+    await pencere(page, 2500);
     const idle = await page.evaluate(STOP);
 
     // --- (2) yürürken (kamera dönüyor, ayak izi basılıyor, sprite değişiyor)
     await page.keyboard.down("w");
     await page.keyboard.down("a");
     await page.evaluate(START);
-    await page.waitForTimeout(2500);
+    await pencere(page, 2500);
     const walk = await page.evaluate(STOP);
     await page.keyboard.up("w");
     await page.keyboard.up("a");
 
     // --- (3) POV + sipariş tahtası (15 satır DOM sahnenin üstünde)
-    await page.waitForTimeout(400);
+    await pencere(page, 400);
     // menü halkasına git: x −5.6, z −4
     for (let i = 0; i < 60; i++) {
       const near = await page.locator("[data-testid=frame-prompt]").count();
       if (near) break;
-      await page.keyboard.down("a"); await page.waitForTimeout(120); await page.keyboard.up("a");
-      await page.keyboard.down("w"); await page.waitForTimeout(220); await page.keyboard.up("w");
+      await page.keyboard.down("a"); await pencere(page, 120); await page.keyboard.up("a");
+      await page.keyboard.down("w"); await pencere(page, 220); await page.keyboard.up("w");
     }
     let pov = null;
     if (await page.locator("[data-testid=frame-prompt]").count()) {
       await page.keyboard.press("e");
       await page.waitForSelector("[data-testid=order-board]", { timeout: 20000 }).catch(() => {});
-      await page.waitForTimeout(1500);
+      await pencere(page, 1500);
       await page.evaluate(START);
-      await page.waitForTimeout(2500);
+      await pencere(page, 2500);
       pov = await page.evaluate(STOP);
       await page.keyboard.press("Escape");
-      await page.waitForTimeout(500);
+      await pencere(page, 500);
     }
 
     const line = (l, m) => m

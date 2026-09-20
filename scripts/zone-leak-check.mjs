@@ -4,6 +4,7 @@
 //
 // Kullanım: pnpm dev -p 3113 çalışırken → CHROME=<yol> node scripts/zone-leak-check.mjs
 import { chromium } from "playwright-core";
+import { hazir, kosul, pencere } from "./_bekle.mjs";
 
 const BASE = process.env.BASE ?? "http://localhost:3113";
 const ROUNDS = Number(process.env.ROUNDS ?? 6);
@@ -20,25 +21,27 @@ const readClosed = () => p.evaluate(() => (window.__ZONE_TEXTURES__ ? window.__Z
 
 await p.goto(`${BASE}/tr/lab/zone`, { waitUntil: "domcontentloaded" });
 await p.waitForFunction(() => document.querySelector("canvas") !== null, { timeout: 20000 });
-await p.waitForTimeout(2000);
+await hazir(p); // Kural 75: sabit 2000 ms yerine koşul
 
 const rows = [];
 for (let i = 1; i <= ROUNDS; i++) {
   // KAPAT — sahne unmount olur
   await p.locator("[data-testid=zone-toggle]").click();
   await p.waitForFunction(() => document.querySelector("canvas") === null, { timeout: 10000 });
-  await p.waitForTimeout(500);
+  // disposer bitene kadar: canlı doku sayısı sıfırlanmış olmalı
+  await kosul(p, () => (window.__ZONE_TEXTURES__?.().alive ?? -1) === 0, null, 10000);
   const closed = await readClosed();
   // AÇ — sahne yeniden mount olur
   await p.locator("[data-testid=zone-toggle]").click();
   await p.waitForFunction(() => document.querySelector("canvas") !== null, { timeout: 20000 });
-  await p.waitForTimeout(1200);
+  await kosul(p, () => (window.__ZONE_STATS__?.().meshes?.length ?? 0) > 0, null, 20000);
   // Kısa bir yürüyüş: ayak izi dokusu ilk adımda üretiliyor. Yürümeden ölçersek o doku hiç
   // oluşmaz ve sızsa bile kontrol onu göremez (kapsam boşluğu).
+  // ÖLÇÜM PENCERESİ: tuşu N ms basılı tutmak girdi süresidir, koşul beklemek değil.
   await p.keyboard.down("ArrowDown");
-  await p.waitForTimeout(700);
+  await pencere(p, 700);
   await p.keyboard.up("ArrowDown");
-  await p.waitForTimeout(400);
+  await pencere(p, 400);
 
   const st = await read();
   rows.push({ round: i, closedAlive: closed?.alive ?? -1, closedLabels: closed?.byLabel, ...(st ?? {}) });
