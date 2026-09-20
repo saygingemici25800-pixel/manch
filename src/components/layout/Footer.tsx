@@ -30,18 +30,30 @@ export default async function Footer() {
             </TransitionLink>
           ))}
         </nav>
-        <div className="flex flex-col items-end max-md:items-start gap-[1vw] max-md:gap-[3vw] [--juggle-scale:0.7]">
-          <Juggle items={INGREDIENTS.slice(0, 4)} className="text-mustard [&_span]:h-[3.5vw] [&_span]:w-[3.5vw] max-md:[&_span]:h-[10vw] max-md:[&_span]:w-[10vw]" />
+        <div className="flex flex-col items-end max-md:items-start gap-[1vw] max-md:gap-[3vw]">
           <p className="font-pixel text-[0.75vw] max-md:text-[2.8vw] uppercase tracking-widest text-cream">{t("tape")}</p>
         </div>
       </div>
 
-      {/* dev wordmark: gerçek logo, dekoratif */}
-      <Logo className="mt-[2vw] max-md:mt-[8vw] block w-[95vw] max-md:w-[140vw] h-auto text-berry select-none" />
+      {/* Zıplama alanı (R18): wordmark'ın ÜSTÜNDEN sayfanın en alt zeminine kadar.
+          YIĞIN SIRASI — dekoratif wordmark z-0, ikonlar z-10, GERÇEK METİN z-20.
+          İkonlar ilk denemede wordmark'ın ARKASINA konmuştu (z-0); ölçümlerin hepsi
+          yeşildi ama ekranda **görünmüyorlardı**: wordmark bandın tamamını kaplayan
+          opak bir SVG, ikonlar yalnız harf aralarında bir an göründü (Kural 59).
+          İkonlar artık wordmark'ın önünde ama telif satırı ile menü linklerinin
+          ARKASINDA; ayrıca katmanın alt sınırı telif satırının üstünde bitiyor
+          (`bottom-[3vw] max-md:bottom-[15vw]`) → ikon hiç metne değmiyor.
+          `pointer-events-none` — tıklamayı yakalamıyor. */}
+      <div className="relative [--juggle-scale:1]">
+        <Juggle field items={INGREDIENTS.slice(0, 4)} className="z-10 text-mustard [&_span]:h-[3.5vw] [&_span]:w-[3.5vw] max-md:[&_span]:h-[8vw] max-md:[&_span]:w-[8vw]" />
 
-      <div className="mt-[1.5vw] max-md:mt-[5vw] flex flex-wrap items-center justify-between gap-[1vw] max-md:gap-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw] text-cream">
-        <span>{t("rights")}</span>
-        <span>{t("credit")}</span>
+        {/* dev wordmark: gerçek logo, dekoratif */}
+        <Logo className="relative z-0 mt-[2vw] max-md:mt-[8vw] block w-[95vw] max-md:w-[140vw] h-auto text-berry select-none" />
+
+        <div className="relative z-20 mt-[1.5vw] max-md:mt-[5vw] flex flex-wrap items-center justify-between gap-[1vw] max-md:gap-[3vw] text40 text-[0.9vw] max-md:text-[3.2vw] text-cream">
+          <span>{t("rights")}</span>
+          <span>{t("credit")}</span>
+        </div>
       </div>
     </footer>
   );

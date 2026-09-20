@@ -1,5 +1,7 @@
 // Kural 46 — gerçek ilk yükleme JS'i: sunucu HTML'indeki <script src> dosyaları.
-// `nomodule` polyfill hariç; gz sütunu esas. Hedef: ana sayfa ≤ 200 kB gz.
+// `nomodule` polyfill hariç; gz sütunu esas. Hedef: ana sayfa ≤ 220 kB gz
+// (Kural 46, revize 2026-09-19: 200 → 220 — 200 ölçüm yapılmadan konmuş bir
+// tahmindi, kalan ağırlık çatının kendisi. Gerekçe kuralda).
 // NOT (Kural, Faz 8): sayfa argümanı `argv.slice(2)` ile alınır — `find(startsWith("/"))`
 // argv[0]'daki node yolunu yakalayıp yanlış sayfayı ölçüyordu.
 import { writeFileSync } from "node:fs";
@@ -29,8 +31,8 @@ for (const path of PAGES) {
   rows[path] = { files: uniq.length, firstLoadRawKB: +(raw / 1024).toFixed(1), firstLoadGzKB: +(gz / 1024).toFixed(1), top: files.slice(0, 5) };
 }
 
-const LIMIT = 200;
-console.log("sayfa        | dosya | raw kB | gz kB | limit 200 gz");
+const LIMIT = 220; // Kural 46 (revize 2026-09-19)
+console.log(`sayfa        | dosya | raw kB | gz kB | limit ${LIMIT} gz`);
 console.log("-------------|-------|--------|-------|-------------");
 for (const [p, r] of Object.entries(rows)) {
   console.log(`${p.padEnd(12)} | ${String(r.files).padStart(5)} | ${String(r.firstLoadRawKB).padStart(6)} | ${String(r.firstLoadGzKB).padStart(5)} | ${r.firstLoadGzKB <= LIMIT ? "✓" : "✗ AŞIYOR"}`);

@@ -1,5 +1,15 @@
-// Ana sayfa LCP — öncesi/sonrası karşılaştırma için. 3 koşu medyanı.
-// Kural 65: ölçüm build'i ayrı klasörde, port önce temizlenir.
+// LCP — **Kural 72'nin kabul kapısı**. Gerçek CDP throttling (yavaş 4G + 4× CPU),
+// 3 koşu medyanı. Lighthouse'un Lantern tahmini kapı DEĞİLDİR (bkz. lighthouse.mjs).
+//
+// Kapı üç sonuç verir:
+//   0 = medyan < 2500 ms · 1 = ÜRÜN hedefin altında · 2 = ÖLÇÜM GÜVENİLMEZ
+// Sapma (en yüksek − en düşük) > 200 ms ise sayı raporlanmaz: Kural 72 böyle bir koşuyu
+// reddeder, çünkü o noktada ölçülen şey ürün değil ortamdır (2026-09-19'da sapma 1812 ms
+// çıktı ve sonuç geçersiz sayıldı). Kötü bir sayıyı "sonuç" diye yazmak en kötü seçenek.
+//
+// Kural 71: dev sunucusu KAPALI, makine boşta. Kural 65: ölçüm build'i ayrı klasörde,
+// port önce temizlenir. Kural 72: kapı yalnız `src/` değiştiğinde açılır — kod
+// değişmediyse son geçerli ölçüm geçerlidir, yük altında tekrar ölçmek Kural 60 ihlalidir.
 // Kullanım: CHROME=<yol> BASE=http://localhost:3101 node scripts/lcp-check.mjs [/tr]
 import { chromium } from "playwright-core";
 
@@ -40,11 +50,34 @@ async function lcpOnce(url, mobile) {
 
 const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
 
+const ESIK = Number(process.env.ESIK ?? 2500);      // Kural 72 kabul ölçütü
+const SAPMA_MAX = Number(process.env.SAPMA_MAX ?? 200); // üstünde ölçüm güvenilmez
+
+const dusuk = [], oynak = [];
 for (const path of PATHS) {
   for (const [label, mobile] of [["mobil", true], ["masaüstü", false]]) {
     const runs = [];
     for (let i = 0; i < RUNS; i++) runs.push(await lcpOnce(BASE + path, mobile));
-    console.log(`${path} ${label.padEnd(9)} LCP medyan ${String(median(runs)).padStart(5)} ms  [${runs.join(", ")}]`);
+    const med = median(runs);
+    const sapma = Math.max(...runs) - Math.min(...runs);
+    // Kapı YALNIZ mobilde: Kural 43/72 hedefi preloader'sız mobile. Masaüstü bilgi.
+    const kapi = mobile;
+    let damga = "";
+    if (kapi && sapma > SAPMA_MAX) { damga = `⚠ ÖLÇÜM GÜVENİLMEZ (sapma ${sapma} ms > ${SAPMA_MAX})`; oynak.push(`${path} sapma=${sapma}`); }
+    else if (kapi && med >= ESIK) { damga = `✗ hedef altı (≥ ${ESIK})`; dusuk.push(`${path} ${med} ms`); }
+    else if (kapi) damga = "✓";
+    console.log(`${path} ${label.padEnd(9)} LCP medyan ${String(med).padStart(5)} ms  sapma ${String(sapma).padStart(4)} ms  [${runs.join(", ")}] ${damga}`);
   }
 }
 await b.close();
+
+if (oynak.length) {
+  console.error(`\n⚠ Kural 72: sapma eşiği aşıldı → sayı RAPORLANMAZ, ölçüm geçersiz: ${oynak.join(" · ")}`);
+  console.error("  Makine boşta mı? Dev sunucusu kapalı mı (Kural 71)? Artık tarayıcı süreci var mı?");
+  process.exit(2);
+}
+if (dusuk.length) {
+  console.error(`\n✗ Kural 72 kapısı: ${dusuk.join(" · ")} (eşik ${ESIK} ms)`);
+  process.exit(1);
+}
+console.log(`\n✓ Kural 72 kapısı: mobil LCP medyanı < ${ESIK} ms, sapma ≤ ${SAPMA_MAX} ms`);

@@ -279,6 +279,47 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   });
   t("Footer · render + linkler", footer.found && footer.links >= 4, JSON.stringify(footer));
 
+  /* R18 zıplama alanı (2026-09-20). İkonlar ilk denemede wordmark'ın ARKASINA kondu:
+     DOM sağlam, olaylar sağlam, çakışma yok, faz farkı tam — ama ekranda görünmüyorlardı,
+     çünkü wordmark bandın tamamını kaplayan opak bir SVG. Joystick'in sepet düğmesinin
+     altında kalmasıyla aynı sınıf kusur (Kural 59) ve hiçbir davranış testine takılmaz.
+     Bu yüzden YIĞIN SIRASI doğrudan denetleniyor. */
+  await q.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await q.waitForTimeout(2600);
+  const jg1 = await q.evaluate(() => {
+    const f = document.querySelector("footer");
+    const ul = f.querySelector("ul[aria-hidden]");
+    const z = (e) => Number(getComputedStyle(e).zIndex) || 0;
+    const kesis = (a, c) => !(a.right <= c.left || a.left >= c.right || a.bottom <= c.top || a.top >= c.bottom);
+    const metin = [...f.querySelectorAll("nav a, span, p")].filter((e) => e.textContent.trim() && e.getBoundingClientRect().height > 0);
+    const li = [...(ul?.querySelectorAll("li") ?? [])].filter((e) => e.getBoundingClientRect().height > 0);
+    return {
+      var: !!ul,
+      zKatman: ul ? z(ul) : null,
+      zWordmark: z(f.querySelector("svg").parentElement === f ? f.querySelector("svg") : f.querySelector("svg")),
+      olaylar: ul ? getComputedStyle(ul).pointerEvents : null,
+      carpisma: li.some((e) => metin.some((m) => kesis(e.getBoundingClientRect(), m.getBoundingClientRect()))),
+      y: li.map((e) => Math.round(e.getBoundingClientRect().top)),
+    };
+  });
+  t("Footer · zıplama alanı wordmark'ın ÜSTÜNDE (görünür)", jg1.var && jg1.zKatman > jg1.zWordmark,
+    `katman z=${jg1.zKatman} · wordmark z=${jg1.zWordmark}`);
+  t("Footer · ikonlar tıklamayı yakalamıyor", jg1.olaylar === "none", `pointer-events=${jg1.olaylar}`);
+  t("Footer · ikonlar metinle çakışmıyor", jg1.var && !jg1.carpisma, `çakışma=${jg1.carpisma}`);
+  // İki örnek arasında GERÇEK bir aralık şart: peş peşe evaluate ~10 ms sürüyor, o
+  // sürede ikon 1-2 px hareket ediyor ve tam sayıya yuvarlanınca 0 çıkıyordu (ürün
+  // duruyor sanılmıştı — ölçüm hatası, Kural 60).
+  await q.waitForTimeout(280);
+  const jg2 = await q.evaluate(() => {
+    const li = [...document.querySelectorAll("footer ul[aria-hidden] li")].filter((e) => e.getBoundingClientRect().height > 0);
+    return li.map((e) => Math.round(e.getBoundingClientRect().top));
+  });
+  // Senkron zıplasalardı hem aynı anda aynı hizada olurlardı hem de birlikte hareket ederlerdi.
+  const yayilim = Math.max(...jg1.y) - Math.min(...jg1.y);
+  const hareket = jg1.y.map((v, i) => Math.abs(v - jg2[i]));
+  t("Footer · ikonlar farklı fazlarda (senkron değil)", yayilim > 20 && Math.max(...hareket) > 4,
+    `aynı andaki yayılım ${yayilim}px · örnekler arası hareket [${hareket.join(",")}]`);
+
   // --- R2/R3 PageTransition + dinamik title
   await q.evaluate(() => window.__UI__.getState().closeAll());
   await q.waitForTimeout(300);

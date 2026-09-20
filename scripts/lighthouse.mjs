@@ -89,14 +89,23 @@ for (const r of rows) {
 writeFileSync(OUT, JSON.stringify({ date: new Date().toISOString(), base: BASE, rows }, null, 2));
 console.log(`\n→ ${OUT}`);
 
-// Kural 43 hedefi: preloader'sız mobile
+/* KURAL 72 (2026-09-19) — LCP KAPISI ARTIK BURADA DEĞİL.
+   Lighthouse'un LCP'si Lantern **tahmin modelinden** gelir; aynı sayfalarda gerçek CDP
+   throttling'le ~2× ayrıştı (`/menu` 3900 vs 2084 · `/contact` 2968 vs 820 ms) ve fark
+   ölçülen sayfadan değil modelden geliyordu. Bu script LCP'yi ve perf skorunu **bilgi
+   olarak** basar, kapı yapmaz — kabul kapısı `scripts/lcp-check.mjs` (gerçek throttling,
+   3 koşu medyanı). Kapı olmayı sürdürenler: A11y ve SEO (onlar model değil, denetim).
+   CLS kapı olarak KALIYOR: Lantern tahmini değil, koşu sırasında gerçekten gözlenen
+   düzen kaymasıdır — Kural 72'nin gerekçesi ona uymuyor. */
 const target = rows.filter((r) => r.form === "mobile" && r.variant === "nopreload");
-const bad = target.filter((r) => (r.perf ?? 100) < 90 || r.lcp >= 2500 || r.cls >= 0.1);
+const bad = target.filter((r) => r.cls >= 0.1);
+const bilgi = target.map((r) => `${r.path} perf=${r.perf} lcp=${r.lcp}`).join(" · ");
 if (ONLY === "a11y") {
   const b2 = rows.filter((r) => r.a11y < 95 || r.seo < 95);
   console.log(b2.length ? `✗ eşik altı: ${b2.map((x) => x.path).join(", ")}` : "✓ A11y ≥ 95 ve SEO ≥ 95");
   process.exit(b2.length ? 1 : 0);
 }
+console.log(`ℹ bilgi (kapı DEĞİL — Kural 72, kapı: scripts/lcp-check.mjs): ${bilgi}`);
 console.log(bad.length
-  ? `✗ hedef altı (preloader'sız mobile): ${bad.map((r) => `${r.path} perf=${r.perf} lcp=${r.lcp} cls=${r.cls}`).join(" · ")}`
-  : "✓ preloader'sız mobile: perf ≥ 90, LCP < 2500 ms, CLS < 0.1");
+  ? `✗ CLS hedef altı (preloader'sız mobile): ${bad.map((r) => `${r.path} cls=${r.cls}`).join(" · ")}`
+  : "✓ preloader'sız mobile: CLS < 0.1");

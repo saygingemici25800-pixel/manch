@@ -30,6 +30,39 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **Footer zıplama alanı genişledi + 2 bayat bekçi düzeltildi (2026-09-20).**
+  `Juggle` (R18) artık **alan modunda** (`field`): ikonlar sıra hâlinde değil, wordmark'ın
+  üstünden sayfanın en alt zeminine kadar uzanan bandı kullanıyor — her biri **kendi
+  yüksekliği, hızı ve faz gecikmesiyle**, ayrıca ayrı periyotlu yatay sapmayla. Fizik
+  hissi: yukarı `power2.out`, aşağı `power2.in`, yere değince kısa ezilme.
+  · **Yığın sırası: wordmark z-0 · ikonlar z-10 · gerçek metin z-20.** İlk deneme ikonları
+    wordmark'ın ARKASINA koymuştu (talimattaki "metnin arkasında kalsın" maddesi) — bütün
+    ölçümler yeşildi ama ekranda **görünmüyorlardı**; wordmark bandın tamamını kaplayan
+    opak bir SVG. Wordmark dekoratif (aria-hidden, 1.3:1 filigran) olduğu için ikonlar
+    önüne alındı; **gerçek metnin** (telif satırı, menü linkleri) önüne geçmiyorlar ve
+    katmanın alt sınırı telif satırının üstünde bitiyor
+  · Band: 1440 → **328 px** (eski zıplama 18 px) · 768 → 175 · 390 → 108.
+    Mobilde ikon 10vw → **8vw** ve **4 yerine 3 ikon** (dördüncüsü `max-md:hidden`)
+  · **`--juggle-scale` artık gerçekten okunuyor** — eskiden Footer'da tanımlıydı, bileşen
+    yorumunda anlatılıyordu ama koda hiç girmiyordu (hayalet ayar)
+  · Renk **değişmedi**: tek renk `text-mustard` (karar bölüm 3'te kapandı)
+  · **Bayat bekçiler (iki tane bulundu, ikisi de düzeltildi):**
+    ① `bundle-report.mjs` limiti **200 → 220** (Kural 46 revizyonu 2026-09-19'da
+      scriptlere işlenmemişti; 219.3 kB'yi sahte "AŞIYOR" gösteriyordu)
+    ② `lighthouse.mjs` **LCP'yi kapı yapıyordu** — Kural 72 (2026-09-19) Lantern
+      tahminini kapı olmaktan çıkarmıştı. LCP + perf artık **bilgi**; kapı `lcp-check.mjs`'e
+      taşındı ve orada **hiç eşik yoktu** → Kural 72 kapısı yazıldı (2500 ms + 200 ms
+      sapma denetimi; 0/1/2 çıkış kodları, üçü de sabotajla doğrulandı).
+      CLS kapı olarak kaldı (Lantern tahmini değil, gözlenen kayma)
+    · `zone-bundle-check` (220/260) taranıp **doğru** bulundu; `lab-check` ürün sayıları
+      (28/7) ve `zone-perf-check` ortam eşiği de güncel
+  · Bekçi: `lab-check`'e 4 kontrol (yığın sırası · `pointer-events` · metinle çakışma ·
+    faz farkı), **sabotajla doğrulandı** — ikonlar wordmark'ın arkasına konunca 106/107
+  · `lab-check` **107/107** · `a11y-check` 39/39 · `smoke` 32/32 · `/tr` **219.3 kB gz**
+    (218.9'dan +0.4; Kural 46 hedefi 220 — **payda 0.7 kB kaldı**)
+  · Gözle bakıldı (Kural 59): 390 / 768 / 1440 + reduced-motion; metin örtülmüyor,
+    taşma yok, dördü de farklı fazda, reduced-motion'da düzgün bir sıra hâlinde duruyorlar
+
 - **CursorTrail malzeme ikonları renklendirildi (2026-09-20).** İmleç dairesindeki 6 ikon
   artık tek renk değil: her malzeme kendi `@theme` tokenını alıyor. Yeni tokenlar
   `--color-tomato #c6412f` · `--color-lettuce #6a9440` · `--color-pickle #55762c` ·
@@ -586,6 +619,18 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 | R18 | Footer | Modak linkler + line-mask + RollText, dev MANCH wordmark, zıplayan (juggle) malzeme ikonları, "Designed & developed by Webber Digital" |
 | R19 | SmoothScroll | Lenis + GSAP ticker, reduced-motion desteği |
 
+> **Malzeme ikonu renk ayrımı (karar: 2026-09-20).** CursorTrail (R8) ikonları **malzeme
+> rengindedir**; Footer Juggle (R18) ve /lab MotionLab **tek renk kalır** (`text-mustard`).
+> Kasıtlı ayrım: Juggle'da ikonlar grup olarak hareket eder, tek renk grubu birlikte
+> okutur; imleçte tek tek döner, orada renk ayırt edicilik kazandırır.
+> **Madde kapandı, yeniden açılmayacak.**
+>
+> · `lettuce` / karo duvar **2.17:1 kabul edildi** — yeşil ile açık mavi renk tonunda
+>   ayrışıyor, dekoratif öğe, metin değil (Kural 40 metin için). Daha koyu bir yeşil
+>   `pickle` ile karışırdı.
+> · `cheddar` + `brioche` ink halesinin **"sticker" etkisi kabul edildi** — marka diline
+>   uygun. Hale okunurluk için zorunlu (ikisi açık zeminde 1.44 ve 2.00:1).
+
 ---
 
 ## 4. FAZLAR
@@ -1022,6 +1067,10 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-19 | kapanış | Kural 72 kapısı (LCP) bu turda **geçerli ölçülemedi** | Makine boşta değildi: önce benim bıraktığım **19 artık tarayıcı süreci** (öldürüldü), sonra macOS'un kendi arka plan işleri — `diskimagesiod` %171, `mediaanalysisd` %126 (Photos indeksleme). Yük 7.8 → 16.6. Örnekler saçıldı: `/menu` [3164, 3592, 4976], sapma **1812 ms** — Kural 72'nin kendi güvenilirlik eşiği (200 ms) bunu reddediyor | Sayı **raporlanmadı**. Kural 72'nin sapma şartı tam bunun için var: kötü bir ölçümü "sonuç" diye yazmak yerine geçersiz saydı. Bu turda `src/` hiç değişmediği (yalnız belge + Kural 73) için son geçerli ölçüm aynen geçerli: **836 / 2084 / 820 ms**. **Ders: ölçüm bitince tarayıcı süreçlerinin kapandığı doğrulanmalı** — birikenler sonraki ölçümleri sessizce bozuyor |
 | 2026-09-20 | cursor | **İkonlar cream/paper bölümlerde zaten GÖRÜNMÜYORDU** — renklendirme sırasında ortaya çıktı | İkon rengi `text-cream` + `bg-current`'tı; buzlu cam da `bg-cream/25`. Krem bölümde camın altındaki etkin zemin **#f5efe9**, ikon **#f4eee6** → **1.0:1**. Yani ikon cream zeminlerde teknik olarak vardı ama hiç okunmuyordu. Hiçbir otomatik kontrol bakmıyordu (DOM'da var, maske çalışıyor, konsol temiz) ve renk tek olduğu için kimsenin dikkatini çekmemişti | Renklendirme bunu kendiliğinden çözdü (4 malzeme açık zeminde 3.1–6.4:1), kalan iki açık renk (cheddar, brioche) ink hale aldı. Ders: **tek renkli dekoratif öğe "sorunsuz" değil, sadece sorgulanmamış demektir** |
 | 2026-09-20 | cursor | Kare/kontrast scripti **iki zeminde yanlış özneyi ölçtü**: "cream bölüm" diye berry (#6a1f3b), "hero fotoğrafı" diye hardal rozet raporlandı | Script hedef bölümün kutusu içinde **en düz (varyansı en düşük) yamayı** arıyordu; `#hits` içinde en düz yer ürün kartının berry görseli, hero kutusunda da dönen rozet çıktı. Ayrıca `<picture>` seçicisi kutu vermiyor (çocuğu `absolute`, kendisi `inline`) → hero hiç bulunamadı. **Ölçüm doğru çalıştı, yanlış yeri ölçtü** (Kural 60) | Yamaya `expect` rengi + tolerans şartı kondu, hero `picture img`'a bağlandı, nokta `data-cursor-hide` üstünde olamaz. Sonra dört zemin de doğru çıktı |
+| 2026-09-20 | footer | **İkonlar wordmark'ın ARKASINDA kalınca GÖRÜNMEZ oldu** — bütün ölçümler yeşildi | Zıplama bandı wordmark'ın üstünden sayfa dibine kadar tanımlandı; talimattaki "ikonlar metnin arkasında kalsın" maddesi uygulanıp katman `z-0` yapıldı. Ama wordmark **bandın tamamını kaplayan opak bir SVG** — ikonlar yalnız harf aralarında bir an göründü. Otomatik kontroller "metinle çakışma yok · taşma yok · faz farkı 100 · konsol 0" diyordu; hiçbiri **ekranda görünüyor mu** diye sormuyor. Joystick'in sepet düğmesi altında kalmasıyla aynı sınıf (Kural 59'un sekizinci yakalayışı) | Yığın sırası üçe ayrıldı: dekoratif wordmark z-0 · ikonlar z-10 · **gerçek metin** z-20. Wordmark aria-hidden bir filigran olduğu için önüne geçmek okunurluğu bozmuyor; telif satırı ve linkler hâlâ ikonların üstünde, katmanın alt sınırı da telif satırının üstünde bitiyor. `lab-check`'e yığın sırası bekçisi eklendi ve **sabotajla doğrulandı** (106/107) |
+| 2026-09-20 | footer | **`--juggle-scale` hayalet ayardı** — Footer'da `0.7` tanımlıydı, bileşen yorumu "ölçek bununla" diyordu, **kod onu hiç okumuyordu** | Faz 3'te yorumla birlikte yazılmış ama `y: -18` sabit kalmış. Yanlış çıktı üretmediği için kimse fark etmedi: ayarı değiştiren biri hiçbir şey olmadığını görür ve nedenini arardı | Bileşen `getComputedStyle(el).getPropertyValue("--juggle-scale")` ile gerçekten okuyor, zıplama genliğini çarpıyor. **Ders: yalnız yorumda yaşayan ayar, olmayan ayardan kötüdür** — belge yalan söylüyor |
+| 2026-09-20 | bekçi | **İki bayat bekçi**: `bundle-report` limiti 200 (Kural 46 → 220), `lighthouse` LCP'yi kapı yapıyordu (Kural 72 onu bilgiye indirmişti) | Kural revizyonları **kurala** yazıldı, scriptlere işlenmedi. İkisi de sahte alarm üretiyordu: 219.3 kB "AŞIYOR" görünüyordu; Lantern LCP'si gerçek throttling'den ~2× kötümser olduğu için kapı sürekli kırmızı yanardı | Limit 220'ye çekildi; LCP/perf `lighthouse`'ta bilgi oldu, kapı `lcp-check.mjs`'e yazıldı (2500 ms eşiği + 200 ms sapma denetimi, çıkış 0/1/2). **Ders: bir kural revize edilince o kuralı uygulayan SCRIPT de aynı turda güncellenir** — yoksa bekçi kuralın eski hâlini savunmaya devam eder |
+| 2026-09-20 | bekçi | Bu turda **iki ölçüm hatası**: ① çıkış kodu testi `$?` ile ölçüldü, boru hattının SON komutunu (`tail`) okuyordu → üç sabotajın üçü de "0" göründü ② "ikon hareket ediyor mu" kontrolü peş peşe iki `evaluate` ile örnekleniyordu (~10 ms arayla), ikon 1-2 px hareket edip tam sayıya yuvarlanınca **0** çıkıyordu → ürün duruyor sanıldı | İkisi de Kural 60'ın bilinen tuzakları: ölçülen şey ürün değil ölçüm aracıydı | ① boru hattı kaldırıldı, node'un kendi çıkış kodu okundu (1/2/0 doğrulandı) ② örnekler arasına 280 ms gerçek aralık kondu |
 
 ---
 
