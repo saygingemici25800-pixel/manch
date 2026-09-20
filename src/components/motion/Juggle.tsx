@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 import { IngredientIcon, INGREDIENTS, type Ingredient } from "@/components/ui/IngredientIcon";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+import { useZoneStore } from "@/store/zone";
 import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
 
 type Props = {
@@ -49,6 +50,7 @@ const LEFT_M = ["10%", "44%", "76%", "76%"];
  * yere değince kısa bir ezilme (0.16 sn) — süre genlikten türetilir (t ∝ √h),
  * böylece top gibi davranır ve zeminde beklemez.
  * Reduced motion: zıplama yok, ikonlar dizili/dizilmiş durur.
+ * Zone perdesi açıkken tween'ler duraklar (footer zaten görünmüyor).
  * Renk: tek renk (`text-mustard`) — karar 2026-09-20, CLAUDE.md bölüm 3.
  */
 export function Juggle({ items = INGREDIENTS, field = false, className }: Props) {
@@ -66,6 +68,18 @@ export function Juggle({ items = INGREDIENTS, field = false, className }: Props)
       // girmiyordu; Footer 0.7 tanımlayıp hiçbir şey elde etmiyordu).
       const k = Number.parseFloat(getComputedStyle(el).getPropertyValue("--juggle-scale")) || 1;
 
+      /* Zone perdesi açıkken (state !== "closed") tween'ler DURAKLAR: perde `fixed
+         inset-0 z-100`, footer o sırada görünmüyor bile — 8 tween'in boşa dönmesi
+         3D sahnenin kare bütçesinden çalıyor. Kapanınca kaldığı yerden devam eder.
+         Abonelik effect'in İÇİNDE: React hiç render etmez, Kural 25 ihlali yok. */
+      const duraklat = (tweens: { pause: () => void; resume: () => void }[]) => {
+        const uygula = (st: string) => tweens.forEach((t) => (st === "closed" ? t.resume() : t.pause()));
+        uygula(useZoneStore.getState().state);
+        return useZoneStore.subscribe((z, prev) => {
+          if (z.state !== prev.state) uygula(z.state);
+        });
+      };
+
       if (!field) {
         const tl = g.gsap.timeline({ repeat: -1 }).to(icons, {
           y: -18 * k,
@@ -74,7 +88,9 @@ export function Juggle({ items = INGREDIENTS, field = false, className }: Props)
           ease: "power2.out",
           stagger: { each: 0.12, repeat: 1, yoyo: true },
         });
+        const cikis = duraklat([tl]);
         return () => {
+          cikis();
           tl.kill();
           g.gsap.set(icons, { clearProps: "transform" });
         };
@@ -117,7 +133,9 @@ export function Juggle({ items = INGREDIENTS, field = false, className }: Props)
         return [tl, xt];
       });
 
+      const cikis = duraklat(tls.flat());
       return () => {
+        cikis();
         tls.flat().forEach((t) => t.kill());
         g.gsap.set(icons, { clearProps: "transform" });
       };

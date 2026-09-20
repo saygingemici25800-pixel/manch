@@ -30,6 +30,30 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **Kural 77 + juggle perde arkasında duruyor (2026-09-20).**
+  · **Kural 77 — yanlış yeşil:** (a) koşu gerçekten koştu mu (çıkış kodu scriptin kendi
+    kodu olmalı; 127 / boru hattının son komutu / çıktısız koşu sonuç değildir) ·
+    (b) iddia düşebiliyor mu (yeni **ve kopyalanan** her iddia sabotajla denenir).
+    Kural 60'ın tamamlayıcısı: 60 "yakalıyor mu?", 77 "zaten koştu mu ve düşebilir mi?".
+  · **Kabuk `timeout` komutu scriptlerde YOK** (tarandı) — `timeout` geçen 39 satırın
+    37'si Playwright/Node seçeneği, 2'si `deploy-wait.mjs`'in kendi `--timeout` bayrağı
+    (Node tarafında, kuralın istediği biçim). `timeout 420` yalnız benim tek seferlik
+    kabuk komutumdaydı, commit'e hiç girmemişti.
+  · **`zone-bundle-check` yanlış yeşil basıyordu** — Zone chunk'ını ölçmediği hâlde
+    "limit içinde" diyordu (yanlış `NEXT_DIST_DIR`). `zoneOlculdu` bayrağı eklendi:
+    ölçmediyse `⚠ Zone chunk ÖLÇÜLMEDİ (limit doğrulanmadı)`. İki yolda da gösterildi.
+    Doğru dizinle: **Zone chunk 241.6 kB gz ✓** (limit 260).
+  · **Footer juggle, Zone perdesi açıkken duraklıyor** — `useZoneStore` aboneliği
+    effect'in içinde; `state !== "closed"` → `pause()`, `closed` → `resume()`.
+    Sızıntı denetlendi (Kural 61-A): three ana bundle'da **yok**, `/tr` **219.6 kB gz**.
+  · `lab-check` **109/109 ×3 ardışık** (+2 yeni bekçi, **çift yönlü**: perde açıkken
+    hareket 0, kapanınca 54–117 px). **Sabotajla doğrulandı** — duraklatma kaldırılınca
+    108/109 ve gerçek hareket ölçüldü (248/104/42/27 px).
+  · ⚠ **`zone-perf-check` yine ÖLÇÜLMEDİ** — makine boş değil: **yük ortalaması 11.30**,
+    en çok CPU'yu Claude uygulamasının kendi süreçleri yiyor (~%90). Kural 71 gereği
+    sayı üretilmedi. **Juggle duraklatmasının oynaklığı çözüp çözmediği hâlâ bilinmiyor** —
+    temiz bir makinede üç koşu gerekiyor.
+
 - **Kural 75/76 + sabit bekleme temizliği (2026-09-20).** Tüm scriptler tarandı:
   **182 sabit `waitForTimeout`** vardı, **`_bekle.mjs` dışında sıfır kaldı.**
   · Yeni ortak modül **`scripts/_bekle.mjs`**: `hazir` (fontlar + `gsapReady` + Lenis kök
@@ -1021,6 +1045,27 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     bilinmez. Belge turu `feat`'e dönebilir (2026-09-20: iki tur üst üste `docs:`/`chore:`
     prefix'iyle Footer davranış değişikliği taşındı ve gövdeye NOT düşülerek idare edildi).
 
+77. **YEŞİL, ÇALIŞTIĞININ KANITI DEĞİLDİR (karar 2026-09-20).** Bir kontrolü geçmiş
+    saymadan önce ikisini de doğrula:
+
+    **(a) Koşu gerçekten koştu mu?** Çıkış kodu **scriptin kendi verdiği kod** olmalı.
+    Komut bulunamadı (127), boru hattının SON komutunun kodu, çıktı üretmeden biten
+    koşu — bunların hiçbiri sonuç değildir. **Çıktı yoksa koşu yok demektir.**
+    Kanıt: 2026-09-19 `$?` boru hattında `tail`'i okudu, üç sabotaj da "0" göründü ·
+    2026-09-20 `timeout` macOS'ta yok, iki doğrulama koşusu hiç çalışmadı ve az kalsın
+    temiz raporlandı · 2026-09-20 `zone-bundle-check` yanlış `NEXT_DIST_DIR` ile Zone
+    chunk'ını **hiç ölçmeden** "limit içinde" dedi.
+    Pratik: kabuk `timeout` komutu **kullanılmaz** (macOS'ta yok); süre sınırı gerekiyorsa
+    Node tarafında, scriptin kendi içinde (`deploy-wait.mjs --timeout` gibi). Ölçemediğini
+    raporlayan script **yeşil basmaz**, ölçemediğini yazar.
+
+    **(b) İddia düşebiliyor mu?** Asla yanlış olamayacak bir iddia kontrol değildir.
+    Yeni yazılan **ve başka scripte kopyalanan** her iddia sabotajla bir kez denenir —
+    **kopya da ayrıca.** Kanıt: 2026-09-20, `__ZONE_STATS__().meshes` bir **dizi**;
+    `dizi > 10` sessizce `false` ve bu koşul dört scripte birden kopyalanmıştı.
+    Kural 60'ın (testi sabote et) tamamlayıcısı: 60 "yakalıyor mu?" diye sorar,
+    77 "zaten koştu mu ve düşebilir mi?" diye sorar.
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1178,6 +1223,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-20 | bekçi | Bu turda **iki ölçüm hatası**: ① çıkış kodu testi `$?` ile ölçüldü, boru hattının SON komutunu (`tail`) okuyordu → üç sabotajın üçü de "0" göründü ② "ikon hareket ediyor mu" kontrolü peş peşe iki `evaluate` ile örnekleniyordu (~10 ms arayla), ikon 1-2 px hareket edip tam sayıya yuvarlanınca **0** çıkıyordu → ürün duruyor sanıldı | İkisi de Kural 60'ın bilinen tuzakları: ölçülen şey ürün değil ölçüm aracıydı | ① boru hattı kaldırıldı, node'un kendi çıkış kodu okundu (1/2/0 doğrulandı) ② örnekler arasına 280 ms gerçek aralık kondu |
 | 2026-09-20 | footer | İkonlar "zıplamıyor, aralıklı sıçrıyor" — zeminde fazla bekliyor gibi duruyordu | İki ayrı sebep, ikisi de **süreyi genlikten bağımsız** tutmaktan: ① zıplama süresi sabitti (1.15–1.46 sn), oysa serbest düşüşte t ∝ √h — alçak genlikli ikon aynı sürede daha az yol alıp **havada süzülüyordu** ② yere değme süresi sabit 0.16 sn'ydi; mobilde döngü 0.86 sn'ye inince bu **%20** ediyordu (masaüstünde %10) | Süre genlikten türetiliyor (`AIR·√(amp/REF)·PACE`), yere değme de `d` ile ölçekleniyor. Ölçüldü: zeminde geçen oran **%20 → %13** (390), %10–15 → %11–13 (1440/768). **Ders: "top gibi dursun" isteniyorsa süre yükseklikten türetilir; sabit süre her zaman yanlış bir yerde hissedilir** |
 | 2026-09-20 | bekçi | **Koşula çevirmek yetmedi — DOĞRU koşulu seçmek gerekti.** Kural 75 uygulanırken altı kontrol kırmızı yandı, altısı da benim seçtiğim koşulun yanlış olmasındandı | ① `zone-camera`: `/lab/zone` açılışında `hazir()` (gsapReady) kondu — o hydration'ı ölçer, **three.js sahnesini değil**; karakter yokken hareket ölçülüp **9 kontrol** düştü ② `a11y` menü overlay: `data-state=open` açılışın BAŞINDA yazılıyor, odak tuzağı kurulum bitince devreye giriyor → Tab turu erken başlayıp perdenin dışına kaçtı ③ `a11y` POV: pano DOM'dan çıkar çıkmaz odak okundu, oysa odak `requestAnimationFrame` döngüsüyle dönüyor (5.5.6) ④ `lab-check` nav: aşağı kaydırma koşulu Lenis yumuşatması sürerken tamamlandı, yukarı tekerlek uçuştaki kaydırmaya karıştı, nav hiç geri gelmedi ⑤ `lab-check` checkout: çekmece açılırken tıklandı → Playwright "element is not stable" ile 30 sn'de çöktü ⑥ `lab-check` Lenis kök sınıfı: `gsapReady` true ama Lenis ayrı chunk, henüz bağlanmamıştı | Sırasıyla: sahne koşulu (`canvases===1 && meshes.length>10`) · odak içeri girene kadar bekle · odak `frame-enter`'a dönene kadar bekle · `durgun()` (kaydırma durdu) · `sabit()` (eleman durdu) · `hazir()` Lenis sınıfını da bekliyor. **Ders: Kural 75 "koşul yaz" demek değil, "ürünün gerçekten beklediği şeyi yaz" demek** — yanlış koşul sabit süreden daha hızlı yanlış cevap verir |
+| 2026-09-20 | bekçi | **`zone-bundle-check` ölçmediği şey için YEŞİL bastı** — "Zone chunk limit içinde" dedi, oysa chunk'ı hiç ölçmemişti | Ölçüm build'i `NEXT_DIST_DIR=.next-build`'teydi, script çağrılırken bu env verilmemişti → `.next/static/chunks` yok, `files.length === 0`, bilgi satırı basılıp **geçildi** ve sonda koşulsuz "limit içinde" yazıldı. Sızıntı kontrolü (asıl iş) çalıştı, boyut kontrolü sessizce atlandı — ikisi tek cümlede onaylanıyordu | `zoneOlculdu` bayrağı: ölçülmediyse son satır `⚠ Zone chunk ÖLÇÜLMEDİ (limit doğrulanmadı)` diyor. İki yolda da gösterildi. **Kural 77(a)**: ölçemediğini raporlayan script yeşil basmaz |
+| 2026-09-20 | footer | Footer juggle'ın 8 tween'i **Zone perdesi açıkken de dönüyordu** — perde tam ekran, footer görünmüyor bile | Juggle yalnız `reduced` biliyordu; Zone durumundan haberi yoktu. 3D sahne kare bütçesiyle yarışan görünmez bir animasyon | `useZoneStore` aboneliği **effect'in içinde** (Kural 25: render'da abonelik yok): `state !== "closed"` → `pause()`, `closed` → `resume()`. `lab-check`'e **çift yönlü** bekçi (perde açıkken hareket 0, kapanınca > 4 px) — tek yön ölçseydi "hep 0 dönen bozuk ölçüm" de geçerdi. Sızıntı riski ayrıca denetlendi (Kural 61-A): `store/zone.ts` three'yi yalnız `import type` ile çekiyor, `/tr` 219.6 kB gz, three ana bundle'da YOK |
 | 2026-09-20 | bekçi | `__ZONE_STATS__().meshes > 10` koşulu **hiç sağlanmadı**, zone-camera 60 sn'de çöktü | `meshes` bir **sayı değil, mesh konumlarının DİZİSİ**. `dizi > 10` sessizce `false` — JS tip hatası vermiyor. Aynı hata dört scripte birden kopyalanmıştı | `meshes?.length`. Ayrıca `textures` da nesne çıktı (`{created,disposed,alive,byLabel}`) → `__ZONE_TEXTURES__().alive`. **Ders: koşul yazarken alanın TİPİ doğrulanır; `?? 0` ile karşılaştırma tip hatasını gizler** |
 | 2026-09-20 | bekçi | İki doğrulama koşusu **hiç çalışmadı**, "ÇIKIŞ=127" verdi | Komuta `timeout 420` eklenmişti; **macOS'ta `timeout` yok** (coreutils'te `gtimeout`). Kabuk 127 döndürdü, döngü bunu koşu sonucu sanıp geçti — az kalsın "iki koşu daha temiz" diye raporlanacaktı | `timeout` kaldırıldı. **Ders: çıkış kodu 127 "başarısız test" değil "komut yok" demektir; sonuç ayrıştırıcısı bunu ayırt etmeli** |
 | 2026-09-20 | bekçi | `lab-check` **oynak çıktı**: ardışık koşular 102/107 · 106/107 · 107/107. Düşen kontroller her seferinde başkaydı — `/menu` modal ESC, `/menu` modal AÇILMA, Preloader kalkması, CookieBanner görünmesi | **Dördü de sabit `waitForTimeout` ile bekliyordu** (800 / 900 / 3200 / 2600 ms). Dev sunucusu yük altındayken (aynı makinede prod sunucusu + ölçüm tarayıcıları + arka arkaya lab koşuları) Turbopack derlemesi ve `router.replace` bu payları aşıyor, kontroller eski durumu okuyup kırmızı yanıyordu. Ürün hatası yok — hepsi yarış; üstelik ikisi çok eski (cookie payı bir kez 1200 → 2600 yapılmıştı, yani kalıp daha önce de ısırmış ve süre büyütülerek geçiştirilmişti). Aynı turda iki koşu `page.goto` zaman aşımıyla tamamen **çöktü** | Dördü de **koşul beklemeye** çevrildi (`waitForFunction` / `waitFor({state})`, tavanlı ve `.catch` ile yutulan) — iddialar aynı yerde duruyor, koşul gerçekten sağlanmazsa yine düşüyor. **Üç ardışık temiz koşu: 107/107 ×3.** Ders: *süre payını büyütmek yarışı çözmez, erteler* — beklenen şey süre değil **koşuldur**. Ayrıca Kural 71 yalnız Lighthouse için değil, dev sunucusuna karşı koşan **her** script için geçerli |

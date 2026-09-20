@@ -71,9 +71,15 @@ function walk(dir) {
 }
 
 const files = walk(CHUNK_DIR);
+/* Kural 77(a): ÖLÇEMEDİĞİ şey için yeşil basmak yanlış yeşildir. Bu script,
+   `NEXT_DIST_DIR` yanlış verildiğinde Zone chunk'ını hiç ölçmeden yine de
+   "Zone chunk limit içinde" diyordu (2026-09-20'de yaşandı: ölçüm build'i
+   `.next-build`'teydi, script `.next`e baktı, ikisi de sessizce geçti). */
+let zoneOlculdu = false;
 if (files.length === 0) {
-  console.log(`\nZone chunk ölçülemedi: ${CHUNK_DIR} bulunamadı (NEXT_DIST_DIR doğru mu?)`);
+  console.log(`\nZone chunk ÖLÇÜLEMEDİ: ${CHUNK_DIR} bulunamadı (NEXT_DIST_DIR doğru mu?)`);
 } else {
+  zoneOlculdu = true;
   const zoneChunks = [];
   for (const f of files) {
     const buf = readFileSync(f);
@@ -96,4 +102,8 @@ if (oversize) {
   console.error(`\n✗ Zone chunk ${oversize} kB gz — limit ${LIMIT_ZONE} kB (sızıntı YOK, yalnızca boyut)`);
 }
 if (leaks || oversize) process.exit(1);
-console.log("\n✓ three.js hiçbir sayfanın ilk yüklemesinde yok · Zone chunk limit içinde");
+console.log(
+  zoneOlculdu
+    ? "\n✓ three.js hiçbir sayfanın ilk yüklemesinde yok · Zone chunk limit içinde"
+    : "\n✓ three.js hiçbir sayfanın ilk yüklemesinde yok · ⚠ Zone chunk ÖLÇÜLMEDİ (limit doğrulanmadı)",
+);

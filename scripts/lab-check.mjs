@@ -333,6 +333,35 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   t("Footer · ikonlar farklı fazlarda (senkron değil)", yayilim > 20 && Math.max(...hareket) > 4,
     `aynı andaki yayılım ${yayilim}px · örnekler arası hareket [${hareket.join(",")}]`);
 
+  /* Zone perdesi açıkken juggle DURMALI (2026-09-20): perde tam ekran, footer görünmüyor
+     bile; 8 tween'in boşa dönmesi 3D sahnenin kare bütçesinden çalıyor. Kontrol ÇİFT
+     YÖNLÜ (Kural 60): perde açıkken hareket 0, kapanınca yeniden > 0 — tek yön ölçseydi
+     "hep 0 dönen bozuk ölçüm" de geçerdi. Perde `select` adımında açılıyor, 3D sahne
+     henüz mount olmuyor: kontrol ucuz. */
+  const konum = () =>
+    q.evaluate(() =>
+      [...document.querySelectorAll("footer ul[aria-hidden] li")]
+        .filter((e) => e.getBoundingClientRect().height > 0)
+        .map((e) => Math.round(e.getBoundingClientRect().top)),
+    );
+  await q.locator("[data-testid=zone-gate]").first().click();
+  await varOl(q, "[data-testid=zone-pick-misu]");
+  await pencere(q, 260); // perdeye geçiş otursun
+  const p1 = await konum();
+  await pencere(q, 420); // ÖLÇÜM PENCERESİ: duruyorsa bu sürede de kıpırdamamalı
+  const p2 = await konum();
+  const perdeHareket = p1.map((v, i) => Math.abs(v - p2[i]));
+  t("Footer · Zone perdesi açıkken juggle DURUYOR", p1.length > 0 && Math.max(...perdeHareket) === 0,
+    `hareket [${perdeHareket.join(",")}]`);
+  await q.keyboard.press("Escape");
+  await kosul(q, () => !document.querySelector("[data-testid=zone-curtain]"));
+  const p3 = await konum();
+  await pencere(q, 420);
+  const p4 = await konum();
+  const sonraHareket = p3.map((v, i) => Math.abs(v - p4[i]));
+  t("Footer · perde kapanınca juggle DEVAM ediyor", Math.max(...sonraHareket) > 4,
+    `hareket [${sonraHareket.join(",")}]`);
+
   // --- R2/R3 PageTransition + dinamik title
   await q.evaluate(() => window.__UI__.getState().closeAll());
   await kosul(q, () => document.querySelectorAll("[role=dialog][data-state=open]").length === 0);
