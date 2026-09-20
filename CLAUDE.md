@@ -30,33 +30,22 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- **Sticker'lar (2026-09-20) — ana sayfa, tam 3 tane, çıplak line-art.**
-  Mevcut `/icons/*.svg` setinin büyütülmüş/döndürülmüş/renklendirilmiş hâli;
-  **yeni görsel dosyası yok, yeni token yok, arka plan/kontur/gölge/hale yok.**
-
-  | # | bölüm | zemin | malzeme | kesim |
-  |---|---|---|---|---|
-  | 1 | `#hits` (TheHits) | cream `#f4eee6` — açık | **tomato** | üst kenar (Marquee→Hits geçişi) |
-  | 2 | `#build` (Build) | paper `#e9dcc6` — açık | **patty** | sağ kenar, üst şerit |
-  | 3 | `#location` (Location) | berry `#6a1f3b` — koyu | **cheddar** | alt kenar, sol |
-
-  · `ui/Sticker.tsx` **sunucu bileşeni**: SVG dosyadan okunup satır içine gömülüyor →
-    **istemci paketine sıfır bayt**, tek doğruluk kaynağı hâlâ `public/icons/`.
-    `stroke-width` CSS ile **1.7** (öznitelik 1.5), rotasyon ±9–14°.
-  · **Eşleşme TİP düzeyinde zorunlu**: `tone: "light"` yalnız tomato/lettuce/pickle/patty,
-    `tone: "dark"` yalnız cheddar/brioche kabul ediyor → yanlış çift **derlenmiyor**.
-    Çalışma zamanı bekçisi ayrıca `lab-check`'te (bölümün zemini sonradan değişirse
-    tipler göremez): **çift yönlü** — gerçek üçü geçiyor, uydurma yanlış çift düşüyor.
-    **Sabotajla doğrulandı**: berry bölüme açık-zemin malzemesi konunca `✗ EŞLEŞMİYOR`.
-  · `Location` `"use client"` olduğu için sticker **sayfada sunucuda render edilip prop
-    olarak içeri veriliyor**. Dışarıdan sarmak işe yaramaz: negatif z-index yalnız ÜST
-    öğenin zeminini geçer, Location'ın kendi `bg-berry`'si sticker'ı örter.
-  · **CLS 0.0000** · yatay taşma **0px** (4 kırılım × TR/EN) · `z-index -10` (içeriğin
-    arkasında) · `aria-hidden` + `pointer-events:none` · mobilde **yalnız 1 tane**
-  · Gözle bakıldı (Kural 59) — **tur üç kusur yakaladı**, üçü de düzeltildi:
-    çift kenardan kesim ikonu parçaya çeviriyordu · Build'in yan boşluğu 3vw olduğu için
-    soldan taşan sticker fotoğrafın altına giriyordu · `6 ÜRÜN` sayacı tomato'nun
-    üstünden geçiyordu (sayacın glif kutusu ölçülüp sticker üstüne alındı)
+- **GERİ ALMA (2026-09-20, kullanıcı — beğeni kararı, kusur değil).** İki iş geri alındı:
+  · **Sticker'lar tamamen kaldırıldı.** Ana sayfadaki 3 malzeme sticker'ı beğenilmedi;
+    `04ad669` **`git revert` ile temiz** geri alındı (çakışma yok). `src`'de kalıntı yok
+    (`Sticker` · `data-sticker` · `text-tomato` grep'i boş; kalan tek `-z-10` Hero'nun
+    eski foto katmanı). Malzeme renk tokenları **duruyor** — onlar CursorTrail'e ait.
+  · **Footer Juggle `c556a58` öncesi hâline döndü**: `field` modu, genişletilmiş band
+    (1440'ta 328 px), `t ∝ √h` ritmi, yatay gezinme/yol kesişmesi, mobil 3 ikon/8vw ve
+    `--juggle-scale` okuması **kaldırıldı**. İkonlar yine footer'ın sağ sütununda,
+    18 px'lik dar bandında, `stagger` ile sırayla zıplıyor.
+  · **Korunanlar:** Zone perdesi açıkken `pause()` (eski Juggle'a yeniden uygulandı,
+    çift yönlü bekçisi yeşil) · `lab-check` gezinme payı 90 sn · Kural 75 istisna metni ·
+    `zone-bundle-check` ve `bundle-report` düzeltmeleri · renk kararları · Kural 74/76/77.
+  · **Bayat bekçiler silindi** (Kural 74): band yığın sırası, metin çakışması, faz
+    yayılımı, yatay menzil — ölçecekleri şey kalmadı.
+  · ⚠ **Aşağıdaki iki DURUM maddesi (band 328 px · 12 yol kesişmesi · `--juggle-scale`
+    okunuyor) artık GEÇERSİZ** — o tur yapıldı, sonra geri alındı. Tarihçe olarak duruyor.
 
 - **Kural 77 + juggle perde arkasında duruyor (2026-09-20).**
   · **Kural 77 — yanlış yeşil:** (a) koşu gerçekten koştu mu (çıkış kodu scriptin kendi
@@ -1252,12 +1241,13 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-20 | footer | İkonlar "zıplamıyor, aralıklı sıçrıyor" — zeminde fazla bekliyor gibi duruyordu | İki ayrı sebep, ikisi de **süreyi genlikten bağımsız** tutmaktan: ① zıplama süresi sabitti (1.15–1.46 sn), oysa serbest düşüşte t ∝ √h — alçak genlikli ikon aynı sürede daha az yol alıp **havada süzülüyordu** ② yere değme süresi sabit 0.16 sn'ydi; mobilde döngü 0.86 sn'ye inince bu **%20** ediyordu (masaüstünde %10) | Süre genlikten türetiliyor (`AIR·√(amp/REF)·PACE`), yere değme de `d` ile ölçekleniyor. Ölçüldü: zeminde geçen oran **%20 → %13** (390), %10–15 → %11–13 (1440/768). **Ders: "top gibi dursun" isteniyorsa süre yükseklikten türetilir; sabit süre her zaman yanlış bir yerde hissedilir** |
 | 2026-09-20 | bekçi | **Koşula çevirmek yetmedi — DOĞRU koşulu seçmek gerekti.** Kural 75 uygulanırken altı kontrol kırmızı yandı, altısı da benim seçtiğim koşulun yanlış olmasındandı | ① `zone-camera`: `/lab/zone` açılışında `hazir()` (gsapReady) kondu — o hydration'ı ölçer, **three.js sahnesini değil**; karakter yokken hareket ölçülüp **9 kontrol** düştü ② `a11y` menü overlay: `data-state=open` açılışın BAŞINDA yazılıyor, odak tuzağı kurulum bitince devreye giriyor → Tab turu erken başlayıp perdenin dışına kaçtı ③ `a11y` POV: pano DOM'dan çıkar çıkmaz odak okundu, oysa odak `requestAnimationFrame` döngüsüyle dönüyor (5.5.6) ④ `lab-check` nav: aşağı kaydırma koşulu Lenis yumuşatması sürerken tamamlandı, yukarı tekerlek uçuştaki kaydırmaya karıştı, nav hiç geri gelmedi ⑤ `lab-check` checkout: çekmece açılırken tıklandı → Playwright "element is not stable" ile 30 sn'de çöktü ⑥ `lab-check` Lenis kök sınıfı: `gsapReady` true ama Lenis ayrı chunk, henüz bağlanmamıştı | Sırasıyla: sahne koşulu (`canvases===1 && meshes.length>10`) · odak içeri girene kadar bekle · odak `frame-enter`'a dönene kadar bekle · `durgun()` (kaydırma durdu) · `sabit()` (eleman durdu) · `hazir()` Lenis sınıfını da bekliyor. **Ders: Kural 75 "koşul yaz" demek değil, "ürünün gerçekten beklediği şeyi yaz" demek** — yanlış koşul sabit süreden daha hızlı yanlış cevap verir |
 | 2026-09-20 | bekçi | **`zone-bundle-check` ölçmediği şey için YEŞİL bastı** — "Zone chunk limit içinde" dedi, oysa chunk'ı hiç ölçmemişti | Ölçüm build'i `NEXT_DIST_DIR=.next-build`'teydi, script çağrılırken bu env verilmemişti → `.next/static/chunks` yok, `files.length === 0`, bilgi satırı basılıp **geçildi** ve sonda koşulsuz "limit içinde" yazıldı. Sızıntı kontrolü (asıl iş) çalıştı, boyut kontrolü sessizce atlandı — ikisi tek cümlede onaylanıyordu | `zoneOlculdu` bayrağı: ölçülmediyse son satır `⚠ Zone chunk ÖLÇÜLMEDİ (limit doğrulanmadı)` diyor. İki yolda da gösterildi. **Kural 77(a)**: ölçemediğini raporlayan script yeşil basmaz |
-| 2026-09-20 | sticker | Konum üç kez yanlıştı; **üçünü de yalnız gözle bakma yakaladı** (Kural 59) | ① İki kenardan birden kesilen ikon "sticker" değil **parça** gibi duruyor ② Build'in yan boşluğu 3vw (43px) ve alt şeridi 72px — 9vw'lik (bbox 148px, rotasyon şişiriyor) sticker ikisine de sığmıyor, soldan taşınca fotoğrafın ALTINA giriyor, alttan kesilince sliver kalıyor ③ `6 ÜRÜN` sayacının glifleri (y 120–136) tomato'nun gövdesinden geçiyordu. Hiçbiri otomatik kontrole takılmaz: DOM'da var, renk doğru, CLS 0, taşma 0 | ① tek kenar kesimi ② Build'de SAĞ kenar + üst şerit ③ sayacın glif kutusu ölçülüp sticker bölümün üst kenarına alındı (`-top-[2.5vw]`), dikey çakışma 0. **Blok kutusu değil GLİF kutusu ölçülür** — `<p>` sütun genişliğince uzanıyor, kutuyla bakınca yanlış pozitif veriyor (`Range.getClientRects()`) |
-| 2026-09-20 | sticker | Sabotaj doğrulaması **iki kez "koşu yok" oldu ve az kalsın "yakalandı" diye okunacaktı** | ① Geçici scriptin import yolu yanlıştı (`../src` — script kök dizinde), hem doğru hem sabotajlı koşu **aynı** `ERR_MODULE_NOT_FOUND` ile çıkış 1 verdi; çıkış koduna bakan biri "sabotaj yakalandı" sanırdı ② dev sunucusu HMR churn'ünden tıkanmıştı (curl 2 sn, Playwright `goto` 30 sn zaman aşımı) | Yol düzeltildi, sabotaj **prod build'e karşı** koşuldu: doğru hâl `EŞLEŞİYOR` (çıkış 0), sabotajlı hâl `tomato@berry ✗ EŞLEŞMİYOR` (çıkış 1). Dev sunucusu `.next` silinip yeniden başlatıldı. **Kural 77(a)'nın birebir örneği: aynı çıkış kodu iki farklı sebepten gelebilir** |
 | 2026-09-20 | footer | Footer juggle'ın 8 tween'i **Zone perdesi açıkken de dönüyordu** — perde tam ekran, footer görünmüyor bile | Juggle yalnız `reduced` biliyordu; Zone durumundan haberi yoktu. 3D sahne kare bütçesiyle yarışan görünmez bir animasyon | `useZoneStore` aboneliği **effect'in içinde** (Kural 25: render'da abonelik yok): `state !== "closed"` → `pause()`, `closed` → `resume()`. `lab-check`'e **çift yönlü** bekçi (perde açıkken hareket 0, kapanınca > 4 px) — tek yön ölçseydi "hep 0 dönen bozuk ölçüm" de geçerdi. Sızıntı riski ayrıca denetlendi (Kural 61-A): `store/zone.ts` three'yi yalnız `import type` ile çekiyor, `/tr` 219.6 kB gz, three ana bundle'da YOK |
 | 2026-09-20 | bekçi | `__ZONE_STATS__().meshes > 10` koşulu **hiç sağlanmadı**, zone-camera 60 sn'de çöktü | `meshes` bir **sayı değil, mesh konumlarının DİZİSİ**. `dizi > 10` sessizce `false` — JS tip hatası vermiyor. Aynı hata dört scripte birden kopyalanmıştı | `meshes?.length`. Ayrıca `textures` da nesne çıktı (`{created,disposed,alive,byLabel}`) → `__ZONE_TEXTURES__().alive`. **Ders: koşul yazarken alanın TİPİ doğrulanır; `?? 0` ile karşılaştırma tip hatasını gizler** |
 | 2026-09-20 | bekçi | İki doğrulama koşusu **hiç çalışmadı**, "ÇIKIŞ=127" verdi | Komuta `timeout 420` eklenmişti; **macOS'ta `timeout` yok** (coreutils'te `gtimeout`). Kabuk 127 döndürdü, döngü bunu koşu sonucu sanıp geçti — az kalsın "iki koşu daha temiz" diye raporlanacaktı | `timeout` kaldırıldı. **Ders: çıkış kodu 127 "başarısız test" değil "komut yok" demektir; sonuç ayrıştırıcısı bunu ayırt etmeli** |
 | 2026-09-20 | bekçi | `lab-check` **oynak çıktı**: ardışık koşular 102/107 · 106/107 · 107/107. Düşen kontroller her seferinde başkaydı — `/menu` modal ESC, `/menu` modal AÇILMA, Preloader kalkması, CookieBanner görünmesi | **Dördü de sabit `waitForTimeout` ile bekliyordu** (800 / 900 / 3200 / 2600 ms). Dev sunucusu yük altındayken (aynı makinede prod sunucusu + ölçüm tarayıcıları + arka arkaya lab koşuları) Turbopack derlemesi ve `router.replace` bu payları aşıyor, kontroller eski durumu okuyup kırmızı yanıyordu. Ürün hatası yok — hepsi yarış; üstelik ikisi çok eski (cookie payı bir kez 1200 → 2600 yapılmıştı, yani kalıp daha önce de ısırmış ve süre büyütülerek geçiştirilmişti). Aynı turda iki koşu `page.goto` zaman aşımıyla tamamen **çöktü** | Dördü de **koşul beklemeye** çevrildi (`waitForFunction` / `waitFor({state})`, tavanlı ve `.catch` ile yutulan) — iddialar aynı yerde duruyor, koşul gerçekten sağlanmazsa yine düşüyor. **Üç ardışık temiz koşu: 107/107 ×3.** Ders: *süre payını büyütmek yarışı çözmez, erteler* — beklenen şey süre değil **koşuldur**. Ayrıca Kural 71 yalnız Lighthouse için değil, dev sunucusuna karşı koşan **her** script için geçerli |
+| 2026-09-20 | ders | **Glif kutusu ≠ blok kutusu.** Çakışma ölçülürken metnin blok kutusu değil `Range.getClientRects()` ile **glif** kutusu ölçülür | `<p>` sütun genişliğince uzanır; içindeki yazı kısa olsa bile blok kutusuyla bakan kontrol "çakışıyor" der. Sticker turunda `6 ÜRÜN` sayacı için yaşandı: kutu çakışması vardı, glifler çakışmıyordu — tersi de mümkün (glif çakışır, kutu görünmez) | Ölçüm `Range.selectNodeContents(el).getClientRects()` ile. **Sticker kodu geri alındı, ders duruyor:** metin çakışması sorulan her yerde geçerli |
+| 2026-09-20 | ders | **Aynı çıkış kodu iki farklı sebepten gelir.** Sabotaj doğrulaması iki kez boşa gitti ve "yakalandı" diye okunacaktı | Geçici scriptin import yolu yanlıştı; **hem doğru hem sabotajlı** koşu `ERR_MODULE_NOT_FOUND` ile **çıkış 1** verdi. Yalnız çıkış koduna bakan biri sabotajın yakalandığını sanır | **Sabotajın BEKLENEN SEBEPTEN düştüğü doğrulanmadan sabotaj geçerli sayılmaz** — çıktı okunur, düşen kontrolün adı ve değeri görülür. Kural 77(a)'nın birebir örneği |
+| 2026-09-20 | ders | **Tip düzeyinde zorlama, çalışma anı bekçisinden üstündür.** | Sticker'da zemin-malzeme eşleşmesi ayrık birleşimle zorunlu kılınmıştı: yanlış çift **derlenmiyordu**. O eşleşme için ayrıca bekçi yazmak gereksiz tekrar olurdu | Bekçi yalnız **tipin göremediği** şeye kalır (orada: bölümün gerçek `background-color`'ı — sonradan değişebilir). Önce tiple kapat, kalanı bekçiye bırak |
 
 ---
 

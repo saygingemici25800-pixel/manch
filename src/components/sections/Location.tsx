@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
@@ -12,23 +11,15 @@ import { useUiStore } from "@/lib/ui-store";
 const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${site.name} ${site.address.full}`)}&output=embed`;
 const DIRECTIONS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.full)}`;
 
-/**
- * Konum — adres, saatler, tıkla-yükle Google Maps iframe (lazy).
- *
- * `sticker`: bu bileşen `"use client"` olduğu için dosyadan okuyan sunucu bileşeni
- * burada çağrılamaz; sayfa onu SUNUCUDA render edip node olarak geçiriyor. Sticker'ın
- * bölümün KENDİ zemininin üstünde olması şart — dışarıdan sarmalarsak Location'ın
- * `bg-berry`'si onu örter (negatif z-index yalnız ÜST öğenin zeminini geçer).
- */
-export function Location({ sticker }: { sticker?: ReactNode }) {
+/** Konum — adres, saatler (TODO), tıkla-yükle Google Maps iframe (lazy). */
+export function Location() {
   const t = useTranslations("Home.location");
   const locale = useLocale() as "tr" | "en";
   const [loaded, setLoaded] = useState(false);
   const setInfoOpen = useUiStore((s) => s.setInfoOpen);
 
   return (
-    <section id="location" data-nav-dark className="relative isolate scroll-mt-[6vw] bg-berry px-[2.5vw] py-[8vw] max-md:px-[5vw] max-md:py-[16vw] text-cream">
-      {sticker}
+    <section id="location" data-nav-dark className="scroll-mt-[6vw] bg-berry px-[2.5vw] py-[8vw] max-md:px-[5vw] max-md:py-[16vw] text-cream">
       <div className="grid grid-cols-2 max-md:grid-cols-1 items-center gap-[4vw] max-md:gap-[10vw]">
         <div className="flex flex-col gap-[1.5vw] max-md:gap-[5vw]">
           <p className="font-display text-[1.3vw] max-md:text-[4.5vw] text-mustard">{t("eyebrow")}</p>

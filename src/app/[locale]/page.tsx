@@ -11,7 +11,6 @@ import { MarqueeBand } from "@/components/sections/MarqueeBand";
 import { MisuMiyu } from "@/components/sections/MisuMiyu";
 import { TheHits } from "@/components/sections/TheHits";
 import { Zone } from "@/components/sections/Zone";
-import { Sticker } from "@/components/ui/Sticker";
 import { clientMessages } from "@/i18n/client-messages";
 import type { Locale } from "@/i18n/routing";
 import { pageMetadata } from "@/lib/seo";
@@ -49,17 +48,7 @@ export default async function HomePage({ params }: Props) {
         <Zone />
         <MisuMiyu />
         <InstagramGrid />
-        {/* Sticker 3/3 — berry (koyu) zemin → cheddar. Location `"use client"` olduğu
-            için sticker burada SUNUCUDA render edilip içeri veriliyor. Mobilde gizli. */}
-        <Location
-          sticker={
-            <Sticker
-              name="cheddar"
-              tone="dark"
-              place="-bottom-[3vw] left-[9vw] rotate-[14deg] max-md:hidden"
-            />
-          }
-        />
+        <Location />
       </main>
     </NextIntlClientProvider>
   );

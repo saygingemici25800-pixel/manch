@@ -300,47 +300,12 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   });
   t("Footer · render + linkler", footer.found && footer.links >= 4, JSON.stringify(footer));
 
-  /* R18 zıplama alanı (2026-09-20). İkonlar ilk denemede wordmark'ın ARKASINA kondu:
-     DOM sağlam, olaylar sağlam, çakışma yok, faz farkı tam — ama ekranda görünmüyorlardı,
-     çünkü wordmark bandın tamamını kaplayan opak bir SVG. Joystick'in sepet düğmesinin
-     altında kalmasıyla aynı sınıf kusur (Kural 59) ve hiçbir davranış testine takılmaz.
-     Bu yüzden YIĞIN SIRASI doğrudan denetleniyor. */
+  /* Band bekçileri KALDIRILDI (2026-09-20): genişletilmiş zıplama alanı geri alındı,
+     Juggle yeniden footer'ın sağ sütununda dar bandında zıplıyor. Yığın sırası, metin
+     çakışması, faz yayılımı ve yatay menzil kontrollerinin ölçeceği şey kalmadı —
+     bayat bekçi bırakmaktansa silinir (Kural 74). Perde-duraklatma bekçisi KALIYOR. */
   await q.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  // ikonlar GERÇEKTEN zıplamaya başlasın (lazy gsap + timeline)
-  await kosul(q, () => [...document.querySelectorAll("footer ul[aria-hidden] li")].some((e) => e.style.transform && e.style.transform !== "none"), null, 20000);
-  const jg1 = await q.evaluate(() => {
-    const f = document.querySelector("footer");
-    const ul = f.querySelector("ul[aria-hidden]");
-    const z = (e) => Number(getComputedStyle(e).zIndex) || 0;
-    const kesis = (a, c) => !(a.right <= c.left || a.left >= c.right || a.bottom <= c.top || a.top >= c.bottom);
-    const metin = [...f.querySelectorAll("nav a, span, p")].filter((e) => e.textContent.trim() && e.getBoundingClientRect().height > 0);
-    const li = [...(ul?.querySelectorAll("li") ?? [])].filter((e) => e.getBoundingClientRect().height > 0);
-    return {
-      var: !!ul,
-      zKatman: ul ? z(ul) : null,
-      zWordmark: z(f.querySelector("svg").parentElement === f ? f.querySelector("svg") : f.querySelector("svg")),
-      olaylar: ul ? getComputedStyle(ul).pointerEvents : null,
-      carpisma: li.some((e) => metin.some((m) => kesis(e.getBoundingClientRect(), m.getBoundingClientRect()))),
-      y: li.map((e) => Math.round(e.getBoundingClientRect().top)),
-    };
-  });
-  t("Footer · zıplama alanı wordmark'ın ÜSTÜNDE (görünür)", jg1.var && jg1.zKatman > jg1.zWordmark,
-    `katman z=${jg1.zKatman} · wordmark z=${jg1.zWordmark}`);
-  t("Footer · ikonlar tıklamayı yakalamıyor", jg1.olaylar === "none", `pointer-events=${jg1.olaylar}`);
-  t("Footer · ikonlar metinle çakışmıyor", jg1.var && !jg1.carpisma, `çakışma=${jg1.carpisma}`);
-  // İki örnek arasında GERÇEK bir aralık şart: peş peşe evaluate ~10 ms sürüyor, o
-  // sürede ikon 1-2 px hareket ediyor ve tam sayıya yuvarlanınca 0 çıkıyordu (ürün
-  // duruyor sanılmıştı — ölçüm hatası, Kural 60).
-  await pencere(q, 280); // ÖLÇÜM PENCERESİ: iki örnek arasında gerçek zaman geçmeli
-  const jg2 = await q.evaluate(() => {
-    const li = [...document.querySelectorAll("footer ul[aria-hidden] li")].filter((e) => e.getBoundingClientRect().height > 0);
-    return li.map((e) => Math.round(e.getBoundingClientRect().top));
-  });
-  // Senkron zıplasalardı hem aynı anda aynı hizada olurlardı hem de birlikte hareket ederlerdi.
-  const yayilim = Math.max(...jg1.y) - Math.min(...jg1.y);
-  const hareket = jg1.y.map((v, i) => Math.abs(v - jg2[i]));
-  t("Footer · ikonlar farklı fazlarda (senkron değil)", yayilim > 20 && Math.max(...hareket) > 4,
-    `aynı andaki yayılım ${yayilim}px · örnekler arası hareket [${hareket.join(",")}]`);
+  await durgun(q);
 
   /* Zone perdesi açıkken juggle DURMALI (2026-09-20): perde tam ekran, footer görünmüyor
      bile; 8 tween'in boşa dönmesi 3D sahnenin kare bütçesinden çalıyor. Kontrol ÇİFT
@@ -349,7 +314,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
      henüz mount olmuyor: kontrol ucuz. */
   const konum = () =>
     q.evaluate(() =>
-      [...document.querySelectorAll("footer ul[aria-hidden] li")]
+      [...document.querySelectorAll("footer [data-juggle]")]
         .filter((e) => e.getBoundingClientRect().height > 0)
         .map((e) => Math.round(e.getBoundingClientRect().top)),
     );
@@ -494,44 +459,6 @@ await hazir(h);
   const afterScroll = await h.evaluate(() =>
     [...document.querySelectorAll("[data-product-card]")].every((c) => Number(getComputedStyle(c).opacity) > 0.99));
   t("ProductGrid · scroll sonrası da 6/6 görünür", afterScroll);
-
-  /* STICKER'LAR (2026-09-20) — kontur/gölge/hale YOK, okunurluk tamamen zemin
-     eşleşmesine bağlı: açık zemine koyu malzeme, koyu zemine açık malzeme.
-     Tip sistemi yanlış çifti derlemiyor ama bir BÖLÜMÜN ZEMİNİ sonradan değişirse
-     tipler bunu göremez — bu kontrol gerçek `background-color`'ı okur.
-     ÇİFT YÖNLÜ (Kural 60): gerçek sticker'lar geçer + uydurma yanlış çift DÜŞER.
-     İkincisi olmasaydı "her şeye true dönen" bozuk bir kural da yeşil verirdi. */
-  const stk = await h.evaluate(() => {
-    const hex = (c) => {
-      const m = c.match(/\d+/g);
-      return m ? "#" + m.slice(0, 3).map((v) => (+v).toString(16).padStart(2, "0")).join("") : c;
-    };
-    return [...document.querySelectorAll("[data-sticker]")].map((el) => ({
-      ad: el.dataset.sticker,
-      renk: hex(getComputedStyle(el).color),
-      zemin: hex(getComputedStyle(el.closest("section")).backgroundColor),
-      gizli: el.closest("[aria-hidden=true]") != null,
-      tiklanmaz: getComputedStyle(el.parentElement).pointerEvents === "none",
-      arkada: Number(getComputedStyle(el.parentElement).zIndex) < 0,
-    }));
-  });
-  const ACIK_ZEMIN = new Set([colors.cream, colors.paper, colors.sky, colors.tile]);
-  const KOYU_ZEMIN = new Set([colors.berry, colors["berry-dk"], colors.ink]);
-  const KOYU_MUREKKEP = new Set([colors.tomato, colors.lettuce, colors.pickle, colors.patty]);
-  const ACIK_MUREKKEP = new Set([colors.mustard, colors.brioche]);
-  const uyar = (zemin, renk) =>
-    (ACIK_ZEMIN.has(zemin) && KOYU_MUREKKEP.has(renk)) || (KOYU_ZEMIN.has(zemin) && ACIK_MUREKKEP.has(renk));
-
-  t("Sticker · ana sayfada tam 3 tane", stk.length === 3, `${stk.length} adet: ${stk.map((s) => s.ad).join(", ")}`);
-  t("Sticker · rengi zeminle EŞLEŞİYOR", stk.length === 3 && stk.every((s) => uyar(s.zemin, s.renk)),
-    stk.map((s) => `${s.ad}@${s.zemin}=${s.renk}${uyar(s.zemin, s.renk) ? "✓" : "✗"}`).join(" · "));
-  // ters yön: kural yanlış çifti gerçekten reddediyor mu (tautoloji değil mi)
-  t("Sticker · kural YANLIŞ çifti reddediyor (ters yön)",
-    !uyar(colors.cream, colors.mustard) && !uyar(colors.berry, colors.tomato) && uyar(colors.cream, colors.tomato),
-    `cream+mustard=${uyar(colors.cream, colors.mustard)} · berry+tomato=${uyar(colors.berry, colors.tomato)} · cream+tomato=${uyar(colors.cream, colors.tomato)}`);
-  t("Sticker · aria-hidden + pointer-events:none + içeriğin ARKASINDA",
-    stk.every((s) => s.gizli && s.tiklanmaz && s.arkada),
-    stk.map((s) => `${s.ad}:${s.gizli ? "h" : "-"}${s.tiklanmaz ? "p" : "-"}${s.arkada ? "z" : "-"}`).join(" "));
 
   // --- harita tıkla-yükle
   await h.evaluate(() => document.querySelector("#location").scrollIntoView());
