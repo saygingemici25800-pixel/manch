@@ -15,7 +15,7 @@ type Props = {
 
 /**
  * R18: malzeme ikonları sırayla zıplar (footer).
- * `--juggle-scale` ile ölçek, `y` ile zıplama; stagger döngüsel.
+ * Sabit `y: -18` zıplama + `scale 1.12`; stagger döngüsel.
  * Reduced motion: zıplama yok, ikonlar dizili durur.
  * Zone perdesi açıkken tween duraklar (footer zaten görünmüyor).
  */

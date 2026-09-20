@@ -30,7 +30,7 @@ export default async function Footer() {
             </TransitionLink>
           ))}
         </nav>
-        <div className="flex flex-col items-end max-md:items-start gap-[1vw] max-md:gap-[3vw] [--juggle-scale:0.7]">
+        <div className="flex flex-col items-end max-md:items-start gap-[1vw] max-md:gap-[3vw]">
           <Juggle items={INGREDIENTS.slice(0, 4)} className="text-mustard [&_span]:h-[3.5vw] [&_span]:w-[3.5vw] max-md:[&_span]:h-[10vw] max-md:[&_span]:w-[10vw]" />
           <p className="font-pixel text-[0.75vw] max-md:text-[2.8vw] uppercase tracking-widest text-cream">{t("tape")}</p>
         </div>
