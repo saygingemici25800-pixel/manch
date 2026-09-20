@@ -32,12 +32,21 @@ for (const path of PAGES) {
 }
 
 const LIMIT = 220; // Kural 46 (revize 2026-09-19)
-console.log(`sayfa        | dosya | raw kB | gz kB | limit ${LIMIT} gz`);
+/* UYARI eşiği (karar 2026-09-20): limitin %98'i. Pay 0.7 kB'ye indiğinde fark edilmesi
+   için — sınıra dayandığımızı AŞMADAN ÖNCE görmek istiyoruz. Uyarı çıkış kodunu
+   değiştirmez (kapı hâlâ LIMIT), yalnız görünür kılar. */
+const WARN = +(LIMIT * 0.98).toFixed(1);
+const damga = (gz) => (gz > LIMIT ? "✗ AŞIYOR" : gz >= WARN ? `⚠ SINIRDA (pay ${+(LIMIT - gz).toFixed(1)} kB)` : "✓");
+console.log(`sayfa        | dosya | raw kB | gz kB | limit ${LIMIT} gz (uyarı ${WARN})`);
 console.log("-------------|-------|--------|-------|-------------");
+let asan = 0, sinirda = 0;
 for (const [p, r] of Object.entries(rows)) {
-  console.log(`${p.padEnd(12)} | ${String(r.files).padStart(5)} | ${String(r.firstLoadRawKB).padStart(6)} | ${String(r.firstLoadGzKB).padStart(5)} | ${r.firstLoadGzKB <= LIMIT ? "✓" : "✗ AŞIYOR"}`);
+  if (r.firstLoadGzKB > LIMIT) asan++; else if (r.firstLoadGzKB >= WARN) sinirda++;
+  console.log(`${p.padEnd(12)} | ${String(r.files).padStart(5)} | ${String(r.firstLoadRawKB).padStart(6)} | ${String(r.firstLoadGzKB).padStart(5)} | ${damga(r.firstLoadGzKB)}`);
 }
 console.log("\n/tr en büyük 5 chunk (gz):");
 for (const f of rows["/tr"]?.top ?? []) console.log(`  ${String(f.gzKB).padStart(6)} kB  ${f.file}`);
-writeFileSync(OUT, JSON.stringify({ date: new Date().toISOString(), base: BASE, limitGzKB: LIMIT, rows }, null, 2));
+writeFileSync(OUT, JSON.stringify({ date: new Date().toISOString(), base: BASE, limitGzKB: LIMIT, warnGzKB: WARN, rows }, null, 2));
+if (sinirda) console.log(`\n⚠ ${sinirda} sayfa limitin %98'inde — sıradaki client kodu limiti aşabilir (Kural 46).`);
+if (asan) console.error(`\n✗ ${asan} sayfa ${LIMIT} kB gz limitini AŞIYOR (Kural 46).`);
 console.log(`\n→ ${OUT}`);

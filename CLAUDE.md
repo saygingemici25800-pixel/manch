@@ -30,6 +30,28 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **Kural 74 + footer ritmi (2026-09-20).** Bekçi tazeliği kural oldu (**Kural 74**:
+  revize edilen kuralın scripti aynı turda güncellenir) ve Footer yığın sırası kararı
+  bölüm 3'e yazıldı (wordmark z-0 · ikonlar z-10 · metin z-20, **madde kapandı**).
+  · **`bundle-report` uyarı eşiği kazandı:** limitin %98'i (**215.6 kB**) aşılınca
+    `⚠ SINIRDA (pay X kB)`, 220 aşılınca `✗ AŞIYOR`. Uyarı çıkış kodunu değiştirmez.
+    **Şu an tetikleniyor: `/tr` 219.5 kB gz → pay 0.5 kB.** Kesim YAPILMADI (karar).
+  · **Juggle ritmi düzeltildi:** zıplama süresi artık **genlikten türetiliyor**
+    (`t ∝ √h`) — sabit süre alçak genlikli ikonları havada süzüyordu. Yere değme süresi
+    de `d` ile ölçekleniyor: mobilde sabit 0.16 sn döngünün **%20'sini** yiyordu,
+    şimdi her kırılımda **%11–15** (hava/yer oranı ~6–7:1 havanın lehine).
+  · **Yatay gezinme genişledi:** ikonlar kendi şeritlerinde değil, menzilleri bilerek
+    üst üste biniyor — masaüstü ≈ %11–57 · %9–39 · %30–63 · %37–87 → **9 sn'de 12 yol
+    kesişmesi** (mobilde 3 ikonla 4). Menzil `[pad, bandW − ikon − pad]` aralığına
+    kırpılıyor: **sınır dışına çıkma yok, duvara yapışma yok** (ölçüldü).
+    Periyotlar (`XDUR`) ne birbirinin ne dikey periyodun katı — senkronlaşmıyorlar.
+  · **Dört oynak kontrol bulundu ve düzeltildi** (benim değişikliğimle ilgisiz, hepsi
+    eski): `/menu` modal ESC · `/menu` modal açılma · Preloader kalkması · CookieBanner
+    görünmesi. Dördü de **sabit süre** bekliyordu; dev sunucusu yük altındayken payı
+    aşıyorlardı. **Koşul beklemeye** çevrildi → **107/107 ×3 ardışık temiz koşu**
+  · Gözle bakıldı (Kural 59): 390 / 768 / 1440 — zeminde bekleme görünmüyor, yollar
+    kesişiyor, kenara yapışan yok, wordmark ve telif satırı tam okunuyor
+
 - **Footer zıplama alanı genişledi + 2 bayat bekçi düzeltildi (2026-09-20).**
   `Juggle` (R18) artık **alan modunda** (`field`): ikonlar sıra hâlinde değil, wordmark'ın
   üstünden sayfanın en alt zeminine kadar uzanan bandı kullanıyor — her biri **kendi
@@ -631,6 +653,12 @@ cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
 > · `cheddar` + `brioche` ink halesinin **"sticker" etkisi kabul edildi** — marka diline
 >   uygun. Hale okunurluk için zorunlu (ikisi açık zeminde 1.44 ve 2.00:1).
 
+> **Footer Juggle yığın sırası (karar: 2026-09-20).** Dekoratif wordmark **z-0** ·
+> ikonlar **z-10** · gerçek metin **z-20**. Wordmark `aria-hidden` ve 1.3:1 filigran
+> olduğu için ince çizgi ikonların önünden geçmesi okunurluğu bozmaz. Telif satırı ve
+> menü linkleri ikonların üstünde, bandın alt sınırı telif satırının üstünde biter.
+> **Madde kapandı, yeniden açılmayacak.**
+
 ---
 
 ## 4. FAZLAR
@@ -916,6 +944,23 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 
 ---
 
+74. **Bir kural revize edildiğinde onu uygulayan script AYNI TURDA güncellenir
+    (karar 2026-09-20).** Güncellenmeyen bekçi kuralın **eski hâlini savunmaya devam
+    eder** ve sessizce yanlış alarm üretir — hem güveni aşındırır hem de gerçek bir
+    sorunu fark etmeyi zorlaştırır.
+    Kanıt, 2026-09-20 taraması: `bundle-report` limiti **200**'de kalmıştı (Kural 46
+    hedefi 2026-09-19'da 220 olmuştu) ve 219.3 kB'yi sahte "AŞIYOR" gösteriyordu ·
+    `lighthouse.mjs` **LCP'yi kapı yapmaya devam ediyordu** (Kural 72 onu bilgiye
+    indirmişti; Lantern gerçek throttling'den ~2× kötümser olduğu için kapı sürekli
+    kırmızı yanardı) · `lcp-check` ise Kural 72'nin kapısını **hiç almamıştı** —
+    kural yazılmış, uygulayıcısı yazılmamıştı.
+    **Aynı sınıf: yalnız yorumda yaşayan ayar, olmayan ayardan kötüdür.**
+    `--juggle-scale` Footer'da tanımlıydı, bileşen yorumu onu anlatıyordu, kod hiç
+    okumuyordu (2026-09-20). Ayarı çevirenin hiçbir şey olmadığını görüp nedenini
+    araması, o ayarın hiç olmamasından daha pahalıdır.
+    **Kalıp:** kural revizyonu tamamlanmadan önce `grep`'le o kuralın sayısal/mantıksal
+    karşılığı scriptlerde aranır; bulunan her yer aynı commit'te güncellenir.
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1071,6 +1116,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-20 | footer | **`--juggle-scale` hayalet ayardı** — Footer'da `0.7` tanımlıydı, bileşen yorumu "ölçek bununla" diyordu, **kod onu hiç okumuyordu** | Faz 3'te yorumla birlikte yazılmış ama `y: -18` sabit kalmış. Yanlış çıktı üretmediği için kimse fark etmedi: ayarı değiştiren biri hiçbir şey olmadığını görür ve nedenini arardı | Bileşen `getComputedStyle(el).getPropertyValue("--juggle-scale")` ile gerçekten okuyor, zıplama genliğini çarpıyor. **Ders: yalnız yorumda yaşayan ayar, olmayan ayardan kötüdür** — belge yalan söylüyor |
 | 2026-09-20 | bekçi | **İki bayat bekçi**: `bundle-report` limiti 200 (Kural 46 → 220), `lighthouse` LCP'yi kapı yapıyordu (Kural 72 onu bilgiye indirmişti) | Kural revizyonları **kurala** yazıldı, scriptlere işlenmedi. İkisi de sahte alarm üretiyordu: 219.3 kB "AŞIYOR" görünüyordu; Lantern LCP'si gerçek throttling'den ~2× kötümser olduğu için kapı sürekli kırmızı yanardı | Limit 220'ye çekildi; LCP/perf `lighthouse`'ta bilgi oldu, kapı `lcp-check.mjs`'e yazıldı (2500 ms eşiği + 200 ms sapma denetimi, çıkış 0/1/2). **Ders: bir kural revize edilince o kuralı uygulayan SCRIPT de aynı turda güncellenir** — yoksa bekçi kuralın eski hâlini savunmaya devam eder |
 | 2026-09-20 | bekçi | Bu turda **iki ölçüm hatası**: ① çıkış kodu testi `$?` ile ölçüldü, boru hattının SON komutunu (`tail`) okuyordu → üç sabotajın üçü de "0" göründü ② "ikon hareket ediyor mu" kontrolü peş peşe iki `evaluate` ile örnekleniyordu (~10 ms arayla), ikon 1-2 px hareket edip tam sayıya yuvarlanınca **0** çıkıyordu → ürün duruyor sanıldı | İkisi de Kural 60'ın bilinen tuzakları: ölçülen şey ürün değil ölçüm aracıydı | ① boru hattı kaldırıldı, node'un kendi çıkış kodu okundu (1/2/0 doğrulandı) ② örnekler arasına 280 ms gerçek aralık kondu |
+| 2026-09-20 | footer | İkonlar "zıplamıyor, aralıklı sıçrıyor" — zeminde fazla bekliyor gibi duruyordu | İki ayrı sebep, ikisi de **süreyi genlikten bağımsız** tutmaktan: ① zıplama süresi sabitti (1.15–1.46 sn), oysa serbest düşüşte t ∝ √h — alçak genlikli ikon aynı sürede daha az yol alıp **havada süzülüyordu** ② yere değme süresi sabit 0.16 sn'ydi; mobilde döngü 0.86 sn'ye inince bu **%20** ediyordu (masaüstünde %10) | Süre genlikten türetiliyor (`AIR·√(amp/REF)·PACE`), yere değme de `d` ile ölçekleniyor. Ölçüldü: zeminde geçen oran **%20 → %13** (390), %10–15 → %11–13 (1440/768). **Ders: "top gibi dursun" isteniyorsa süre yükseklikten türetilir; sabit süre her zaman yanlış bir yerde hissedilir** |
+| 2026-09-20 | bekçi | `lab-check` **oynak çıktı**: ardışık koşular 102/107 · 106/107 · 107/107. Düşen kontroller her seferinde başkaydı — `/menu` modal ESC, `/menu` modal AÇILMA, Preloader kalkması, CookieBanner görünmesi | **Dördü de sabit `waitForTimeout` ile bekliyordu** (800 / 900 / 3200 / 2600 ms). Dev sunucusu yük altındayken (aynı makinede prod sunucusu + ölçüm tarayıcıları + arka arkaya lab koşuları) Turbopack derlemesi ve `router.replace` bu payları aşıyor, kontroller eski durumu okuyup kırmızı yanıyordu. Ürün hatası yok — hepsi yarış; üstelik ikisi çok eski (cookie payı bir kez 1200 → 2600 yapılmıştı, yani kalıp daha önce de ısırmış ve süre büyütülerek geçiştirilmişti). Aynı turda iki koşu `page.goto` zaman aşımıyla tamamen **çöktü** | Dördü de **koşul beklemeye** çevrildi (`waitForFunction` / `waitFor({state})`, tavanlı ve `.catch` ile yutulan) — iddialar aynı yerde duruyor, koşul gerçekten sağlanmazsa yine düşüyor. **Üç ardışık temiz koşu: 107/107 ×3.** Ders: *süre payını büyütmek yarışı çözmez, erteler* — beklenen şey süre değil **koşuldur**. Ayrıca Kural 71 yalnız Lighthouse için değil, dev sunucusuna karşı koşan **her** script için geçerli |
 
 ---
 

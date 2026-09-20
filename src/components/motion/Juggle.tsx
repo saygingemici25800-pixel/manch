@@ -23,11 +23,21 @@ type Props = {
    Sayılar birbirinin katı DEĞİL; olsaydı faz farkı bir süre sonra kapanır ve ikonlar
    senkronize zıplamaya başlardı. */
 const RISE = [0.92, 0.6, 0.8, 0.46]; // bandın oranı
-const DUR = [1.15, 1.46, 0.93, 1.31]; // sn
 const LAG = [0, 0.37, 0.72, 1.09]; // faz kayması (sn)
-const SWAY = [1, -1.35, 0.8, -0.95]; // yatay sapma yönü/çarpanı
-/** Yatay sapma genliği: 1.1vw (Kural 8 — vw tabanlı, dar ekranda kendiliğinden küçülür). */
-const SWAY_VW = 0.011;
+/** Havada geçen süre — genlikten TÜRETİLİR (aşağıya bak), bu yalnız referans tempo. */
+const AIR = 0.62;
+/** `AIR`'ın ölçeklendiği referans genlik (px). */
+const REF_AMP = 220;
+/** İkon başına tempo çarpanı — periyotlar birbirinin katı olmasın diye. */
+const PACE = [1, 1.13, 0.9, 1.07];
+/**
+ * Yatay gezinme: bandın genişliğinin oranı (işaret = yön). Şeritler BİLEREK üst üste
+ * biniyor — desktop menziller ≈ [11,53] [9,35] [30,60] [37,83] % → yollar kesişiyor.
+ * Kenara yapışma yok: menzil `[pad, bandW - ikon - pad]` aralığına kırpılıyor.
+ */
+const XAMP = [0.42, -0.26, -0.3, -0.46];
+/** Yatay periyotlar — dikey periyotların da birbirlerinin de katı DEĞİL. */
+const XDUR = [2.3, 2.9, 2.6, 3.4];
 /** Yatay yerleşim — masaüstü 4 ikon, mobil 3 (dördüncüsü `max-md:hidden`). */
 const LEFT = ["11%", "35%", "60%", "83%"];
 const LEFT_M = ["10%", "44%", "76%", "76%"];
@@ -36,7 +46,8 @@ const LEFT_M = ["10%", "44%", "76%", "76%"];
  * R18: malzeme ikonları zıplar (footer + /lab).
  * `--juggle-scale` zıplama yüksekliğini çarpar (kapsayıcıdan okunur), `y` ile zıplama.
  * Fizik hissi: yukarı yavaşlayarak (`power2.out`), aşağı hızlanarak (`power2.in`),
- * yere değince kısa bir ezilme.
+ * yere değince kısa bir ezilme (0.16 sn) — süre genlikten türetilir (t ∝ √h),
+ * böylece top gibi davranır ve zeminde beklemez.
  * Reduced motion: zıplama yok, ikonlar dizili/dizilmiş durur.
  * Renk: tek renk (`text-mustard`) — karar 2026-09-20, CLAUDE.md bölüm 3.
  */
@@ -70,26 +81,39 @@ export function Juggle({ items = INGREDIENTS, field = false, className }: Props)
       }
 
       const band = el.clientHeight;
-      const sway = window.innerWidth * SWAY_VW;
+      const bandW = el.clientWidth;
       const tls = [...icons].map((li, i) => {
+        const iw = li.offsetWidth;
         const amp = Math.max(24, (band - li.offsetHeight) * RISE[i % RISE.length] * k);
-        const d = DUR[i % DUR.length];
+        /* Süre GENLİKTEN türetiliyor: serbest düşüşte t ∝ √h. İki kazancı var —
+           (a) top hissi doğru oluyor, alçak zıplayan ikon hızlı zıplıyor; eskiden süre
+           sabitti ve alçak genlikliler havada süzülüyordu ("zeminde bekliyor" hissi),
+           (b) farklı genlikler periyotları kendiliğinden ayırıyor. */
+        const d = AIR * Math.sqrt(amp / REF_AMP) * PACE[i % PACE.length];
+        /* Yere değme süresi de `d` ile ölçekleniyor. Sabit 0.16 sn bırakılmıştı ve
+           mobilde zıplamalar kısaldığı için döngünün **%20'sini** yiyordu ("zeminde
+           bekliyor" hissi tam buydu — ölçüldü). Ölçekli hâlde her kırılımda ~%10. */
+        const yer = Math.max(0.09, 0.16 * (d / AIR));
+        g.gsap.set(li, { transformOrigin: "50% 100%" }); // ezilme tabandan olsun
         const tl = g.gsap
           .timeline({ repeat: -1, delay: LAG[i % LAG.length] })
-          .to(li, { y: -amp, scale: 1.1, duration: d, ease: "power2.out" })
-          .to(li, { y: 0, scale: 1, duration: d * 0.82, ease: "power2.in" })
-          .to(li, { scaleX: 1.14, scaleY: 0.84, duration: 0.08, ease: "power1.out" })
-          .to(li, { scaleX: 1, scaleY: 1, duration: 0.16, ease: "power2.out" });
-        // Yatay sapma AYRI bir tween: süresi dikeyin katı değil, böylece yörünge
-        // kendini tekrar etmiyor (düz yukarı-aşağı görünmüyor).
-        const xt = g.gsap.to(li, {
-          x: SWAY[i % SWAY.length] * sway,
-          duration: d * 1.63,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-          delay: LAG[i % LAG.length] * 0.5,
-        });
+          .to(li, { y: -amp, scaleX: 0.94, scaleY: 1.08, duration: d, ease: "power2.out" })
+          .to(li, { y: 0, scaleX: 1, scaleY: 1, duration: d, ease: "power2.in" })
+          .to(li, { scaleX: 1.18, scaleY: 0.82, duration: yer * 0.34, ease: "power2.out" })
+          .to(li, { scaleX: 1, scaleY: 1, duration: yer * 0.66, ease: "power2.out" });
+
+        /* Yatay gezinme AYRI tween ve GENİŞ: ikonlar kendi şeritlerinde kalmıyor,
+           menziller üst üste biniyor → yollar kesişiyor. Periyot dikeyin katı değil,
+           bu yüzden kesişmeler her turda başka noktada oluyor. */
+        const pad = iw * 0.15;
+        const base = li.offsetLeft;
+        const hedef = bandW * XAMP[i % XAMP.length];
+        const x = Math.max(-base + pad, Math.min(bandW - iw - base - pad, hedef));
+        const xt = g.gsap.fromTo(
+          li,
+          { x: 0 },
+          { x, duration: XDUR[i % XDUR.length], ease: "sine.inOut", yoyo: true, repeat: -1, delay: LAG[i % LAG.length] * 0.6 },
+        );
         return [tl, xt];
       });
 

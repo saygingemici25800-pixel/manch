@@ -164,7 +164,9 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
   const seenFirst = await q.locator("[data-preloader]").count();
   t("Preloader · ilk ziyarette görünür", seenFirst === 1, `adet=${seenFirst}`);
-  await q.waitForTimeout(3200);
+  // Koşul beklenir, sabit süre değil (Kural 60): dev sunucusu yük altındayken perde
+  // 3200 ms'yi aşıyor ve kontrol "kalkmadı" diyordu — ürün değil yarış.
+  await q.locator("[data-preloader]").waitFor({ state: "detached", timeout: 15000 }).catch(() => {});
   const goneAfter = await q.locator("[data-preloader]").count();
   t("Preloader · süre sonunda kalkar", goneAfter === 0);
 
@@ -256,8 +258,9 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
 
   // --- Cart persist (Kural 30): yeniden yükle, satırlar dursun
   await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
-  // CookieBanner 1.2 s gecikmeyle açılır → payla bekle (yoksa yarış)
-  await q.waitForTimeout(2600);
+  // CookieBanner 1.2 s gecikmeyle açılır. Sabit 2600 ms pay bırakılmıştı ama yük
+  // altında o da yetmiyordu → bandın KENDİSİ bekleniyor (Kural 60).
+  await q.locator("[data-testid=cookie-banner]").waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
   const persisted = await q.evaluate(() => window.__CART__.getState().lines.length);
   t("Cart · localStorage persist", persisted === 2, `satır=${persisted}`);
 
@@ -619,7 +622,14 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   // --- disclaimer iki yerde
   const d1 = await m.locator("[data-testid=menu-disclaimer]").count();
   await m.locator("[data-open-detail='classic-manch']").click();
-  await m.waitForTimeout(900);
+  // Sabit 900 ms yerine koşul (Kural 60) — yük altında modal geç açılıyordu.
+  await m
+    .waitForFunction(
+      () => document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state") === "open" && location.search !== "",
+      null,
+      { timeout: 10000 },
+    )
+    .catch(() => {});
   const modal = await m.evaluate(() => ({
     state: document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state"),
     url: location.search,
@@ -631,7 +641,19 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   t("/menu · modalda malzeme listesi", modal.ing >= 6, `${modal.ing} madde`);
 
   await m.keyboard.press("Escape");
-  await m.waitForTimeout(800);
+  /* SABİT bekleme (800 ms) yerine KOŞUL bekleniyor (Kural 60): dev sunucusu yük
+     altındayken `router.replace` + yeniden render 800 ms'yi aşıyor ve kontrol eski
+     durumu okuyup kırmızı yanıyordu (2026-09-20, üç koşuda bir). İddia değişmedi —
+     koşul gerçekten sağlanmazsa aşağıdaki `t(...)` yine düşer, yalnız yarış kalktı. */
+  await m
+    .waitForFunction(
+      () =>
+        document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state") === "closed" &&
+        location.search === "",
+      null,
+      { timeout: 8000 },
+    )
+    .catch(() => {});
   const closed = await m.evaluate(() => ({ state: document.querySelector("[data-testid=product-modal]")?.getAttribute("data-state"), url: location.search }));
   t("/menu · ESC modalı kapatır + URL temizlenir", closed.state === "closed" && closed.url === "", JSON.stringify(closed));
 
