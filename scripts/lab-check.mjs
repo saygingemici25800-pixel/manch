@@ -12,8 +12,16 @@ const ENGINE = process.env.BROWSER === "webkit" ? webkit : chromium;
 const PORT = process.env.PORT ?? "3113";
 const BASE = `http://localhost:${PORT}`;
 const URL = `${BASE}/tr/lab`;
+/* Gezinme payı (Kural 75'in gezinme hâli): Playwright'ın 30 sn varsayılanı DEV
+   sunucusunda yetmiyor — `.next` temizlendikten sonra ilk ziyaret edilen rota soğuk
+   derleniyor ve `page.goto` zaman aşımına düşüyor (2026-09-20: `/en/about`, koşu
+   çöktü). Ürünle ilgisi yok; sabit pay yine küçük kaldı. 90 sn bir KAPI değil,
+   yalnız tavan: gerçekten yanıt vermeyen sayfa hâlâ düşer. */
+const NAV_TIMEOUT = Number(process.env.NAV_TIMEOUT ?? 90000);
+
 const b = await ENGINE.launch(process.env.BROWSER === "webkit" ? {} : { executablePath: process.env.CHROME });
 const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+p.setDefaultNavigationTimeout(NAV_TIMEOUT);
 
 const errs = [];
 p.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") errs.push(m.type() + ": " + m.text()); });
@@ -165,6 +173,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   // --- R1 Preloader: ilk ziyarette çıkar, ikincide çıkmaz (sessionStorage)
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const q = await ctx.newPage();
+  q.setDefaultNavigationTimeout(NAV_TIMEOUT);
   await q.goto(`${BASE}/tr`, { waitUntil: "domcontentloaded" });
   const seenFirst = await q.locator("[data-preloader]").count();
   t("Preloader · ilk ziyarette görünür", seenFirst === 1, `adet=${seenFirst}`);
@@ -385,6 +394,7 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
 {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const h = await ctx.newPage();
+  h.setDefaultNavigationTimeout(NAV_TIMEOUT);
   const herrs = [];
   h.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") herrs.push(m.type() + ": " + m.text()); });
   h.on("pageerror", (e) => herrs.push("pageerror: " + e.message));
@@ -485,6 +495,44 @@ await hazir(h);
     [...document.querySelectorAll("[data-product-card]")].every((c) => Number(getComputedStyle(c).opacity) > 0.99));
   t("ProductGrid · scroll sonrası da 6/6 görünür", afterScroll);
 
+  /* STICKER'LAR (2026-09-20) — kontur/gölge/hale YOK, okunurluk tamamen zemin
+     eşleşmesine bağlı: açık zemine koyu malzeme, koyu zemine açık malzeme.
+     Tip sistemi yanlış çifti derlemiyor ama bir BÖLÜMÜN ZEMİNİ sonradan değişirse
+     tipler bunu göremez — bu kontrol gerçek `background-color`'ı okur.
+     ÇİFT YÖNLÜ (Kural 60): gerçek sticker'lar geçer + uydurma yanlış çift DÜŞER.
+     İkincisi olmasaydı "her şeye true dönen" bozuk bir kural da yeşil verirdi. */
+  const stk = await h.evaluate(() => {
+    const hex = (c) => {
+      const m = c.match(/\d+/g);
+      return m ? "#" + m.slice(0, 3).map((v) => (+v).toString(16).padStart(2, "0")).join("") : c;
+    };
+    return [...document.querySelectorAll("[data-sticker]")].map((el) => ({
+      ad: el.dataset.sticker,
+      renk: hex(getComputedStyle(el).color),
+      zemin: hex(getComputedStyle(el.closest("section")).backgroundColor),
+      gizli: el.closest("[aria-hidden=true]") != null,
+      tiklanmaz: getComputedStyle(el.parentElement).pointerEvents === "none",
+      arkada: Number(getComputedStyle(el.parentElement).zIndex) < 0,
+    }));
+  });
+  const ACIK_ZEMIN = new Set([colors.cream, colors.paper, colors.sky, colors.tile]);
+  const KOYU_ZEMIN = new Set([colors.berry, colors["berry-dk"], colors.ink]);
+  const KOYU_MUREKKEP = new Set([colors.tomato, colors.lettuce, colors.pickle, colors.patty]);
+  const ACIK_MUREKKEP = new Set([colors.mustard, colors.brioche]);
+  const uyar = (zemin, renk) =>
+    (ACIK_ZEMIN.has(zemin) && KOYU_MUREKKEP.has(renk)) || (KOYU_ZEMIN.has(zemin) && ACIK_MUREKKEP.has(renk));
+
+  t("Sticker · ana sayfada tam 3 tane", stk.length === 3, `${stk.length} adet: ${stk.map((s) => s.ad).join(", ")}`);
+  t("Sticker · rengi zeminle EŞLEŞİYOR", stk.length === 3 && stk.every((s) => uyar(s.zemin, s.renk)),
+    stk.map((s) => `${s.ad}@${s.zemin}=${s.renk}${uyar(s.zemin, s.renk) ? "✓" : "✗"}`).join(" · "));
+  // ters yön: kural yanlış çifti gerçekten reddediyor mu (tautoloji değil mi)
+  t("Sticker · kural YANLIŞ çifti reddediyor (ters yön)",
+    !uyar(colors.cream, colors.mustard) && !uyar(colors.berry, colors.tomato) && uyar(colors.cream, colors.tomato),
+    `cream+mustard=${uyar(colors.cream, colors.mustard)} · berry+tomato=${uyar(colors.berry, colors.tomato)} · cream+tomato=${uyar(colors.cream, colors.tomato)}`);
+  t("Sticker · aria-hidden + pointer-events:none + içeriğin ARKASINDA",
+    stk.every((s) => s.gizli && s.tiklanmaz && s.arkada),
+    stk.map((s) => `${s.ad}:${s.gizli ? "h" : "-"}${s.tiklanmaz ? "p" : "-"}${s.arkada ? "z" : "-"}`).join(" "));
+
   // --- harita tıkla-yükle
   await h.evaluate(() => document.querySelector("#location").scrollIntoView());
   await hazir(h);
@@ -523,6 +571,7 @@ await hazir(h);
 {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const m = await ctx.newPage();
+  m.setDefaultNavigationTimeout(NAV_TIMEOUT);
   const merrs = [];
   const bad4xx = [];
   m.on("console", (e) => { if (e.type() === "error" || e.type() === "warning") merrs.push(e.type() + ": " + e.text()); });
@@ -743,6 +792,7 @@ await hazir(m);
 {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
   const q7 = await ctx.newPage();
+  q7.setDefaultNavigationTimeout(NAV_TIMEOUT);
 
   // --- metadata rotaları
   const meta = [];
