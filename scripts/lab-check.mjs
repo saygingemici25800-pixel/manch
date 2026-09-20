@@ -2,6 +2,7 @@
 // Kullanım: pnpm dev -p 3113 çalışırken → CHROME=<chromium yolu> node scripts/lab-check.mjs
 // Kural 45: BROWSER=webkit ile ikinci koşu (Faz 8'de).
 import { chromium, webkit } from "playwright-core";
+import { colors } from "../src/styles/tokens.ts";
 
 // Kural 45: BROWSER=webkit ile Safari/WebKit koşusu (backdrop-blur, svh/dvh, Lenis wheel,
 // sticky sekme, PNG şeffaflık). WebKit'te Tab yalnızca form kontrollerini dolaşır.
@@ -95,6 +96,25 @@ await p.mouse.move(hideBox.x + hideBox.width / 2, hideBox.y + hideBox.height / 2
 await p.waitForTimeout(500);
 const trailOp = await p.evaluate(() => getComputedStyle(document.querySelector("[data-testid=cursor-trail]")).opacity);
 t("data-cursor-hide üstünde iz gizlendi", Number(trailOp) < 0.2, `opacity=${trailOp}`);
+
+/* Malzeme ikonu renkleri (2026-09-20). Üç şey sessizce kırılabilir:
+   ① renk tokendan değil koda gömülü hex'ten gelir ② iki malzeme aynı rengi alır
+   ③ hale düşer → ikon koyu ya da açık zeminin birinde kaybolur (gözle bakmadan
+   görünmez, çünkü DOM ve olaylar sağlam kalır — Kural 59'un joystick/tavan dersi).
+   Ölçüm ekranda RENDER EDİLEN değerden yapılır, kaynaktan değil. */
+const ink = await p.evaluate(() =>
+  [...document.querySelectorAll("[data-icon]")].map((el) => ({
+    renk: getComputedStyle(el.querySelector("[data-icon-mask]") ?? el).backgroundColor,
+    hale: (getComputedStyle(el).filter.match(/drop-shadow/g) ?? []).length,
+  })),
+);
+const rgb = (hex) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ")})`;
+const BEKLENEN = [colors.lettuce, colors.tomato, colors.mustard, colors.patty, colors.pickle, colors.brioche].map(rgb);
+t("malzeme ikonları 6 ayrı renk", new Set(ink.map((i) => i.renk)).size === 6, ink.map((i) => i.renk).join(" · "));
+t("ikon renkleri tokenlardan (hex gömülü değil)", ink.length === 6 && ink.every((v, i) => v.renk === BEKLENEN[i]),
+  `beklenen ${BEKLENEN.join(",")} · gelen ${ink.map((i) => i.renk).join(",")}`);
+t("her ikonda iki katmanlı hale (kontrast koruması)", ink.length === 6 && ink.every((i) => i.hale === 2),
+  ink.map((i) => i.hale).join(","));
 
 // --- 7 reduced motion: zorla AÇIK
 await p.getByRole("button", { name: "Zorla AÇIK" }).click();

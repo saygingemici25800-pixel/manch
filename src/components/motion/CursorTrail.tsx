@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { INGREDIENTS } from "@/components/ui/IngredientIcon";
+import { INGREDIENT_INK, INGREDIENTS } from "@/components/ui/IngredientIcon";
 import { useFinePointer } from "@/lib/hooks/useFinePointer";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
@@ -16,6 +16,8 @@ const TRAIL_POINTS = 14;
  * `button, a` selector'ı YOK.
  * Kural 31: koşullu `null` render eden component'te `useGSAP({ scope })` kullanılmaz —
  * ref effect içinde okunur, yoksa erken çıkılır.
+ * Renkler: her malzeme kendi tokenını alır (`INGREDIENT_INK`); buzlu cam daire ve
+ * beyaz iz değişmedi.
  */
 export function CursorTrail() {
   const root = useRef<HTMLDivElement>(null);
@@ -98,21 +100,34 @@ export function CursorTrail() {
         data-dot
         className="absolute -left-[1.4vw] -top-[1.4vw] grid h-[2.8vw] w-[2.8vw] place-items-center rounded-full bg-cream/25 text-cream backdrop-blur-md"
       >
-        {INGREDIENTS.map((name) => (
-          <span
-            key={name}
-            data-icon
-            className="col-start-1 row-start-1 inline-block h-[1.4vw] w-[1.4vw] bg-current opacity-0"
-            style={{
-              maskImage: `url(/icons/${name}.svg)`,
-              WebkitMaskImage: `url(/icons/${name}.svg)`,
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-            }}
-          />
-        ))}
+        {INGREDIENTS.map((name) => {
+          const { color, halo } = INGREDIENT_INK[name];
+          return (
+            /* Hale DIŞ elemanda: CSS'te `filter` maskeden ÖNCE uygulanır, aynı elemana
+               konsaydı maske haleyi de keserdi. Dış eleman `data-icon` kalıyor ki GSAP
+               döngüsü (autoAlpha + rotate) hale ile birlikte çalışsın. */
+            <span
+              key={name}
+              data-icon
+              className="col-start-1 row-start-1 inline-block h-[1.4vw] w-[1.4vw] opacity-0"
+              style={{ filter: `drop-shadow(0 0 1px ${halo}) drop-shadow(0 0 1px ${halo})` }}
+            >
+              <span
+                data-icon-mask
+                className="block h-full w-full"
+                style={{
+                  backgroundColor: color,
+                  maskImage: `url(/icons/${name}.svg)`,
+                  WebkitMaskImage: `url(/icons/${name}.svg)`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                }}
+              />
+            </span>
+          );
+        })}
       </div>
     </div>
   );

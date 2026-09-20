@@ -11,6 +11,13 @@ export const colors = {
   pink: "#e9a3b8",
   mustard: "#f6c343",
   ink: "#1b1b1b",
+
+  // Malzeme ikonları (CursorTrail) — cheddar ayrı token almaz, mustard'ı kullanır.
+  tomato: "#c6412f",
+  lettuce: "#6a9440",
+  pickle: "#55762c",
+  patty: "#7b4a2e",
+  brioche: "#d9a15b",
 } as const;
 
 export type ColorToken = keyof typeof colors;

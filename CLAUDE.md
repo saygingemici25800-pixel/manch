@@ -30,6 +30,28 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **CursorTrail malzeme ikonları renklendirildi (2026-09-20).** İmleç dairesindeki 6 ikon
+  artık tek renk değil: her malzeme kendi `@theme` tokenını alıyor. Yeni tokenlar
+  `--color-tomato #c6412f` · `--color-lettuce #6a9440` · `--color-pickle #55762c` ·
+  `--color-patty #7b4a2e` · `--color-brioche #d9a15b`; **cheddar ayrı token almadı,
+  mevcut `--color-mustard`'ı kullanıyor.** `tokens.ts` aynası güncel (9 → 14 token,
+  `/lab` paleti hepsini gösteriyor). **Buzlu cam daire ve beyaz iz değişmedi.**
+  · **Hale zorunlu çıktı, tercih değil:** gerçek malzeme renkleri orta tonlu olduğu için
+    hiçbiri hem krem/karo hem berry/ink zeminde birden okunmuyor (ölçüldü). Her ikon,
+    rengin ZAYIF kaldığı zeminin karşıtı bir hale alıyor — koyu zeminde silinenler krem,
+    açık zeminde silinenler ink. Hale `drop-shadow`, **iki katman**; A/B ile karar verildi
+    (tek katmanda `patty` koyu zeminde, `brioche` açık zeminde gözle görülür şekilde sönüyor):
+    `docs/screens/cursor-renk-hale-ab-{berry,cream}.png` — üst satır uygulanan (iki katman),
+    alt satır reddedilen (tek katman)
+  · **Ölçüm, dört zeminde buzlu camın ALTINDAKİ etkin rengin üstünden yapıldı** (sayfa
+    rengi değil): hero fotoğrafı `#655869` · cream `#f5efe9` · berry `#8c5367` · karo `#add0dc`.
+    24 hücrenin hepsinde ya ikonun kendi kontrastı ≥ 2.17 ya da halesi ≥ 5.13 — **hiçbir
+    malzeme hiçbir zeminde kaybolmuyor.** En zayıf hücre `lettuce` / karo duvar (2.17)
+  · Bekçi: `lab-check`'e 3 kontrol (6 ayrı renk · renkler tokendan geliyor · iki katmanlı
+    hale), **sabotajla doğrulandı** — hex gömülünce ve hale tek katmana düşünce 101/103
+  · `lab-check` **103/103** · `a11y-check` 39/39 · `smoke` 32/32 · `/tr` ilk yükleme
+    **218.9 kB gz** (değişmedi, Kural 46 hedefi 220 ✓)
+
 - Aktif faz: **Fazlar 1–9 + 5.5 KAPALI (2026-09-19).** Site canlı, kalan iş sahibinden gelecek
   içeriğe ve sipariş sistemi kararına bağlı. Devir notu: **`docs/manch-devir.md`** (yeni bir
   oturuma hızlı giriş; tek doğruluk kaynağı yine bu dosyadır). Faz 7 yeniden doğrulandı ve kapatıldı (2026-09-19): Zone `sr-only` hedefleri, kapalı diyalog `inert`, taslak metin kaydı. `a11y-check` 39/39. Faz 6 iç sayfaları
@@ -998,6 +1020,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-19 | 9 | `yedek-faz-9` etiketi **yalnız yereldeydi**; `CLAUDE.md` onu güvenlik ağı sayıyordu | Etiket oluşturulmuş ama `git push origin <etiket>` yapılmamıştı. `git tag` yerel listeyi gösterdiği için "var" görünüyordu; `ls-remote` ile bakılmamıştı. Bu makine gitse yedek de giderdi | Etiket push edildi, `ls-remote` ile doğrulandı (uzakta artık `yedek-faz-9` + `yedek-zone-oncesi`). **Kural 73** yazıldı |
 | 2026-09-19 | 9 | Faz 9'da **domain kutusu `[x]`** işaretliydi ama alan adı hiç bağlanmamıştı | İşaretlenen şey "Cloudflare adım listesini yazdım"dı, sonucu değil. Kutuya bakan domainin hazır olduğunu sanıyordu — kayıt üç faz boyunca yanlış durdu | Kutu `[ ]`'ya çevrildi, gerekçesi yanına yazıldı. **Kural 73'ün ikinci yarısı:** kutu ancak dışarıdan doğrulanabilir bir kanıtla işaretlenir |
 | 2026-09-19 | kapanış | Kural 72 kapısı (LCP) bu turda **geçerli ölçülemedi** | Makine boşta değildi: önce benim bıraktığım **19 artık tarayıcı süreci** (öldürüldü), sonra macOS'un kendi arka plan işleri — `diskimagesiod` %171, `mediaanalysisd` %126 (Photos indeksleme). Yük 7.8 → 16.6. Örnekler saçıldı: `/menu` [3164, 3592, 4976], sapma **1812 ms** — Kural 72'nin kendi güvenilirlik eşiği (200 ms) bunu reddediyor | Sayı **raporlanmadı**. Kural 72'nin sapma şartı tam bunun için var: kötü bir ölçümü "sonuç" diye yazmak yerine geçersiz saydı. Bu turda `src/` hiç değişmediği (yalnız belge + Kural 73) için son geçerli ölçüm aynen geçerli: **836 / 2084 / 820 ms**. **Ders: ölçüm bitince tarayıcı süreçlerinin kapandığı doğrulanmalı** — birikenler sonraki ölçümleri sessizce bozuyor |
+| 2026-09-20 | cursor | **İkonlar cream/paper bölümlerde zaten GÖRÜNMÜYORDU** — renklendirme sırasında ortaya çıktı | İkon rengi `text-cream` + `bg-current`'tı; buzlu cam da `bg-cream/25`. Krem bölümde camın altındaki etkin zemin **#f5efe9**, ikon **#f4eee6** → **1.0:1**. Yani ikon cream zeminlerde teknik olarak vardı ama hiç okunmuyordu. Hiçbir otomatik kontrol bakmıyordu (DOM'da var, maske çalışıyor, konsol temiz) ve renk tek olduğu için kimsenin dikkatini çekmemişti | Renklendirme bunu kendiliğinden çözdü (4 malzeme açık zeminde 3.1–6.4:1), kalan iki açık renk (cheddar, brioche) ink hale aldı. Ders: **tek renkli dekoratif öğe "sorunsuz" değil, sadece sorgulanmamış demektir** |
+| 2026-09-20 | cursor | Kare/kontrast scripti **iki zeminde yanlış özneyi ölçtü**: "cream bölüm" diye berry (#6a1f3b), "hero fotoğrafı" diye hardal rozet raporlandı | Script hedef bölümün kutusu içinde **en düz (varyansı en düşük) yamayı** arıyordu; `#hits` içinde en düz yer ürün kartının berry görseli, hero kutusunda da dönen rozet çıktı. Ayrıca `<picture>` seçicisi kutu vermiyor (çocuğu `absolute`, kendisi `inline`) → hero hiç bulunamadı. **Ölçüm doğru çalıştı, yanlış yeri ölçtü** (Kural 60) | Yamaya `expect` rengi + tolerans şartı kondu, hero `picture img`'a bağlandı, nokta `data-cursor-hide` üstünde olamaz. Sonra dört zemin de doğru çıktı |
 
 ---
 

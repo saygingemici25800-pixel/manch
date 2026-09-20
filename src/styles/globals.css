@@ -13,6 +13,15 @@
   --color-mustard: #f6c343;
   --color-ink: #1b1b1b;
 
+  /* Malzeme ikonları (CursorTrail) — gerçek malzeme rengi, markanın doygunluğunda:
+     floresan değil, kırık/toprak tonlarda. Cheddar ayrı token almaz, --color-mustard
+     kullanır. Kontrast ölçümü + hale kararı: hata günlüğü 2026-09-20. */
+  --color-tomato: #c6412f;
+  --color-lettuce: #6a9440;
+  --color-pickle: #55762c;
+  --color-patty: #7b4a2e;
+  --color-brioche: #d9a15b;
+
   --ease-jelly: cubic-bezier(0.4, 1.6, 0.7, 0.95);
 }
 
