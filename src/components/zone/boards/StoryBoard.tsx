@@ -20,7 +20,7 @@ export function StoryBoard({ frame }: { frame: ZoneFrame }) {
 
   return (
     <div data-testid="story-board" data-frame={frame.id} className="flex flex-col gap-[1.2vw] max-md:gap-[4vw]">
-      <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-ink/20 bg-paper">
+      <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-ink/20 bg-cream">
         <Image
           src={frame.art}
           alt={t(`frames.${frame.id}`)}

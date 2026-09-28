@@ -96,13 +96,13 @@ export default async function MenuPage({ params }: Props) {
           <p className="font-pixel text-[0.9vw] uppercase tracking-[0.3em] text-berry max-md:text-[3vw]">
             {site.menuTagline}
           </p>
-          <p className="font-pixel text-[0.8vw] uppercase tracking-widest text-berry-dk max-md:text-[2.8vw]">
+          <p className="font-pixel text-[0.8vw] uppercase tracking-widest text-berry max-md:text-[2.8vw]">
             {tc("products", { count: products.length })}
           </p>
           {/* Faz 4'te eklenen anahtar — 1/2: menü başlığının altında */}
           <p
             data-testid="menu-disclaimer"
-            className="max-w-[46ch] font-ui text-[0.8vw] text-berry-dk max-md:text-[2.9vw]"
+            className="max-w-[46ch] font-ui text-[0.8vw] text-berry max-md:text-[2.9vw]"
           >
             {t("disclaimer")}
           </p>

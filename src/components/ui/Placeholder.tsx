@@ -10,9 +10,9 @@ type Props = {
 
 const TONES = {
   berry: "bg-berry text-cream",
-  sky: "bg-sky text-berry-dk",
-  pink: "bg-pink text-berry-dk",
-  paper: "bg-paper text-berry-dk",
+  sky: "bg-sky text-berry",
+  pink: "bg-sky text-berry",
+  paper: "bg-cream text-berry",
 } as const;
 
 /**

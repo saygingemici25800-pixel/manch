@@ -94,7 +94,7 @@ export function FramePrompt() {
           ref={enterBtn}
           data-testid="frame-enter"
           onClick={() => openFrame(frame.id)}
-          className="rounded-full border-2 border-berry-dk bg-mustard px-[1.2vw] py-[0.35vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] text-berry-dk max-md:px-[4vw] max-md:py-[1.2vw] max-md:text-[3.2vw]"
+          className="rounded-full border-2 border-berry bg-cream px-[1.2vw] py-[0.35vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] text-berry max-md:px-[4vw] max-md:py-[1.2vw] max-md:text-[3.2vw]"
         >
           {t("enter")}
         </button>

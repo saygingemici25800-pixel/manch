@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 
-import { INGREDIENT_INK, INGREDIENTS } from "@/components/ui/IngredientIcon";
+import { INGREDIENTS } from "@/components/ui/IngredientIcon";
+import { colors } from "@/styles/tokens";
 import { useFinePointer } from "@/lib/hooks/useFinePointer";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { useLazyGsap } from "@/lib/hooks/useLazyGsap";
@@ -16,8 +17,8 @@ const TRAIL_POINTS = 14;
  * `button, a` selector'ı YOK.
  * Kural 31: koşullu `null` render eden component'te `useGSAP({ scope })` kullanılmaz —
  * ref effect içinde okunur, yoksa erken çıkılır.
- * Renkler: her malzeme kendi tokenını alır (`INGREDIENT_INK`); buzlu cam daire ve
- * beyaz iz değişmedi.
+ * Renk: TEK renk + zemin kuralı (koyu zeminde krem, açık zeminde bordo).
+ * Hale mekanizması kaldırıldı (kit geçişi 2026-09-28).
  */
 export function CursorTrail() {
   const root = useRef<HTMLDivElement>(null);
@@ -58,7 +59,37 @@ export function CursorTrail() {
         }
       };
 
+      /* ZEMİN KURALI (kit 2026-09-28): ikonlar TEK renk, hale yok — okunurluk
+         tamamen zemine bağlı. Koyu zeminde krem, açık zeminde bordo.
+         Zemin imlecin ALTINDAN okunuyor (`elementFromPoint` + ata zincirinde ilk
+         saydam olmayan arka plan): `data-nav-dark` bölüm işareti nav BANDINI ölçer,
+         imlecin altını değil — iki farklı soru. Katman `pointer-events-none`
+         olduğu için kendini döndürmüyor.
+         Her karede değil, ~10 Hz örnekleniyor: `getComputedStyle` pahalı. */
+      let tick = 0;
+      let koyu = true;
+      const zeminKoyuMu = (x: number, y: number) => {
+        let el = document.elementFromPoint(x, y) as Element | null;
+        while (el) {
+          const bg = getComputedStyle(el).backgroundColor;
+          const m = bg.match(/\d+(\.\d+)?/g);
+          if (m && (m.length < 4 || Number(m[3]) > 0.5)) {
+            const [r, g2, b] = m.map(Number);
+            return 0.2126 * r + 0.7152 * g2 + 0.0722 * b < 140;
+          }
+          el = el.parentElement;
+        }
+        return true; // zemin okunamadıysa krem (sayfa zeminleri ağırlıkla bordo)
+      };
+
       const draw = () => {
+        if (++tick % 6 === 0 && mx >= 0) {
+          const k = zeminKoyuMu(mx, my);
+          if (k !== koyu) {
+            koyu = k;
+            dot.style.color = k ? colors.cream : colors.berry;
+          }
+        }
         pts.push({ x: mx, y: my });
         if (pts.length > TRAIL_POINTS) pts.shift();
         path.setAttribute("d", pts.map((p, i) => `${i ? "L" : "M"}${p.x},${p.y}`).join(" "));
@@ -100,34 +131,21 @@ export function CursorTrail() {
         data-dot
         className="absolute -left-[1.4vw] -top-[1.4vw] grid h-[2.8vw] w-[2.8vw] place-items-center rounded-full bg-cream/25 text-cream backdrop-blur-md"
       >
-        {INGREDIENTS.map((name) => {
-          const { color, halo } = INGREDIENT_INK[name];
-          return (
-            /* Hale DIŞ elemanda: CSS'te `filter` maskeden ÖNCE uygulanır, aynı elemana
-               konsaydı maske haleyi de keserdi. Dış eleman `data-icon` kalıyor ki GSAP
-               döngüsü (autoAlpha + rotate) hale ile birlikte çalışsın. */
-            <span
-              key={name}
-              data-icon
-              className="col-start-1 row-start-1 inline-block h-[1.4vw] w-[1.4vw] opacity-0"
-              style={{ filter: `drop-shadow(0 0 1px ${halo}) drop-shadow(0 0 1px ${halo})` }}
-            >
-              <span
-                data-icon-mask
-                className="block h-full w-full"
-                style={{
-                  backgroundColor: color,
-                  maskImage: `url(/icons/${name}.svg)`,
-                  WebkitMaskImage: `url(/icons/${name}.svg)`,
-                  maskRepeat: "no-repeat",
-                  WebkitMaskRepeat: "no-repeat",
-                  maskSize: "contain",
-                  WebkitMaskSize: "contain",
-                }}
-              />
-            </span>
-          );
-        })}
+        {INGREDIENTS.map((name) => (
+          <span
+            key={name}
+            data-icon
+            className="col-start-1 row-start-1 inline-block h-[1.4vw] w-[1.4vw] bg-current opacity-0"
+            style={{
+              maskImage: `url(/icons/${name}.svg)`,
+              WebkitMaskImage: `url(/icons/${name}.svg)`,
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+            }}
+          />
+        ))}
       </div>
     </div>
   );

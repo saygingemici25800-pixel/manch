@@ -58,3 +58,6 @@ playwright-report/
 test-results/
 *.tmp.mjs
 .next-V*/
+
+# Marka kiti kaynak PDF"leri — repoya girmez (122 MB + 848 KB, Kural 69/70)
+*.pdf

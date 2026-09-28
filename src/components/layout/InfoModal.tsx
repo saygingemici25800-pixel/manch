@@ -22,7 +22,7 @@ export default function InfoModal() {
 
   return (
     <div
-      className={clsx("fixed inset-0 z-73 grid place-items-center bg-berry-dk/50 p-[4vw] transition-opacity duration-300", open ? "opacity-100" : "pointer-events-none opacity-0")}
+      className={clsx("fixed inset-0 z-73 grid place-items-center bg-berry/50 p-[4vw] transition-opacity duration-300", open ? "opacity-100" : "pointer-events-none opacity-0")}
       onClick={(e) => e.target === e.currentTarget && close()}
     >
       <div ref={ref} role="dialog" aria-modal={open || undefined} inert={!open} aria-labelledby="info-title" data-state={open ? "open" : "closed"} className={clsx("w-[34vw] max-md:w-[88vw] transition-transform duration-400", open ? "scale-100" : "scale-95")}>

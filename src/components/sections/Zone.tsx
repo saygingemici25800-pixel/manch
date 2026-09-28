@@ -16,7 +16,10 @@ export async function Zone() {
   const tz = await getTranslations("Zone");
 
   return (
-    <section id="zone" data-nav-dark="" className="relative scroll-mt-[6vw]">
+    <section id="zone" className="relative scroll-mt-[6vw]">
+      {/* `data-nav-dark` KALDIRILDI (kit geçişi 2026-09-28): `tile` #8fc3d6'dan
+          #C3E5F7'ye açıldı, bölüm artık koyu değil. İşaret kalsaydı nav krem hapa
+          döner ve krem/mavi 1.27 ile YASAK ÇİFT oluşurdu. */}
       {/* dalgalı üst kenar */}
       <svg viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true" className="block h-[5vw] w-full max-md:h-[12vw]">
         <path className="fill-cream" d="M0,0 L1440,0 L1440,40 Q1080,90 720,45 T0,40 Z" />
@@ -30,7 +33,7 @@ export async function Zone() {
           <SplitReveal as="h2" type="lines" className="heading180 text-[4.4vw] text-berry max-md:text-[12vw]">
             {t("zone.title")}
           </SplitReveal>
-          <p className="mt-[1.2vw] max-w-[44ch] font-ui text-[1.1vw] text-berry-dk max-md:mt-[4vw] max-md:text-[4vw]">
+          <p className="mt-[1.2vw] max-w-[44ch] font-ui text-[1.1vw] text-berry max-md:mt-[4vw] max-md:text-[4vw]">
             {t("zone.body")}
           </p>
           <p className="mt-[1.5vw] font-pixel text-[1.1vw] uppercase text-berry max-md:mt-[5vw] max-md:text-[3.4vw]">

@@ -47,7 +47,7 @@ export async function Hero() {
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </picture>
-        <div className="absolute inset-0 bg-berry-dk/45" />
+        <div className="absolute inset-0 bg-berry/45" />
       </div>
 
       {/* dönen rozet */}
@@ -56,7 +56,7 @@ export async function Hero() {
           <defs>
             <path id="badge" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" fill="none" />
           </defs>
-          <text className="fill-mustard font-ui text-[9px] uppercase tracking-[0.18em]">
+          <text className="fill-cream font-ui text-[9px] uppercase tracking-[0.18em]">
             <textPath href="#badge">{t("hero.badge").repeat(2)}</textPath>
           </text>
         </svg>
@@ -70,7 +70,7 @@ export async function Hero() {
           Hero `min-h-[100svh]` + `justify-end` olduğu için bu dolgu sayfa yüksekliğini
           DEĞİŞTİRMEZ — blok kendi içinde yukarı kayar, banner `fixed`, CLS riski yok. */}
       <div className="relative px-[3vw] pb-[7.5vw] max-md:px-[5vw] max-md:pb-[28vw]">
-        <h1 className="heading180 max-w-[16ch] text-mustard">{t("hero.title")}</h1>
+        <h1 className="heading180 max-w-[16ch] text-cream">{t("hero.title")}</h1>
         <p className="mt-[1vw] max-w-[46ch] text40 text-[1.2vw] text-cream max-md:mt-[4vw] max-md:text-[4vw]">
           {t("hero.sub")}
         </p>

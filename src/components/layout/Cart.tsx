@@ -97,7 +97,7 @@ export default function Cart() {
           <circle cx="9.5" cy="20" r="1.2" /><circle cx="17" cy="20" r="1.2" />
         </svg>
         {hydrated && count > 0 && (
-          <span data-testid="cart-count" className="badge absolute -right-[0.3vw] -top-[0.3vw] max-md:-right-[1vw] max-md:-top-[1vw] grid h-[1.6vw] min-w-[1.6vw] max-md:h-[5.5vw] max-md:min-w-[5.5vw] place-items-center rounded-full bg-mustard px-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.6vw] text-ink">
+          <span data-testid="cart-count" className="badge absolute -right-[0.3vw] -top-[0.3vw] max-md:-right-[1vw] max-md:-top-[1vw] grid h-[1.6vw] min-w-[1.6vw] max-md:h-[5.5vw] max-md:min-w-[5.5vw] place-items-center rounded-full bg-cream px-[0.3vw] font-pixel text-[0.7vw] max-md:text-[2.6vw] text-ink">
             {count}
           </span>
         )}
@@ -107,7 +107,7 @@ export default function Cart() {
       <div
         aria-hidden="true"
         onClick={close}
-        className={clsx("fixed inset-0 z-71 bg-berry-dk/40 transition-opacity duration-400", open ? "opacity-100" : "pointer-events-none opacity-0")}
+        className={clsx("fixed inset-0 z-71 bg-berry/40 transition-opacity duration-400", open ? "opacity-100" : "pointer-events-none opacity-0")}
       />
 
       {/* kraft drawer */}
@@ -126,7 +126,7 @@ export default function Cart() {
         aria-label={t("title")}
         data-state={open ? "open" : "closed"}
         className={clsx(
-          "grain fixed right-0 top-0 z-72 flex h-full w-[28vw] max-md:w-[88vw] flex-col gap-[1.5vw] max-md:gap-[5vw] bg-paper p-[2vw] max-md:p-[6vw] text-berry-dk shadow-[-1vw_0_3vw_-1vw_rgba(78,16,48,.5)] transition-transform duration-500 ease-[cubic-bezier(.4,1.2,.5,1)]",
+          "grain fixed right-0 top-0 z-72 flex h-full w-[28vw] max-md:w-[88vw] flex-col gap-[1.5vw] max-md:gap-[5vw] bg-cream p-[2vw] max-md:p-[6vw] text-berry shadow-[-1vw_0_3vw_-1vw_rgba(78,16,48,.5)] transition-transform duration-500 ease-[cubic-bezier(.4,1.2,.5,1)]",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -150,7 +150,7 @@ export default function Cart() {
                 <div className="flex items-center gap-[0.6vw] max-md:gap-[2vw]">
                   <button type="button" aria-label={t("less")} onClick={() => setQty(l.slug, l.qty - 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-berry text-cream">−</button>
                   <span className="font-pixel text-[0.9vw] max-md:text-[3.4vw] min-w-[1.2vw] text-center">{l.qty}</span>
-                  <button type="button" aria-label={t("more")} onClick={() => setQty(l.slug, l.qty + 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-mustard text-ink">+</button>
+                  <button type="button" aria-label={t("more")} onClick={() => setQty(l.slug, l.qty + 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-cream text-ink">+</button>
                   <button type="button" aria-label={t("remove")} onClick={() => remove(l.slug)} className="ml-[0.4vw] text-[1vw] max-md:text-[3.4vw] underline underline-offset-4">✕</button>
                 </div>
               </li>

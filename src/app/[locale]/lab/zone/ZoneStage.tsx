@@ -72,7 +72,7 @@ export function ZoneStage() {
 
   return (
     <>
-      {mounted ? <ZoneCanvas className="h-full w-full" /> : <div className="h-full w-full bg-paper" />}
+      {mounted ? <ZoneCanvas className="h-full w-full" /> : <div className="h-full w-full bg-cream" />}
 
       {/* Nav (z-80) tıklamayı yakalamasın diye z-90 ve nav'dan uzak köşe — Kural 63 ④ */}
       <div className="absolute bottom-[2vw] left-[2vw] z-90 flex flex-col gap-[0.6vw] max-md:bottom-[5vw] max-md:left-[5vw] max-md:gap-[2vw]">
@@ -117,7 +117,7 @@ export function ZoneStage() {
               type="button"
               data-testid="zone-close-frame"
               onClick={closeFrame}
-              className="rounded-full border-2 border-berry-dk bg-mustard px-[1.2vw] py-[0.5vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry-dk max-md:px-[4vw] max-md:py-[2vw] max-md:text-[3vw]"
+              className="rounded-full border-2 border-berry bg-cream px-[1.2vw] py-[0.5vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry max-md:px-[4vw] max-md:py-[2vw] max-md:text-[3vw]"
             >
               ← GERİ (POV)
             </button>

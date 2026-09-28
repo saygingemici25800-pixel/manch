@@ -17,7 +17,7 @@ const LINKS = [
   { key: "contact", href: "/contact" },
 ] as const;
 
-/** R5 — Tam ekran menü: bg-berry-dk/60 + backdrop-blur (karar 2026-09-17), Modak linkler line-mask ile, ESC / focus trap / scroll kilidi. */
+/** R5 — Tam ekran menü: bg-berry/60 + backdrop-blur (karar 2026-09-17), Modak linkler line-mask ile, ESC / focus trap / scroll kilidi. */
 export default function MenuOverlay() {
   const t = useTranslations("Nav");
   const open = useUiStore((s) => s.menuOpen);
@@ -36,7 +36,7 @@ export default function MenuOverlay() {
       aria-label={t("menuButton")}
       data-state={open ? "open" : "closed"}
       className={clsx(
-        "fixed inset-0 z-70 flex flex-col justify-between bg-berry-dk/60 px-[2.5vw] pb-[2vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[6vw] max-md:pt-[24vw] backdrop-blur-md transition-[opacity,visibility] duration-500",
+        "fixed inset-0 z-70 flex flex-col justify-between bg-berry/60 px-[2.5vw] pb-[2vw] pt-[8vw] max-md:px-[5vw] max-md:pb-[6vw] max-md:pt-[24vw] backdrop-blur-md transition-[opacity,visibility] duration-500",
         open ? "visible opacity-100" : "invisible opacity-0",
       )}
     >
@@ -48,7 +48,7 @@ export default function MenuOverlay() {
               href={l.href}
               data-cursor-hide
               onClick={close}
-              className="group w-fit font-display text-[6vw] max-md:text-[13vw] leading-[0.95] text-cream transition-colors hover:text-mustard focus-visible:text-mustard"
+              className="group w-fit font-display text-[6vw] max-md:text-[13vw] leading-[0.95] text-cream transition-colors hover:text-cream focus-visible:text-cream"
             >
               <SplitReveal type="lines" trigger="mount" stagger={0.06 + i * 0.01}>
                 {t(l.key)}

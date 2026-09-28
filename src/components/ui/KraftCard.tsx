@@ -15,7 +15,7 @@ export function KraftCard({ children, tilt = -1.2, className }: Props) {
   return (
     <div
       className={clsx(
-        "relative bg-paper text-berry-dk shadow-[0_1.2vw_2.4vw_rgba(78,16,48,0.18)]",
+        "relative bg-cream text-berry shadow-[0_1.2vw_2.4vw_rgba(78,16,48,0.18)]",
         className,
       )}
       style={{ transform: tilt ? `rotate(${tilt}deg)` : undefined }}
@@ -26,7 +26,7 @@ export function KraftCard({ children, tilt = -1.2, className }: Props) {
         className="pointer-events-none absolute inset-0 opacity-[0.12]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(90deg, var(--color-berry-dk) 0 1px, transparent 1px 4px)",
+            "repeating-linear-gradient(90deg, var(--color-berry) 0 1px, transparent 1px 4px)",
         }}
       />
       <div className="relative">{children}</div>

@@ -79,7 +79,7 @@ export function Frame({ frame }: { frame: ZoneFrame }) {
         rotation={[0, rotY, 0]}
       >
         <planeGeometry args={[3.2, 0.06]} />
-        <meshBasicMaterial color={colors.mustard} transparent opacity={0.6} toneMapped={false} />
+        <meshBasicMaterial color={colors.cream} transparent opacity={0.6} toneMapped={false} />
       </mesh>
     </>
   );

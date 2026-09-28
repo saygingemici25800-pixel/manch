@@ -61,7 +61,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Preloader />
           <a
             href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-[1vw] focus:top-[1vw] focus:z-100 focus:bg-mustard focus:px-[1vw] focus:py-[0.5vw] focus:font-ui focus:uppercase focus:text-berry-dk"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-[1vw] focus:top-[1vw] focus:z-100 bg-cream focus:px-[1vw] focus:py-[0.5vw] focus:font-ui focus:uppercase focus:text-berry"
           >
             {skip}
           </a>

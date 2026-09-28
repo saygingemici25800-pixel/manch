@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { colors } from "@/styles/tokens";
 import { site } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -8,8 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: site.taglineAlt,
     start_url: "/tr",
     display: "standalone",
-    background_color: "#F4EEE6",
-    theme_color: "#7A1F4B",
+    background_color: colors.cream,
+    theme_color: colors.berry,
     icons: [
       { src: "/icon/32", sizes: "32x32", type: "image/png" },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },

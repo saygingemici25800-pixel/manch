@@ -14,7 +14,7 @@ const FULL_COVER_UP = "M0 0 Q50 -18 100 0 L100 100 L0 100 Z";
 const FULL_RECT = "M0 0 L100 0 L100 100 Q50 100 0 100 Z";
 const GONE_TOP = "M0 0 L100 0 L100 0 Q50 -18 0 0 Z";
 
-const LAYERS = ["var(--color-berry)", "var(--color-pink)", "var(--color-mustard)"];
+const LAYERS = ["var(--color-berry)", "var(--color-sky)", "var(--color-cream)"];
 const FALLBACK_MS = 4000;
 
 /**

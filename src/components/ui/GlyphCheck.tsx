@@ -88,13 +88,13 @@ export function GlyphCheck({ families }: { families: { label: string; cssVar: st
         <li key={r.label} className="font-ui text-[1.1vw] max-md:text-[3.4vw]">
           <span className="font-bold">{r.label}:</span>{" "}
           {r.error ? (
-            <span className="text-berry-dk">⚠ {r.error}</span>
+            <span className="text-berry">⚠ {r.error}</span>
           ) : r.missing.length === 0 ? (
             <span className="text-berry">
               ✓ {TR_GLYPHS.length}/{TR_GLYPHS.length} TR karakteri var
             </span>
           ) : (
-            <span className="text-berry-dk">
+            <span className="text-berry">
               ✗ eksik ({r.missing.length}): {r.missing.join(" ")}
             </span>
           )}

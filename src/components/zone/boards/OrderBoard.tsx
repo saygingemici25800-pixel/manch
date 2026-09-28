@@ -49,7 +49,7 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
   return (
     <div data-testid="order-board" className="flex flex-col gap-[1.2vw] max-md:gap-[4vw]">
       {/* Menü metinleri taslak — tahtanın üstünde de duyurulur */}
-      <p className="font-ui text-[0.8vw] leading-[1.5] text-berry-dk max-md:text-[3vw]">
+      <p className="font-ui text-[0.8vw] leading-[1.5] text-berry max-md:text-[3vw]">
         {tMenu("disclaimer")}
       </p>
 
@@ -126,8 +126,8 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
       ))}
 
       {/* Alt şerit sticky: uzun listede satırlar ALTINDAN akar, şerit onları kapatmaz */}
-      <div className="sticky bottom-0 -mx-[1.4vw] -mb-[1.4vw] flex items-center justify-between gap-[1vw] border-t-[3px] border-ink bg-paper px-[1.4vw] py-[0.8vw] max-md:-mx-[4vw] max-md:-mb-[4vw] max-md:px-[4vw] max-md:py-[3vw]">
-        <p className="font-ui text-[0.95vw] text-berry-dk max-md:text-[3.2vw]">
+      <div className="sticky bottom-0 -mx-[1.4vw] -mb-[1.4vw] flex items-center justify-between gap-[1vw] border-t-[3px] border-ink bg-cream px-[1.4vw] py-[0.8vw] max-md:-mx-[4vw] max-md:-mb-[4vw] max-md:px-[4vw] max-md:py-[3vw]">
+        <p className="font-ui text-[0.95vw] text-berry max-md:text-[3.2vw]">
           {t("total")}{" "}
           {/* Rakamlar font-ui (Mouse Memoirs), Modak DEGIL (karar 2026-09-18, kullanici).
               Modak'in sifiri dolu bir elips: counter'i kapali, 40 px'te bile leke gibi okunuyor
@@ -147,7 +147,7 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
           data-testid="order-submit"
           disabled={!channel.available || total === 0}
           onClick={() => submitOrder(lines, locale, tAll)}
-          className="shrink-0 rounded-full border-2 border-berry-dk bg-mustard px-[1.2vw] py-[0.45vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry-dk disabled:cursor-not-allowed disabled:opacity-40 max-md:px-[4vw] max-md:py-[1.6vw] max-md:text-[3.2vw]"
+          className="shrink-0 rounded-full border-2 border-berry bg-cream px-[1.2vw] py-[0.45vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry disabled:cursor-not-allowed disabled:opacity-40 max-md:px-[4vw] max-md:py-[1.6vw] max-md:text-[3.2vw]"
         >
           {tAll(channel.labelKey)}
         </button>

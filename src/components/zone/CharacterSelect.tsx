@@ -62,13 +62,13 @@ export function CharacterSelect() {
             type="button"
             data-testid={`zone-pick-${who}`}
             onClick={() => select(who)}
-            className="group flex flex-col items-center gap-[0.6vw] rounded-[1.4vw] border-2 border-cream/40 bg-cream/10 px-[1.6vw] py-[1.2vw] transition-transform duration-300 hover:-translate-y-[0.5vw] hover:border-mustard max-md:gap-[2vw] max-md:rounded-[4vw] max-md:px-[4vw] max-md:py-[3vw]"
+            className="group flex flex-col items-center gap-[0.6vw] rounded-[1.4vw] border-2 border-cream/40 bg-cream/10 px-[1.6vw] py-[1.2vw] transition-transform duration-300 hover:-translate-y-[0.5vw] hover:border-cream max-md:gap-[2vw] max-md:rounded-[4vw] max-md:px-[4vw] max-md:py-[3vw]"
           >
             <Face who={who} />
             <span className="font-display text-[1.6vw] text-cream max-md:text-[5vw]">
               {t(`select.${who}`)}
             </span>
-            <span className="font-pixel text-[0.6vw] uppercase tracking-[0.18em] text-mustard max-md:text-[2.4vw]">
+            <span className="font-pixel text-[0.6vw] uppercase tracking-[0.18em] text-cream max-md:text-[2.4vw]">
               {t(`select.${who}Note`)}
             </span>
           </button>

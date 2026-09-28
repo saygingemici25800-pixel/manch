@@ -15,7 +15,7 @@ export async function InstagramGrid() {
   const alts = t("insta.alts").split("|");
 
   return (
-    <section className="bg-pink px-[3vw] py-[5vw] max-md:px-[5vw] max-md:py-[14vw]">
+    <section className="bg-sky px-[3vw] py-[5vw] max-md:px-[5vw] max-md:py-[14vw]">
       <SectionHeader
         eyebrow={t("insta.eyebrow")}
         title={site.social.instagramHandle}

@@ -24,7 +24,7 @@ export default async function NotFound() {
       </Float>
       <p className="font-pixel text-[1vw] max-md:text-[3.4vw] uppercase tracking-widest text-berry">404</p>
       <h1 className="font-display text-[6vw] max-md:text-[13vw] leading-[0.95] text-berry">{t("title")}</h1>
-      <p className="max-w-[36vw] max-md:max-w-none text40 text-[1.4vw] max-md:text-[4.5vw] normal-case tracking-normal text-berry-dk">{t("body")}</p>
+      <p className="max-w-[36vw] max-md:max-w-none text40 text-[1.4vw] max-md:text-[4.5vw] normal-case tracking-normal text-berry">{t("body")}</p>
       <TransitionLink href="/" data-cursor-hide data-testid="nf-home" className="group rounded-full bg-berry px-[2vw] py-[0.9vw] max-md:px-[6vw] max-md:py-[3.5vw] text40 text-[1.3vw] max-md:text-[4.2vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink">
         <RollText>{t("home")}</RollText>
       </TransitionLink>

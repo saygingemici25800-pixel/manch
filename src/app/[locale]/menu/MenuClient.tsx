@@ -110,7 +110,7 @@ export function MenuClient({ categories, products }: Props) {
                 onClick={() => setFilter(active ? null : tag)}
                 className={clsx(
                   "rounded-full px-[1vw] py-[0.35vw] max-md:px-[3vw] max-md:py-[1.2vw] font-pixel text-[0.65vw] max-md:text-[2.4vw] uppercase transition-[background-color,color,transform] duration-300 hover:scale-105",
-                  active ? "bg-ink text-cream" : tag === "spicy" ? "bg-berry text-cream" : tag === "new" ? "bg-mustard text-ink" : "bg-pink text-berry-dk",
+                  active ? "bg-ink text-cream" : tag === "spicy" ? "bg-berry text-cream" : tag === "new" ? "bg-cream text-ink" : "bg-sky text-berry",
                 )}
               >
                 {tp(`tags.${tag}`)}
@@ -120,7 +120,7 @@ export function MenuClient({ categories, products }: Props) {
         </div>
       </div>
 
-      {blocks.length === 0 && <p className="text40 text-[1.4vw] max-md:text-[4.5vw] text-berry-dk">{t("empty")}</p>}
+      {blocks.length === 0 && <p className="text40 text-[1.4vw] max-md:text-[4.5vw] text-berry">{t("empty")}</p>}
 
       {blocks.map(({ category, items }, bi) => (
         <section key={category.id} id={`cat-${category.id}`} data-testid="menu-category" className="scroll-mt-[10vw] max-md:scroll-mt-[26vw] flex flex-col gap-[1.5vw] max-md:gap-[5vw]">

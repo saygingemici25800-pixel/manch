@@ -72,7 +72,7 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
           <h3 className="font-display text-[1.4vw] leading-tight text-berry max-md:text-[5vw]">
             {p.name[locale]}
           </h3>
-          <span className="shrink-0 font-ui text-[1.1vw] text-berry-dk max-md:text-[4vw]">
+          <span className="shrink-0 font-ui text-[1.1vw] text-berry max-md:text-[4vw]">
             {p.price == null ? <SoonBadge /> : `${p.price} TL`}
           </span>
         </div>
@@ -118,7 +118,7 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
             /* Kural 40: dokunma hedefi ≥ 24 px. 2.4vw, 768 px'te 18 px ediyordu — tablet portrede
                dokunmatik ve eşiğin altında. Taban `min-h/min-w` ile konuyor (5.5.8'de
                `OrderBoard`'un −/+ düğmelerinde aynı çözüm uygulanmıştı). */
-            className="grid h-[2.4vw] w-[2.4vw] min-h-[26px] min-w-[26px] place-items-center rounded-full bg-mustard text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-mustard/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
+            className="grid h-[2.4vw] w-[2.4vw] min-h-[26px] min-w-[26px] place-items-center rounded-full bg-cream text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-cream/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
           >
             +
           </button>

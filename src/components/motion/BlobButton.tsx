@@ -81,7 +81,7 @@ export function BlobButton({ children, onClick, className, ariaLabel }: Props) {
       >
         <path
           d={BLOB_D}
-          className="fill-berry stroke-cream transition-colors duration-300 group-hover/blob:fill-berry-dk"
+          className="fill-berry stroke-cream transition-colors duration-300 group-hover/blob:fill-berry"
           strokeWidth={10}
         />
       </svg>

@@ -49,7 +49,7 @@ export default async function AboutPage({ params }: Props) {
           <SplitReveal as="h1" type="lines" className="heading180 text-[4.2vw] text-berry max-md:text-[12vw]">
             {t("title")}
           </SplitReveal>
-          <SplitReveal as="h2" type="lines" className="mt-[1.5vw] max-w-[30ch] text40 text-[1.8vw] text-berry-dk max-md:mt-[5vw] max-md:text-[5.5vw]">
+          <SplitReveal as="h2" type="lines" className="mt-[1.5vw] max-w-[30ch] text40 text-[1.8vw] text-berry max-md:mt-[5vw] max-md:text-[5.5vw]">
             {t("story.title")}
           </SplitReveal>
           <p className="mt-[1.2vw] max-w-[48ch] font-ui text-[1.05vw] text-ink max-md:mt-[4vw] max-md:text-[3.9vw]">
@@ -61,7 +61,7 @@ export default async function AboutPage({ params }: Props) {
 
           <KraftCard className="mt-[2vw] w-[26vw] p-[1.4vw] max-md:mt-[6vw] max-md:w-full max-md:p-[5vw]">
             <p className="font-display text-[1.4vw] text-berry max-md:text-[5vw]">{t("story.cardTitle")}</p>
-            <ul className="mt-[0.5vw] flex flex-col gap-[0.2vw] font-ui text-[1vw] uppercase text-berry-dk max-md:mt-[2vw] max-md:gap-[1vw] max-md:text-[3.6vw]">
+            <ul className="mt-[0.5vw] flex flex-col gap-[0.2vw] font-ui text-[1vw] uppercase text-berry max-md:mt-[2vw] max-md:gap-[1vw] max-md:text-[3.6vw]">
               {points.map((p) => (
                 <li key={p}>· {p}</li>
               ))}
@@ -91,7 +91,7 @@ export default async function AboutPage({ params }: Props) {
            `scroll-mt` nav yüksekliği payı — diğer çapalarla aynı (Kural 33). */}
       <section
         id="mascots"
-        className="grid scroll-mt-[6vw] grid-cols-2 items-center gap-[4vw] bg-pink px-[3vw] py-[5vw] max-md:grid-cols-1 max-md:gap-[6vw] max-md:px-[5vw] max-md:py-[13vw]"
+        className="grid scroll-mt-[6vw] grid-cols-2 items-center gap-[4vw] bg-sky px-[3vw] py-[5vw] max-md:grid-cols-1 max-md:gap-[6vw] max-md:px-[5vw] max-md:py-[13vw]"
       >
         <Float amount={12} className="justify-self-center">
           <Image
@@ -105,10 +105,10 @@ export default async function AboutPage({ params }: Props) {
           />
         </Float>
         <div>
-          <SplitReveal as="h2" type="lines" className="heading180 text-[3.6vw] text-berry-dk max-md:text-[10vw]">
+          <SplitReveal as="h2" type="lines" className="heading180 text-[3.6vw] text-berry max-md:text-[10vw]">
             {t("mascots.title")}
           </SplitReveal>
-          <p className="mt-[1.2vw] max-w-[44ch] font-ui text-[1.05vw] text-berry-dk max-md:mt-[4vw] max-md:text-[3.9vw]">
+          <p className="mt-[1.2vw] max-w-[44ch] font-ui text-[1.05vw] text-berry max-md:mt-[4vw] max-md:text-[3.9vw]">
             {t("mascots.body")}
           </p>
         </div>
@@ -146,7 +146,7 @@ export default async function AboutPage({ params }: Props) {
           href="/#zone"
           data-cursor-hide
           data-testid="about-zone-cta"
-          className="mt-[2vw] inline-flex items-center gap-[0.5vw] rounded-full border-2 border-berry-dk bg-mustard px-[1.8vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] text-berry-dk transition-transform duration-300 hover:scale-105 max-md:mt-[6vw] max-md:gap-[2vw] max-md:px-[6vw] max-md:py-[2.6vw] max-md:text-[4vw]"
+          className="mt-[2vw] inline-flex items-center gap-[0.5vw] rounded-full border-2 border-berry bg-cream px-[1.8vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] text-berry transition-transform duration-300 hover:scale-105 max-md:mt-[6vw] max-md:gap-[2vw] max-md:px-[6vw] max-md:py-[2.6vw] max-md:text-[4vw]"
         >
           {t("gallery.cta")} <span aria-hidden="true">→</span>
         </TransitionLink>
@@ -158,7 +158,7 @@ export default async function AboutPage({ params }: Props) {
         <ol className="flex flex-col gap-[1vw] border-l-[0.2vw] border-berry pl-[2vw] max-md:gap-[4vw] max-md:border-l-[0.8vw] max-md:pl-[6vw]">
           {timeline.map(([when, what]) => (
             <li key={when} className="relative">
-              <span className="absolute -left-[2.5vw] top-[0.4vw] h-[0.7vw] w-[0.7vw] rounded-full bg-mustard max-md:-left-[7.4vw] max-md:h-[2.4vw] max-md:w-[2.4vw]" />
+              <span className="absolute -left-[2.5vw] top-[0.4vw] h-[0.7vw] w-[0.7vw] rounded-full bg-cream max-md:-left-[7.4vw] max-md:h-[2.4vw] max-md:w-[2.4vw]" />
               <p className="font-pixel text-[0.85vw] uppercase text-berry max-md:text-[3vw]">{when}</p>
               <p className="font-ui text-[1.2vw] text-ink max-md:text-[4.2vw]">{what}</p>
             </li>

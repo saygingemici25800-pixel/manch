@@ -155,7 +155,7 @@ export function Joystick() {
         Ayrıca `text-ink/70` **Kural 40'ı ihlal ediyordu**: metin renginde opaklık yasak,
         tam palet rengi kullanılır. Hap, `FramePrompt`'un künye hapıyla aynı dili konuşur.
       */}
-      <span className="rounded-full border-2 border-berry bg-cream px-[8px] py-[2px] font-pixel text-[9px] uppercase tracking-[0.18em] text-berry-dk max-md:hidden">
+      <span className="rounded-full border-2 border-berry bg-cream px-[8px] py-[2px] font-pixel text-[9px] uppercase tracking-[0.18em] text-berry max-md:hidden">
         {t("hint.joystick")}
       </span>
     </div>

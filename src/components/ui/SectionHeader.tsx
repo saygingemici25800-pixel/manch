@@ -24,7 +24,7 @@ export function SectionHeader({ eyebrow, title, counter, as = "h2", className }:
           {title}
         </SplitReveal>
         {counter ? (
-          <span className="shrink-0 font-ui text-[1vw] uppercase tracking-[0.15em] text-berry-dk max-md:text-[3.2vw]">
+          <span className="shrink-0 font-ui text-[1vw] uppercase tracking-[0.15em] text-berry max-md:text-[3.2vw]">
             {counter}
           </span>
         ) : null}

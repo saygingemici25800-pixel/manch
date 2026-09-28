@@ -29,7 +29,7 @@ export async function MisuMiyu() {
         <SplitReveal as="p" type="lines" className="mt-[1.2vw] max-w-[44ch] font-ui text-[1.1vw] text-ink max-md:mt-[4vw] max-md:text-[4vw]">
           {t("misu.body")}
         </SplitReveal>
-        <p className="mt-[1.5vw] inline-block -rotate-2 bg-mustard px-[1vw] py-[0.4vw] font-pixel text-[0.9vw] uppercase text-ink max-md:mt-[5vw] max-md:px-[3vw] max-md:py-[1.5vw] max-md:text-[3vw]">
+        <p className="mt-[1.5vw] inline-block -rotate-2 bg-cream px-[1vw] py-[0.4vw] font-pixel text-[0.9vw] uppercase text-ink max-md:mt-[5vw] max-md:px-[3vw] max-md:py-[1.5vw] max-md:text-[3vw]">
           {t("misu.tape")}
         </p>
       </div>

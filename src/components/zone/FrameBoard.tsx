@@ -79,7 +79,7 @@ export function FrameBoard() {
             type="button"
             data-testid="frame-board-back"
             onClick={closeFrame}
-            className="shrink-0 rounded-full border-2 border-berry-dk bg-mustard px-[1.1vw] py-[0.4vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] text-berry-dk max-md:px-[4vw] max-md:py-[1.4vw] max-md:text-[3.2vw]"
+            className="shrink-0 rounded-full border-2 border-berry bg-cream px-[1.1vw] py-[0.4vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] text-berry max-md:px-[4vw] max-md:py-[1.4vw] max-md:text-[3.2vw]"
           >
             {t("back")}
           </button>

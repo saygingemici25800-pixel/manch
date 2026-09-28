@@ -15,18 +15,18 @@ import { colors } from "@/styles/tokens";
 
 const C = {
   berry: colors.berry,
-  berryDk: colors["berry-dk"],
   sky: colors.sky,
   tile: colors.tile,
   cream: colors.cream,
-  paper: colors.paper,
-  pink: colors.pink,
-  mustard: colors.mustard,
   ink: colors.ink,
 } as const;
 
-/** berry'nin rgba karşılığı — künye metninde yarı saydam kullanılır. */
-const BERRY_RGB = "106, 31, 59";
+/**
+ * berry'nin rgba karşılığı — künye metninde yarı saydam kullanılır.
+ * Elle yazılmıştı ve palet değişince sessizce bayatlıyordu (kit geçişi 2026-09-28);
+ * artık tokendan TÜRETİLİYOR, tek doğruluk kaynağı `tokens.ts`.
+ */
+const BERRY_RGB = [1, 3, 5].map((i) => parseInt(C.berry.slice(i, i + 2), 16)).join(", ");
 
 /**
  * Doku defteri (spec bölüm 9 / Kural 60).

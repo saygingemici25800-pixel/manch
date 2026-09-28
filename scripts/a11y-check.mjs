@@ -31,21 +31,32 @@ const lum = (rgb) => { const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12
 const cr = (a, b) => { const [x, y] = [lum(hex(a)), lum(hex(b))].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
 
 console.log("— kontrast (token çiftleri, WCAG AA 4.5:1)");
+/* MARKA KİTİ (2026-09-28): üç renk. `berry-dk` · `paper` · `pink` · `mustard` silindi.
+   `tile` ile `sky` aynı maviye indi. */
 const PAIRS = [
   ["metin berry / cream", colors.berry, colors.cream, 4.5],
-  ["metin berry-dk / cream", colors["berry-dk"], colors.cream, 4.5],
   ["metin cream / berry (bordo üstü)", colors.cream, colors.berry, 4.5],
-  ["metin cream / berry-dk (bordo üstü)", colors.cream, colors["berry-dk"], 4.5],
-  ["YAKINDA rozeti: ink / mustard", colors.ink, colors.mustard, 4.5],
-  ["metin berry / pink", colors.berry, colors.pink, 4.5],
-  ["metin berry / tile", colors.berry, colors.tile, 4.5],
-  ["metin berry-dk / paper", colors["berry-dk"], colors.paper, 4.5],
+  ["metin berry / sky (mavi üstü)", colors.berry, colors.sky, 4.5],
+  ["metin berry / tile (karo üstü)", colors.berry, colors.tile, 4.5],
   ["metin ink / cream", colors.ink, colors.cream, 4.5],
-  ["focus halkası mustard / berry-dk", colors.mustard, colors["berry-dk"], 3],
+  ["metin ink / sky", colors.ink, colors.sky, 4.5],
+  ["YAKINDA rozeti: ink / cream", colors.ink, colors.cream, 4.5],
+  ["focus halkası krem / berry", colors.cream, colors.berry, 3],
+  ["focus halkası bordo / sky", colors.berry, colors.sky, 3],
+];
+/* YASAK ÇİFTLER — bunların DÜŞMESİ gerekir. Olmasaydı "her şeye true dönen" bozuk bir
+   kontrast fonksiyonu da yeşil verirdi (Kural 60 · 77-b: iddia düşebiliyor mu?). */
+const YASAK = [
+  ["mavi üstüne krem metin", colors.cream, colors.sky],
+  ["bordo üstüne ink metin", colors.ink, colors.berry],
 ];
 for (const [ad, fg, bg, esik] of PAIRS) {
   const r = cr(fg, bg);
   ok(r >= esik, `${ad}`, `${r.toFixed(2)}:1 (eşik ${esik})`);
+}
+for (const [ad, fg, bg] of YASAK) {
+  const r = cr(fg, bg);
+  ok(r < 4.5, `YASAK ÇİFT gerçekten düşüyor: ${ad}`, `${r.toFixed(2)}:1 (< 4.5 olmalı)`);
 }
 
 const br = await chromium.launch({ executablePath: process.env.CHROME });
@@ -69,6 +80,51 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
         ad: (a.getAttribute("aria-label") || a.textContent || a.tagName).trim().slice(0, 24),
         halka: cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0,
         renk: cs.outlineColor,
+        /* Halkanın ARKASINDAKİ gerçek zemin. Kit'te üç rengin hiçbiri her zeminde
+           çalışmıyor, halka zemine göre seçiliyor (globals.css) — kontrast bu yüzden
+           ZEMİN BAŞINA ölçülür. Eski kontrol yalnız "halka var mı" diyordu.
+
+           ATA ZİNCİRİ YETMEZ: nav `fixed`, hero'nun üstünde durur ama ÇOCUĞU değildir;
+           ata zinciri `body`'ye (krem) çıkar ve ölçüm "krem üstünde krem halka" der —
+           oysa öğe koyu fotoğrafın üstünde. İlk yazımda tam bu oldu (Kural 60: ölçtüğün
+           şey ürün mü, ölçüm aracı mı?). Doğrusu HIT-TEST: öğenin merkezinden aşağı
+           bakıp YIĞINDA ondan sonra gelen ilk opak arka planı almak. */
+        /* Halka NEREYE çiziliyor? `outline-offset` negatifse halka ÖĞENİN ÜSTÜNDE
+           durur → kontrast öğenin KENDİ zeminiyle ölçülür. Pozitifse dışarıda
+           durur → ARKADAKİ zeminle. İkisini ayırmadan ölçmek, doğru kurulmuş bir
+           halkayı yanlış yerde arar (Kural 60). */
+        iceride: parseFloat(cs.outlineOffset) < 0,
+        kendiZemin: (() => {
+          let e = a;
+          while (e) {
+            const bg = getComputedStyle(e).backgroundColor;
+            const m = bg.match(/\d+(\.\d+)?/g);
+            if (m && (m.length < 4 || Number(m[3]) > 0.5)) return bg;
+            e = e.parentElement;
+          }
+          return "rgb(255, 255, 255)";
+        })(),
+        zemin: (() => {
+          const r0 = a.getBoundingClientRect();
+          const cx = Math.round(r0.left + r0.width / 2);
+          const cy = Math.round(r0.top + r0.height / 2);
+          const yigin = document.elementsFromPoint(cx, cy);
+          const bastan = yigin.indexOf(a);
+          for (const e of yigin.slice(bastan + 1)) {
+            const bg = getComputedStyle(e).backgroundColor;
+            const m = bg.match(/\d+(\.\d+)?/g);
+            if (m && (m.length < 4 || Number(m[3]) > 0.5)) return bg;
+          }
+          // yığın bir şey vermezse ata zincirine düş
+          let e = a.parentElement;
+          while (e) {
+            const bg = getComputedStyle(e).backgroundColor;
+            const m = bg.match(/\d+(\.\d+)?/g);
+            if (m && (m.length < 4 || Number(m[3]) > 0.5)) return bg;
+            e = e.parentElement;
+          }
+          return "rgb(255, 255, 255)";
+        })(),
         gorunur: r.width > 0 && r.height > 0,
         yol: a.tagName + (a.getAttribute("data-testid") ? `[${a.getAttribute("data-testid")}]` : ""),
       };
@@ -78,6 +134,18 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   const halkasiz = durak.filter((d) => !d.halka && d.gorunur);
   ok(durak.length >= 10, `${path} klavye turu ${durak.length} durak`);
   ok(halkasiz.length === 0, `${path} her durakta focus ring GÖRÜNÜR`, halkasiz.slice(0, 3).map((d) => d.ad).join(" | "));
+  /* YENİ (2026-09-28): halka VAR yetmez, zemininde OKUNUYOR mu? */
+  const rgbCr = (a1, b1) => {
+    const n = (v) => v.match(/\d+/g).slice(0, 3).map(Number);
+    const L = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
+      const [r, g, b] = c.map(f); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const [x, y] = [L(n(a1)), L(n(b1))].sort((m, n2) => n2 - m);
+    return (x + 0.05) / (y + 0.05);
+  };
+  const hedef = (d) => (d.iceride ? d.kendiZemin : d.zemin);
+  const soluk = durak.filter((d) => d.gorunur && d.halka && rgbCr(d.renk, hedef(d)) < 3);
+  ok(soluk.length === 0, `${path} focus ring ZEMİNİNDE okunuyor (≥ 3:1)`,
+    soluk.slice(0, 3).map((d) => `${d.ad}: halka ${d.renk} / ${d.iceride ? "kendi zemini" : "arka zemin"} ${hedef(d)} = ${rgbCr(d.renk, hedef(d)).toFixed(2)}`).join(" | ") || `${durak.filter((d) => d.halka).length} durak ölçüldü`);
   const ilkUc = durak.slice(0, 3).map((d) => d.ad).join(" → ");
   ok(/atla|skip/i.test(durak[0]?.ad ?? ""), `${path} ilk durak skip link`, ilkUc);
   await p.close();

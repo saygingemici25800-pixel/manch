@@ -57,7 +57,7 @@ function Counters() {
   }, []);
 
   return (
-    <p data-testid="counters" className="font-ui text-[1vw] text-berry-dk max-md:text-[3.2vw]">
+    <p data-testid="counters" className="font-ui text-[1vw] text-berry max-md:text-[3.2vw]">
       ScrollTrigger: <b data-st>{v.st}</b> · aktif tween: <b data-tw>{v.tw}</b> · ticker frame:{" "}
       <b>{v.tick}</b>
     </p>
@@ -175,7 +175,7 @@ export function MotionLab() {
           {REDUCED_TABLE.map((r) => (
             <li key={r.name} className="font-ui text-[1vw] text-ink max-md:text-[3.2vw]">
               <b className="text-berry">{r.name}</b> — {r.behaviour}{" "}
-              <span className={r.kind === "kapanır" ? "text-berry-dk" : "text-berry"}>[{r.kind}]</span>
+              <span className={r.kind === "kapanır" ? "text-berry" : "text-berry"}>[{r.kind}]</span>
             </li>
           ))}
         </ul>

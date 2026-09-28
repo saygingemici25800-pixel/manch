@@ -1,6 +1,7 @@
 "use client";
 
 import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
@@ -23,6 +24,9 @@ const HALL_LEN = Z_FRONT - Z_BACK;
 /** Tavan ışık bantları — prototipteki ölçüler (0.5 × 36, tavanın 4 cm altında). */
 const STRIP_W = 0.5;
 const STRIP_LEN = 36;
+/** Tavan kremi: bantlarla ayrışsın diye aynı kremin %88 şiddeti (renk eklenmedi). */
+const CEIL_CREAM = new THREE.Color(colors.cream).multiplyScalar(0.88);
+
 const STRIP_Y = CEIL_H - 0.04;
 
 export function Hall() {
@@ -96,12 +100,15 @@ export function Hall() {
         <meshStandardMaterial map={floor} roughness={0.95} metalness={0} />
       </mesh>
 
-      {/* ---------------- tavan: düz krem ----------------
-          `meshStandardMaterial` ile aşağı bakan yüzey sadece ambient alıyor ve GRİ görünüyordu.
-          Spec "düz krem" diyor → ışıktan etkilenmeyen materyal. */}
+      {/* ---------------- tavan: krem, ŞİDDETİ KISILMIŞ ----------------
+          `meshStandardMaterial` ile aşağı bakan yüzey sadece ambient alıyor ve GRİ
+          görünüyordu → ışıktan etkilenmeyen materyal (karar 2026-09-18).
+          Kit geçişinde (2026-09-28) bantlar hardaldan KREME döndü ve krem tavanın
+          üstünde kayboldular. Kural: renk EKLENMEZ, şiddetle oynanır — tavan aynı
+          kremin %88 şiddetinde, bantlar tam krem. Tek hue, iki parlaklık. */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, CEIL_H, 0]}>
         <planeGeometry args={[HALF_W * 2, HALL_LEN]} />
-        <meshBasicMaterial color={colors.cream} toneMapped={false} />
+        <meshBasicMaterial color={CEIL_CREAM} toneMapped={false} />
       </mesh>
 
       {/* tavandaki hardal ışık bantları (x = ±4, prototip ölçüsü: 0.5 × 36, y 5.96).
@@ -110,7 +117,7 @@ export function Hall() {
       {[-4, 4].map((x) => (
         <mesh key={x} rotation={[Math.PI / 2, 0, 0]} position={[x, STRIP_Y, 0]}>
           <planeGeometry args={[STRIP_W, STRIP_LEN]} />
-          <meshBasicMaterial color={colors.mustard} toneMapped={false} />
+          <meshBasicMaterial color={colors.cream} toneMapped={false} />
         </mesh>
       ))}
 

@@ -2,22 +2,13 @@
 // Kullanım: /lab önizlemesi, canvas/SVG gibi CSS değişkeni okuyamayan yerler.
 
 export const colors = {
-  berry: "#6a1f3b",
-  "berry-dk": "#4e1030",
-  sky: "#c4e4f3",
-  tile: "#8fc3d6",
-  cream: "#f4eee6",
-  paper: "#e9dcc6",
-  pink: "#e9a3b8",
-  mustard: "#f6c343",
+  // MARKA KİTİ (karar 2026-09-28) — globals.css @theme ile elle senkron (Kural 21).
+  // `tile` ile `sky` aynı değerde: sınıf adları korundu, dosyalar açılmadı.
+  berry: "#77133E",
+  sky: "#C3E5F7",
+  tile: "#C3E5F7",
+  cream: "#FFF9F2",
   ink: "#1b1b1b",
-
-  // Malzeme ikonları (CursorTrail) — cheddar ayrı token almaz, mustard'ı kullanır.
-  tomato: "#c6412f",
-  lettuce: "#6a9440",
-  pickle: "#55762c",
-  patty: "#7b4a2e",
-  brioche: "#d9a15b",
 } as const;
 
 export type ColorToken = keyof typeof colors;

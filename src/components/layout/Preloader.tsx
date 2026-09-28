@@ -79,12 +79,12 @@ export default function Preloader() {
       className="fixed inset-0 z-95 flex flex-col items-center justify-center gap-[2vw] max-md:gap-[6vw] bg-berry text-cream transition-transform ease-[cubic-bezier(.76,0,.24,1)]"
       style={{ transform: phase === "exit" ? "translateY(-100%)" : "translateY(0)", transitionDuration: `${EXIT}s` }}
     >
-      <Logo label={site.name} className="h-[7vw] max-md:h-[16vw] w-auto text-mustard" />
+      <Logo label={site.name} className="h-[7vw] max-md:h-[16vw] w-auto text-cream" />
       <p className="text40 text-[1.6vw] max-md:text-[5vw] text-cream" aria-label={lines[msg]}>
         {lines[msg]}
       </p>
       <div className="h-[0.2vw] max-md:h-[0.8vw] w-[24vw] max-md:w-[60vw] overflow-hidden rounded-full bg-cream/25">
-        <div className="bar h-full w-full origin-left scale-x-0 bg-mustard" style={{ animation: `preload-bar ${DURATION}s cubic-bezier(.4,0,.2,1) forwards` }} />
+        <div className="bar h-full w-full origin-left scale-x-0 bg-cream" style={{ animation: `preload-bar ${DURATION}s cubic-bezier(.4,0,.2,1) forwards` }} />
       </div>
     </div>
   );

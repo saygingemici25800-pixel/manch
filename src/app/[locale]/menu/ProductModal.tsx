@@ -31,7 +31,7 @@ export function ProductModal({ product, onClose }: Props) {
 
   return (
     <div
-      className={clsx("fixed inset-0 z-73 grid place-items-center bg-berry-dk/50 p-[3vw] max-md:p-[4vw] transition-opacity duration-300", open ? "opacity-100" : "pointer-events-none opacity-0")}
+      className={clsx("fixed inset-0 z-73 grid place-items-center bg-berry/50 p-[3vw] max-md:p-[4vw] transition-opacity duration-300", open ? "opacity-100" : "pointer-events-none opacity-0")}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -61,7 +61,7 @@ export function ProductModal({ product, onClose }: Props) {
               <p className="text40 text-[1.2vw] max-md:text-[4.2vw] normal-case tracking-normal">{product.desc[locale]}</p>
               <p className="font-pixel text-[0.7vw] max-md:text-[2.8vw] uppercase tracking-wide">{product.price !== null ? `${product.price} TL` : <SoonBadge />}</p>
               {/* Faz 4'te eklenen anahtar — 2/2: modalda fiyatın yanında */}
-              <p data-testid="modal-disclaimer" className="font-ui text-[0.7vw] max-md:text-[2.6vw] normal-case text-berry-dk">{tm("disclaimer")}</p>
+              <p data-testid="modal-disclaimer" className="font-ui text-[0.7vw] max-md:text-[2.6vw] normal-case text-berry">{tm("disclaimer")}</p>
 
               <h3 className="mt-[0.5vw] font-display text-[1.3vw] max-md:text-[5vw]">{t("ingredients")}</h3>
               <ul className="flex flex-col gap-[0.2vw] max-md:gap-[1vw] text40 text-[1.05vw] max-md:text-[3.8vw]">

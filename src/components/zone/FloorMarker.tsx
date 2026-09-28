@@ -85,7 +85,7 @@ export function FloorMarker({ frame, reduced }: { frame: ZoneFrame; reduced: boo
       <mesh ref={pulse} name={`zone-pulse-${frame.id}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.016, z]}>
         <planeGeometry args={[MARKER_SIZE, MARKER_SIZE]} />
         <meshBasicMaterial
-          color={colors.mustard}
+          color={colors.cream}
           transparent
           opacity={0}
           depthWrite={false}

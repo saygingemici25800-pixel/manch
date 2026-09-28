@@ -41,10 +41,10 @@ export function ZoneLoader() {
           data-testid="zone-progress"
           data-value={progress}
           style={{ width: `${progress}%` }}
-          className="block h-full rounded-full bg-mustard transition-[width] duration-200"
+          className="block h-full rounded-full bg-cream transition-[width] duration-200"
         />
       </div>
-      <span className="font-pixel text-[0.8vw] text-mustard max-md:text-[3vw]">{progress}%</span>
+      <span className="font-pixel text-[0.8vw] text-cream max-md:text-[3vw]">{progress}%</span>
     </div>
   );
 }

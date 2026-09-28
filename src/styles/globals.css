@@ -3,24 +3,15 @@
 
 /* ---------- Renk tokenları (src/styles/tokens.ts ile senkron tutulur — Kural 21/22) ---------- */
 @theme {
-  --color-berry: #6a1f3b; /* karar 2026-09-18: menu-print.png wordmark ölçümü */
-  --color-berry-dk: #4e1030;
-  --color-sky: #c4e4f3;
-  --color-tile: #8fc3d6;
-  --color-cream: #f4eee6;
-  --color-paper: #e9dcc6;
-  --color-pink: #e9a3b8;
-  --color-mustard: #f6c343;
+  /* MARKA KİTİ (karar 2026-09-28). Üç renk, 80/20:
+     bordo %40 · açık mavi %40 · krem %20 (YALNIZ vurgu ve CTA).
+     `ink` kit'te yok ama nötr gövde metni olarak kalıyor.
+     `tile` ile `sky` aynı maviye indi — sınıf adları korunuyor ki 53 dosya açılmasın. */
+  --color-berry: #77133E;
+  --color-sky: #C3E5F7;
+  --color-tile: #C3E5F7;
+  --color-cream: #FFF9F2;
   --color-ink: #1b1b1b;
-
-  /* Malzeme ikonları (CursorTrail) — gerçek malzeme rengi, markanın doygunluğunda:
-     floresan değil, kırık/toprak tonlarda. Cheddar ayrı token almaz, --color-mustard
-     kullanır. Kontrast ölçümü + hale kararı: hata günlüğü 2026-09-20. */
-  --color-tomato: #c6412f;
-  --color-lettuce: #6a9440;
-  --color-pickle: #55762c;
-  --color-patty: #7b4a2e;
-  --color-brioche: #d9a15b;
 
   --ease-jelly: cubic-bezier(0.4, 1.6, 0.7, 0.95);
 }
@@ -48,14 +39,48 @@ body {
   font-family: var(--font-ui);
 }
 
-/* Erişilebilirlik: klavye odağı hardal halka (Kural 40) */
+/* Erişilebilirlik: klavye odağı (Kural 40). Kit'te üç renk var ve HİÇBİRİ tek başına
+   her zeminde çalışmıyor (ölçüldü): bordo halka mavi/krem üstünde 8.15/10.32 ✓ ama
+   bordo/ink üstünde 1.00/1.60 ✗; krem halka tam tersi.
+
+   TEMEL İLKE: `outline` öğenin DIŞINA çizilir — yani halkanın kontrastı öğenin kendi
+   doldurma rengiyle değil, ARKASINDAKİ zeminle ölçülür. İlk iki denemede bu ters
+   kuruldu (krem hapa bordo halka verildi, hap bordo zeminin üstündeydi → 1.00) ve
+   `a11y-check`'in yeni zemin-başına kontrolü ikisini de yakaladı.
+
+   ÇÖZÜM iki kola ayrılıyor:
+   ① Kendi opak zemini OLAN öğe (hap, buton): halka İÇERİ alınır (`outline-offset`
+      negatif) ve öğenin kendi rengine göre seçilir. Böylece arkada ne olduğu
+      önemsizleşir — hap nerede durursa dursun halka okunur.
+   ② Zemini OLMAYAN öğe (link, sr-only, ikon): halka dışarıda kalır ve BÖLÜMÜN
+      koyuluğuna göre seçilir. Varsayılan bordo (sayfa zemini krem); koyu bölümlerde
+      ve ters dönmüş nav'da krem. */
 :focus-visible {
-  outline: 2px solid var(--color-mustard);
+  outline: 2px solid var(--color-berry);
   outline-offset: 2px;
 }
-.bg-mustard:focus-visible,
-.bg-cream:focus-visible {
-  outline-color: var(--color-berry-dk);
+
+/* ② zeminsiz öğeler — bölüm koyuysa krem halka.
+   `[data-nav-invert]`: nav `fixed`, koyu bölümün İÇİNDE değil; kendi ters-dönme
+   durumunu işaretliyor (ata seçici onu yakalayamaz). */
+[data-nav-dark] :focus-visible,
+[data-nav-invert] :focus-visible {
+  outline-color: var(--color-cream);
+}
+
+/* ① kendi zemini olan öğeler — halka İÇERİDE, kendi rengine göre.
+   En sonda: eşit özgüllükte son kural kazanır, koyu bölümün içindeki krem hap da
+   doğru halkayı alır. */
+.bg-cream:focus-visible,
+.bg-sky:focus-visible,
+.bg-tile:focus-visible {
+  outline-color: var(--color-berry);
+  outline-offset: -3px;
+}
+.bg-berry:focus-visible,
+.bg-ink:focus-visible {
+  outline-color: var(--color-cream);
+  outline-offset: -3px;
 }
 
 /* Preloader ilerleme çubuğu — GSAP'sız (Kural 46) */

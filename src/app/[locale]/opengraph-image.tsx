@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { colors } from "@/styles/tokens";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
@@ -27,8 +28,8 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#7A1F4B",
-          color: "#F6C343",
+          background: colors.berry,
+          color: colors.cream,
           fontFamily: "Modak",
           position: "relative",
         }}
@@ -36,21 +37,21 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
         {/* dama bandı */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 40, display: "flex" }}>
           {Array.from({ length: 30 }).map((_, i) => (
-            <div key={i} style={{ width: 40, height: 40, background: i % 2 ? "#F4EEE6" : "#7A1F4B" }} />
+            <div key={i} style={{ width: 40, height: 40, background: i % 2 ? colors.cream : colors.berry }} />
           ))}
         </div>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 40, display: "flex" }}>
           {Array.from({ length: 30 }).map((_, i) => (
-            <div key={i} style={{ width: 40, height: 40, background: i % 2 ? "#7A1F4B" : "#F4EEE6" }} />
+            <div key={i} style={{ width: 40, height: 40, background: i % 2 ? colors.berry : colors.cream }} />
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 40, padding: "0 60px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 18, width: 700 }}>
             <svg viewBox={LOGOMANCH_VIEWBOX} width={700} height={Math.round((700 * 480) / 1948)}>
-              <path fill="#F4EEE6" fillRule="evenodd" d={LOGOMANCH_PATH} />
+              <path fill={colors.cream} fillRule="evenodd" d={LOGOMANCH_PATH} />
             </svg>
-            <div style={{ fontSize: 52, color: "#F6C343" }}>{site.tagline}</div>
-            <div style={{ fontSize: 28, color: "#E9A3B8" }}>{t("description")}</div>
+            <div style={{ fontSize: 52, color: colors.cream }}>{site.tagline}</div>
+            <div style={{ fontSize: 28, color: colors.sky }}>{t("description")}</div>
           </div>
           <img src={burger} width={400} height={400} alt="" style={{ objectFit: "contain" }} />
         </div>

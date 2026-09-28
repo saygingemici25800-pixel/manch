@@ -60,6 +60,7 @@ export default function Nav() {
     <header
       data-nav
       data-nav-state={show ? "visible" : "hidden"}
+      data-nav-invert={invert || undefined}
       className={clsx(
         "fixed inset-x-0 top-0 z-80 flex items-center justify-between px-[2.5vw] py-[1vw] max-md:px-[5vw] max-md:py-[3vw]",
         "transition-[transform,color] duration-500 ease-out",

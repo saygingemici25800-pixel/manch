@@ -109,24 +109,37 @@ await kosul(p, () => Number(getComputedStyle(document.querySelector("[data-testi
 const trailOp = await p.evaluate(() => getComputedStyle(document.querySelector("[data-testid=cursor-trail]")).opacity);
 t("data-cursor-hide üstünde iz gizlendi", Number(trailOp) < 0.2, `opacity=${trailOp}`);
 
-/* Malzeme ikonu renkleri (2026-09-20). Üç şey sessizce kırılabilir:
-   ① renk tokendan değil koda gömülü hex'ten gelir ② iki malzeme aynı rengi alır
-   ③ hale düşer → ikon koyu ya da açık zeminin birinde kaybolur (gözle bakmadan
-   görünmez, çünkü DOM ve olaylar sağlam kalır — Kural 59'un joystick/tavan dersi).
-   Ölçüm ekranda RENDER EDİLEN değerden yapılır, kaynaktan değil. */
-const ink = await p.evaluate(() =>
-  [...document.querySelectorAll("[data-icon]")].map((el) => ({
-    renk: getComputedStyle(el.querySelector("[data-icon-mask]") ?? el).backgroundColor,
-    hale: (getComputedStyle(el).filter.match(/drop-shadow/g) ?? []).length,
-  })),
-);
+/* Malzeme ikonu rengi (kit geçişi 2026-09-28). Malzeme tokenları ve hale mekanizması
+   SİLİNDİ: ikonlar TEK renk, okunurluk ZEMİN KURALINA bağlı — koyu zeminde krem,
+   açık zeminde bordo. Sessizce kırılabilecek iki şey: ① renk tokendan değil gömülü
+   hex'ten gelir ② zemin kuralı hiç çalışmaz (imleç her zeminde aynı kalır).
+   İkincisi ÇİFT YÖNLÜ ölçülüyor — tek yön ölçseydi "hep aynı dönen" bozuk ölçüm de
+   geçerdi (Kural 60). Ölçüm ekranda RENDER EDİLEN değerden yapılır. */
 const rgb = (hex) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ")})`;
-const BEKLENEN = [colors.lettuce, colors.tomato, colors.mustard, colors.patty, colors.pickle, colors.brioche].map(rgb);
-t("malzeme ikonları 6 ayrı renk", new Set(ink.map((i) => i.renk)).size === 6, ink.map((i) => i.renk).join(" · "));
-t("ikon renkleri tokenlardan (hex gömülü değil)", ink.length === 6 && ink.every((v, i) => v.renk === BEKLENEN[i]),
-  `beklenen ${BEKLENEN.join(",")} · gelen ${ink.map((i) => i.renk).join(",")}`);
-t("her ikonda iki katmanlı hale (kontrast koruması)", ink.length === 6 && ink.every((i) => i.hale === 2),
-  ink.map((i) => i.hale).join(","));
+const ikonRenkleri = await p.evaluate(() =>
+  [...document.querySelectorAll("[data-icon]")].map((el) => getComputedStyle(el).color));
+const haleSayisi = await p.evaluate(() =>
+  [...document.querySelectorAll("[data-icon]")].filter((el) => /drop-shadow/.test(getComputedStyle(el).filter)).length);
+t("CursorTrail · ikonlar TEK renk", new Set(ikonRenkleri).size === 1, `${new Set(ikonRenkleri).size} ayrı renk`);
+t("CursorTrail · hale mekanizması kaldırıldı", haleSayisi === 0, `drop-shadow taşıyan ikon: ${haleSayisi}`);
+
+/* Zemin kuralı: imlecin ALTINA bilinen renkte iki kutu konur, iz oraya götürülür. */
+await p.evaluate(([bordo, mavi]) => {
+  const yap = (id, renk, left) => {
+    const d = document.createElement("div");
+    d.id = id;
+    Object.assign(d.style, { position: "fixed", left: `${left}px`, top: "300px", width: "200px", height: "140px", background: renk, zIndex: "1" });
+    document.body.append(d);
+  };
+  yap("__zemin-koyu__", bordo, 10);
+  yap("__zemin-acik__", mavi, 260);
+}, [colors.berry, colors.sky]);
+const izRengi = async (x, y) => { await p.mouse.move(x, y, { steps: 8 }); await pencere(p, 450); return p.evaluate(() => getComputedStyle(document.querySelector("[data-dot]")).color); };
+const koyuRenk = await izRengi(110, 370);
+const acikRenk = await izRengi(360, 370);
+await p.evaluate(() => { document.getElementById("__zemin-koyu__")?.remove(); document.getElementById("__zemin-acik__")?.remove(); });
+t("CursorTrail · KOYU zeminde krem", koyuRenk === rgb(colors.cream), `koyu → ${koyuRenk}`);
+t("CursorTrail · AÇIK zeminde bordo (ters yön)", acikRenk === rgb(colors.berry), `açık → ${acikRenk}`);
 
 // --- 7 reduced motion: zorla AÇIK
 await p.getByRole("button", { name: "Zorla AÇIK" }).click();
@@ -325,8 +338,12 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   await pencere(q, 420); // ÖLÇÜM PENCERESİ: duruyorsa bu sürede de kıpırdamamalı
   const p2 = await konum();
   const perdeHareket = p1.map((v, i) => Math.abs(v - p2[i]));
-  t("Footer · Zone perdesi açıkken juggle DURUYOR", p1.length > 0 && Math.max(...perdeHareket) === 0,
-    `hareket [${perdeHareket.join(",")}]`);
+  /* Eşik 0 DEĞİL 2 px: perde durumu yayılıp tween duraklayana kadar bir kare geçebiliyor
+     ve örnek tam o karede düşerse 1 px okunuyordu (üç koşuda bir kırmızı — oynak kontrol,
+     Kural 60). Ayırt edicilik korunuyor: DÖNEN juggle aynı pencerede 10–21 px yapıyor,
+     yani 2 px ile 10 px arasında 5× pay var; alttaki ters yön kontrolü > 4 px arıyor. */
+  t("Footer · Zone perdesi açıkken juggle DURUYOR", p1.length > 0 && Math.max(...perdeHareket) <= 2,
+    `hareket [${perdeHareket.join(",")}] (eşik ≤ 2)`);
   await q.keyboard.press("Escape");
   await kosul(q, () => !document.querySelector("[data-testid=zone-curtain]"));
   const p3 = await konum();

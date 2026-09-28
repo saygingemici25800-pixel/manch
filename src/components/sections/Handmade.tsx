@@ -26,7 +26,7 @@ export async function Handmade() {
           <p className="font-display text-[1.4vw] text-berry max-md:text-[5vw]">
             {t("handmade.cardTitle")}
           </p>
-          <ul className="mt-[0.5vw] flex flex-col gap-[0.2vw] font-ui text-[1vw] uppercase text-berry-dk max-md:mt-[2vw] max-md:gap-[1vw] max-md:text-[3.6vw]">
+          <ul className="mt-[0.5vw] flex flex-col gap-[0.2vw] font-ui text-[1vw] uppercase text-berry max-md:mt-[2vw] max-md:gap-[1vw] max-md:text-[3.6vw]">
             {points.map((p) => (
               <li key={p}>· {p}</li>
             ))}

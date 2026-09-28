@@ -30,6 +30,29 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **MARKA KİTİ — FAZ B (PALET) UYGULANDI (2026-09-28).** Yalnız renk; font/logo/pattern/
+  maskot bu turda YOK (Faz C/D/E). Tablo bölüm 3'te.
+  · **14 token → 5.** Dokuz token silindi, dört değer değişti. 44 dosyada sınıf devri.
+  · **Kontrast İYİLEŞTİ:** berry/cream 9.73 → **10.32** · berry/sky(pink) 5.55 → **8.15** ·
+    berry/tile 5.85 → **8.15** · ink/cream 14.94 → **16.47**. Düşen çift yok.
+    `a11y-check` **44/44** (5 yeni kontrol) · Lighthouse **A11y 100 / SEO 100** ×4 sayfa.
+  · **Focus ring yeniden kuruldu — iki kez yanlış kuruldu, yeni bekçi ikisini de yakaladı.**
+    Temel ilke: `outline` öğenin DIŞINA çizilir, kontrast ARKADAKİ zeminle ölçülür.
+    Kendi opak zemini olan öğede halka **içeri** alınır. `.bg-sky`/`.bg-tile` listeye
+    girdi (FAZ A boşluğu). Bekçi **sabotajla doğrulandı** (40/44).
+  · **`#zone` bölümünden `data-nav-dark` kalktı:** `tile` #8fc3d6 → #C3E5F7 ile bölüm
+    artık açık; işaret kalsaydı nav krem hapa döner ve **krem/mavi 1.27 yasak çifti**
+    oluşurdu. `data-nav-dark` 4 → 3.
+  · **OG/ikon/manifest'teki gömülü `#7A1F4B` kapandı** — 10 gündür bayattı (aşağıda).
+  · **Zone:** `BERRY_RGB` artık tokendan türetiliyor (elle yazılıydı). Işık bantları
+    krem; tavan aynı kremin **%88 şiddetinde** — renk eklenmedi, şiddetle oynandı.
+  · `lab-check` **106/106 ×3 ardışık** · `faz6` 227/227 · `zone-camera` 105/105 ·
+    `zone-leak` temiz · `smoke` 32/32 · `/tr` **218.7 kB gz** (218.9'dan −0.2)
+  · `Brand Guidelines.pdf` (122 MB) ve `Big Menu A4.pdf` **`.gitignore`'a** girdi (Kural 69/70)
+  · ⚠ **KARAR BEKLİYOR — footer:** tek bordo olunca dev wordmark bordo-üstü-bordo (1.00)
+    olup **kayboldu**; filigran niyeti krem %12 ile (**1.32**, eski 1.30'a birebir yakın)
+    yeniden kuruldu. **Mavi footer denemesi de çekildi** — karar kullanıcıda.
+
 - **GERİ ALMA (2026-09-20, kullanıcı — beğeni kararı, kusur değil).** İki iş geri alındı:
   · **Sticker'lar tamamen kaldırıldı.** Ana sayfadaki 3 malzeme sticker'ı beğenilmedi;
     `04ad669` **`git revert` ile temiz** geri alındı (çakışma yok). `src`'de kalıntı yok
@@ -440,7 +463,18 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 37. UI component'lerinde `className` prop'u base sınıfları **ezemez** (Tailwind çıktı sırası alfabetik/katman bazlı, `relative` > `absolute`). Konum/boyut gibi override edilebilecek base sınıflar koşullu eklenir (`!className?.includes("absolute") && "relative"`) ya da `!` important varyantı istenir.
 38. SEO dosya kuralları (Next 16 `file-conventions/metadata`): `app/sitemap.ts` + `app/robots.ts` + `app/manifest.ts` **kök `app/`'ta** (layout gerektirmez); `alternates.languages` sitemap'te de metadata'da da `{ tr, en, "x-default" }`. Sayfa metadata'sı `src/lib/seo.ts#pageMetadata` ile (canonical `/${locale}${path}`, hreflang, OG, Twitter); `metadataBase` = `site.url` (`NEXT_PUBLIC_SITE_URL`, TODO domain). Title şablonu layout'ta `%s | MANCH`, sayfalar kısa başlık verir, ana sayfa `absolute`.
 39. `next/og` (`ImageResponse`): `app/[locale]/opengraph-image.tsx` Node runtime'da, `params.locale` alır; font **TTF/OTF/WOFF** (woff2 yok) → `src/assets/fonts/Modak-Regular.ttf` (OFL) `readFile(join(process.cwd(), …))` ile. İkonlar `app/icon.tsx` (`generateImageMetadata` → `/icon/32`, `/icon/512`) + `app/apple-icon.tsx` (180); logo gelince PNG/SVG ile değişir.
-40. Erişilebilirlik: metin renginde opaklık yok (`text-berry-dk/70`, `opacity-60` yasak) — tam palet rengi; ölçülen tüm çiftler ≥ 4.5:1 (berry/cream 8.6, berry/pink 4.9, berry/tile 5.2, ink/mustard 10.5, mustard/berry 6.0). `:focus-visible` global hardal halka (mustard zeminde berry-dk); skip link `#main` (her sayfada `<main id="main">`). Dialog'lar `role=dialog aria-modal` + `aria-label`/`aria-labelledby`.
+40. Erişilebilirlik: metin renginde opaklık yok (`opacity-60` yasak) — tam palet rengi.
+    **Marka kiti çiftleri (2026-09-28):** berry/cream **10.32** · cream/berry 10.32 ·
+    berry/sky **8.15** · berry/tile 8.15 · ink/cream **16.47** · ink/sky 13.02.
+    **YASAK ÇİFTLER:** mavi üstüne krem metin (**1.27**) · bordo üstüne ink metin (**1.60**).
+    `a11y-check` hem geçmesi gerekenleri hem **düşmesi gerekenleri** denetler.
+    **`:focus-visible` zemine göre seçilir** — `outline` öğenin DIŞINA çizilir, yani
+    kontrast öğenin kendi doldurma rengiyle değil ARKASINDAKİ zeminle ölçülür:
+    varsayılan bordo (sayfa zemini krem); koyu bölüm / ters nav → krem;
+    **kendi opak zemini olan öğede halka İÇERİ alınır** (`outline-offset` negatif) ve
+    kendi rengine göre seçilir, böylece arkada ne olduğu önemsizleşir.
+    Skip link `#main` (her sayfada `<main id="main">`). Dialog'lar `role=dialog aria-modal`
+    + `aria-label`/`aria-labelledby`.
 41. Görsel pipeline (`scripts/content/`, **`scripts/content/.venv`** — Python 3.9.6, rembg 2.0.61, onnxruntime 1.19; `.gitignore`'da): kaynaklar `docs/source/` (commit'te, asla yazılmaz). Kesit üretimi `cutouts.py --model isnet-general-use --matting --preclean` — matris kararı 2026-09-17 (`docs/screens/cutouts-compare/`, 4 kombinasyon gözle: matting olmadan ok kancaları, preclean olmadan kağıt yamaları kalıyor; ikisi birlikte temiz). Adımlar: kaynak KOPYASINDA ön-temizlik (kağıt ton 288°–11° & açık ∨ katı magenta; beyaz/mavimsi ok/derz → karo rengi) → rembg isnet + alpha matting (fg 240 / bg 15 / erode 8) → en büyük bağlı bileşen → `trim_cold_bottom` → %6 pad, kare 1200 PNG + 600 WebP `public/burgers/<slug>.png`. **`new_session(..., providers=["CPUExecutionProvider"])` zorunlu** (CoreML sağlayıcısı askıda kalıyor). birefnet-general: 973 MB, tek fotoğraf > 240 s → kullanılmaz. Fotoğraflar uzun kenar 1600 jpg+webp `public/images/`. Kontak tablosu `docs/screens/icerik-burgers.png` + `cutouts-before-after.png` ile göz kontrolü zorunlu. Toplu döngüler bash (`compare.sh`); zsh'de tırnaksız `$flags` bölünmez. Kesitler onaylandı (2026-09-17); **orijinal fotoğraflar gelince aynı komutla yeniden üretilir**, script'e dokunulmaz.
 42. Logo: `public/logo/logo-manch.svg` / `logo-menu.svg` / `logo-m.svg` basılı menüden potrace izi (`fill="currentColor"`); React'te `ui/logo-manch.tsx`, `ui/logo-menu.tsx`, `ui/logo-m.ts` **otomatik üretilir** (script), elle düzenlenmez; `ui/Logo.tsx` sarmalar. OG/ikonlar bu path'leri Satori `<svg>` ile çizer; OG'deki burger `readFile` → data URI (ağ yok). Orijinal vektör logo gelince yalnızca SVG dosyaları + üretilen component'ler değişir.
 43. Performans ölçümü (`scripts/lighthouse.mjs`): Performance + A11y + SEO, **desktop ve mobile**, her sayfa **iki kez** — preloader'sız (`?nopreload=1`) ve preloader'lı. **Her iki varyant prod build'de**: ölçüm build'i `NEXT_PUBLIC_ALLOW_NOPRELOAD=1 NEXT_PUBLIC_SITE_URL=http://localhost:3100 pnpm build` (parametre dev'de her zaman, prod'da sadece bu env ile çalışır; yayın build'inde etkisiz). Dev sunucuda ölçüm YAPILMAZ (minify'sız, TBT 3–5× şişer — ilk baseline bu yüzden çöpe gitti). **Hedef = preloader'sız mobile: Performance ≥ 90, LCP < 2.5 s, CLS < 0.1**; preloader'lı LCP **olduğu gibi** raporlanır (toplama/ekleme yok), hedef değildir (1.8 s zemin bilinçli; LCP elementi çoğu zaman preloader'ın kendisidir). Throttling `simulate`, mobile 412×823 @1.75. Baseline `docs/screens/faz-8-baseline.json`, final `faz-8-final.json`.
@@ -681,11 +715,24 @@ Fethiye'deki smash burger markası **MANCH** için animasyon ağırlıklı, iki 
 
 ## 3. TASARIM SİSTEMİ
 
-**Renkler** (`berry` 2026-09-18'de basılı menüden teyit edildi; kalan 8 token teyit bekliyor — DURUM):
+**Renkler — MARKA KİTİ (karar 2026-09-28, FAZ B uygulandı).** Üç renk, 80/20:
 ```
-berry #6A1F3B · berry-dk #4E1030 · sky #C4E4F3 · tile #8FC3D6
-cream #F4EEE6 · paper #E9DCC6 · pink #E9A3B8 · mustard #F6C343 · ink #1B1B1B
+berry (bordo) #77133E — %40   ·   sky / tile (açık mavi) #C3E5F7 — %40
+cream (krem)  #FFF9F2 — %20, YALNIZ vurgu ve CTA   ·   ink #1B1B1B (nötr gövde metni)
 ```
+| silinen token | nereye gitti |
+|---|---|
+| `berry-dk` | `berry` (tek bordo) |
+| `paper` | `cream` |
+| `pink` | `sky` |
+| `mustard` | `cream` (CTA rolü kreme geçti) |
+| `tomato · lettuce · pickle · patty · brioche` | silindi — CursorTrail tek renge indi |
+
+`sky` ile `tile` **aynı değerde**: sınıf adları korundu ki 53 dosya açılmasın.
+Rol devirleri: CTA/hap → krem · `SoonBadge` krem+ink · `PageTransition` bordo→mavi→krem ·
+InstagramGrid ve /about zemini mavi · Zone ışık bantları krem (tavan %88 şiddete kısıldı,
+renk eklenmedi) · CursorTrail tek renk + zemin kuralı (koyu→krem, açık→bordo), hale yok.
+
 **Fontlar:** Modak (`font-display`) · Mouse Memoirs (`font-ui`, uppercase, tracking-wide) · **Press Start 2P** (`font-pixel`, tape/aksan — Kural 18). TR karakterleri test et (Kural 21).
 **Utility'ler:** `heading180`, `text40`, `text-stroke-small`
 **Desenler:** bordo-beyaz dama · pembe dama kağıt · mavi karo duvar · kraft menü kartı · Misu&Miyu line-art tepsi deseni · grain (.06)
@@ -1248,6 +1295,10 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-20 | ders | **Glif kutusu ≠ blok kutusu.** Çakışma ölçülürken metnin blok kutusu değil `Range.getClientRects()` ile **glif** kutusu ölçülür | `<p>` sütun genişliğince uzanır; içindeki yazı kısa olsa bile blok kutusuyla bakan kontrol "çakışıyor" der. Sticker turunda `6 ÜRÜN` sayacı için yaşandı: kutu çakışması vardı, glifler çakışmıyordu — tersi de mümkün (glif çakışır, kutu görünmez) | Ölçüm `Range.selectNodeContents(el).getClientRects()` ile. **Sticker kodu geri alındı, ders duruyor:** metin çakışması sorulan her yerde geçerli |
 | 2026-09-20 | ders | **Aynı çıkış kodu iki farklı sebepten gelir.** Sabotaj doğrulaması iki kez boşa gitti ve "yakalandı" diye okunacaktı | Geçici scriptin import yolu yanlıştı; **hem doğru hem sabotajlı** koşu `ERR_MODULE_NOT_FOUND` ile **çıkış 1** verdi. Yalnız çıkış koduna bakan biri sabotajın yakalandığını sanır | **Sabotajın BEKLENEN SEBEPTEN düştüğü doğrulanmadan sabotaj geçerli sayılmaz** — çıktı okunur, düşen kontrolün adı ve değeri görülür. Kural 77(a)'nın birebir örneği |
 | 2026-09-20 | ders | **Tip düzeyinde zorlama, çalışma anı bekçisinden üstündür.** | Sticker'da zemin-malzeme eşleşmesi ayrık birleşimle zorunlu kılınmıştı: yanlış çift **derlenmiyordu**. O eşleşme için ayrıca bekçi yazmak gereksiz tekrar olurdu | Bekçi yalnız **tipin göremediği** şeye kalır (orada: bölümün gerçek `background-color`'ı — sonradan değişebilir). Önce tiple kapat, kalanı bekçiye bırak |
+| 2026-09-28 | kit | **OG görseli, favicon'lar ve manifest 10 GÜNDÜR bayat renkteydi** — gömülü `#7A1F4B` taşıyorlardı | `berry` 2026-09-18'de `#7A1F4B` → `#6A1F3B` olmuştu; token güncellendi ama bu dört dosya hex'i **koda gömülü** tuttuğu için haberi olmadı. Hiçbir bekçi bakmıyordu: `smoke` og:image'in VAR olduğunu doğruluyor, rengini değil. Paylaşım kartı ve favicon palet dışı yayında kaldı | Dördü de `tokens.ts`'ten okuyor (Satori CSS değişkeni çözemez, JS tarafından alınıyor). **Kural 74'ün token hâli: bir DEĞER revize edilince onu KOPYALAYAN her yer aynı turda güncellenir** — kural metni kadar sabitler için de geçerli |
+| 2026-09-28 | kit | **Footer'ın dev MANCH wordmark'ı tamamen kayboldu** | `berry-dk` silinip tek bordoya inilince filigran `text-berry` `bg-berry` üstünde kaldı → **1.00**. Eskiden berry/berry-dk = 1.30'du: bilinçli, zar zor görünen bir filigran (karar 2026-09-18). Otomatik kontrollerin hiçbiri görmedi — `aria-hidden` dekoratif SVG, `lab-check` yalnız "var mı" diye soruyor. **Gözle bakma turu yakaladı** (Kural 59) | Filigran NİYETİ kit içinde yeniden kuruldu: `color-mix` ile krem %12 → **1.32**, eski değere birebir yakın. Kural 40 burada geçerli değil (metin değil). Mavi footer alternatifi ayrıca çekildi, karar kullanıcıda |
+| 2026-09-28 | kit | **Focus ring İKİ KEZ ters kuruldu**; ikisini de aynı turda yazılan yeni bekçi yakaladı | ① Varsayılan krem yapıldı — ama sayfanın kendi zemini krem (`html`), skip link/nav logosu/menü düğmesinde halka-zemin **1.00** ② Varsayılan bordoya çevrildi, kendi zemini olan öğelere "kendi rengine göre" halka verildi — ama `outline` öğenin **DIŞINA** çizilir: krem hap bordo zeminde bordo halka aldı, yine 1.00. Ayrıca bekçinin ilk hâli ata zincirini ölçüyordu; nav `fixed`, hero'nun çocuğu değil → "krem üstünde krem" diyordu, oysa öğe koyu fotoğrafın üstündeydi (Kural 60) | İlke netleşti: halka DIŞARIDAYSA arkadaki zeminle, İÇERİDEYSE (`outline-offset` negatif) öğenin kendi zeminiyle ölçülür. Kendi opak zemini olan öğelerde halka içeri alındı → arkada ne olduğu önemsizleşti. Bekçi hit-test'e (`elementsFromPoint`) çevrildi ve offset'in işaretine göre hedef seçiyor. **Sabotajla doğrulandı: 40/44** |
+| 2026-09-28 | kit | Zone ışık bantları hardaldan kreme dönünce **krem tavanın üstünde kayboldu** | Tavan da krem; iki yüzey aynı `meshBasicMaterial` renginde → sıfır ayrışma. Sahne "soğudu" ve salonun uzunluğunu okutan çizgiler gitti | Karar gereği **renk eklenmedi, şiddetle oynandı**: tavan aynı kremin **%88** şiddetinde (`Color.multiplyScalar`), bantlar tam krem. Tek hue, iki parlaklık — bantlar geri geldi |
 
 ---
 

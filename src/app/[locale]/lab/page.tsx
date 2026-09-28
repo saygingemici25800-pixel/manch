@@ -40,7 +40,7 @@ export default async function LabPage({ params }: Props) {
   return (
     <main id="main" className="grain min-h-screen bg-cream px-[3vw] py-[3vw] max-md:px-[5vw]">
       <h1 className="heading180 text-berry">LAB</h1>
-      <p className="text40 text-berry-dk">{t("subtitle")}</p>
+      <p className="text40 text-berry">{t("subtitle")}</p>
 
       {/* ---------------- RENKLER ---------------- */}
       <Section id="colors" title={t("colors")}>
@@ -68,7 +68,7 @@ export default async function LabPage({ params }: Props) {
               <p className={`${f.cls} text-[3vw] leading-tight text-ink max-md:text-[7vw]`}>
                 MANCH — Handmade Hits Different
               </p>
-              <p className={`${f.cls} text-[1.6vw] leading-tight text-berry-dk max-md:text-[4.6vw]`}>
+              <p className={`${f.cls} text-[1.6vw] leading-tight text-berry max-md:text-[4.6vw]`}>
                 {PANGRAM_TR}
               </p>
               <p className={`${f.cls} text-[2vw] tracking-[0.08em] text-berry max-md:text-[6vw]`}>
@@ -81,7 +81,7 @@ export default async function LabPage({ params }: Props) {
 
       {/* ---------------- TR GLYPH TESTİ ---------------- */}
       <Section id="glyphs" title={t("glyphs")}>
-        <p className="mb-[1vw] font-ui text-[1vw] uppercase text-berry-dk max-md:mb-[3vw] max-md:text-[3.2vw]">
+        <p className="mb-[1vw] font-ui text-[1vw] uppercase text-berry max-md:mb-[3vw] max-md:text-[3.2vw]">
           {t("glyphsNote")}
         </p>
         <GlyphCheck families={FONT_ROWS.map(({ label, cssVar }) => ({ label, cssVar }))} />
@@ -96,7 +96,7 @@ export default async function LabPage({ params }: Props) {
           </div>
           <div>
             <code className="font-ui text-[1vw] text-berry max-md:text-[3.2vw]">.text40</code>
-            <p className="text40 text-berry-dk">United Chill Burger Zone</p>
+            <p className="text40 text-berry">United Chill Burger Zone</p>
           </div>
           <div>
             <code className="font-ui text-[1vw] text-berry max-md:text-[3.2vw]">.text-stroke-small</code>
@@ -104,11 +104,11 @@ export default async function LabPage({ params }: Props) {
           </div>
           <div>
             <code className="font-ui text-[1vw] text-berry max-md:text-[3.2vw]">.text-stroke-fill</code>
-            <p className="text-stroke-fill font-display text-[4vw] text-mustard max-md:text-[10vw]">MANCH</p>
+            <p className="text-stroke-fill font-display text-[4vw] text-cream max-md:text-[10vw]">MANCH</p>
           </div>
           <div>
             <code className="font-ui text-[1vw] text-berry max-md:text-[3.2vw]">.grain</code>
-            <div className="grain h-[8vw] bg-mustard max-md:h-[20vw]" />
+            <div className="grain h-[8vw] bg-cream max-md:h-[20vw]" />
           </div>
         </div>
       </Section>

@@ -44,7 +44,7 @@ export default function ContactClient() {
             <button type="button" disabled aria-disabled="true" data-testid="wa-button" className={`${pill} cursor-not-allowed bg-berry/40 text-cream hover:scale-100`}>{t("whatsapp")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" /></button>
           )}
           <button type="button" data-cursor-hide data-testid="contact-info" onClick={() => setInfoOpen(true)} className={`${pill} border-[0.15vw] border-berry text-berry hover:bg-berry hover:text-cream`}><RollText>{t("reservation")}</RollText></button>
-          <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`${pill} bg-mustard text-ink`}><RollText>{t("directions")}</RollText></a>
+          <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`${pill} bg-cream text-ink`}><RollText>{t("directions")}</RollText></a>
         </div>
 
         <ul className="mt-[0.5vw] flex flex-wrap gap-[1.2vw] max-md:gap-[4vw] text40 text-[1.05vw] max-md:text-[3.6vw]">
@@ -59,7 +59,7 @@ export default function ContactClient() {
         ) : (
           <button type="button" data-testid="map-load" onClick={() => setLoaded(true)} className="group absolute inset-0 grid place-items-center text-cream">
             <Placeholder tone="sky" label={t("mapTitle")} className="absolute inset-0 rounded-none!" />
-            <span className="relative rounded-full bg-berry-dk px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-transform duration-300 group-hover:scale-105">{t("loadMap")}</span>
+            <span className="relative rounded-full bg-berry px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-transform duration-300 group-hover:scale-105">{t("loadMap")}</span>
           </button>
         )}
       </div>

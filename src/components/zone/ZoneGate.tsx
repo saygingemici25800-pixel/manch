@@ -56,7 +56,7 @@ export function ZoneGate() {
         data-cursor-hide
         data-testid="zone-gate"
         onClick={enter}
-        className="rounded-full border-2 border-berry-dk bg-mustard px-[1.8vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] text-berry-dk transition-transform duration-300 hover:scale-105 max-md:px-[6vw] max-md:py-[2.6vw] max-md:text-[4vw]"
+        className="rounded-full border-2 border-berry bg-cream px-[1.8vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] text-berry transition-transform duration-300 hover:scale-105 max-md:px-[6vw] max-md:py-[2.6vw] max-md:text-[4vw]"
       >
         {t("gate")}
       </button>
@@ -69,7 +69,7 @@ export function ZoneGate() {
           role="dialog"
           aria-modal="true"
           aria-label={t("title")}
-          className="fixed inset-0 z-100 grid place-items-center overflow-hidden bg-berry-dk"
+          className="fixed inset-0 z-100 grid place-items-center overflow-hidden bg-berry"
         >
           {/* Sahne yalnızca karakter seçildikten sonra kurulur; yükleme ekranı üstünde durur. */}
           {(state === "loading" || state === "zone" || state === "pov") && (
@@ -84,7 +84,7 @@ export function ZoneGate() {
             data-cursor-hide
             data-testid="zone-exit"
             onClick={exit}
-            className="absolute right-[1.5vw] top-[1.5vw] z-90 rounded-full border-2 border-cream bg-transparent px-[1.2vw] py-[0.45vw] font-ui text-[0.9vw] uppercase tracking-[0.12em] text-cream transition-colors duration-300 hover:bg-cream hover:text-berry-dk max-md:right-[5vw] max-md:top-[5vw] max-md:px-[4vw] max-md:py-[1.6vw] max-md:text-[3.2vw]"
+            className="absolute right-[1.5vw] top-[1.5vw] z-90 rounded-full border-2 border-cream bg-transparent px-[1.2vw] py-[0.45vw] font-ui text-[0.9vw] uppercase tracking-[0.12em] text-cream transition-colors duration-300 hover:bg-cream hover:text-berry max-md:right-[5vw] max-md:top-[5vw] max-md:px-[4vw] max-md:py-[1.6vw] max-md:text-[3.2vw]"
           >
             {t("exit")}
           </button>
