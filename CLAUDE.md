@@ -30,6 +30,40 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- 🔴 **KURAL 79'un İLK TARAMASI FAZ B'DE 8 KAYIP NİYET DAHA BULDU (2026-09-29) —
+  KARAR BEKLİYOR, KOD DEĞİŞTİRİLMEDİ (Kural 10).** Kural 79 yazılır yazılmaz aynı
+  soru sistematik soruldu: *FAZ B'de başka ne sessizce öldü?* Beş eksende tarandı,
+  30 aday çıktı, her biri **iki bağımsız şüpheciye** çürütülmeye verildi → 20 onay /
+  10 çürütme; onaylar **8 ayrı kusura** iniyor (çoğu 4 eksende birbirinden bağımsız
+  bulundu). Hepsi dosyadan **elle teyit edildi**.
+  · **Tek mekanizma:** rol devri `mustard → cream` yapıldı, ama krem öğelerin çoğu
+    **krem ya da beyaz zeminin üstünde** duruyor. Devir tablosu zemini hesaba katmadı.
+    `bg-white` **kit tokeni bile değil** — tabloda hiç görünmüyor.
+  · **1.00 (birebir aynı renk):** sepet çekmecesinde adet **`+`** düğmesi
+    (`Cart.tsx:153`, çekmece `bg-cream`) — yanındaki `−` hâlâ dolu bordo, **çift
+    simetrisi kırık** · **`SoonBadge`** (`SoonBadge.tsx:18`) KraftCard/çekmece
+    üstünde — **Kural 54-A'nın tüm mekanizması** çıplak metne indi · `/menu` **NEW**
+    filtre hapı (`MenuClient.tsx:113`, şerit `bg-cream/90`) — `spicy` bordo,
+    `signature` mavi, **yalnız NEW görünmez** · `/contact` **YOL TARİFİ** hapı
+    (`ContactClient.tsx:47`, KraftCard `bg-cream`) · MisuMiyu **tape şeridi**
+    (`MisuMiyu.tsx:32`, bölüm `bg-cream`) — bant gidince 2°'lik eğiklik kusur gibi duruyor
+  · **1.05:** ürün kartı **sepete ekle `+`** (`ProductCard.tsx:121`, kart `bg-white`) —
+    ana sayfada 6, `/menu`'de 28 kartta; R11'in adı birebir "hardal + butonu" ve
+    bileşenin **kendi docstring'i hâlâ "hardal" diyor**. Devre dışı↔etkin ayrımı da
+    1.34 → **1.03**'e düştü (fiyatsız 4 ürün)
+  · **Etkisiz hover/odak (tautoloji):** `MenuOverlay.tsx:51`
+    `text-cream hover:text-cream focus-visible:text-cream` · `BlobButton.tsx:84`
+    `fill-berry group-hover/blob:fill-berry` — `transition-colors` boşa dönüyor
+  · **Neden hiçbir bekçi görmedi:** hepsi **dekoratif dolgu**; metin kontrastı
+    (ink/krem 16.47) sorunsuz geçiyor, dokunma hedefi 26 px, `aria-label` yerinde,
+    konsol temiz. `a11y-check` **token çiftlerini** ölçüyor, `cream+white` çifti
+    listede yok. Gözle bakma turu footer filigranını ve Zone bantlarını yakaladı,
+    bunları **kaçırdı** — tur bölüm bölüm bakıyor, tek tek düğmelere değil.
+  · **Düzeltme YAPILMADI:** "krem CTA açık zeminde ne olacak?" bir **rol kararıdır**,
+    kit tablosuna aittir ve kullanıcınındır (footer rengiyle aynı sınıf). En küçük
+    aday: açık zeminde dolgu `bg-berry text-cream` (berry/beyaz 9.9, cream/berry
+    10.32 — kit içinde kalır). **Faz B-2 olarak açıldı.**
+
 - **MARKA KİTİ — FAZ B (PALET) UYGULANDI (2026-09-28).** Yalnız renk; font/logo/pattern/
   maskot bu turda YOK (Faz C/D/E). Tablo bölüm 3'te.
   · **14 token → 5.** Dokuz token silindi, dört değer değişti. 44 dosyada sınıf devri.
@@ -49,9 +83,12 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · `lab-check` **106/106 ×3 ardışık** · `faz6` 227/227 · `zone-camera` 105/105 ·
     `zone-leak` temiz · `smoke` 32/32 · `/tr` **218.7 kB gz** (218.9'dan −0.2)
   · `Brand Guidelines.pdf` (122 MB) ve `Big Menu A4.pdf` **`.gitignore`'a** girdi (Kural 69/70)
-  · ⚠ **KARAR BEKLİYOR — footer:** tek bordo olunca dev wordmark bordo-üstü-bordo (1.00)
-    olup **kayboldu**; filigran niyeti krem %12 ile (**1.32**, eski 1.30'a birebir yakın)
-    yeniden kuruldu. **Mavi footer denemesi de çekildi** — karar kullanıcıda.
+  · ✅ **FOOTER KARARI KAPANDI (2026-09-29, kullanıcı): tek bordo.** Mavi footer
+    denemesi çekilmişti, **reddedildi** — footer gövdeden kopmuyor, kit'in %40 mavi
+    dengesini sayfanın en altına yığmak istenmedi. Dev wordmark tek bordoda
+    bordo-üstü-bordo (1.00) olup kaybolmuştu; filigran **niyeti** krem %12 ile
+    (`color-mix`, **1.32** — eski berry/berry-dk 1.30'a birebir yakın) yeniden
+    kuruldu. **Madde kapandı, yeniden açılmayacak.** Bu vaka Kural 79'un kanıtıdır.
 
 - **GERİ ALMA (2026-09-20, kullanıcı — beğeni kararı, kusur değil).** İki iş geri alındı:
   · **Sticker'lar tamamen kaldırıldı.** Ana sayfadaki 3 malzeme sticker'ı beğenilmedi;
@@ -473,6 +510,8 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     varsayılan bordo (sayfa zemini krem); koyu bölüm / ters nav → krem;
     **kendi opak zemini olan öğede halka İÇERİ alınır** (`outline-offset` negatif) ve
     kendi rengine göre seçilir, böylece arkada ne olduğu önemsizleşir.
+    Gerekçesi, bekçinin ölçüm yöntemi ve kanıtı **Kural 78**'de — **ikisi birlikte
+    revize edilir** (Kural 74: biri değişip öteki kalırsa bayat bekçi doğar).
     Skip link `#main` (her sayfada `<main id="main">`). Dialog'lar `role=dialog aria-modal`
     + `aria-label`/`aria-labelledby`.
 41. Görsel pipeline (`scripts/content/`, **`scripts/content/.venv`** — Python 3.9.6, rembg 2.0.61, onnxruntime 1.19; `.gitignore`'da): kaynaklar `docs/source/` (commit'te, asla yazılmaz). Kesit üretimi `cutouts.py --model isnet-general-use --matting --preclean` — matris kararı 2026-09-17 (`docs/screens/cutouts-compare/`, 4 kombinasyon gözle: matting olmadan ok kancaları, preclean olmadan kağıt yamaları kalıyor; ikisi birlikte temiz). Adımlar: kaynak KOPYASINDA ön-temizlik (kağıt ton 288°–11° & açık ∨ katı magenta; beyaz/mavimsi ok/derz → karo rengi) → rembg isnet + alpha matting (fg 240 / bg 15 / erode 8) → en büyük bağlı bileşen → `trim_cold_bottom` → %6 pad, kare 1200 PNG + 600 WebP `public/burgers/<slug>.png`. **`new_session(..., providers=["CPUExecutionProvider"])` zorunlu** (CoreML sağlayıcısı askıda kalıyor). birefnet-general: 973 MB, tek fotoğraf > 240 s → kullanılmaz. Fotoğraflar uzun kenar 1600 jpg+webp `public/images/`. Kontak tablosu `docs/screens/icerik-burgers.png` + `cutouts-before-after.png` ile göz kontrolü zorunlu. Toplu döngüler bash (`compare.sh`); zsh'de tırnaksız `$flags` bölünmez. Kesitler onaylandı (2026-09-17); **orijinal fotoğraflar gelince aynı komutla yeniden üretilir**, script'e dokunulmaz.
@@ -1130,6 +1169,63 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     Kural 60'ın (testi sabote et) tamamlayıcısı: 60 "yakalıyor mu?" diye sorar,
     77 "zaten koştu mu ve düşebilir mi?" diye sorar.
 
+78. **`outline` öğenin DIŞINA çizilir (karar 2026-09-29).** Kontrastı öğenin kendi
+    doldurma rengiyle değil, **arkasındaki** zeminle ölçülür. Focus ring rengi
+    seçilirken bakılacak şey öğenin rengi değil, **öğenin üstünde durduğu zemindir.**
+
+    Kendi zemini olan öğelerde (hap buton, kart, rozet) halka **içeri** alınır
+    (`outline-offset` negatif) — böylece arkada ne olduğu önemsizleşir ve zemin
+    başına override gerekmez.
+
+    Focus ring bekçisi de bu kurala göre ölçer: halka dışarıdaysa **arkadaki** zemin,
+    içerideyse **öğenin kendi** zemini. Ata zincirinden değil **hit-test** ile
+    (`elementsFromPoint`) — `fixed` öğeler DOM ağacında beklenen yerde durmaz.
+
+    Kanıt: 2026-09-28, iki ayrı yanlış kurulum (varsayılan krem · "kendi rengine
+    göre") dört sayfada 1.00 kontrast üretti; bekçi ikisini de yakaladı.
+
+    **Kural 74 durumu:** bu kuralı uygulayan bekçi `scripts/a11y-check.mjs`'te
+    (`iceride` / `kendiZemin` / `zemin` → `hedef()`) **zaten var**, FAZ B'de bu ilkeye
+    göre yazıldı ve sabotajla doğrulandı (40/44). Bu turda script işi çıkmadı.
+    Kural 40'ın focus-ring paragrafı bu maddenin özetidir — **ikisi birlikte revize
+    edilir**, biri değişip öteki kalırsa bayat bekçi doğar.
+
+79. **Silinen şeyin NİYETİ korunur, DEĞERİ değil (karar 2026-09-29).** Bir token,
+    font ya da bileşen kaldırılırken yerine konacak şey **eski değeri** değil, o
+    değerin **taşıdığı niyettir**. Niyet önce yazılır, sonra yeni sistemde yeniden
+    kurulur; eski hex/punto/ölçü **hedef değildir**.
+
+    Kanıt: 2026-09-28, `berry-dk` silinince footer filigranı bordo-üstü-bordo (1.00)
+    olup kayboldu. Hedef "eski berry-dk'yı taklit etmek" değil, **"1.30:1 filigran"**
+    niyetiydi; kit içinde `color-mix` krem %12 ile **1.32** olarak yeniden kuruldu.
+    Aynı turda Zone ışık bantları da kayboldu (krem bant / krem tavan) — niyet
+    "salonun uzunluğunu okutan çizgi"ydi, tavan %88 şiddete kısılarak korundu.
+
+    Aynı ilke **Faz C'de** geçerli olacak: Modak gidince korunacak şey Modak'ın
+    metrikleri değil, **"ağır, kısa, büyük başlık"** niyetidir. Faz D'de logo, Faz
+    E'de maskot için de aynı soru sorulur: *bu şey neyi yapıyordu?*
+
+    **Pratik karşılığı — silme turu üç adımdır:** ① silinecek şeyin niyetini yaz
+    (ne işe yarıyordu, hangi ayrımı taşıyordu) ② yeni sistemde o niyeti kur
+    ③ **gözle bak** (Kural 59). Bu kusur sınıfı otomatik kontrole görünmez: öğe
+    `aria-hidden` dekoratif olabilir, DOM'da durur, konsol temizdir, kontrast
+    bekçisi metin olmadığı için bakmaz. **İkisi de gözle bulundu.**
+
+    **79-A · Rol devri TEK YÖNLÜ BİR EŞLEME DEĞİLDİR (2026-09-29).** Devir tablosuna
+    `A → B` yazmak yetmez; **"B nerede duruyor?"** sorulmadan devir tamamlanmaz.
+    Kanıt: `mustard → cream` devri aynı gün 8 kusur doğurdu. Hardal **her** zeminde
+    ayrışıyordu (doygun sarı); krem yalnız **koyu** zeminde ayrışır — ve krem öğelerin
+    çoğu krem/beyaz yüzeylerin üstündeydi. Sepet `+` düğmesi, `SoonBadge`, NEW filtre
+    hapı, YOL TARİFİ hapı ve tape şeridi **1.00**'e düştü.
+    · **Palet dışı zeminler de sayılır:** `ProductCard` `bg-white` taşıyor; beyaz bir
+      kit tokeni **değil**, bu yüzden tabloda hiç görünmedi ve kimse bakmadı.
+      Devir denetimi tokenlerle değil, **öğenin fiilen üstünde durduğu yüzeyle** yapılır.
+    · **`hover:`/`focus-visible:` varyantları da devre girer:** iki token birleşince
+      varyant dinlenme durumuyla aynı sınıfa düşer ve **tautolojiye** dönüşür
+      (`text-cream` üstünde `hover:text-cream`). Sınıf durur, `transition-colors`
+      döner, hiçbir şey olmaz — grep "sınıf var" der, ekranda karşılığı yoktur.
+      Silme turunda `hover:`/`focus-visible:`/`group-hover:` varyantları **ayrıca** taranır.
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1299,6 +1395,9 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-28 | kit | **Footer'ın dev MANCH wordmark'ı tamamen kayboldu** | `berry-dk` silinip tek bordoya inilince filigran `text-berry` `bg-berry` üstünde kaldı → **1.00**. Eskiden berry/berry-dk = 1.30'du: bilinçli, zar zor görünen bir filigran (karar 2026-09-18). Otomatik kontrollerin hiçbiri görmedi — `aria-hidden` dekoratif SVG, `lab-check` yalnız "var mı" diye soruyor. **Gözle bakma turu yakaladı** (Kural 59) | Filigran NİYETİ kit içinde yeniden kuruldu: `color-mix` ile krem %12 → **1.32**, eski değere birebir yakın. Kural 40 burada geçerli değil (metin değil). Mavi footer alternatifi ayrıca çekildi, karar kullanıcıda |
 | 2026-09-28 | kit | **Focus ring İKİ KEZ ters kuruldu**; ikisini de aynı turda yazılan yeni bekçi yakaladı | ① Varsayılan krem yapıldı — ama sayfanın kendi zemini krem (`html`), skip link/nav logosu/menü düğmesinde halka-zemin **1.00** ② Varsayılan bordoya çevrildi, kendi zemini olan öğelere "kendi rengine göre" halka verildi — ama `outline` öğenin **DIŞINA** çizilir: krem hap bordo zeminde bordo halka aldı, yine 1.00. Ayrıca bekçinin ilk hâli ata zincirini ölçüyordu; nav `fixed`, hero'nun çocuğu değil → "krem üstünde krem" diyordu, oysa öğe koyu fotoğrafın üstündeydi (Kural 60) | İlke netleşti: halka DIŞARIDAYSA arkadaki zeminle, İÇERİDEYSE (`outline-offset` negatif) öğenin kendi zeminiyle ölçülür. Kendi opak zemini olan öğelerde halka içeri alındı → arkada ne olduğu önemsizleşti. Bekçi hit-test'e (`elementsFromPoint`) çevrildi ve offset'in işaretine göre hedef seçiyor. **Sabotajla doğrulandı: 40/44** |
 | 2026-09-28 | kit | Zone ışık bantları hardaldan kreme dönünce **krem tavanın üstünde kayboldu** | Tavan da krem; iki yüzey aynı `meshBasicMaterial` renginde → sıfır ayrışma. Sahne "soğudu" ve salonun uzunluğunu okutan çizgiler gitti | Karar gereği **renk eklenmedi, şiddetle oynandı**: tavan aynı kremin **%88** şiddetinde (`Color.multiplyScalar`), bantlar tam krem. Tek hue, iki parlaklık — bantlar geri geldi |
+| 2026-09-29 | kural 78 | **Bekçi ATA ZİNCİRİYLE ölçtüğü için `fixed` öğelerde yanlış zemin buldu** — nav logosu ve menü düğmesi için "krem üstünde krem" dedi, oysa öğeler koyu hero fotoğrafının üstündeydi | Focus ring kontrastı `el.parentElement` zinciri yukarı taranarak ölçülüyordu. Nav `position: fixed` — DOM'da `<body>`'nin çocuğu, **ekranda** hero'nun üstünde. Ata zinciri "ekranda neyin üstünde duruyor" sorusunu yanıtlamaz, yalnız "hangi kutunun içinde yazılmış" sorusunu yanıtlar. Ölçüm doğru çalıştı, **yanlış özneyi** ölçtü (Kural 60) | Hedef zemin **hit-test** ile bulunuyor: `document.elementsFromPoint(cx, cy)` yığınından öğenin kendisinin ALTINDAKİ ilk opak katman. Ayrıca hedef, halkanın nereye çizildiğine göre seçiliyor — `outline-offset` negatifse öğenin **kendi** zemini, değilse **arkadaki** zemin (Kural 78). Sabotajla doğrulandı: 40/44 |
+| 2026-09-29 | kural 79 | **Footer filigranı kaybolduğu hâlde 44 otomatik kontrolün hiçbiri görmedi** — kusuru yalnız gözle bakma turu yakaladı | Filigran `aria-hidden="true"` dekoratif bir SVG. Üç bekçi de yapısal olarak kör: axe/Lighthouse `aria-hidden` öğeyi erişilebilirlik ağacından çıkarır, kontrast denetimine hiç sokmaz · `a11y-check` **metin** çiftlerini ölçer, filigran metin değil · `lab-check` "wordmark var mı" diye sorar, **görünüyor mu** diye sormaz. Üstelik 1.00 kontrast burada bir **Kural 40 ihlali değil** (metin değil) — yani doğru kurulmuş bir kontrast bekçisi bile bunu bilerek atlardı | Kusur sınıfı kabul edildi ve **Kural 79** yazıldı: silme turu ① niyeti yaz ② yeniden kur ③ **gözle bak** adımlarıyla yürür. Bekçiye bağlanmadı — "dekoratif öğe görünüyor mu" sorusu piksel karşılaştırması ister (Kural 64: süs bir öğe için orantısız). Kural 59 bu boşluğun kalıcı karşılığıdır |
+| 2026-09-29 | kural 79 | **Kural 79 yazıldığı gün FAZ B'de 8 kayıp niyet daha buldu** — sepet `+` düğmesi, `SoonBadge`, NEW filtre hapı, YOL TARİFİ hapı, tape şeridi (beşi de **1.00**), ürün kartı `+` (1.05), iki etkisiz hover (`MenuOverlay`, `BlobButton`) | Rol devri **`mustard → cream`** yapılırken devrin **varış zemini** sorulmadı. Hardal her zeminde ayrışıyordu (doygun sarı); krem yalnız **koyu** zeminde ayrışıyor. Krem öğelerin çoğu ise krem/beyaz yüzeylerin üstünde duruyor — `KraftCard` `bg-cream`, sepet çekmecesi `bg-cream`, `/menu` şeridi `bg-cream/90`, `ProductCard` **`bg-white`**. `bg-white` kit tokeni bile değil, bu yüzden devir tablosunda hiç görünmedi. Hover tarafında ayrı bir yüz: `berry-dk → berry` birleşince `hover:` varyantı dinlenme durumuyla **aynı sınıfa** düştü ve tautolojiye dönüştü (`hover:text-cream` üstünde `text-cream`) — sınıf duruyor, `transition-colors` dönüyor, hiçbir şey olmuyor | Kusurlar **düzeltilmedi**: "krem CTA açık zeminde ne olur" bir rol kararıdır, kit tablosuna ve kullanıcıya aittir (Kural 10) → **Faz B-2** açıldı. Kalıcı ders Kural 79'a işlendi: **rol devri tek yönlü bir eşleme değildir** — `A → B` yazarken "B nerede duruyor?" sorulmadan devir tamamlanmaz. Tarama yöntemi de kayda değer: 5 eksen × 30 aday, her aday **iki bağımsız şüpheciye** (renk merceği · görünürlük merceği) çürütülmeye verildi, 10'u elendi; kalan 20 bulgu **8 kusura** indi ve 4 eksen birbirinden bağımsız aynı üçünü buldu |
 
 ---
 
