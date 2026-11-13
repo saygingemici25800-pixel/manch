@@ -20,6 +20,14 @@ const URL = `${BASE}/tr/lab`;
 const NAV_TIMEOUT = Number(process.env.NAV_TIMEOUT ?? 90000);
 
 const b = await ENGINE.launch(process.env.BROWSER === "webkit" ? {} : { executablePath: process.env.CHROME });
+
+/* Kural 60/74 (2026-11-13): sipariş durumu artık SAATE bağlı. Bekçi gerçek saatte koşsaydı
+   gece 23:45'te sepet GERÇEKTEN kapalı olur ve "gönder etkin" kontrolleri düşerdi — sonuç
+   günün saatine bağlı, oynak olurdu. Açılan HER sayfa sabit bir açık saat gönderir; dev
+   sunucusu `x-test-now`'u dinler (production'da dinlenmez). */
+const ACIK_SAAT = "2026-11-16T12:00:00+03:00";
+const saatli = (o = {}) => ({ ...o, extraHTTPHeaders: { ...(o.extraHTTPHeaders ?? {}), "x-test-now": ACIK_SAAT } });
+for (const ad of ["newContext", "newPage"]) { const asil = b[ad].bind(b); b[ad] = (o) => asil(saatli(o)); }
 const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
 p.setDefaultNavigationTimeout(NAV_TIMEOUT);
 

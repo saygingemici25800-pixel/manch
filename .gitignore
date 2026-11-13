@@ -61,3 +61,6 @@ test-results/
 
 # Marka kiti kaynak PDF"leri — repoya girmez (122 MB + 848 KB, Kural 69/70)
 *.pdf
+
+# yönetim paneli yerel deposu (dev / yerel prod testi) — gerçek veri Upstash Redis'te
+.data/

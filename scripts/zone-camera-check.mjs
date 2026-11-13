@@ -8,7 +8,7 @@
 //
 // Kullanım: pnpm dev -p 3113 çalışırken → CHROME=<yol> node scripts/zone-camera-check.mjs
 import { chromium } from "playwright-core";
-import { hazir, pencere } from "./_bekle.mjs";
+import { hazir, kosul, pencere } from "./_bekle.mjs";
 
 const BASE = process.env.BASE ?? "http://localhost:3113";
 const URL_ZONE = `${BASE}/tr/lab/zone`;
@@ -36,6 +36,14 @@ const ONLY = process.env.ONLY ?? "";
 const runs = (section) => !ONLY || ONLY === section;
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
+
+/* Kural 60/74 (2026-11-13): sipariş durumu artık SAATE bağlı. Bekçi gerçek saatte koşsaydı
+   gece 23:45'te sepet GERÇEKTEN kapalı olur ve "gönder etkin" kontrolleri düşerdi — sonuç
+   günün saatine bağlı, oynak olurdu. Açılan HER sayfa sabit bir açık saat gönderir; dev
+   sunucusu `x-test-now`'u dinler (production'da dinlenmez). */
+const ACIK_SAAT = "2026-11-16T12:00:00+03:00";
+const saatli = (o = {}) => ({ ...o, extraHTTPHeaders: { ...(o.extraHTTPHeaders ?? {}), "x-test-now": ACIK_SAAT } });
+for (const ad of ["newContext", "newPage"]) { const asil = browser[ad].bind(browser); browser[ad] = (o) => asil(saatli(o)); }
 
 // Dev sunucusu rotayı ilk istekte derliyor; ısıtmadan her bölüm 30 sn'lik varsayılana takılır.
 await fetch(URL_ZONE).catch(() => {});
@@ -831,7 +839,11 @@ if (runs("scene")) {
   /* Adaptör (Kural 66): tahta WhatsApp'ı BİLMEZ — düğme metni bile adaptörden */
   {
     const label = await page.locator("[data-testid=order-submit]").innerText();
-    const ch = await page.evaluate(() => window.__ORDER__?.orderChannel());
+    /* Adaptörün imzası 2026-11-13'te değişti: kanal artık sipariş DURUMUNU alıyor. Bekçi tahtanın
+       kullandığı canlı durumu verir — argümansız çağrı patlıyordu (Kural 74). */
+    // Durum cevabı gelmeden çağırmak null durumla patlar — önce cevabı bekle (koşul, süre değil).
+    await kosul(page, () => !!window.__ORDER_STATUS__?.getState().resp);
+    const ch = await page.evaluate(() => window.__ORDER__?.orderChannel(window.__ORDER_STATUS__?.getState().resp));
     ok(ch?.labelKey === "Order.send",
       "gönder düğmesinin metni adaptörden geliyor (`channel.labelKey`)",
       `${ch?.labelKey} → "${label}"`);

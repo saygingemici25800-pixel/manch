@@ -5,11 +5,13 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 
 import Footer from "@/components/layout/Footer";
 import LayoutDeferred from "@/components/layout/LayoutDeferred";
+import { PriceProvider } from "@/components/PriceProvider";
 import Nav from "@/components/layout/Nav";
 import Preloader from "@/components/layout/Preloader";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { clientMessages } from "@/i18n/client-messages";
 import { routing, type Locale } from "@/i18n/routing";
+import { getEffectivePrices } from "@/lib/menu-prices";
 import { restaurantJsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { fontVariables } from "@/styles/fonts";
@@ -48,15 +50,19 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Kural 44: client'a yalnızca client component'lerin kullandığı namespace'ler.
   const messages = clientMessages(await getMessages());
   const skip = (await getTranslations({ locale, namespace: "Common" }))("skipToContent");
+  /* Etkin fiyatlar (panel ezmesi + menu.ts) — önbellekli, panel değiştirince tazelenir.
+     Sayfa STATİK kalır; fiyat tek kaynaktan (PriceProvider) tüm bileşenlere dağılır. */
+  const prices = await getEffectivePrices();
 
   return (
     <html lang={locale} className={fontVariables}>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <PriceProvider prices={prices}>
           {/* Restaurant JSON-LD — Kural 54: bilinmeyen alan YAZILMAZ (uydurma değer işletme kartını bozar). */}
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd(locale as Locale)) }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantJsonLd(locale as Locale, prices)) }}
           />
           <Preloader />
           <a
@@ -72,6 +78,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           </SmoothScroll>
           {/* Cart / InfoModal / CookieBanner artık LayoutDeferred içinde (Kural 46). */}
           <LayoutDeferred />
+          </PriceProvider>
         </NextIntlClientProvider>
       </body>
     </html>

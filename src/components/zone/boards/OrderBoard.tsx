@@ -8,6 +8,9 @@ import { getProduct } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
 import { orderChannel, orderTotal, submitOrder } from "@/lib/order/submit";
+import { useOrderStatus, useOrderStatusPolling } from "@/lib/order/status-store";
+import { usePricesStale } from "@/lib/order/use-fresh-prices";
+import { usePrices } from "@/components/PriceProvider";
 import { ORDER_GROUPS } from "@/lib/zone/order-rows";
 
 /**
@@ -25,11 +28,16 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
   const lines = useCartStore((s) => s.lines);
   const add = useCartStore((s) => s.add);
   const setQty = useCartStore((s) => s.setQty);
-  const channel = orderChannel();
+  /* Tahta yalnız açıkken bağlı → açık kaldığı sürece durum tazelenir. Fiyat etkin tablodan. */
+  const prices = usePrices();
+  const status = useOrderStatus();
+  useOrderStatusPolling(true);
+  const pricesStale = usePricesStale(prices);
+  const channel = orderChannel(status, { lines, prices, pricesStale });
   const keepScroll = useRef(0);
 
   const qtyOf = (slug: string) => lines.find((l) => l.slug === slug)?.qty ?? 0;
-  const total = orderTotal(lines);
+  const total = orderTotal(lines, prices);
 
   /**
    * **`scrollTop` korunur.** Adet değişince store güncelleniyor ve pano yeniden render
@@ -69,7 +77,8 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
                * `menu.ts`'e girildiği an satır kendiliğinden normale döner, bu dosya
                * değişmez. Rozet Kural 54-A, toplama girmemesi `orderTotal` tarafında.
                */
-              const orderable = p.price != null;
+              const price = prices[slug] ?? null;
+              const orderable = price != null;
               return (
                 <li
                   key={slug}
@@ -83,7 +92,7 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
                     {p.name[locale]}
                   </span>
                   <span className="shrink-0 font-ui text-[0.95vw] text-berry max-md:text-[3.4vw]">
-                    {orderable ? `${p.price} TL` : <SoonBadge />}
+                    {orderable ? `${price} TL` : <SoonBadge />}
                   </span>
                   <span className="flex shrink-0 items-center gap-[0.4vw] max-md:gap-[2vw]">
                     <button
@@ -126,7 +135,7 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
       ))}
 
       {/* Alt şerit sticky: uzun listede satırlar ALTINDAN akar, şerit onları kapatmaz */}
-      <div className="sticky bottom-0 -mx-[1.4vw] -mb-[1.4vw] flex items-center justify-between gap-[1vw] border-t-[3px] border-ink bg-cream px-[1.4vw] py-[0.8vw] max-md:-mx-[4vw] max-md:-mb-[4vw] max-md:px-[4vw] max-md:py-[3vw]">
+      <div className="sticky bottom-0 -mx-[1.4vw] -mb-[1.4vw] flex flex-wrap items-center justify-between gap-[1vw] border-t-[3px] border-ink bg-cream px-[1.4vw] py-[0.8vw] max-md:-mx-[4vw] max-md:-mb-[4vw] max-md:px-[4vw] max-md:py-[3vw]">
         <p className="font-ui text-[0.95vw] text-berry max-md:text-[3.2vw]">
           {t("total")}{" "}
           {/* Rakamlar font-ui (Mouse Memoirs), Modak DEGIL (karar 2026-09-18, kullanici).
@@ -146,11 +155,18 @@ export function OrderBoard({ scroller }: { scroller: RefObject<HTMLElement | nul
           type="button"
           data-testid="order-submit"
           disabled={!channel.available || total === 0}
-          onClick={() => submitOrder(lines, locale, tAll)}
+          onClick={() => submitOrder(lines, locale, tAll, prices, status)}
           className="shrink-0 rounded-full border-2 border-berry bg-cream px-[1.2vw] py-[0.45vw] font-ui text-[0.9vw] uppercase tracking-[0.1em] text-berry disabled:cursor-not-allowed disabled:opacity-40 max-md:px-[4vw] max-md:py-[1.6vw] max-md:text-[3.2vw]"
         >
           {tAll(channel.labelKey)}
         </button>
+        {/* Kapalıyken sebep (saat / panelden durduruldu). Tahta görünür, adet girilir,
+            yalnız gönder kapalı — site sepetiyle aynı davranış. */}
+        {channel.notice && (
+          <p role="status" data-testid="order-closed" className="basis-full font-ui text-[0.85vw] uppercase tracking-wide text-berry max-md:text-[3vw]">
+            {tAll(channel.notice.key, channel.notice.values)}
+          </p>
+        )}
       </div>
     </div>
   );

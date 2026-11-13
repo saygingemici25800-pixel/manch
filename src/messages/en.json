@@ -352,6 +352,13 @@
   "Order": {
     "intro": "Hi MANCH! I'd like to order:",
     "total": "Total: {total} TL",
-    "send": "SEND VIA WHATSAPP"
+    "send": "SEND VIA WHATSAPP",
+    "closed": "ORDERING CLOSED",
+    "pausedNow": "We're not taking orders right now",
+    "opensToday": "We're closed right now · opening today at {time}",
+    "opensTomorrow": "We're closed right now · opening tomorrow at {time}",
+    "ref": "Order ref: {id}",
+    "pricesUpdating": "Prices were updated — refreshing your cart…",
+    "unpricedLines": "{n} item(s) in your cart are not available right now — please remove them"
   }
 }

@@ -71,6 +71,10 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   const durak = [];
   for (let i = 0; i < 30; i++) {
     await p.keyboard.press("Tab");
+    /* Kural 75: odak `transition-colors` tetikleyebilir (FAZ B-2 dolgu↔kontur takası).
+       Zemin geçiş ORTASINDA okunursa iki rengin karışımı ölçülür (2026-11-13: bordo→krem
+       %18'de yakalanıp 1.52 dendi). Odaktaki öğenin animasyonları durana kadar beklenir. */
+    await kosul(p, () => (document.activeElement?.getAnimations?.() ?? []).every((x) => x.playState !== "running"), null, 3000);
     const s = await p.evaluate(() => {
       const a = document.activeElement;
       if (!a || a === document.body) return null;
@@ -360,6 +364,15 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   p.setDefaultTimeout(45000);
   await p.goto(`${BASE}${path}?nopreload=1`, { waitUntil: "domcontentloaded" });
   await hazir(p);
+  /* Kural 75: /menu içeriği <Suspense> içinde istemcide doğar (Kural 34) — `hazir()` onu
+     beklemez; 2026-11-13'te bir koşuda 0 öğe ölçüldü. Gelmezse aşağıdaki iddia yine düşer. */
+  /* Koşul DOM'da varlık değil, ölçümün kendi görünürlük tanımı (hit-test): kapalı sepet
+     çekmecesindeki `.emph` düğmeleri DOM'da hep durur, varlık koşulu anında sağlanıyordu. */
+  await kosul(p, () => [...document.querySelectorAll(".emph")].some((el) => {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) return false;
+    return document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).includes(el);
+  }));
 
   const hepsi = (await p.evaluate(OLC_EMPH)).filter((d) => d.gorunur);
   // Kural 77(a): ölçemediğini raporlayan kontrol yeşil basmaz.

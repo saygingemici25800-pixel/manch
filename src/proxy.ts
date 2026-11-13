@@ -10,6 +10,7 @@ export const config = {
     // Statik dosyalar, _next ve uzantili yollar haric her sey.
     // Kural 38: `icon` ve `apple-icon` UZANTISIZ metadata rotalari (/icon/32) —
     // haric tutulmazsa locale'e yonlendirilir ve 404 doner.
-    "/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)",
+    // `admin`: yönetim paneli dil ağacının DIŞINDA (/tr/admin'e yönlendirilmemeli).
+    "/((?!api|_next|_vercel|admin|icon|apple-icon|.*\\..*).*)",
   ],
 };

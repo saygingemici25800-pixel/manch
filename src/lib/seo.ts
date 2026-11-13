@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { routing, type Locale } from "@/i18n/routing";
-import { priceRange } from "@/data/menu";
+import { priceRangeOf, type PriceMap } from "@/lib/prices";
 import { site } from "@/lib/site";
 
 /** Kural 38 — her sayfa: canonical + hreflang (tr/en/x-default) + OG/Twitter. Title şablonu layout'ta ("%s | MANCH"). */
@@ -47,7 +47,8 @@ export function pageMetadata(opts: {
  * Google Rich Results bu alanı "isteğe bağlı, eksik" diye uyarıyordu.
  * `openingHoursSpecification` ve `addressRegion` 2026-09-18'de **eklendi** (veri geldi).
  */
-export function restaurantJsonLd(locale: Locale) {
+/** `prices` ETKİN fiyatlar (panel ezmesi dahil) — panelde değişen fiyat Google'a da yansır. */
+export function restaurantJsonLd(locale: Locale, prices: PriceMap) {
   const base = site.url;
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -70,7 +71,7 @@ export function restaurantJsonLd(locale: Locale) {
   /* Fiyat aralığı gerçek menüden. Biçim: para birimi + min–max (schema.org `priceRange`
      serbest metin kabul eder; "₺₺" gibi bant yerine sayısal aralık daha bilgilendirici
      ve doğrulanabilir). */
-  const pr = priceRange();
+  const pr = priceRangeOf(prices);
   if (pr) data.priceRange = `${pr.min}–${pr.max} TL`;
   // Yapılandırılmış veride boşluksuz E.164 (görünen arayüzde okunur biçim kalır).
   if (site.contact.phone) data.telephone = site.contact.phone.replace(/\s+/g, "");

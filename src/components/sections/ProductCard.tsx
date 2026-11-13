@@ -9,6 +9,7 @@ import { CheckerBand } from "@/components/ui/CheckerBand";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { SoonBadge } from "@/components/ui/SoonBadge";
 import { action, disabledAction, type ActionClass } from "@/styles/emphasis";
+import { usePrice } from "@/components/PriceProvider";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
@@ -28,7 +29,10 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
   const t = useTranslations("Common");
   const tp = useTranslations("Product");
   /** Fiyatı bilinmeyen ürün sipariş edilemez — koşul veriden gelir. */
-  const orderable = p.price != null;
+  /* Fiyat ETKİN tablodan (panel ezmesi dahil) — `p.price` menu.ts'teki ham değer, panelde
+     değişmiş olabilir. Sepet ve sipariş tahtası da aynı tablodan okur. */
+  const price = usePrice(p.slug);
+  const orderable = price != null;
   /* Tip kapısı (FAZ B-2): sepete ekle EYLEM. Kart `bg-white` — palet dışı bir
      zemin, kit tablosunda hiç görünmüyordu (Kural 79-A). Krem dolgu beyazın
      üstünde 1.05'ti; devre dışı↔etkin ayrımı da 1.03'e düşmüştü. */
@@ -79,7 +83,7 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
             {p.name[locale]}
           </h3>
           <span className="shrink-0 font-ui text-[1.1vw] text-berry max-md:text-[4vw]">
-            {p.price == null ? <SoonBadge /> : `${p.price} TL`}
+            {price == null ? <SoonBadge /> : `${price} TL`}
           </span>
         </div>
         <p className="font-ui text-[0.95vw] leading-snug text-ink max-md:text-[3.4vw]">

@@ -352,6 +352,13 @@
   "Order": {
     "intro": "Merhaba MANCH! Sipariş vermek istiyorum:",
     "total": "Toplam: {total} TL",
-    "send": "WHATSAPP'TAN GÖNDER"
+    "send": "WHATSAPP'TAN GÖNDER",
+    "closed": "SİPARİŞ ŞU AN KAPALI",
+    "pausedNow": "Şu an sipariş almıyoruz",
+    "opensToday": "Şu an kapalıyız · bugün {time}'da açılıyoruz",
+    "opensTomorrow": "Şu an kapalıyız · yarın {time}'da açılıyoruz",
+    "ref": "Sipariş no: {id}",
+    "pricesUpdating": "Fiyatlar güncellendi — sepet yenileniyor…",
+    "unpricedLines": "Sepetteki {n} ürün şu an satışta değil — sepetten çıkarın"
   }
 }

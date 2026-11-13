@@ -30,6 +30,31 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **YÖNETİM PANELİ `/admin` YAZILDI (2026-11-13, kullanıcı: "basit tut, yalnız işletme sahibi
+  girsin").** Kurallar **Kural 80**'de. Kapsam: menü fiyatı · sipariş anlık aç/kapa · çalışma
+  saati dışında otomatik kapalı (sepet görünür, yalnız GÖNDER kapalı, sebep yazar) · sipariş
+  akışı (sipariş no + günlük sayaç). Sipariş yine WhatsApp'tan yürür; mesajda **sipariş no** var.
+  · **Vercel'de YAPILACAK (kullanıcı):** ① Storage → **Upstash Redis** → `manch-v2`'ye bağla
+    (`KV_REST_API_URL/TOKEN` kendiliğinden gelir) ② env **`ADMIN_PASSWORD`** (uzun, rastgele)
+    ③ env **`ADMIN_SESSION_SECRET`** (`openssl rand -base64 48`) ④ redeploy. Bağlanana kadar
+    site NORMAL çalışır, panel "veritabanı bağlı değil" der ve giriş kapalıdır.
+  · ⚠ **Redis yolu yalnız kod okumasıyla doğrulandı** — testler dosya deposuyla
+    (`ADMIN_STORE=file`). Bağlandıktan sonra canlıda **bir fiyat kaydı + bir aç/kapa** elle
+    denenmeli.
+  · Bekçiler: **`admin-check` 50/50** (yerel prod; erişim · giriş · kilit yarışı · çerezsiz
+    action tekrarı · kurcalanmış çerez · aç/kapa · saat · ilk yüklemede fiyat · bayat sekme ·
+    satıştan kalkan ürün · kurcalanmış kayıt) · **`hours-check` 24/24**.
+  · **Beş koruma TEK TEK sabotajla doğrulandı** (Kural 77b): çerezsiz action · giriş kilidi
+    yarışı · bayat sekme · fiyatsız satır (yalnız 2 beklenen kontrol düştü) · durum kapısı
+    (yalnız 4 beklenen kontrol düştü). Toplu sabotaj birbirini zincirleme bozdu → ayrı koşuldu.
+  · Yan iş — **üç bekçi oynaklığı giderildi** (ürün kusuru değil): `a11y` odak halkası renk
+    geçişi ortasında okunuyordu (1.52) · `a11y` bölüm 5 `/menu`'de Suspense içeriğini
+    beklemiyordu (0 öğe) · `faz6` Next dev LCP sezgisini filtrelemiyordu (Kural 53).
+  · `lint`+`build` temiz · `a11y` **60/60 ×4** · `lab-check` **106/106 ×3** · `faz6` 227/227 ·
+    `zone-camera` 105/105 · `zone-leak` temiz · `tautoloji` 6/6 · `smoke` 32/32 (yerel prod) ·
+    `/tr` **219.4 kB gz** (218.7'den +0.7; Kural 46 limiti 220 — **pay 0.6 kB**, uyarı eşiğinde)
+  · Canlı: site https://manch-v2.vercel.app · panel https://manch-v2.vercel.app/admin
+
 - **FAZ B-2 — CTA/ROZET SİSTEMİ UYGULANDI (2026-11-13).** FAZ A taramasının 8 maddesi
   düzeltildi, tarama sırasında **2 madde daha** bulundu (toplam 10).
   · **Sistem (karar kullanıcı, kapalı):** dolgu zemine göre terslenir (koyu→krem dolgu,
@@ -1278,6 +1303,53 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     varyantları dahil. Bekçisi `a11y-check` bölüm 5 (`.emph` kancası, hit-test ile
     zemin, çift yönlü sonda).
 
+80. **YÖNETİM PANELİ `/admin` (karar 2026-11-13, kullanıcı: "basit tut, yalnız işletme
+    sahibi girsin").** Kapsam: menü **fiyatı** düzenleme · siparişi **anlık aç/kapa** ·
+    çalışma saati dışında **otomatik kapalı** · **sipariş akışı**. Ürün ekleme/silme,
+    görsel, metin, saat düzenleme YOK — ihtiyaç doğarsa ayrı karar.
+
+    · **Konum:** `src/app/admin/` — `[locale]` ağacının DIŞINDA, kendi `<html>`'iyle;
+      `proxy.ts` matcher'ı `admin`'i hariç tutar, `robots` + `noindex` kapalı.
+      **İki bilinçli istisna:** metinler Türkçe ve bileşende (Kural 5 kamu yüzü içindir,
+      tek kullanıcı tek dil) · ölçüler `rem` (Kural 8; panel telefonda okunur olmalı).
+    · **Giriş:** tek şifre (`ADMIN_PASSWORD`, Vercel env) + HMAC-imzalı çerez
+      (`ADMIN_SESSION_SECRET` ≥ 32 kr). İmza anahtarına **şifrenin özeti** katılır:
+      şifre değişince tüm oturumlar düşer. Çerez HttpOnly · Secure · SameSite=Lax · 14 gün.
+    · **HER server action `requireAdmin()` ile BAŞLAR** ve istemciden gelen her değeri
+      yeniden doğrular. Sayfanın korumalı olması action'ı korumaz — action doğrudan POST
+      edilebilen bir uç noktadır. Bekçi bunu **çerezsiz tekrar** ile ölçer.
+    · **Giriş kilidi: ÖNCE SAY, SONRA DENE.** `hit()` (atomik INCR) şifre kontrolünden
+      önce; IP başına 5 + tüm IP'ler toplamı 40 / 15 dk. "Sayaca bak → dene → say"
+      sırası paralel isteklerle aşılıyordu (inceleme 2026-11-13, 15 denemenin 15'i geçti).
+    · **Depo:** `src/lib/store` — Upstash Redis (REST, paket yok) · dosya (dev/yerel test,
+      `ADMIN_STORE=file`) · none (prod'da bağlı değilse: site ÇALIŞIR, panel "bağlı değil"
+      der, giriş kapanır). Depo eksikliği **deploy'u kırmaz** — Kural 57'nin tersi bilerek.
+    · **Fiyat tek kaynaktan:** `menu.ts` ürünlerin kaynağı kalır, panel yalnız fiyatı ezer
+      (boş = YAKINDA). Etkin fiyat sunucuda `getEffectivePrices()` (önbellekli, etiket
+      `menu-prices`), istemcide **yalnız `PriceProvider`/`usePrice(s)`** — `p.price`
+      görüntü ya da toplam için OKUNMAZ (ham değerdir). Kayıtta `revalidateTag(..., {
+      expire: 0 })` + `revalidatePath("/[locale]", "layout")`: `"max"` profili ilk
+      ziyaretçiye eski fiyatı gösterir. Çalışma anında depo hatası **yutulmaz** (Next
+      eski sayfayı korur); yalnız build'de menu.ts'e düşülür.
+    · **Sipariş durumu = elle açık VE çalışma saatinde** (İstanbul, sunucu otoritesi).
+      Statik sayfaya GÖMÜLMEZ: `/api/order-status` (dinamik) + istemci deposu; sepet/tahta
+      açıkken 20 sn'de bir ve sekme görünür olunca tazelenir, kapanış anı sunucu saati +
+      monoton süreyle yeniden hesaplanır. Ağ hatası **son bilinen** durumu silmez.
+      Kapalıyken sepet görünür, ürün eklenir, **yalnız gönder kapalı** ve sebep yazar.
+    · **Gönder üç sebeple kapanır:** sipariş kapalı · sekmedeki fiyatlar sunucununkinden
+      eski (fiyat imzası farklı → sayfa verisi tazelenir) · sepette satıştan kalkmış ürün.
+    · **Sipariş kaydı** (`/api/orders`): WhatsApp aynen sürer, mesajda **sipariş no** var.
+      Tutar ve ürün adı SUNUCUDA hesaplanır/okunur; kişisel veri yazılmaz; hız sınırı
+      IP + küresel; günlük sayaç ayrı tutulur (liste 60 kayıtta kesilir, sayaç kesilmez).
+    · **Test saati:** `x-test-now` başlığı yalnız dev sunucusunda ya da `ORDER_TEST_CLOCK=1`
+      ile başlatılmış yerel prod'da dinlenir. `lab-check` ve `zone-camera-check` her
+      sayfaya sabit **açık saat** gönderir — yoksa gece koşulan bekçi sepeti gerçekten
+      kapalı bulur ve oynak olurdu (Kural 60).
+    · **Bekçiler:** `scripts/admin-check.mjs` (yerel prod + `ADMIN_STORE=file`; erişim,
+      giriş, kilit yarışı, çerezsiz action tekrarı, kurcalanmış çerez, aç/kapa, saat,
+      fiyatın ilk yüklemede görünmesi, bayat sekme, satıştan kalkan ürün, kurcalanmış
+      kayıtlar) · `scripts/hours-check.mjs` (saat sınırları, saf fonksiyon).
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1455,6 +1527,15 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-13 | B-2 | **Belge-only commit'te Kural 60'ın DOM çapası yöntemi UYGULANAMAZ** — istisna olarak kayda geçti | 2026-09-29'daki Kural 78/79 turu yalnız `CLAUDE.md`'ye dokundu; `src/` byte-identikti, yani build çıktısı da byte-identik. Kural 60 "beklenen commit'in getirdiği bir DOM çapası canlı HTML'de görünmeden deploy bitti denmez" diyor — ama ortada **yeni bir çapa yok**, olamaz da | O turda "deploy doğrulandı" **denmedi**; yerine sitenin sağlığı canlı `smoke` 32/32 ile gösterildi ve sınır raporda açıkça yazıldı. **Kural:** belge-only commit'te deploy onayı çapayla verilemez; yapılacak tek şey bunu söylemek ve sağlık kontrolüyle yetinmektir. Çapa uydurmak (ör. yoruma rastgele bir dize koymak) yasak — o çapa ürünü değil kendini doğrular |
 
 | 2026-11-13 | B-2 | **Filtre hapının hover'ı ÖLÜYDÜ** — kontak tablosunda görünmedi, ölçülünce çıktı | Dinlenme hâli `label()` ile kurulmuştu: "konturlu = etiket" kuralı görünümde doğru, ama etiket **statik** (hover sınıfı yok) ve hap bir **düğme**. Rolü görünüşe göre seçtim, davranışa göre değil. Ekran görüntüsü hover anını yakalasa bile CursorTrail dairesi hapın üstüne bindiği için fark okunmuyordu | Hap konturlu **eylem** oldu (`action("light","secondary")`): dinlenme konturlu, hover dolu. Ölçüm: dinlenme `bg transparent / text berry` → hover `bg berry / text cream`. **Ders: rol, görünüşe göre değil etkileşime göre seçilir** — tıklanabilen her şey eylemdir, konturlu olsa bile. `label()` yalnız etkileşimsiz rozette |
+| 2026-11-13 | admin | **Sabotaj build'i KIRIKTI ama doğrulama ESKİ build'e karşı koştu** — "koruma yakalanmadı" sonucu az kalsın raporlanacaktı | Sabotaj `if (false)` olarak yazıldı; TS daraltması bozuldu, `pnpm build` düştü. Koşucu build'in çıkış koduna bakmadan `pnpm start`'a geçti → `.next-build`'teki ÖNCEKİ (sağlam) build servis edildi ve sabotaj "etkisiz" göründü. Kural 77(a)'nın birebir hâli: koşu koşmadı, ama çıktı üretti | Koşucu `BUILD≠0` ise ölçmeden durur ve `✗ BUILD KIRIK — ölçülmedi` yazar; her sabotajdan önce `rm -rf .next-build`. Sabotaj derlenebilir biçimde yazılır (`&& Number.NaN > 0` — tip daraltmasını bozmaz). **Ders: sabotajlı build'in çıkış kodu, sabotajın kendisi kadar ölçümün parçasıdır** |
+| 2026-11-13 | admin | **Giriş kilidi paralel istekle aşılıyordu** — 15 eşzamanlı denemenin 15'i şifreye ulaştı | Sıra "sayaca bak → şifreyi dene → yanlışsa say" idi; 15 istek aynı anda sayaca baktı, hepsi 0 gördü. Okuma ile yazma arası yarış penceresi | **Önce say, sonra dene:** atomik `INCR` şifre kontrolünden önce; IP 5 + küresel 40 / 15 dk. `admin-check` paralel 15 deneme atıyor, sabotajla doğrulandı (eski sıraya dönünce 15/15 geçti) |
+| 2026-11-13 | admin | **Durum uç noktasına ulaşılamayınca sepet "açık"a düşüyordu** (fail-open) ve son bilinen kapalı durum siliniyordu | İstemci deposu ağ hatasında varsayılan değere dönüyordu; panelden kapatılmış sipariş bir ağ hıçkırığıyla yeniden gönderilebilir oluyordu | Ağ hatası **son bilinen** durumu korur; kapanış anı sunucu saati + `performance.now()` ile istemcide yeniden hesaplanır (yerel saat değil) |
+| 2026-11-13 | admin | **Panelden önce açılmış sekme eski fiyatla sipariş gönderebiliyordu** | Fiyat statik sayfaya gömülü; sekme açık kaldıkça eski rakam toplamda kalıyordu | `/api/order-status` fiyat imzası (`pricesVersion`) taşıyor; farklıysa gönder kapanır + `router.refresh()`. Sabotajla doğrulandı: tazeleme kaldırılınca `Toplam570 TL` eski kaldı |
+| 2026-11-13 | admin | Panelde fiyat **silinen** (YAKINDA'ya dönen) ürün sepette kalırsa **0 TL** olarak gönderiliyordu | `orderTotal` fiyatsız satırı 0 sayıyordu; sepet persist olduğu için eski satır yaşıyor | Gönder üçüncü sebeple kapanır: `unpricedLines` (sebep metniyle); sunucu da fiyatsız satırı 400 ile reddeder — iki katman |
+| 2026-11-13 | admin | Depo hatası ISR'a **pişiyordu**: Redis bir an okunamayınca menu.ts fiyatları önbelleğe yazılıp saatlerce gösterilecekti | `getEffectivePrices` her hatada sessizce menu.ts'e düşüyordu | Çalışma anında hata **fırlatılır** (Next eski sayfayı korur); menu.ts'e yalnız `phase-production-build`'de düşülür. Panel de okuma hatasını yutmaz: uyarı + formlar kapalı |
+| 2026-11-13 | admin | Zincir komutu **hiç koşmadı** — zsh tek tırnak içindeki `\'`'yi kaçış saymadı, bütün satır ayrıştırma hatasıyla düştü | zsh'de tek tırnak içinde kaçış yok; ayrıca `${PIPESTATUS}` zsh'de boş (bash dizisi) → boru hattının kodları okunamıyordu | Çok satırlı düzenlemeler python heredoc'una (`<<'PY'`); çıkış kodu boru hattından değil komutun kendisinden okunur (Kural 77a). Hiçbir dosyanın değişmediği `git status` ile doğrulandı |
+| 2026-11-13 | admin | **Toplu sabotaj ZİNCİRLEME bozuldu** — dört koruma tek build'de sabote edilince biri ötekilerin kontrollerini düşürdü, script de H bölümünde çöktü; iki sabotaj hiç ölçülmedi | Çerezsiz action sabotajı depoyu gerçekten değiştirdi (siparişi açtı) → sonraki saat/durum kontrolleri o yüzden kırmızı yandı, sabotajın sebebi ayırt edilemedi | Her koruma **ayrı build'de, tek başına** sabote edildi; geçerlilik ölçütü "yalnız beklenen kontrol(ler) düştü". **Ders: sabotaj izole değilse kanıt değildir — düşen kontrolün sebebi okunabilmeli** (Kural 77b) |
+| 2026-11-13 | admin | `a11y` bekçisi iki kez **yanlış koşul** seçti: halka renk geçişi ortasında okundu (bordo→krem %18 → 1.52) · `/menu`'de `.emph` sayısını bekledi ama kapalı sepet çekmecesinin düğmeleri DOM'da hep durduğu için koşul ANINDA sağlandı (0 öğe) | Kural 75'in ikinci yüzü: koşul ürünün beklediği şey olmalı. FAZ B-2'nin dolgu↔kontur geçişi `transition-colors` getirdi, eski ölçüm bunu bilmiyordu; görünürlük ölçümü hit-test, koşul ise DOM varlığıydı | Halka: odaktaki öğenin `getAnimations()`'ı durana kadar · bölüm 5: **ölçümün kendi görünürlük tanımı** (kadrajda + hit-test). 60/60 ×4. **Ders: bekleme koşulu, ölçümle aynı tanımı kullanır** |
 
 ---
 

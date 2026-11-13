@@ -33,6 +33,10 @@ for (const [w,h,dsf] of BPS) {
         const txt = m.text().trim();
         if (txt === KNOWN) return;
         if (beklenen404 && /Failed to load resource.*404/.test(txt)) return;
+        /* Kural 53: Next DEV'in LCP sezgisi ("… was detected as the Largest Contentful Paint
+           (LCP) …") — yalnız dev'de, zamanlamaya bağlı; `eager` KULLANILMAZ (Kural 45).
+           lab-check'te zaten filtreli; bu scriptte eksikti (2026-11-13). Metin birebir çapalı. */
+        if (/^Image with src "[^"]+" was detected as the Largest Contentful Paint \(LCP\)/.test(txt)) return;
         errs.push(txt.slice(0,80));
       });
       p.on("pageerror", e => errs.push("pageerror: "+e.message.slice(0,80)));

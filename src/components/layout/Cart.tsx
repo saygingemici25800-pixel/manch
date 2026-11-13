@@ -15,6 +15,9 @@ import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
 import { action, disabledAction, type ActionClass } from "@/styles/emphasis";
+import { usePrices } from "@/components/PriceProvider";
+import { useOrderStatus, useOrderStatusPolling } from "@/lib/order/status-store";
+import { usePricesStale } from "@/lib/order/use-fresh-prices";
 
 /** R12 — sağ altta berry sepet + krem sayaç, "SEPETE EKLENDİ" toast, kraft drawer.
  *  Gönderme `lib/order/submit` adaptöründe (Kural 66); bu bileşen kanalı bilmez. */
@@ -22,7 +25,6 @@ export default function Cart() {
   const t = useTranslations("Cart");
   /** Kural 66: gönder düğmesinin metni ve mesajın biçimi adaptörden gelir. */
   const tAll = useTranslations();
-  const channel = orderChannel();
   const locale = useLocale() as Locale;
   const hydrated = useHydrated();
   const reduced = useReducedMotion();
@@ -37,6 +39,16 @@ export default function Cart() {
   const [toast, setToast] = useState<string | null>(null);
   const close = useCallback(() => setOpen(false), [setOpen]);
   useDialog(open, close, drawer);
+
+  /* Fiyat ETKİN tablodan (panel ezmesi) · durum CANLI (saat + panel düğmesi).
+     Durum yalnız çekmece açıkken tazelenir — kapalıyken düğme görünmüyor, her
+     ziyaretçi için dakikada bir istek atmanın anlamı yok. İlk cevaba kadar yerel
+     saat yedeği geçerli, yani düğme hiçbir an "belirsiz" kalmaz. */
+  const prices = usePrices();
+  const status = useOrderStatus();
+  useOrderStatusPolling(open);
+  const pricesStale = usePricesStale(prices);
+  const channel = orderChannel(status, { lines, prices, pricesStale });
 
   const count = lines.reduce((n, l) => n + l.qty, 0);
 
@@ -65,7 +77,7 @@ export default function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastAdded, locale]);
 
-  const total = orderTotal(lines);
+  const total = orderTotal(lines, prices);
   const canSubmit = channel.available && lines.length > 0;
   /* Tip kapısı (FAZ B-2): adet düğmeleri EYLEM. Buraya `label(...)` yazmak derlenmez. */
   const qtyTone: ActionClass = action("light");
@@ -150,7 +162,7 @@ export default function Cart() {
               <li key={l.slug} className="flex items-center justify-between gap-[1vw] border-b border-berry/15 pb-[0.8vw] max-md:pb-[3vw]">
                 <div className="flex flex-col">
                   <span className="text40 text-[1.2vw] max-md:text-[4.2vw]">{p?.name[locale] ?? l.slug}</span>
-                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price !== null && p?.price !== undefined ? `${p.price * l.qty} TL` : <SoonBadge />}</span>
+                  <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{prices[l.slug] != null ? `${(prices[l.slug] as number) * l.qty} TL` : <SoonBadge />}</span>
                 </div>
                 <div className="flex items-center gap-[0.6vw] max-md:gap-[2vw]">
                   {/* FAZ B-2: çekmece `bg-cream` → açık zemin. `−` zaten doluydu, `+`
@@ -180,7 +192,7 @@ export default function Cart() {
               type="button"
               data-cursor-hide
               data-testid="checkout"
-              onClick={() => submitOrder(lines, locale, tAll)}
+              onClick={() => submitOrder(lines, locale, tAll, prices, status)}
               className={clsx("group grid place-items-center rounded-full px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] hover:scale-105", submitTone)}
             >
               <RollText>{tAll(channel.labelKey)}</RollText>
@@ -193,7 +205,9 @@ export default function Cart() {
               aria-disabled="true"
               className={clsx("grid cursor-not-allowed place-items-center rounded-full px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw]", submitDisabled)}
             >
-              {lines.length === 0 ? (
+              {/* Kapalıyken rozet YOK — sebep aşağıda tam cümleyle yazıyor. Rozet yalnız
+                  kanal hiç kurulmamışsa (numara yok) "yakında" anlamında kalır. */}
+              {lines.length === 0 || channel.notice ? (
                 tAll(channel.labelKey)
               ) : (
                 <>
@@ -201,6 +215,13 @@ export default function Cart() {
                 </>
               )}
             </button>
+          )}
+          {/* Kapalıyken SEBEP: sepet görünür, ürün eklenebilir, yalnız gönder kapalı
+              (karar 2026-11-13). `role=status` → ekran okuyucu durum değişince duyurur. */}
+          {channel.notice && (
+            <p role="status" data-testid="order-closed" className="text-center font-ui text-[1vw] uppercase tracking-wide text-berry max-md:text-[3.6vw]">
+              {tAll(channel.notice.key, channel.notice.values)}
+            </p>
           )}
         </div>
       </div>
