@@ -30,8 +30,49 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
-- 🔴 **KURAL 79'un İLK TARAMASI FAZ B'DE 8 KAYIP NİYET DAHA BULDU (2026-09-29) —
-  KARAR BEKLİYOR, KOD DEĞİŞTİRİLMEDİ (Kural 10).** Kural 79 yazılır yazılmaz aynı
+- **FAZ B-2 — CTA/ROZET SİSTEMİ UYGULANDI (2026-11-13).** FAZ A taramasının 8 maddesi
+  düzeltildi, tarama sırasında **2 madde daha** bulundu (toplam 10).
+  · **Sistem (karar kullanıcı, kapalı):** dolgu zemine göre terslenir (koyu→krem dolgu,
+    açık→bordo dolgu) · **dolgu = eylem, kontur = etiket** · hover = dolgu↔kontur takası,
+    hue sabit · devre dışı = konturlu + %50 opaklık · **mavi dolgu açık zeminde YASAK**.
+    Yeni token yok. Tek kaynak: **`src/styles/emphasis.ts`**.
+  · **TİP DÜZEYİNDE ZORLANDI** (2026-09-20 dersi): `action()` → `ActionClass`,
+    `label()` → `LabelClass`, markalı tipler. Bir CTA'ya etiket sınıfı vermek
+    **derlenmiyor**. Sabotajla doğrulandı: `TS2322: Type 'LabelClass' is not
+    assignable to type 'ActionClass'` · doğru hâlde `tsc` 0 çıktı.
+  · **Tarama sırasında bulunan 2 ek kusur:** `/menu` **`signature`** hapı `bg-sky`
+    krem şerit üstünde (**1.27** — Kural 40'ın yasak çiftiyle aynı iki renk; FAZ A
+    bunu kaçırmıştı, üç haptan **ikisi** görünmüyordu) · **Footer menü linkleri**
+    `hover:text-cream` zaten `text-cream` üstünde — `MenuOverlay` ile aynı tautoloji.
+  · **Zincirleme risk yakalandı:** `SoonBadge` konturlu-bordoya dönünce Location'ın
+    **bordo zemininde** bordo-üstü-bordo olacaktı — düzeltmenin kendisi yeni bir 1.00
+    doğuruyordu. 18 kullanım yerinin zemini tek tek geçildi, Location `ground="dark"` aldı.
+  · Bekçi: `a11y-check` **bölüm 5 — bileşen ölçeği**, zemin hit-test ile bulunuyor
+    (Kural 78'in aynı gerekçesi), **çift yönlü sonda** ile doğrulandı.
+  · **Kural 79-B** yazıldı: göz iki ölçekte bakar.
+  · **Filtre hapı ikinci kez düzeltildi:** dinlenme hâli önce `label()` yapılmıştı —
+    görünüm doğruydu ama **hover ölüydü** (etiket statiktir, hap ise düğme). Kontak
+    tablosu göstermedi, hover'ın hesaplanan değeri ölçülünce çıktı → konturlu **eylem**
+    (`action("light","secondary")`). `label()` artık yalnız etkileşimsiz rozette.
+  · Yeni bekçi **`scripts/tautoloji-check.mjs`** — ölü hover/odak varyantı avcısı,
+    kaynak üstünde, 4 sabotaj sondasıyla. İlk koşuda **kendi yeni modülümü** yakaladı
+    (`disabledAction`'da tabanla aynı `hover:` sınıfları).
+  · `lint`+`build` temiz · `a11y` **60/60** (16 yeni) · `tautoloji` **6/6** · `lab-check`
+    **106/106 ×3** · `faz6` 227/227 · `smoke` 32/32 · `zone-camera` 105/105 · `zone-leak`
+    temiz · Lighthouse **A11y 100 / SEO 100** ×4 · `/tr` **218.7 kB gz** (değişmedi)
+
+- **ANA SAYFA: marquee bandı kaldırıldı + `#zone` artık Zone'un kendi karesini gösteriyor
+  (2026-11-13, kullanıcı).** `MarqueeBand` (R14) ana sayfadan çıktı — primitive `Marquee`
+  ve `/lab` demosu duruyor, yalnız bant gitti; `Home.marqueeItems` öksüz kaldığı için silindi.
+  `#zone`'daki burger fotoğrafı yerine **salondan gerçek kare**: arka duvardaki künye
+  yazısı + her iki maskot (`public/images/zone-hall.{jpg,webp}`, üreteci
+  **`scripts/zone-still.mjs`**).
+  · ⚠ **Karedeki maskotlar GEÇİCİ** — `drawCapy()` sprite'ı; gerçek 8 PNG hâlâ TODO'da.
+    Çizimler gelince `node scripts/zone-still.mjs` ile kare yeniden üretilir, başka
+    hiçbir şey değişmez.
+
+- ✅ **(KAPANDI — yukarıdaki FAZ B-2 ile) KURAL 79'un İLK TARAMASI FAZ B'DE 8 KAYIP
+  NİYET BULMUŞTU (2026-09-29).** Kural 79 yazılır yazılmaz aynı
   soru sistematik soruldu: *FAZ B'de başka ne sessizce öldü?* Beş eksende tarandı,
   30 aday çıktı, her biri **iki bağımsız şüpheciye** çürütülmeye verildi → 20 onay /
   10 çürütme; onaylar **8 ayrı kusura** iniyor (çoğu 4 eksende birbirinden bağımsız
@@ -789,10 +830,10 @@ renk eklenmedi) · CursorTrail tek renk + zemin kuralı (koyu→krem, açık→b
 | R8 | CursorTrail | Desktop: beyaz 2px iz path + buzlu cam dairede dönen malzeme ikonu; `data-cursor-hide` |
 | R9 | Hero + JellyWave | Tam ekran foto, hardal Modak "HANDMADE HITS DIFFERENT" char reveal, dönen Misu&Miyu rozeti, altta scroll hızına göre `scaleY 1→1.08` esneyen dalga |
 | R10 | SectionHeader | küçük Modak üst başlık + büyük berry başlık + "N ÜRÜN" sayacı |
-| R11 | ProductCard | 3 kolon, `h-[35vw] rounded-[2vw]`, giriş `y64→0` stagger, ortada 2×12 dama bandı hover'da `cubic-bezier(.4,1.6,.7,.95)` .44s esner, burger döner, "Quick details", hardal + butonu |
+| R11 | ProductCard | 3 kolon, `h-[35vw] rounded-[2vw]`, giriş `y64→0` stagger, ortada 2×12 dama bandı hover'da `cubic-bezier(.4,1.6,.7,.95)` .44s esner, burger döner, "Quick details", **bordo + butonu** (FAZ B-2; eski "hardal" 2026-09-28'de silinmişti) |
 | R12 | Cart | "SEPETE EKLENDİ" toast, sağ altta berry sepet + hardal sayaç rozeti, kraft drawer, checkout → WhatsApp mesajı |
 | R13 | ZoneBlock | `pt-[18vw]`, dalgalı üst kenar, karo duvar zemin, parallax burger, blob CTA |
-| R14 | Marquee | Pixel font bordo bantlar, -4°, zıt yönler, scroll hızıyla hızlanır |
+| R14 | Marquee | Pixel font bordo bantlar, -4°, zıt yönler, scroll hızıyla hızlanır. **Ana sayfadan KALDIRILDI (2026-11-13, kullanıcı).** Primitive ve `/lab` demosu duruyor |
 | ~~R15~~ | ~~SmashAnatomy~~ | **İPTAL (karar 2026-09-18)** — gerçek katman fotoğrafı yok; eski sitedeki pinned + `scrollIntoView` hatası da buradan çıkmıştı |
 | R15b | BuildSequence | 6 karelik yapım sırası (`/images/process/01-06`). **Dikey akış, pin YOK** — ScrollTrigger `scrub` ile çapraz geçiş (opacity + hafif scale); yanında adım numarası 01-06 + iki dilli adım metni. Kural 50 geçerli: fold üstündeki ilk kare animasyonsuz görünür. Başlık: "Smash'inin katmanlarıyla tanış." |
 | R16 | CookieBanner | alt orta kart, LATER / OKAY! |
@@ -801,7 +842,8 @@ renk eklenmedi) · CursorTrail tek renk + zemin kuralı (koyu→krem, açık→b
 | R19 | SmoothScroll | Lenis + GSAP ticker, reduced-motion desteği |
 
 > **Malzeme ikonu renk ayrımı (karar: 2026-09-20).** CursorTrail (R8) ikonları **malzeme
-> rengindedir**; Footer Juggle (R18) ve /lab MotionLab **tek renk kalır** (`text-mustard`).
+> rengindedir**; Footer Juggle (R18) ve /lab MotionLab **tek renk kalır** (FAZ B'den beri
+> `text-cream`; `mustard` tokeni silindi).
 > Kasıtlı ayrım: Juggle'da ikonlar grup olarak hareket eder, tek renk grubu birlikte
 > okutur; imleçte tek tek döner, orada renk ayırt edicilik kazandırır.
 > **Madde kapandı, yeniden açılmayacak.**
@@ -1226,6 +1268,16 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
       döner, hiçbir şey olmaz — grep "sınıf var" der, ekranda karşılığı yoktur.
       Silme turunda `hover:`/`focus-visible:`/`group-hover:` varyantları **ayrıca** taranır.
 
+    **79-B · GÖZ İKİ ÖLÇEKTE BAKAR (2026-11-13).** Token/rol devri sonrası gözle
+    bakma **iki ölçekte** yapılır: **bölüm ölçeği** (zemin, başlık, boşluk) ve
+    **bileşen ölçeği** (her etkileşimli öğe; dinlenme · hover · odak · devre dışı;
+    göründüğü HER zeminde). Bölüm ölçeği tek başına yetmez: 2026-09-28'de footer
+    filigranını yakaladı ama **altı düğmeyi 1.00 kontrastla canlıya bıraktı**.
+    Bileşen ölçeği taraması **varış zeminini** sorar (79-A): "B nerede duruyor?" —
+    palet dışı zeminler (`bg-white`) ve `hover:`/`focus-visible:`/`group-hover:`
+    varyantları dahil. Bekçisi `a11y-check` bölüm 5 (`.emph` kancası, hit-test ile
+    zemin, çift yönlü sonda).
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1398,6 +1450,11 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-09-29 | kural 78 | **Bekçi ATA ZİNCİRİYLE ölçtüğü için `fixed` öğelerde yanlış zemin buldu** — nav logosu ve menü düğmesi için "krem üstünde krem" dedi, oysa öğeler koyu hero fotoğrafının üstündeydi | Focus ring kontrastı `el.parentElement` zinciri yukarı taranarak ölçülüyordu. Nav `position: fixed` — DOM'da `<body>`'nin çocuğu, **ekranda** hero'nun üstünde. Ata zinciri "ekranda neyin üstünde duruyor" sorusunu yanıtlamaz, yalnız "hangi kutunun içinde yazılmış" sorusunu yanıtlar. Ölçüm doğru çalıştı, **yanlış özneyi** ölçtü (Kural 60) | Hedef zemin **hit-test** ile bulunuyor: `document.elementsFromPoint(cx, cy)` yığınından öğenin kendisinin ALTINDAKİ ilk opak katman. Ayrıca hedef, halkanın nereye çizildiğine göre seçiliyor — `outline-offset` negatifse öğenin **kendi** zemini, değilse **arkadaki** zemin (Kural 78). Sabotajla doğrulandı: 40/44 |
 | 2026-09-29 | kural 79 | **Footer filigranı kaybolduğu hâlde 44 otomatik kontrolün hiçbiri görmedi** — kusuru yalnız gözle bakma turu yakaladı | Filigran `aria-hidden="true"` dekoratif bir SVG. Üç bekçi de yapısal olarak kör: axe/Lighthouse `aria-hidden` öğeyi erişilebilirlik ağacından çıkarır, kontrast denetimine hiç sokmaz · `a11y-check` **metin** çiftlerini ölçer, filigran metin değil · `lab-check` "wordmark var mı" diye sorar, **görünüyor mu** diye sormaz. Üstelik 1.00 kontrast burada bir **Kural 40 ihlali değil** (metin değil) — yani doğru kurulmuş bir kontrast bekçisi bile bunu bilerek atlardı | Kusur sınıfı kabul edildi ve **Kural 79** yazıldı: silme turu ① niyeti yaz ② yeniden kur ③ **gözle bak** adımlarıyla yürür. Bekçiye bağlanmadı — "dekoratif öğe görünüyor mu" sorusu piksel karşılaştırması ister (Kural 64: süs bir öğe için orantısız). Kural 59 bu boşluğun kalıcı karşılığıdır |
 | 2026-09-29 | kural 79 | **Kural 79 yazıldığı gün FAZ B'de 8 kayıp niyet daha buldu** — sepet `+` düğmesi, `SoonBadge`, NEW filtre hapı, YOL TARİFİ hapı, tape şeridi (beşi de **1.00**), ürün kartı `+` (1.05), iki etkisiz hover (`MenuOverlay`, `BlobButton`) | Rol devri **`mustard → cream`** yapılırken devrin **varış zemini** sorulmadı. Hardal her zeminde ayrışıyordu (doygun sarı); krem yalnız **koyu** zeminde ayrışıyor. Krem öğelerin çoğu ise krem/beyaz yüzeylerin üstünde duruyor — `KraftCard` `bg-cream`, sepet çekmecesi `bg-cream`, `/menu` şeridi `bg-cream/90`, `ProductCard` **`bg-white`**. `bg-white` kit tokeni bile değil, bu yüzden devir tablosunda hiç görünmedi. Hover tarafında ayrı bir yüz: `berry-dk → berry` birleşince `hover:` varyantı dinlenme durumuyla **aynı sınıfa** düştü ve tautolojiye dönüştü (`hover:text-cream` üstünde `text-cream`) — sınıf duruyor, `transition-colors` dönüyor, hiçbir şey olmuyor | Kusurlar **düzeltilmedi**: "krem CTA açık zeminde ne olur" bir rol kararıdır, kit tablosuna ve kullanıcıya aittir (Kural 10) → **Faz B-2** açıldı. Kalıcı ders Kural 79'a işlendi: **rol devri tek yönlü bir eşleme değildir** — `A → B` yazarken "B nerede duruyor?" sorulmadan devir tamamlanmaz. Tarama yöntemi de kayda değer: 5 eksen × 30 aday, her aday **iki bağımsız şüpheciye** (renk merceği · görünürlük merceği) çürütülmeye verildi, 10'u elendi; kalan 20 bulgu **8 kusura** indi ve 4 eksen birbirinden bağımsız aynı üçünü buldu |
+| 2026-11-13 | B-2 | **Düzeltmenin KENDİSİ yeni bir 1.00 doğuracaktı** — `SoonBadge` konturlu-bordoya çevrilince Location'ın `bg-berry` zemininde bordo-üstü-bordo olacaktı | Rozetin zemini **tek tip sanıldı**. 18 kullanım yerinin 17'si açık (KraftCard/çekmece/beyaz kart), biri KOYU (Location `bg-berry`). Kural 79-A'nın aynı tuzağı, bu kez düzeltme tarafında: "B nerede duruyor?" sorusu bir kez daha sorulmasaydı, bir kusuru kapatırken başkasını açacaktım | `SoonBadge` artık **zemini parametre olarak alıyor** (`ground`), varsayılan "light", Location açıkça `"dark"` veriyor. Ders: rol devri yaparken varış zemini **her kullanım yeri için ayrı** sorulur — "çoğu açık zeminde" yeterli değil |
+| 2026-11-13 | B-2 | FAZ A taraması **iki kusuru kaçırmıştı**: `/menu` `signature` hapı (`bg-sky`, krem şerit üstünde **1.27**) ve **Footer** menü linkleri (`hover:text-cream` zaten `text-cream` üstünde) | Tarama 5 eksende koştu ama ikisi de eksenlerin kör noktasındaydı: `signature` hapı "renkli, demek ki görünür" diye geçti — oysa sky/cream Kural 40'ın **yasak çiftiyle aynı iki renk**; Footer linki ise `MenuOverlay` ile birebir aynı tautolojiydi, tarama onu bulup bunu bulmadı (aynı deseni **tüm** dosyalarda aramak yerine bulduğu yerde durdu) | İkisi de düzeltildi. Ders: bir desen bir yerde bulunduğunda **aynı desen tüm kod tabanında** aranır — "bir örnek bulundu" tarama bitti demek değildir. `a11y-check` bölüm 5 artık `.emph` taşıyan her öğeyi **otomatik** topluyor, liste elle güncellenmiyor (Kural 74: bayat bekçi doğmaz) |
+| 2026-11-13 | B-2 | **Belge-only commit'te Kural 60'ın DOM çapası yöntemi UYGULANAMAZ** — istisna olarak kayda geçti | 2026-09-29'daki Kural 78/79 turu yalnız `CLAUDE.md`'ye dokundu; `src/` byte-identikti, yani build çıktısı da byte-identik. Kural 60 "beklenen commit'in getirdiği bir DOM çapası canlı HTML'de görünmeden deploy bitti denmez" diyor — ama ortada **yeni bir çapa yok**, olamaz da | O turda "deploy doğrulandı" **denmedi**; yerine sitenin sağlığı canlı `smoke` 32/32 ile gösterildi ve sınır raporda açıkça yazıldı. **Kural:** belge-only commit'te deploy onayı çapayla verilemez; yapılacak tek şey bunu söylemek ve sağlık kontrolüyle yetinmektir. Çapa uydurmak (ör. yoruma rastgele bir dize koymak) yasak — o çapa ürünü değil kendini doğrular |
+
+| 2026-11-13 | B-2 | **Filtre hapının hover'ı ÖLÜYDÜ** — kontak tablosunda görünmedi, ölçülünce çıktı | Dinlenme hâli `label()` ile kurulmuştu: "konturlu = etiket" kuralı görünümde doğru, ama etiket **statik** (hover sınıfı yok) ve hap bir **düğme**. Rolü görünüşe göre seçtim, davranışa göre değil. Ekran görüntüsü hover anını yakalasa bile CursorTrail dairesi hapın üstüne bindiği için fark okunmuyordu | Hap konturlu **eylem** oldu (`action("light","secondary")`): dinlenme konturlu, hover dolu. Ölçüm: dinlenme `bg transparent / text berry` → hover `bg berry / text cream`. **Ders: rol, görünüşe göre değil etkileşime göre seçilir** — tıklanabilen her şey eylemdir, konturlu olsa bile. `label()` yalnız etkileşimsiz rozette |
 
 ---
 

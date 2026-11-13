@@ -14,8 +14,9 @@ import { useHydrated } from "@/lib/hooks/useHydrated";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
+import { action, disabledAction, type ActionClass } from "@/styles/emphasis";
 
-/** R12 — sağ altta berry sepet + hardal sayaç, "SEPETE EKLENDİ" toast, kraft drawer.
+/** R12 — sağ altta berry sepet + krem sayaç, "SEPETE EKLENDİ" toast, kraft drawer.
  *  Gönderme `lib/order/submit` adaptöründe (Kural 66); bu bileşen kanalı bilmez. */
 export default function Cart() {
   const t = useTranslations("Cart");
@@ -66,6 +67,10 @@ export default function Cart() {
 
   const total = orderTotal(lines);
   const canSubmit = channel.available && lines.length > 0;
+  /* Tip kapısı (FAZ B-2): adet düğmeleri EYLEM. Buraya `label(...)` yazmak derlenmez. */
+  const qtyTone: ActionClass = action("light");
+  const submitTone: ActionClass = action("light");
+  const submitDisabled: ActionClass = disabledAction("light");
 
   return (
     <div ref={root}>
@@ -148,9 +153,12 @@ export default function Cart() {
                   <span className="font-pixel text-[0.7vw] max-md:text-[2.6vw]">{p?.price !== null && p?.price !== undefined ? `${p.price * l.qty} TL` : <SoonBadge />}</span>
                 </div>
                 <div className="flex items-center gap-[0.6vw] max-md:gap-[2vw]">
-                  <button type="button" aria-label={t("less")} onClick={() => setQty(l.slug, l.qty - 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-berry text-cream">−</button>
+                  {/* FAZ B-2: çekmece `bg-cream` → açık zemin. `−` zaten doluydu, `+`
+                      krem/krem ile 1.00'e düşüp kaybolmuştu; ikisi de aynı eylem
+                      sınıfını alıyor, çift simetrisi geri geldi. */}
+                  <button type="button" aria-label={t("less")} onClick={() => setQty(l.slug, l.qty - 1)} className={clsx("grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full", qtyTone)}>−</button>
                   <span className="font-pixel text-[0.9vw] max-md:text-[3.4vw] min-w-[1.2vw] text-center">{l.qty}</span>
-                  <button type="button" aria-label={t("more")} onClick={() => setQty(l.slug, l.qty + 1)} className="grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full bg-cream text-ink">+</button>
+                  <button type="button" aria-label={t("more")} onClick={() => setQty(l.slug, l.qty + 1)} className={clsx("grid h-[1.8vw] w-[1.8vw] max-md:h-[7vw] max-md:w-[7vw] place-items-center rounded-full", qtyTone)}>+</button>
                   <button type="button" aria-label={t("remove")} onClick={() => remove(l.slug)} className="ml-[0.4vw] text-[1vw] max-md:text-[3.4vw] underline underline-offset-4">✕</button>
                 </div>
               </li>
@@ -173,7 +181,7 @@ export default function Cart() {
               data-cursor-hide
               data-testid="checkout"
               onClick={() => submitOrder(lines, locale, tAll)}
-              className="group grid place-items-center rounded-full bg-berry px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] text-cream transition-[transform,background-color] duration-300 hover:scale-105 hover:bg-ink"
+              className={clsx("group grid place-items-center rounded-full px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] hover:scale-105", submitTone)}
             >
               <RollText>{tAll(channel.labelKey)}</RollText>
             </button>
@@ -183,7 +191,7 @@ export default function Cart() {
               disabled
               data-testid="checkout"
               aria-disabled="true"
-              className="grid cursor-not-allowed place-items-center rounded-full bg-berry/40 px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw] text-cream"
+              className={clsx("grid cursor-not-allowed place-items-center rounded-full px-[1.6vw] py-[0.9vw] max-md:px-[5vw] max-md:py-[3.5vw] text40 text-[1.2vw] max-md:text-[4vw]", submitDisabled)}
             >
               {lines.length === 0 ? (
                 tAll(channel.labelKey)

@@ -48,7 +48,9 @@ export default function MenuOverlay() {
               href={l.href}
               data-cursor-hide
               onClick={close}
-              className="group w-fit font-display text-[6vw] max-md:text-[13vw] leading-[0.95] text-cream transition-colors hover:text-cream focus-visible:text-cream"
+              /* FAZ B-2: `hover:text-cream` dinlenme hâliyle AYNIYDI — sınıf duruyor,
+                 `transition-colors` dönüyor, ekranda hiçbir şey olmuyordu. */
+              className="group w-fit font-display text-[6vw] max-md:text-[13vw] leading-[0.95] text-cream transition-colors duration-300 hover:text-sky focus-visible:text-sky"
             >
               <SplitReveal type="lines" trigger="mount" stagger={0.06 + i * 0.01}>
                 {t(l.key)}

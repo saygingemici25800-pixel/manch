@@ -10,6 +10,7 @@ import type { Category, Product, Tag } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useUiStore } from "@/lib/ui-store";
+import { action, type ActionClass } from "@/styles/emphasis";
 import { ProductModal } from "./ProductModal";
 
 const TAGS: Tag[] = ["spicy", "new", "signature"];
@@ -29,6 +30,14 @@ export function MenuClient({ categories, products }: Props) {
   const searchParams = useSearchParams();
   const navHidden = useUiStore((s) => s.navHidden);
   const [filter, setFilter] = useState<Tag | null>(null);
+  /* Tip kapısı (FAZ B-2): hap bir DÜĞME, yani her iki hâlinde de EYLEM.
+     Dinlenme konturlu (ikincil), aktif dolu (birincil) — hover'da takas oluyor.
+     İlk yazımda dinlenme hâli `label()` yapılmıştı: görünüm doğruydu ama
+     **hover tamamen ölüydü** (etiket statiktir). Kontak tablosu bunu göstermedi,
+     hover'ın hesaplanan değeri ÖLÇÜLÜNCE çıktı (Kural 60). `label()` artık yalnız
+     etkileşimsiz rozetlerde (`SoonBadge`). */
+  const chipActive: ActionClass = action("light");
+  const chipRest: ActionClass = action("light", "secondary");
   const [active, setActive] = useState<string | null>(null);
 
   // URL tek kaynak (Kural 34)
@@ -108,9 +117,13 @@ export function MenuClient({ categories, products }: Props) {
                 data-testid={`filter-${tag}`}
                 aria-pressed={active}
                 onClick={() => setFilter(active ? null : tag)}
+                /* FAZ B-2: üç hap artık AYNI dili konuşuyor — dinlenme konturlu
+                   (etiket), aktif dolu (eylem). Eski hâlde `new` krem şerit üstünde
+                   krem (1.00) ve `signature` krem şerit üstünde MAVİ (1.27, Kural 40
+                   yasak çifti) idi: üç haptan ikisinin gövdesi görünmüyordu. */
                 className={clsx(
-                  "rounded-full px-[1vw] py-[0.35vw] max-md:px-[3vw] max-md:py-[1.2vw] font-pixel text-[0.65vw] max-md:text-[2.4vw] uppercase transition-[background-color,color,transform] duration-300 hover:scale-105",
-                  active ? "bg-ink text-cream" : tag === "spicy" ? "bg-berry text-cream" : tag === "new" ? "bg-cream text-ink" : "bg-sky text-berry",
+                  "rounded-full px-[1vw] py-[0.35vw] max-md:px-[3vw] max-md:py-[1.2vw] font-pixel text-[0.65vw] max-md:text-[2.4vw] uppercase hover:scale-105",
+                  active ? chipActive : chipRest,
                 )}
               >
                 {tp(`tags.${tag}`)}

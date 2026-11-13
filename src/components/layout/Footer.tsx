@@ -23,7 +23,7 @@ export default async function Footer() {
       <div className="grid grid-cols-[1fr_auto] max-md:grid-cols-1 items-end gap-[3vw] max-md:gap-[10vw]">
         <nav className="flex flex-col gap-[0.4vw] max-md:gap-[1.5vw]">
           {LINKS.map((l) => (
-            <TransitionLink key={l.key} href={l.href} data-cursor-hide className="group w-fit text40 font-display normal-case tracking-normal text-[2.6vw] max-md:text-[8vw] leading-none hover:text-cream">
+            <TransitionLink key={l.key} href={l.href} data-cursor-hide className="group w-fit text40 font-display normal-case tracking-normal text-[2.6vw] max-md:text-[8vw] leading-none transition-colors duration-300 hover:text-sky">
               <SplitReveal type="lines" className="block" >{tn(l.key)}</SplitReveal>
               <span className="sr-only">{tn(l.key)}</span>
               <span aria-hidden="true" className="hidden group-hover:block"><RollText>{tn(l.key)}</RollText></span>

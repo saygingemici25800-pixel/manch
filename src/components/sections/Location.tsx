@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { RollText } from "@/components/motion/RollText";
 import { SoonBadge } from "@/components/ui/SoonBadge";
+import { action, type ActionClass } from "@/styles/emphasis";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { formatHours, site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
@@ -18,6 +19,9 @@ export function Location() {
   const [loaded, setLoaded] = useState(false);
   const setInfoOpen = useUiStore((s) => s.setInfoOpen);
 
+  /* Tip kapısı: yol tarifi EYLEM, bölüm `bg-berry` → KOYU zemin. */
+  const dirTone: ActionClass = action("dark");
+
   return (
     <section id="location" data-nav-dark className="scroll-mt-[6vw] bg-berry px-[2.5vw] py-[8vw] max-md:px-[5vw] max-md:py-[16vw] text-cream">
       <div className="grid grid-cols-2 max-md:grid-cols-1 items-center gap-[4vw] max-md:gap-[10vw]">
@@ -28,11 +32,11 @@ export function Location() {
             {site.address.street}, {site.address.district}<br />{site.address.postalCode} {site.address.city}
           </address>
           <dl className="grid grid-cols-[auto_1fr] gap-x-[1.5vw] gap-y-[0.4vw] max-md:gap-y-[1.5vw] text40 text-[1.1vw] max-md:text-[3.8vw]">
-            <dt className="text-cream">{t("hours")}</dt><dd>{formatHours(locale) ?? <SoonBadge />}</dd>
-            <dt className="text-cream">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : <SoonBadge />}</dd>
+            <dt className="text-cream">{t("hours")}</dt><dd>{formatHours(locale) ?? <SoonBadge ground="dark" />}</dd>
+            <dt className="text-cream">{t("phone")}</dt><dd>{site.contact.phone ? <a href={`tel:${site.contact.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">{site.contact.phoneDisplay}</a> : <SoonBadge ground="dark" />}</dd>
           </dl>
           <div className="flex flex-wrap gap-[1vw] max-md:gap-[3vw]">
-            <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className="group rounded-full bg-cream px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-ink transition-[transform] duration-300 hover:scale-105">
+            <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`group rounded-full px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] hover:scale-105 ${dirTone}`}>
               <RollText>{t("directions")}</RollText>
             </a>
             <button type="button" data-cursor-hide onClick={() => setInfoOpen(true)} className="group rounded-full border-[0.15vw] border-cream px-[1.6vw] py-[0.7vw] max-md:px-[5vw] max-md:py-[2.5vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-[transform,background-color,color] duration-300 hover:scale-105 hover:bg-cream hover:text-berry">

@@ -64,8 +64,12 @@ export async function Zone() {
         </div>
 
         <Parallax distance={70}>
+          {/* Karar 2026-11-13 (kullanıcı): bölüm artık Zone'un KENDİ içeriğini
+              gösteriyor — burger fotoğrafı değil, salondan gerçek bir kare:
+              arka duvardaki künye yazısı + her iki maskot. `scripts/zone-still.mjs`
+              üretiyor; maskot çizimleri gelince aynı komutla yeniden üretilir. */}
           <Image
-            src="/burgers/on-tile/classic-manch.jpg"
+            src="/images/zone-hall.jpg"
             alt={t("zone.imageAlt")}
             width={1400}
             height={1050}

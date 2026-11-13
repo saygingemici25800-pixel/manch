@@ -8,6 +8,7 @@ import { useState } from "react";
 import { CheckerBand } from "@/components/ui/CheckerBand";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { SoonBadge } from "@/components/ui/SoonBadge";
+import { action, disabledAction, type ActionClass } from "@/styles/emphasis";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
@@ -21,13 +22,18 @@ type Props = {
   onSelect?: (slug: string) => void;
 };
 
-/** R11 — dama bandı, kesit PNG, quick details, hardal "+" sepete ekle. */
+/** R11 — dama bandı, kesit PNG, quick details, bordo "+" sepete ekle (FAZ B-2). */
 export function ProductCard({ product: p, priority, onSelect }: Props) {
   const locale = useLocale() as Locale;
   const t = useTranslations("Common");
   const tp = useTranslations("Product");
   /** Fiyatı bilinmeyen ürün sipariş edilemez — koşul veriden gelir. */
   const orderable = p.price != null;
+  /* Tip kapısı (FAZ B-2): sepete ekle EYLEM. Kart `bg-white` — palet dışı bir
+     zemin, kit tablosunda hiç görünmüyordu (Kural 79-A). Krem dolgu beyazın
+     üstünde 1.05'ti; devre dışı↔etkin ayrımı da 1.03'e düşmüştü. */
+  const addTone: ActionClass = action("light");
+  const addDisabled: ActionClass = disabledAction("light");
   const add = useCartStore((s) => s.add);
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -118,7 +124,10 @@ export function ProductCard({ product: p, priority, onSelect }: Props) {
             /* Kural 40: dokunma hedefi ≥ 24 px. 2.4vw, 768 px'te 18 px ediyordu — tablet portrede
                dokunmatik ve eşiğin altında. Taban `min-h/min-w` ile konuyor (5.5.8'de
                `OrderBoard`'un −/+ düğmelerinde aynı çözüm uygulanmıştı). */
-            className="grid h-[2.4vw] w-[2.4vw] min-h-[26px] min-w-[26px] place-items-center rounded-full bg-cream text-[1.2vw] text-ink transition-transform duration-300 hover:scale-110 disabled:cursor-not-allowed disabled:bg-cream/40 disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]"
+            className={clsx(
+              "grid h-[2.4vw] w-[2.4vw] min-h-[26px] min-w-[26px] place-items-center rounded-full text-[1.2vw] hover:scale-110 disabled:cursor-not-allowed disabled:hover:scale-100 max-md:h-[9vw] max-md:w-[9vw] max-md:text-[4.5vw]",
+              orderable ? addTone : addDisabled,
+            )}
           >
             +
           </button>

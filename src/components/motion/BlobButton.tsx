@@ -81,11 +81,11 @@ export function BlobButton({ children, onClick, className, ariaLabel }: Props) {
       >
         <path
           d={BLOB_D}
-          className="fill-berry stroke-cream transition-colors duration-300 group-hover/blob:fill-berry"
+          className="fill-berry stroke-cream transition-colors duration-300 group-hover/blob:fill-transparent group-hover/blob:stroke-berry"
           strokeWidth={10}
         />
       </svg>
-      <span className="relative z-10 px-[2vw] py-[1vw] font-ui uppercase tracking-[0.08em] text-cream max-md:px-[6vw] max-md:py-[3vw]">
+      <span className="relative z-10 px-[2vw] py-[1vw] font-ui uppercase tracking-[0.08em] text-cream transition-colors duration-300 group-hover/blob:text-berry max-md:px-[6vw] max-md:py-[3vw]">
         {children}
       </span>
     </button>

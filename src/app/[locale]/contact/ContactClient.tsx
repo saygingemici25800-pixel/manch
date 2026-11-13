@@ -8,12 +8,13 @@ import { KraftCard } from "@/components/ui/KraftCard";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { formatHours, site } from "@/lib/site";
 import { useUiStore } from "@/lib/ui-store";
+import { action, disabledAction, type ActionClass } from "@/styles/emphasis";
 
 const MAP_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${site.name} ${site.address.full}`)}&output=embed`;
 const DIRECTIONS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.full)}`;
 const WA = site.contact.whatsapp ? `https://wa.me/${site.contact.whatsapp.replace(/[^\d]/g, "")}` : null;
 
-const pill = "group grid place-items-center rounded-full px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] transition-[transform,background-color,color] duration-300 hover:scale-105";
+const pill = "group grid place-items-center rounded-full px-[1.6vw] py-[0.8vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] hover:scale-105";
 
 /** /contact — adres kartı, WhatsApp (null → disabled + yakında), InfoModal, sosyal linkler, tıkla-yükle harita. */
 export default function ContactClient() {
@@ -21,6 +22,11 @@ export default function ContactClient() {
   const locale = useLocale() as "tr" | "en";
   const [loaded, setLoaded] = useState(false);
   const setInfoOpen = useUiStore((s) => s.setInfoOpen);
+  /* Tip kapısı (FAZ B-2): üçü de EYLEM. KraftCard `bg-cream` → açık zemin.
+     Yol tarifi eskiden `bg-cream text-ink` ile krem kartın üstünde 1.00'di. */
+  const ctaPrimary: ActionClass = action("light");
+  const ctaSecondary: ActionClass = action("light", "secondary");
+  const ctaDisabled: ActionClass = disabledAction("light");
 
   return (
     <div className="grid grid-cols-2 max-md:grid-cols-1 items-start gap-[4vw] max-md:gap-[10vw]">
@@ -39,12 +45,12 @@ export default function ContactClient() {
 
         <div className="flex flex-wrap gap-[0.8vw] max-md:gap-[2.5vw]">
           {WA ? (
-            <a href={WA} target="_blank" rel="noopener noreferrer" data-cursor-hide data-testid="wa-button" className={`${pill} bg-berry text-cream hover:bg-ink`}><RollText>{t("whatsapp")}</RollText></a>
+            <a href={WA} target="_blank" rel="noopener noreferrer" data-cursor-hide data-testid="wa-button" className={`${pill} ${ctaPrimary}`}><RollText>{t("whatsapp")}</RollText></a>
           ) : (
-            <button type="button" disabled aria-disabled="true" data-testid="wa-button" className={`${pill} cursor-not-allowed bg-berry/40 text-cream hover:scale-100`}>{t("whatsapp")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" /></button>
+            <button type="button" disabled aria-disabled="true" data-testid="wa-button" className={`${pill} cursor-not-allowed hover:scale-100 ${ctaDisabled}`}>{t("whatsapp")} <SoonBadge className="ml-[0.5vw] max-md:ml-[2vw]" /></button>
           )}
-          <button type="button" data-cursor-hide data-testid="contact-info" onClick={() => setInfoOpen(true)} className={`${pill} border-[0.15vw] border-berry text-berry hover:bg-berry hover:text-cream`}><RollText>{t("reservation")}</RollText></button>
-          <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`${pill} bg-cream text-ink`}><RollText>{t("directions")}</RollText></a>
+          <button type="button" data-cursor-hide data-testid="contact-info" onClick={() => setInfoOpen(true)} className={`${pill} ${ctaSecondary}`}><RollText>{t("reservation")}</RollText></button>
+          <a href={DIRECTIONS} target="_blank" rel="noopener noreferrer" data-cursor-hide className={`${pill} ${ctaSecondary}`}><RollText>{t("directions")}</RollText></a>
         </div>
 
         <ul className="mt-[0.5vw] flex flex-wrap gap-[1.2vw] max-md:gap-[4vw] text40 text-[1.05vw] max-md:text-[3.6vw]">

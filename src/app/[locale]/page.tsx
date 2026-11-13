@@ -7,7 +7,6 @@ import { Handmade } from "@/components/sections/Handmade";
 import { Hero } from "@/components/sections/Hero";
 import { InstagramGrid } from "@/components/sections/InstagramGrid";
 import { Location } from "@/components/sections/Location";
-import { MarqueeBand } from "@/components/sections/MarqueeBand";
 import { MisuMiyu } from "@/components/sections/MisuMiyu";
 import { TheHits } from "@/components/sections/TheHits";
 import { Zone } from "@/components/sections/Zone";
@@ -41,7 +40,6 @@ export default async function HomePage({ params }: Props) {
     <NextIntlClientProvider messages={messages}>
       <main id="main">
         <Hero />
-        <MarqueeBand />
         <TheHits />
         <Build />
         <Handmade />

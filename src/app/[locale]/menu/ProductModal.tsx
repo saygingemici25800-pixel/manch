@@ -8,6 +8,7 @@ import { KraftCard } from "@/components/ui/KraftCard";
 import Image from "next/image";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { SoonBadge } from "@/components/ui/SoonBadge";
+import { disabledAction } from "@/styles/emphasis";
 import type { Product } from "@/data/menu";
 import type { Locale } from "@/i18n/routing";
 import { useCartStore } from "@/lib/cart-store";
@@ -94,7 +95,7 @@ export function ProductModal({ product, onClose }: Props) {
                   aria-disabled="true"
                   data-testid="modal-add"
                   title={tc("priceSoon")}
-                  className="mt-[0.5vw] inline-flex cursor-not-allowed flex-wrap items-center justify-center gap-x-[0.6vw] gap-y-[0.3vw] rounded-full bg-berry/40 px-[1.6vw] py-[0.8vw] max-md:gap-x-[2vw] max-md:gap-y-[1vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] text-cream"
+                  className={`mt-[0.5vw] inline-flex cursor-not-allowed flex-wrap items-center justify-center gap-x-[0.6vw] gap-y-[0.3vw] rounded-full px-[1.6vw] py-[0.8vw] max-md:gap-x-[2vw] max-md:gap-y-[1vw] max-md:px-[5vw] max-md:py-[3vw] text40 text-[1.1vw] max-md:text-[3.8vw] ${disabledAction("light")}`}
                 >
                   <span>{tc("addToCart")}</span> <SoonBadge />
                 </button>

@@ -292,6 +292,103 @@ for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
   await p.close();
 }
 
+/* ---------------- 5 · BİLEŞEN ÖLÇEĞİ — dolgu/kontur zeminde okunuyor mu (Kural 79-B) ----------------
+   Bölüm ölçeği bunu GÖREMEZ: 2026-09-28'de gözle bakma turu footer filigranını yakaladı
+   ama altı düğmeyi 1.00–1.05 kontrastla canlıya bıraktı. Burada her CTA/rozet TEK TEK,
+   **fiilen üstünde durduğu** zeminle ölçülür (Kural 79-A: "B nerede duruyor?").
+   Zemin ata zincirinden değil HIT-TEST ile bulunur — Kural 78'in aynı gerekçesi. */
+const OLC_EMPH = `(() => {
+  /* Rengi ELLE AYRIŞTIRMA. Tailwind v4 opaklıklı renkleri \`oklab(...)\` olarak yayıyor;
+     ilk üç sayıyı 0-255 RGB sanan bir ayrıştırıcı krem şeridi neredeyse SİYAH okuyor ve
+     ürün kusursuzken 1.94 basıyor (ölçüldü, Kural 60). Dönüşümü tarayıcıya yaptırıyoruz:
+     canvas \`fillStyle\` her geçerli CSS rengini kabul eder, \`getImageData\` sRGB verir. */
+  const cv = document.createElement("canvas"); cv.width = cv.height = 1;
+  const cx2 = cv.getContext("2d", { willReadFrequently: true });
+  const rgba = (c) => {
+    cx2.clearRect(0, 0, 1, 1);
+    cx2.fillStyle = "rgba(0,0,0,0)"; cx2.fillStyle = c;
+    cx2.fillRect(0, 0, 1, 1);
+    const d = cx2.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2], d[3] / 255];
+  };
+  const uzerine = (ust, alt) => ust[3] >= 1 ? ust
+    : [0, 1, 2].map((i) => ust[i] * ust[3] + alt[i] * (1 - ust[3])).concat(1);
+  const L = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
+    const [r, g, b] = c.slice(0, 3).map(f); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const cr = (a, b) => { const [x, y] = [L(a), L(b)].sort((m, k) => k - m); return (x + 0.05) / (y + 0.05); };
+
+  return [...document.querySelectorAll(".emph")].map((el) => {
+    /* Öğeyi ÖNCE kadraja al: \`elementsFromPoint\` yalnız viewport içini görür, yoksa
+       fold altındaki her düğme "görünmez" sayılır (ölçüldü: /tr'de 9 öğeden 0'a düştü).
+       Kapalı diyalog içeriği kaydırıldıktan sonra da hit-test'e düşmez — doğru şekilde elenir. */
+    el.scrollIntoView({ block: "center", inline: "center" });
+    const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+    const cx = Math.round(r.left + r.width / 2), cy = Math.round(r.top + r.height / 2);
+    const yigin = document.elementsFromPoint(cx, cy);
+    const i = yigin.indexOf(el);
+    /* GÖRÜNÜRLÜK: kutusu olması YETMEZ. Kapalı bir diyalogun (InfoModal) içeriği
+       \`invisible/opacity-0\` olduğu hâlde düzende yer tutar; hit-test onu döndürmez,
+       \`indexOf\` -1 olur ve naif bir \`slice(0)\` o koordinattaki BAŞKA bir şeyi
+       (hero fotoğrafının tinti) zemin sanar. Ölçüldü: 1.00 yanlış alarmı. */
+    const gorunur = r.width > 0 && r.height > 0 && i !== -1;
+    /* Zemin: öğenin ALTINDAKİ katmanlar, alttan üste doğru BİLEŞTİRİLEREK
+       (yarı saydam \`bg-cream/90\` tek başına renk değildir). */
+    let zemin = [255, 255, 255, 1];
+    if (gorunur) {
+      const katmanlar = yigin.slice(i + 1).map((e) => rgba(getComputedStyle(e).backgroundColor)).filter((c) => c[3] > 0);
+      for (let k = katmanlar.length - 1; k >= 0; k--) zemin = uzerine(katmanlar[k], zemin);
+    }
+    const dolu = el.classList.contains("emph-filled");
+    const govde = rgba(dolu ? cs.backgroundColor : cs.borderTopColor);
+    const metinZem = dolu ? uzerine(govde, zemin) : zemin;
+    return {
+      ad: (el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 28),
+      id: el.id || "",
+      rol: el.classList.contains("emph-label") ? "etiket" : "eylem",
+      dolu, pasif: el.classList.contains("emph-disabled"), gorunur,
+      govdeZemin: cr(uzerine(govde, zemin), zemin),
+      metinZemin: cr(rgba(cs.color), metinZem),
+    };
+  });
+})()`;
+
+/** Tek yüklem — hem ürüne hem sabotaj sondasına AYNISI uygulanır. */
+const emphGecer = (d) => d.govdeZemin >= 3 && (d.pasif || d.metinZemin >= 4.5);
+
+for (const path of ["/tr", "/tr/menu", "/tr/contact", "/en"]) {
+  const p = await br.newPage({ viewport: { width: 1440, height: 900 } });
+  p.setDefaultTimeout(45000);
+  await p.goto(`${BASE}${path}?nopreload=1`, { waitUntil: "domcontentloaded" });
+  await hazir(p);
+
+  const hepsi = (await p.evaluate(OLC_EMPH)).filter((d) => d.gorunur);
+  // Kural 77(a): ölçemediğini raporlayan kontrol yeşil basmaz.
+  ok(hepsi.length > 0, `${path} bileşen ölçeği: CTA/rozet bulundu`, `${hepsi.length} öğe`);
+  const zayif = hepsi.filter((d) => !emphGecer(d));
+  ok(zayif.length === 0, `${path} her CTA/rozet ZEMİNİNDE okunuyor (gövde ≥ 3, metin ≥ 4.5)`,
+    zayif.slice(0, 4).map((d) => `${d.ad}[${d.rol}] gövde ${d.govdeZemin.toFixed(2)} / metin ${d.metinZemin.toFixed(2)}`).join(" | ")
+      || `${hepsi.length} öğe ölçüldü`);
+
+  /* ÇİFT YÖNLÜ (Kural 60/77-b): aynı yüklem, iki sonda. Doğru eşleşme GEÇMELİ,
+     ters eşleşme DÜŞMELİ. Tek yön ölçülseydi "hep geçen" bozuk bir yüklem de yeşil verirdi. */
+  await p.evaluate(`(() => {
+    const d = document.createElement("div");
+    d.id = "emph-sonda";
+    d.style.cssText = "position:fixed;left:0;top:0;z-index:99999;background:#FFF9F2;padding:12px";
+    d.innerHTML =
+      '<span id="sonda-dogru" class="emph emph-label emph-outlined" style="border:2px solid #77133E;color:#77133E;background:transparent">D</span>' +
+      '<span id="sonda-ters"  class="emph emph-label emph-outlined" style="border:2px solid #FFF9F2;color:#FFF9F2;background:transparent">T</span>';
+    document.body.appendChild(d);
+  })()`);
+  const sondalar = await p.evaluate(OLC_EMPH);
+  const dogru = sondalar.find((d) => d.id === "sonda-dogru");
+  const ters = sondalar.find((d) => d.id === "sonda-ters");
+  ok(dogru && emphGecer(dogru), `${path} sonda: DOĞRU eşleşme geçiyor`, dogru ? `gövde ${dogru.govdeZemin.toFixed(2)}` : "sonda yok");
+  ok(ters && !emphGecer(ters), `${path} sonda: TERS eşleşme DÜŞÜYOR (yüklem gerçekten ayırt ediyor)`, ters ? `gövde ${ters.govdeZemin.toFixed(2)}` : "sonda yok");
+  await p.evaluate(`document.getElementById("emph-sonda")?.remove()`);
+  await p.close();
+}
+
 await br.close();
 console.log(`\n${pass}/${pass + fail} ${fail ? "✗" : "✓"}`);
 process.exit(fail ? 1 : 0);
