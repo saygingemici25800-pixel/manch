@@ -3,9 +3,16 @@ import "server-only";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
+import { neon } from "@neondatabase/serverless";
+
 /**
- * Yönetim paneli deposu — TEK arayüz, üç gerçekleme.
+ * Yönetim paneli deposu — TEK arayüz, dört gerçekleme.
  *
+ * · **postgres** — Vercel Marketplace'ten bağlanan **Neon (ücretsiz plan, `free_v3`)**.
+ *   Production'da kullanılan bu (karar 2026-11-15): bu Vercel hesabında yeni bir Upstash
+ *   veritabanı yalnız ücretli planlarla açılabiliyordu, Neon'un ücretsiz planı var.
+ *   Vercel bağlanınca `DATABASE_URL`'i kendisi ekler. HTTP sürücüsü (`@neondatabase/serverless`),
+ *   bağlantı havuzu yok — sunucusuz fonksiyonda doğru model. Tablolar ilk kullanımda kurulur.
  * · **redis** — Vercel Marketplace'ten bağlanan Upstash Redis. REST üzerinden konuşulur
  *   (`fetch`), yeni paket yok. Vercel bağlanınca env'i kendisi ekler: `KV_REST_API_URL` +
  *   `KV_REST_API_TOKEN` (ya da Upstash'in kendi adlarıyla `UPSTASH_REDIS_REST_*`).
@@ -39,7 +46,7 @@ export interface StoredOrder {
 export type PriceOverrides = Record<string, number | null>;
 
 export interface AdminStore {
-  kind: "redis" | "file" | "none";
+  kind: "postgres" | "redis" | "file" | "none";
   getPrices(): Promise<PriceOverrides>;
   setPrice(slug: string, price: number | null): Promise<void>;
   getOrderingEnabled(): Promise<boolean>;
@@ -56,7 +63,7 @@ export interface AdminStore {
 
 export class StoreNotConfigured extends Error {
   constructor() {
-    super("Yönetim deposu bağlı değil (KV_REST_API_URL / KV_REST_API_TOKEN).");
+    super("Yönetim deposu bağlı değil (DATABASE_URL ya da KV_REST_API_URL / KV_REST_API_TOKEN).");
   }
 }
 
@@ -69,6 +76,128 @@ const K = {
   day: (d: string) => `manch:day:${d}`,
   rl: (key: string) => `manch:rl:${key}`,
 };
+
+/* --------------------------------------------------------------- postgres */
+
+/**
+ * Redis gerçeklemesindeki her garanti burada da TEK SQL ifadesiyle, atomik:
+ * · `hit` — `INSERT … ON CONFLICT DO UPDATE … RETURNING n`: sayaç satır kilidiyle artar,
+ *   paralel 15 deneme 15 ayrı değer görür (Kural 80: önce say, sonra dene). Pencere
+ *   dolmuşsa aynı ifadede 1'e döner — ayrı bir EXPIRE çağrısı yok, süresiz kalma riski yok.
+ * · `addOrder` — kimlik kaydı `ON CONFLICT … WHERE at < now() − 2 gün`: Redis'teki
+ *   `SET NX EX 172800`'ün karşılığı. Kısa kimlikler zamanla tekrar edebilir; 2 günden eski
+ *   kimlik yeniden kullanılabilir, yenisi reddedilir. Eşzamanlı çift tıklama da tek satır yazar.
+ * · Sipariş satırı + günlük sayaç tek işlemde (transaction).
+ *
+ * `prefix`: tablo adı öneki. Production `manch_`; bekçi gerçek veritabanında `manchtest_`
+ * ile koşar ve tablolarını siler — canlı veriye dokunmaz.
+ */
+function postgresStore(url: string, prefix: string): AdminStore {
+  if (!/^[a-z_]+$/.test(prefix)) throw new Error("ADMIN_PG_PREFIX yalnız küçük harf ve _");
+  const sql = neon(url, { fetchOptions: { cache: "no-store" } });
+  const T = {
+    prices: `${prefix}prices`,
+    settings: `${prefix}settings`,
+    orders: `${prefix}orders`,
+    ids: `${prefix}order_ids`,
+    days: `${prefix}days`,
+    hits: `${prefix}hits`,
+  };
+
+  let ready: Promise<unknown> | null = null;
+  const schema = () =>
+    (ready ??= sql
+      .transaction([
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.prices} (slug text PRIMARY KEY, price integer)`),
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.settings} (key text PRIMARY KEY, value text NOT NULL)`),
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.orders} (seq bigserial PRIMARY KEY, id text NOT NULL, at text NOT NULL, locale text NOT NULL, items jsonb NOT NULL, total integer NOT NULL)`),
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.ids} (id text PRIMARY KEY, at timestamptz NOT NULL)`),
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.days} (day text PRIMARY KEY, count integer NOT NULL, total bigint NOT NULL)`),
+        sql.query(`CREATE TABLE IF NOT EXISTS ${T.hits} (key text PRIMARY KEY, n integer NOT NULL, until timestamptz NOT NULL)`),
+      ])
+      // Kurulum düşerse bir sonraki çağrı yeniden denesin (önbellekte reddedilmiş söz kalmasın).
+      .catch((e) => {
+        ready = null;
+        throw e;
+      }));
+  const q = async <R = Record<string, unknown>>(text: string, params: unknown[] = []) => {
+    await schema();
+    return (await sql.query(text, params)) as R[];
+  };
+
+  return {
+    kind: "postgres",
+    async getPrices() {
+      const rows = await q<{ slug: string; price: number | null }>(`SELECT slug, price FROM ${T.prices}`);
+      return Object.fromEntries(rows.map((r) => [r.slug, r.price]));
+    },
+    async setPrice(slug, price) {
+      await q(
+        `INSERT INTO ${T.prices} (slug, price) VALUES ($1, $2) ON CONFLICT (slug) DO UPDATE SET price = EXCLUDED.price`,
+        [slug, price],
+      );
+    },
+    async getOrderingEnabled() {
+      const rows = await q<{ value: string }>(`SELECT value FROM ${T.settings} WHERE key = 'ordering'`);
+      return rows[0]?.value !== "0";
+    },
+    async setOrderingEnabled(enabled) {
+      await q(
+        `INSERT INTO ${T.settings} (key, value) VALUES ('ordering', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+        [enabled ? "1" : "0"],
+      );
+    },
+    async addOrder(order, day) {
+      const fresh = await q(
+        `INSERT INTO ${T.ids} (id, at) VALUES ($1, now())
+         ON CONFLICT (id) DO UPDATE SET at = now() WHERE ${T.ids}.at < now() - interval '2 days'
+         RETURNING id`,
+        [order.id],
+      );
+      if (fresh.length === 0) return false;
+      await sql.transaction([
+        sql.query(`INSERT INTO ${T.orders} (id, at, locale, items, total) VALUES ($1, $2, $3, $4::jsonb, $5)`, [
+          order.id,
+          order.at,
+          order.locale,
+          JSON.stringify(order.items),
+          order.total,
+        ]),
+        sql.query(
+          `INSERT INTO ${T.days} (day, count, total) VALUES ($1, 1, $2)
+           ON CONFLICT (day) DO UPDATE SET count = ${T.days}.count + 1, total = ${T.days}.total + EXCLUDED.total`,
+          [day, order.total],
+        ),
+      ]);
+      return true;
+    },
+    async getDayStats(day) {
+      const rows = await q<{ count: number; total: string | number }>(`SELECT count, total FROM ${T.days} WHERE day = $1`, [day]);
+      return { count: Number(rows[0]?.count ?? 0), total: Number(rows[0]?.total ?? 0) };
+    },
+    async listOrders(limit) {
+      const rows = await q<{ id: string; at: string; locale: string; items: OrderItem[]; total: number }>(
+        `SELECT id, at, locale, items, total FROM ${T.orders} ORDER BY seq DESC LIMIT $1`,
+        [limit],
+      );
+      return rows.map((r) => ({ id: r.id, at: r.at, locale: r.locale, items: r.items, total: Number(r.total) }));
+    },
+    async hit(key, windowSec) {
+      const rows = await q<{ n: number }>(
+        `INSERT INTO ${T.hits} (key, n, until) VALUES ($1, 1, now() + make_interval(secs => $2))
+         ON CONFLICT (key) DO UPDATE SET
+           n = CASE WHEN ${T.hits}.until <= now() THEN 1 ELSE ${T.hits}.n + 1 END,
+           until = CASE WHEN ${T.hits}.until <= now() THEN now() + make_interval(secs => $2) ELSE ${T.hits}.until END
+         RETURNING n`,
+        [key, windowSec],
+      );
+      return Number(rows[0]?.n ?? 0);
+    },
+    async reset(key) {
+      await q(`DELETE FROM ${T.hits} WHERE key = $1`, [key]);
+    },
+  };
+}
 
 /* ------------------------------------------------------------------ redis */
 
@@ -225,8 +354,13 @@ export function getStore(): AdminStore {
   if (cached) return cached;
   const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) cached = redisStore(url.replace(/\/+$/, ""), token);
-  else if (process.env.ADMIN_STORE === "file" || process.env.NODE_ENV !== "production") cached = fileStore();
+  const pg = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  // `ADMIN_STORE=file` her şeyin ÖNÜNDE: yerel testte ortamda bir DATABASE_URL dursa bile
+  // test gerçek veritabanına yazmasın.
+  if (process.env.ADMIN_STORE === "file") cached = fileStore();
+  else if (url && token) cached = redisStore(url.replace(/\/+$/, ""), token);
+  else if (pg) cached = postgresStore(pg, process.env.ADMIN_PG_PREFIX ?? "manch_");
+  else if (process.env.NODE_ENV !== "production") cached = fileStore();
   else cached = noneStore;
   return cached;
 }

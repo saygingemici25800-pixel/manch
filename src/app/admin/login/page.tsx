@@ -11,9 +11,9 @@ export default async function LoginPage() {
   if (await isAdmin()) redirect("/admin");
 
   const problem = !adminConfigured()
-    ? "Panel henüz kurulmadı: Vercel'de ADMIN_PASSWORD ve ADMIN_SESSION_SECRET tanımlanmalı."
+    ? "Panel henüz kurulmadı: Vercel'de ADMIN_PASSWORD tanımlanmalı."
     : getStore().kind === "none"
-      ? "Veritabanı bağlı değil — Vercel → Storage'dan Upstash Redis bağlanmalı."
+      ? "Veritabanı bağlı değil — Vercel → Storage'dan Neon bağlanmalı."
       : null;
 
   return (

@@ -33,8 +33,31 @@ const ok = (c, l, e = "") => { if (c) { pass++; console.log(`  ✓ ${l}${e ? " �
 
 if (!PASSWORD) { console.log("✗ ADMIN_PASSWORD verilmedi — test koşamaz (Kural 77-a)"); process.exit(2); }
 
-const depo = async () => { try { return JSON.parse(await readFile(STORE_FILE, "utf8")); } catch { return {}; } };
-await rm(STORE_FILE, { force: true }); // temiz başlangıç
+/* Depo okuyucu — iki mod (2026-11-15):
+   · dosya (varsayılan): sunucu `ADMIN_STORE=file` ile, depo `.data/admin-store.json`
+   · Postgres (`ADMIN_CHECK_PG=1` + `DATABASE_URL` + `ADMIN_PG_PREFIX`): sunucu GERÇEK Neon
+     veritabanına test önekiyle yazar; bekçi aynı tabloları okur, başta boşaltır, sonda siler.
+     Önek `manch_` OLAMAZ — canlı tablolara dokunulmaz. */
+const PG = process.env.ADMIN_CHECK_PG === "1";
+const PREFIX = process.env.ADMIN_PG_PREFIX ?? "";
+if (PG && (!process.env.DATABASE_URL || !/^[a-z_]+$/.test(PREFIX) || PREFIX === "manch_")) {
+  console.log("✗ ADMIN_CHECK_PG: DATABASE_URL ve canlıdan FARKLI bir ADMIN_PG_PREFIX gerekli"); process.exit(2);
+}
+const sql = PG ? (await import("@neondatabase/serverless")).neon(process.env.DATABASE_URL) : null;
+const TABLOLAR = ["prices", "settings", "orders", "order_ids", "days", "hits"];
+async function pgSil(tablo) { try { await sql.query(`DELETE FROM ${PREFIX}${tablo}`); } catch { /* henüz yok */ } }
+const depo = async () => {
+  if (!PG) { try { return JSON.parse(await readFile(STORE_FILE, "utf8")); } catch { return {}; } }
+  const q = (t) => sql.query(t).catch(() => []);
+  const prices = Object.fromEntries((await q(`SELECT slug, price FROM ${PREFIX}prices`)).map((r) => [r.slug, r.price]));
+  const st = await q(`SELECT value FROM ${PREFIX}settings WHERE key = 'ordering'`);
+  const orders = (await q(`SELECT id, at, locale, items, total FROM ${PREFIX}orders ORDER BY seq DESC`)).map((r) => ({ ...r, total: Number(r.total) }));
+  const days = Object.fromEntries((await q(`SELECT day, count, total FROM ${PREFIX}days`)).map((r) => [r.day, { count: Number(r.count), total: Number(r.total) }]));
+  return { prices, ordering: st[0] ? st[0].value !== "0" : true, orders, days };
+};
+const depoSifirla = async () => { if (PG) for (const t of TABLOLAR) await pgSil(t); else await rm(STORE_FILE, { force: true }); };
+const kilidiKaldir = async () => { if (PG) await pgSil("hits"); else await rm(STORE_FILE, { force: true }); };
+await depoSifirla(); // temiz başlangıç
 
 const br = await chromium.launch({ executablePath: process.env.CHROME });
 
@@ -117,7 +140,7 @@ async function girisDene(sifre) {
 
   const kilit = await girisDene(PASSWORD);
   ok(/Çok fazla/i.test(kilit ?? "") && !ap.url().endsWith("/admin"), "5 hatadan sonra DOĞRU şifre bile kilitli", kilit ?? ap.url());
-  await rm(STORE_FILE, { force: true }); // kilidi kaldır (sayaç dosyada)
+  await kilidiKaldir(); // kilidi kaldır (sayaç depoda)
   const e2 = await girisDene(PASSWORD);
   ok(e2 === null && new URL(ap.url()).pathname === "/admin", "doğru şifre → pano", new URL(ap.url()).pathname);
   const cerez = (await admin.cookies()).find((c) => c.name === "manch_admin");
@@ -344,5 +367,7 @@ console.log("\nH · BAYAT SEKME / SATIŞTAN KALKAN ÜRÜN");
 }
 
 await br.close();
+// Postgres modunda test tabloları silinir (sunucu kapatıldıktan sonra tekrar koşulursa yeniden kurar).
+if (PG) for (const t of TABLOLAR) await sql.query(`DROP TABLE IF EXISTS ${PREFIX}${t}`).catch(() => {});
 console.log(`\n${pass}/${pass + fail} ${fail ? "✗" : "✓"}`);
 process.exit(fail ? 1 : 0);

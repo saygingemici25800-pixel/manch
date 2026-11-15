@@ -25,11 +25,11 @@ export type LoginState = { error: string } | undefined;
 
 export async function login(_prev: LoginState, form: FormData): Promise<LoginState> {
   if (!adminConfigured()) {
-    return { error: "Panel henüz kurulmadı: Vercel'de ADMIN_PASSWORD ve ADMIN_SESSION_SECRET tanımlanmalı." };
+    return { error: "Panel henüz kurulmadı: Vercel'de ADMIN_PASSWORD tanımlanmalı." };
   }
   const store = getStore();
   // Depo yokken hız sınırı da yok — kaba kuvvete açık bir giriş bırakmaktansa giriş kapanır.
-  if (store.kind === "none") return { error: "Veritabanı bağlı değil — Vercel'de Upstash Redis bağlanmalı." };
+  if (store.kind === "none") return { error: "Veritabanı bağlı değil — Vercel'de Neon (Storage) bağlanmalı." };
 
   /* ÖNCE SAY, SONRA DENE. İlk yazımda sıra "sayaca bak → şifreyi dene → yanlışsa say"
      idi: paralel 300 istek sayacı aynı anda 0 görüyor ve 5 sınırı fiilen yok oluyordu

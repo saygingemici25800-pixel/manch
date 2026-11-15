@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
  * Yönetim paneli girişi — TEK kullanıcı (işletme sahibi), tek şifre.
  *
  * · Şifre Vercel env'inde: `ADMIN_PASSWORD`. Kodda, repoda, sohbette DEĞİL.
- * · Oturum: `ADMIN_SESSION_SECRET` ile HMAC-imzalı çerez (`v1.<bitiş>.<imza>`). Sunucuda
+ * · Oturum: `ADMIN_SESSION_SECRET` (yoksa DATABASE_URL'den türetilen sır) ile HMAC-imzalı çerez (`v1.<bitiş>.<imza>`). Sunucuda
  *   oturum tablosu yok; sırrı değiştirmek tüm oturumları anında düşürür.
  * · Çerez `HttpOnly` (JS okuyamaz) · `Secure` (prod) · `SameSite=Lax`: WhatsApp'tan
  *   gelen bir bağlantıyla açılınca da girişli kalır, başka siteden POST'ta gönderilmez.
@@ -20,9 +20,18 @@ import { redirect } from "next/navigation";
 export const SESSION_COOKIE = "manch_admin";
 const MAX_AGE = 60 * 60 * 24 * 14; // 14 gün — sahip telefondan sık girmek zorunda kalmasın
 
+/**
+ * Oturum sırrı: `ADMIN_SESSION_SECRET` (≥ 32 kr) varsa o. Yoksa bağlı veritabanının
+ * bağlantı adresinden TÜRETİLİR (karar 2026-11-15) — adres içinde veritabanı parolası olan,
+ * yalnız sunucunun bildiği bir sırdır; sahibin Vercel'e girmesi gereken tek değer şifre
+ * kalır. Veritabanı parolası döndürülürse oturumlar düşer (yeniden giriş yeter).
+ * Depo yoksa panel zaten kapalı; sır da yok.
+ */
 function sessionSecret(): string | null {
   const s = process.env.ADMIN_SESSION_SECRET;
-  return s && s.length >= 32 ? s : null;
+  if (s && s.length >= 32) return s;
+  const db = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  return db ? createHash("sha256").update(`manch-admin-session|${db}`, "utf8").digest("hex") : null;
 }
 
 /** Panel kurulmuş mu? Şifre ya da yeterince uzun sır yoksa giriş tamamen kapalıdır. */
@@ -59,7 +68,7 @@ export function checkPassword(input: string): boolean {
 
 export async function startSession(): Promise<void> {
   const key = sessionSecret();
-  if (!key) throw new Error("ADMIN_SESSION_SECRET yok ya da 32 karakterden kısa");
+  if (!key) throw new Error("Oturum sırrı yok: ADMIN_SESSION_SECRET (≥ 32 kr) ya da DATABASE_URL gerekli");
   const exp = Date.now() + MAX_AGE * 1000;
   (await cookies()).set(SESSION_COOKIE, `v1.${exp}.${sign(`v1.${exp}`, key)}`, {
     httpOnly: true,

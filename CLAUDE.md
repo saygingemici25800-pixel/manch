@@ -50,19 +50,23 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
     girişten kule gibiydi) — ikisi de düzeltildi.
   · Yan iş — **iki eski bekçi oynaklığı giderildi** (ürün kusuru değil, son commit'te de vardı):
     POV kamera yerleşmesi sabit pencerede bekleniyordu · portre FOV boyut oturmadan okunuyordu.
-  · ⚠ Redis/Vercel kurulumu (yönetim paneli) **kullanıcı isteğiyle ertelendi** — aşağıdaki maddede.
 
 - **YÖNETİM PANELİ `/admin` YAZILDI (2026-11-13, kullanıcı: "basit tut, yalnız işletme sahibi
   girsin").** Kurallar **Kural 80**'de. Kapsam: menü fiyatı · sipariş anlık aç/kapa · çalışma
   saati dışında otomatik kapalı (sepet görünür, yalnız GÖNDER kapalı, sebep yazar) · sipariş
   akışı (sipariş no + günlük sayaç). Sipariş yine WhatsApp'tan yürür; mesajda **sipariş no** var.
-  · **Vercel'de YAPILACAK (kullanıcı):** ① Storage → **Upstash Redis** → `manch-v2`'ye bağla
-    (`KV_REST_API_URL/TOKEN` kendiliğinden gelir) ② env **`ADMIN_PASSWORD`** (uzun, rastgele)
-    ③ env **`ADMIN_SESSION_SECRET`** (`openssl rand -base64 48`) ④ redeploy. Bağlanana kadar
-    site NORMAL çalışır, panel "veritabanı bağlı değil" der ve giriş kapalıdır.
-  · ⚠ **Redis yolu yalnız kod okumasıyla doğrulandı** — testler dosya deposuyla
-    (`ADMIN_STORE=file`). Bağlandıktan sonra canlıda **bir fiyat kaydı + bir aç/kapa** elle
-    denenmeli.
+  · ✅ **DEPO BAĞLANDI (2026-11-15): Neon ücretsiz Postgres (`free_v3`), `manch-v2-db`,
+    bölge iad1 (fonksiyonlarla aynı), yalnız Production'a bağlı.** Upstash DEĞİL: bu hesapta
+    yeni Upstash veritabanı yalnız ÜCRETLİ planlarla açılabiliyordu (hesapta zaten bir ücretsiz
+    Upstash var, başka projede). Neon'da ücret yok. `DATABASE_URL`'i Vercel ekledi.
+  · **Postgres yolu GERÇEK Neon'da doğrulandı:** `admin-check` **50/50** (`ADMIN_CHECK_PG=1`,
+    önek `manchtest_`, test tabloları sonda silindi — canlı tablolara dokunulmadı). İki
+    Postgres koruması ayrı sabotajla (kilit sayacı · çift sipariş engeli). Dosya modu da 50/50.
+  · **Oturum sırrı artık İSTEĞE BAĞLI:** `ADMIN_SESSION_SECRET` yoksa `DATABASE_URL`'den türetilir.
+  · ⏳ **KALAN TEK ADIM (kullanıcı): Vercel → manch-v2 → Settings → Environment Variables →
+    `ADMIN_PASSWORD` (Production) → kaydet → Redeploy.** Şifreyi Claude koymaz (gerçek
+    production şifresi — kural gereği). Konunca giriş açılır; canlıda bir fiyat kaydı + bir
+    aç/kapa elle denenmeli.
   · Bekçiler: **`admin-check` 50/50** (yerel prod; erişim · giriş · kilit yarışı · çerezsiz
     action tekrarı · kurcalanmış çerez · aç/kapa · saat · ilk yüklemede fiyat · bayat sekme ·
     satıştan kalkan ürün · kurcalanmış kayıt) · **`hours-check` 24/24**.
@@ -1335,7 +1339,7 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
       **İki bilinçli istisna:** metinler Türkçe ve bileşende (Kural 5 kamu yüzü içindir,
       tek kullanıcı tek dil) · ölçüler `rem` (Kural 8; panel telefonda okunur olmalı).
     · **Giriş:** tek şifre (`ADMIN_PASSWORD`, Vercel env) + HMAC-imzalı çerez
-      (`ADMIN_SESSION_SECRET` ≥ 32 kr). İmza anahtarına **şifrenin özeti** katılır:
+      (`ADMIN_SESSION_SECRET` ≥ 32 kr; yoksa `DATABASE_URL`'den türetilir — 2026-11-15). İmza anahtarına **şifrenin özeti** katılır:
       şifre değişince tüm oturumlar düşer. Çerez HttpOnly · Secure · SameSite=Lax · 14 gün.
     · **HER server action `requireAdmin()` ile BAŞLAR** ve istemciden gelen her değeri
       yeniden doğrular. Sayfanın korumalı olması action'ı korumaz — action doğrudan POST
@@ -1343,8 +1347,10 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
     · **Giriş kilidi: ÖNCE SAY, SONRA DENE.** `hit()` (atomik INCR) şifre kontrolünden
       önce; IP başına 5 + tüm IP'ler toplamı 40 / 15 dk. "Sayaca bak → dene → say"
       sırası paralel isteklerle aşılıyordu (inceleme 2026-11-13, 15 denemenin 15'i geçti).
-    · **Depo:** `src/lib/store` — Upstash Redis (REST, paket yok) · dosya (dev/yerel test,
-      `ADMIN_STORE=file`) · none (prod'da bağlı değilse: site ÇALIŞIR, panel "bağlı değil"
+    · **Depo:** `src/lib/store` — **Neon Postgres (production, 2026-11-15;
+      `@neondatabase/serverless` HTTP, tablolar ilk kullanımda `manch_*`)** · Upstash Redis
+      (REST; bağlanırsa öncelikli) · dosya (dev/yerel test, `ADMIN_STORE=file` HER ŞEYİN
+      önünde — yerel test gerçek DB'ye yazmasın) · none (prod'da bağlı değilse: site ÇALIŞIR, panel "bağlı değil"
       der, giriş kapanır). Depo eksikliği **deploy'u kırmaz** — Kural 57'nin tersi bilerek.
     · **Fiyat tek kaynaktan:** `menu.ts` ürünlerin kaynağı kalır, panel yalnız fiyatı ezer
       (boş = YAKINDA). Etkin fiyat sunucuda `getEffectivePrices()` (önbellekli, etiket
@@ -1590,6 +1596,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-15 | mutfak | Tabela başlığı ("SMASH BURGERS") **iki kenardan kesik** çıktı | Sığdırma döngüsü `measureText().width` (ilerleme genişliği) ile ölçüyordu; Modak'ın harfleri ilerlemenin dışına taşıyor | Mürekkep kutusuyla ölçülür: `actualBoundingBoxLeft + actualBoundingBoxRight`. **Canvas'a yazılan display fontta genişlik `width` ile ölçülmez** |
 | 2026-11-15 | mutfak | Düzeltmeden sonra da tabelanın baş ve son harfi kesik göründü — bu kez **askı çubukları** yazının önünden geçiyordu | Askılar tabelanın MERKEZİNDEN tavana çizilmişti; tabelanın üst yarısını boydan boya kesiyorlardı. Otomatik hiçbir kontrol bakmıyor; **yalnız yerel prod gözle bakmada** görüldü (Kural 59) | Askı tabelanın üst kenarından başlıyor ve 1 cm geride. Aynı turda ikinci göz bulgusu: tek sırada dizili 7 burger girişten **kule** gibi görünüyordu → zikzak (±0.32) |
 | 2026-11-15 | bekçi | "SEPETE EKLE" kontrolü `/eklendi/i` ile düştü, metin doğruydu | Metin CSS'te `uppercase`: `innerText` "EKLENDİ" döner, JS `/i` bayrağı Türkçe **İ**'yi **i**'ye katlamaz | Desen `/EKLEND/i`. **Büyük harfli Türkçe metinde `/i` ile `ı/i/İ` içeren kelime aranmaz** — harfi dışarıda bırak ya da büyük yaz |
+| 2026-11-15 | admin | Upstash Redis Vercel CLI'dan açılamadı: listede **yalnız ücretli planlar** (Pay As You Go, Fixed) | Hesapta zaten bir ücretsiz Upstash veritabanı var (başka proje); ücretsiz plan listelenmiyor. Ücretli plan bir satın alma — onaysız açılmaz | **Neon `free_v3`** (ücretsiz) seçildi, depo katmanına Postgres gerçeklemesi yazıldı. Redis'in atomik garantileri tek ifadeli SQL'e çevrildi (`ON CONFLICT … RETURNING`). Kod yolu değişti ama **arayüz aynı** — tüketicilerin hiçbiri dokunulmadı (Kural 66'nın depo karşılığı) |
+| 2026-11-15 | admin | Postgres yolu canlı veriye dokunmadan nasıl test edilir? | Bekçi depoyu doğrudan okuyor (çerezsiz istek depoyu değiştirmedi mi?); gerçek DB'de koşunca canlı tablolar kirlenirdi | Tablo öneki env'den (`ADMIN_PG_PREFIX`); bekçi `manchtest_` ile koşar, başta boşaltır, sonda **siler**; önek `manch_` verilirse koşmayı reddeder. Sonrasında `information_schema` ile tablo kalmadığı doğrulandı |
 
 ---
 

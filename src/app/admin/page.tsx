@@ -65,7 +65,7 @@ export default async function AdminPage() {
 
       {store.kind === "none" && (
         <p role="alert" className="rounded-xl border-2 border-berry px-4 py-3 text-sm font-semibold text-berry">
-          Veritabanı bağlı değil — değişiklikler kaydedilemez. Vercel → Storage → Upstash Redis bağlanmalı.
+          Veritabanı bağlı değil — değişiklikler kaydedilemez. Vercel → Storage → Neon bağlanmalı.
         </p>
       )}
 
