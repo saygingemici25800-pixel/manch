@@ -30,6 +30,30 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **CANLI ADRES DEĞİŞTİ: https://manch.sngdestek.com (2026-11-15, kullanıcı: "adresi kalıcı yap").**
+  Sebep: bu bağlantıda **bütün `*.vercel.app` adresleri TLS el sıkışmasında kesiliyor**
+  (`Connection reset by peer`, SNI'ye bakan engel — aynı IP'ye `vercel.com` adıyla 200 geliyor;
+  `manch-eight`, Vercel'in kendi örnek sitesi de aynı). Site hiç çökmemişti. Kurallar **Kural 82**'de.
+  · `manch.sngdestek.com` → `manch-v2` (sngdestek.com Vercel DNS'inde, anında doğrulandı)
+  · `NEXT_PUBLIC_SITE_URL` (Production) = `https://manch.sngdestek.com` — canonical, hreflang,
+    sitemap, OG, JSON-LD artık bu adresi gösterir (Kural 57). Preview kapsamı değişmedi.
+  · `ADMIN_PASSWORD` Vercel'de (Production, secret); kullanıcı kendi terminalinde üretip koydu,
+    yerel kopya `.env.admin-sifre` (`.env*` ile gitignore'da). **Panele giriş kullanıcı tarafından
+    doğrulandı** ("girdim"). Oturum sırrı DATABASE_URL'den türetiliyor.
+  · ⚠ `manch-v2.vercel.app` hâlâ ayakta ve aynı içeriği veriyor (yönlendirme yok); canonical yeni
+    adrese baktığı için kopya içerik sorunu yok. Kalıcı marka alan adı (ör. manch.com.tr) hâlâ TODO.
+
+- **ZONE TEZGÂHINDA TABAK (2026-11-15, kullanıcı: "burgerler havada duruyor, altına tabak koy,
+  gerçekçi olsun").** Kesit görsellerinin altında **%13.7–19.2** şeffaf pay vardı (rembg %6 pad +
+  kare kadraj) → sprite 10–14 cm havada duruyordu. Pay artık **görselin alfasından ölçülüyor**
+  (`dishes.ts#measureBase`, slug başına sabit yok) ve kesit tabağa oturuyor (1.2 cm basma payı).
+  Krem seramik tabak + bordo kenar çizgisi + yumuşak temas gölgesi; siyah ızgara kalktı, yerine
+  bordo servis tahtası (tabak ızgarada durmaz). Kesit 0.8 → 0.72 (tabak ölçeğine göre).
+  · Bekçi: `zone-camera-check` mutfak **20/20** — yeni kontrol görseli **kendisi tam
+    çözünürlükte** ölçüp sahnedeki dünya konumuyla karşılaştırıyor (ürün formülünü tekrar etmiyor).
+    **Sabotajla doğrulandı:** ofset kaldırılınca yalnız o kontrol düştü (19/20; truffle +1.1 cm havada).
+  · Gözle bakıldı (Kural 59): 1440 + 390, iki açı.
+
 - **ZONE'A AÇIK MUTFAK EKLENDİ (2026-11-15, kullanıcı: "ortasına uzunlamasına bir açık mutfak,
   ürünlere tıklayınca içeriği gelsin" — istasyon seçeneği seçildi).** Kurallar **Kural 81**'de.
   · Salonun ortasında alçak tezgâh (x ±1.05, z −9..3), üç istasyon: **SMASH BURGERS** (7 gerçek
@@ -1404,6 +1428,15 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
       fareyle** tıklar — ışın testi dahil uçtan uca; tıklanan noktada DOM katmanı olmadığı
       `elementFromPoint` ile önce doğrulanır.
 
+82. **CANLI ADRES `manch.sngdestek.com`; `*.vercel.app` bazı Türk bağlantılarında ENGELLİ
+    (2026-11-15).** Engel TLS SNI'sinde: bağlantı Client Hello'da kesilir, DNS değiştirmek işe
+    yaramaz. Teşhis: `curl -v https://<x>.vercel.app` → `Connection reset by peer`; aynı IP'ye
+    `--resolve vercel.com:443:<ip>` → 200 ise site ayakta, engel yoldadır.
+    · Smoke, gözle bakma ve kullanıcıya verilen her link **yeni adresle**. `vercel curl` ve
+      web-fetch ajanı da aynı ağdan çıktığı için vercel.app'e ulaşamaz — "site çöktü" sanılmaz.
+    · Yeni bir proje/alt alan adı: `vercel domains add <alt>.sngdestek.com <proje>` (Vercel DNS,
+      anında); ardından `NEXT_PUBLIC_SITE_URL` Production'da güncellenir + redeploy (Kural 57).
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1598,6 +1631,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-15 | bekçi | "SEPETE EKLE" kontrolü `/eklendi/i` ile düştü, metin doğruydu | Metin CSS'te `uppercase`: `innerText` "EKLENDİ" döner, JS `/i` bayrağı Türkçe **İ**'yi **i**'ye katlamaz | Desen `/EKLEND/i`. **Büyük harfli Türkçe metinde `/i` ile `ı/i/İ` içeren kelime aranmaz** — harfi dışarıda bırak ya da büyük yaz |
 | 2026-11-15 | admin | Upstash Redis Vercel CLI'dan açılamadı: listede **yalnız ücretli planlar** (Pay As You Go, Fixed) | Hesapta zaten bir ücretsiz Upstash veritabanı var (başka proje); ücretsiz plan listelenmiyor. Ücretli plan bir satın alma — onaysız açılmaz | **Neon `free_v3`** (ücretsiz) seçildi, depo katmanına Postgres gerçeklemesi yazıldı. Redis'in atomik garantileri tek ifadeli SQL'e çevrildi (`ON CONFLICT … RETURNING`). Kod yolu değişti ama **arayüz aynı** — tüketicilerin hiçbiri dokunulmadı (Kural 66'nın depo karşılığı) |
 | 2026-11-15 | admin | Postgres yolu canlı veriye dokunmadan nasıl test edilir? | Bekçi depoyu doğrudan okuyor (çerezsiz istek depoyu değiştirmedi mi?); gerçek DB'de koşunca canlı tablolar kirlenirdi | Tablo öneki env'den (`ADMIN_PG_PREFIX`); bekçi `manchtest_` ile koşar, başta boşaltır, sonda **siler**; önek `manch_` verilirse koşmayı reddeder. Sonrasında `information_schema` ile tablo kalmadığı doğrulandı |
+| 2026-11-15 | canlı | Kullanıcı "siteyi açamıyorum" — panel, ana sayfa, API hepsi `000` | `*.vercel.app` adresleri bu ağda TLS SNI ile engelli: Client Hello'da `Connection reset by peer`. Aynı IP'ye `vercel.com` SNI'siyle 200, eski site ve Vercel'in örnek sitesi de engelli → ürün değil yol. `vercel curl` ve web-fetch ajanı da aynı ağdan çıktığı için doğrulayamadı | `manch.sngdestek.com` bağlandı (Vercel DNS), `NEXT_PUBLIC_SITE_URL` güncellendi. Kural 82 |
+| 2026-11-15 | mutfak | Burgerler tezgâhta **havada** duruyordu (kullanıcı ekran görüntüsü) | Kesit PNG/webp'lerin altında yüksekliğin %14–19'u kadar şeffaf pay var; sprite düzlemin alt kenarına göre konumlanıyordu. Kural 59 turu bunu "burger tezgâhın üstünde" diye geçmişti — ızgaranın siyahı boşluğu gölge gibi gösteriyordu | Pay alfadan ölçülüyor, kesit tabağa oturuyor. **Ders: şeffaf kenarlı sprite'ı yere oturtan şey düzlemin kenarı değil, görselin opak kenarıdır** — kare kadrajlı kesitlerde her zaman ölç |
 
 ---
 

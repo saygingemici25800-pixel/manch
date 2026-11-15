@@ -913,6 +913,45 @@ if (runs("kitchen")) {
     "tezgâhta 7 burger kesiti var, yedisi de gerçek görselini aldı",
     JSON.stringify(dishes));
 
+  /* --- burgerler TABAĞA OTURUYOR (havada değil, tabağa gömülmüş de değil) — alt şeffaf pay
+     görselden ölçülür; kenar ile tabak yüzeyi arası −0.03..0 (hafif basma payı). Bir kare
+     sonra okunur: ölçüm doku geldiği karede uygulanıyor. --- */
+  // Bağımsız ölçüm: test görselleri KENDİSİ tam çözünürlükte açıp alt payı ölçer, ürünün
+  // ölçtüğüyle (96 px) ve sahnedeki konumla karşılaştırır. Ürünün formülünü tekrar etmez —
+  // ofset hiç uygulanmasa ya da ölçüm bozulsa bu sayılar ayrışır.
+  await kosul(page, () => Object.keys(window.__ZONE_KITCHEN__?.seat?.() ?? {}).length === 7, null, 5000);
+  const seat = await page.evaluate(async () => {
+    const k = window.__ZONE_KITCHEN__;
+    const out = {};
+    for (const slug of Object.keys(k.dishes())) {
+      const img = new Image();
+      img.src = `/burgers/${slug}.webp`;
+      await img.decode();
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const x = c.getContext("2d");
+      x.drawImage(img, 0, 0);
+      const a = x.getImageData(0, 0, c.width, c.height).data;
+      let bottom = 0;
+      for (let y = c.height - 1; y >= 0 && !bottom; y--)
+        for (let i = 0; i < c.width; i++) if (a[(y * c.width + i) * 4 + 3] > 40) { bottom = y; break; }
+      const truth = (c.height - 1 - bottom) / c.height;
+      out[slug] = { truth: +truth.toFixed(3), seat: k.seat()[slug] };
+    }
+    // dünya konumu kendi başına: kesit merkezi − yarı boy + GERÇEK pay − tabak üstü
+    const DISH = 0.72, TOP = 0.95 + 0.035;
+    for (const slug of Object.keys(out)) {
+      const p = k.dishWorldY(slug);
+      out[slug].gap = +(p - DISH / 2 + out[slug].truth * DISH - TOP).toFixed(3);
+    }
+    return out;
+  });
+  const seats = Object.values(seat);
+  ok(seats.length === 7 && seats.every((s) => s.gap <= -0.002 && s.gap >= -0.025),
+    "7 burgerin yedisi de tabağa OTURUYOR — görselin gerçek alt kenarı tabak yüzeyinin 0–2.5 cm içinde (havada değil, gömük değil)",
+    JSON.stringify(seat));
+
   /* --- çarpışma: tezgâhın ucuna düz yürüyen DURUR · koridorda yürüyen GEÇER --- */
   await tp(0, 7);
   await hold(page, "ArrowUp", 2600);

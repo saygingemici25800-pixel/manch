@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-import { acquireDish, dishSources, setSceneCursor } from "@/lib/zone/dishes";
+import { acquireDish, dishBases, dishSources, setSceneCursor } from "@/lib/zone/dishes";
 import { KITCHEN, STATIONS, kitchenFace, nearestStation, type StationId } from "@/lib/zone/kitchen";
 import { COUNTER_DISHES } from "@/lib/zone/kitchen-stations";
 import { zoneRuntime } from "@/lib/zone/runtime";
@@ -32,7 +32,18 @@ const LEN = KITCHEN.zMax - KITCHEN.zMin;
 const MID_Z = (KITCHEN.zMax + KITCHEN.zMin) / 2;
 const BODY_W = KITCHEN.halfW * 2 - 0.1;
 const BAND_H = 0.18;
-const DISH = 0.8;
+const DISH = 0.72;
+/**
+ * Tabak (2026-11-15, kullanıcı: "havada duruyorlar, altına tabak koy, gerçekçi olsun").
+ * Burger kesitin genişliği ≈ DISH × 0.89 = 0.64; tabak çapı bunun ~1.4 katı. Komşu
+ * tabakların merkezleri arası ≈ 1.04 (zikzak) → kenarlar arası pay 0.14, birbirine binmez.
+ */
+const PLATE_R = 0.45;
+const PLATE_H = 0.035;
+/** Tabağın üst yüzeyi — burgerin alt kenarı buraya oturur. */
+const PLATE_TOP = KITCHEN.top + PLATE_H;
+/** Ekmeğin altı tabağa hafifçe "basar": kesit kenarındaki yumuşak alfa çizgi gibi kalmasın. */
+const SEAT_SINK = 0.012;
 /** Kesitler burger istasyonunun ortasına, eşit aralıkla. */
 const DISH_GAP = 0.82;
 const SIGN_Y = 2.75;
@@ -105,7 +116,10 @@ export function Kitchen() {
         const spec = COUNTER_DISHES[i];
         const mesh = o.children[0] as THREE.Mesh | undefined;
         if (!spec || !mesh) return;
-        const texture = acquireDish(spec.slug, spec.url, aniso).texture;
+        // burger tabağa oturur: görselin alt şeffaf payı kadar aşağı (alfadan ölçülür)
+        const dish = acquireDish(spec.slug, spec.url, aniso);
+        const texture = dish.texture;
+        mesh.position.y = DISH / 2 - dish.base * DISH - SEAT_SINK;
         const mat = mesh.material as THREE.MeshBasicMaterial;
         if (mat.map !== texture) {
           mat.map = texture;
@@ -134,7 +148,24 @@ export function Kitchen() {
     };
     w.__ZONE_KITCHEN__ = {
       dishes: () => dishSources(),
+      /** Burgerin görünen alt kenarının tabak yüzeyine uzaklığı (birim; ≈ −SEAT_SINK beklenir). */
+      seat: () => {
+        const bases = dishBases();
+        const out: Record<string, number> = {};
+        for (const d of COUNTER_DISHES) {
+          const o = billboards.current?.parent?.getObjectByName(`zone-dish-${d.slug}`);
+          if (!o || bases[d.slug] == null) continue;
+          const v = new THREE.Vector3();
+          o.getWorldPosition(v);
+          out[d.slug] = Math.round((v.y - DISH / 2 + bases[d.slug] * DISH - PLATE_TOP) * 1000) / 1000;
+        }
+        return out;
+      },
       dishPoint: (slug: string) => point(`zone-dish-${slug}`),
+      dishWorldY: (slug: string) => {
+        const o = billboards.current?.parent?.getObjectByName(`zone-dish-${slug}`);
+        return o ? o.getWorldPosition(new THREE.Vector3()).y : null;
+      },
       signPoint: (id: StationId) => point(`zone-sign-${id}`),
       count: COUNTER_DISHES.length,
     };
@@ -182,17 +213,20 @@ export function Kitchen() {
           <meshBasicMaterial map={band} toneMapped={false} />
         </mesh>
       ))}
-      {/* ızgara — burger istasyonunun altında */}
-      <mesh position={[0, KITCHEN.top + 0.012, 0]}>
-        <boxGeometry args={[1.5, 0.025, COUNTER_DISHES.length * DISH_GAP + 0.3]} />
-        <meshStandardMaterial color={colors.ink} roughness={0.35} metalness={0.2} />
+      {/* servis tahtası — burger istasyonunun altında, tabaklar üstünde (ızgara değil: tabak
+          sıcak ızgarada durmaz) */}
+      <mesh position={[0, KITCHEN.top + 0.006, 0]}>
+        <boxGeometry args={[1.62, 0.012, COUNTER_DISHES.length * DISH_GAP + 0.4]} />
+        <meshStandardMaterial color={colors.berry} roughness={0.8} />
       </mesh>
 
       {/* ---- burger istasyonu: gerçek kesitler ---- */}
       <group ref={dishRefs}>
         {COUNTER_DISHES.map((d, i) => (
-          <group key={d.slug} position={[dishX(i), KITCHEN.top + DISH / 2 + 0.03, dishZ(i)]}>
+          <group key={d.slug} position={[dishX(i), PLATE_TOP, dishZ(i)]}>
+            {/* children[0] = kesit (kare döngüsü bunu okur) */}
             <mesh
+              position={[0, DISH / 2 - 0.16 * DISH - SEAT_SINK, 0]}
               name={`zone-dish-${d.slug}`}
               onClick={openDish(d.slug)}
               onPointerOver={hover(true)}
@@ -200,6 +234,19 @@ export function Kitchen() {
             >
               <planeGeometry args={[DISH, DISH]} />
               <meshBasicMaterial transparent alphaTest={0.05} toneMapped={false} />
+            </mesh>
+            {/* tabak: alttan daralan seramik gövde + düz iç yüzey + bordo kenar çizgisi + temas gölgesi */}
+            <mesh position={[0, -PLATE_H / 2 + 0.006, 0]}>
+              <cylinderGeometry args={[PLATE_R, PLATE_R * 0.72, PLATE_H, 40]} />
+              <meshStandardMaterial color={colors.cream} roughness={0.35} />
+            </mesh>
+            <mesh position={[0, 0.0065, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[PLATE_R * 0.86, PLATE_R * 0.9, 48]} />
+              <meshBasicMaterial color={colors.berry} toneMapped={false} />
+            </mesh>
+            <mesh position={[0, 0.007, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 0.55, 1]}>
+              <circleGeometry args={[DISH * 0.36, 32]} />
+              <meshBasicMaterial color={colors.ink} transparent opacity={0.22} depthWrite={false} toneMapped={false} />
             </mesh>
           </group>
         ))}
