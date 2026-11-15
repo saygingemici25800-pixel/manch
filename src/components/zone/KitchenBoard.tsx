@@ -78,20 +78,20 @@ export function KitchenBoard() {
         data-view={view}
         data-product={product?.slug ?? ""}
         style={reduced ? undefined : { animation: "zone-board-in .45s cubic-bezier(.4,1.4,.7,.95) both" }}
-        className="pointer-events-auto flex w-[min(92vw,760px)] max-h-[min(86vh,900px)] flex-col overflow-y-auto border-[14px] border-ink bg-cream shadow-[0_40px_90px_rgba(27,27,27,0.45)] outline outline-[6px] outline-ink/25"
+        className="pointer-events-auto flex w-[min(92vw,880px)] max-h-[min(88vh,940px)] flex-col overflow-y-auto border-[14px] border-ink bg-cream shadow-[0_40px_90px_rgba(27,27,27,0.45)] outline outline-[6px] outline-ink/25"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-[2vw] bg-berry px-[1.4vw] py-[0.9vw] max-md:px-[4vw] max-md:py-[3vw]">
           <div className="min-w-0">
-            <p className="font-pixel text-[0.6vw] uppercase tracking-[0.2em] text-cream max-md:text-[2.2vw]">
+            <p className="font-pixel text-[0.75vw] uppercase tracking-[0.2em] text-cream max-md:text-[2.6vw]">
               {product ? `${t("kitchen.kicker")} · ${t(`groups.${kitchen.station}`)}` : t("kitchen.kicker")}
             </p>
-            <h2 className="line-clamp-2 font-display text-[2vw] leading-[1.1] text-cream max-md:text-[6vw]">{title}</h2>
+            <h2 className="line-clamp-2 font-display text-[2.4vw] leading-[1.1] text-cream max-md:text-[6.6vw]">{title}</h2>
           </div>
           <button
             type="button"
             data-testid="kitchen-board-back"
             onClick={closeFrame}
-            className={`shrink-0 rounded-full px-[1.1vw] py-[0.4vw] font-ui text-[0.95vw] uppercase tracking-[0.12em] max-md:px-[4vw] max-md:py-[1.4vw] max-md:text-[3.2vw] ${action("dark")}`}
+            className={`shrink-0 rounded-full px-[1.1vw] py-[0.4vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] max-md:px-[4vw] max-md:py-[1.4vw] max-md:text-[3.6vw] ${action("dark")}`}
           >
             {t("back")}
           </button>
@@ -117,7 +117,7 @@ export function KitchenBoard() {
             />
           ) : (
             <div className="flex flex-col gap-[1vw] max-md:gap-[4vw]">
-              <p className="font-ui text-[1vw] uppercase tracking-[0.08em] text-berry max-md:text-[3.6vw]">{t("kitchen.listHint")}</p>
+              <p className="font-ui text-[1.25vw] uppercase tracking-[0.08em] text-berry max-md:text-[4vw]">{t("kitchen.listHint")}</p>
               <ul data-testid="kitchen-list" className="grid grid-cols-2 gap-[0.8vw] max-md:grid-cols-1 max-md:gap-[2.5vw]">
                 {items.map((p) => {
                   const price = prices[p.slug] ?? null;
@@ -132,8 +132,8 @@ export function KitchenBoard() {
                       >
                         <Thumb product={p} locale={locale} className="size-[3.6vw] shrink-0 max-md:size-[14vw]" sizes="(max-width: 768px) 14vw, 4vw" />
                         <span className="flex min-w-0 flex-col gap-[0.2vw] max-md:gap-[1vw]">
-                          <span className="font-display text-[1.25vw] leading-[1.05] text-ink max-md:text-[4.6vw]">{p.name[locale]}</span>
-                          <span className="font-ui text-[0.95vw] uppercase tracking-[0.06em] text-berry max-md:text-[3.4vw]">
+                          <span className="font-display text-[1.55vw] leading-[1.05] text-ink max-md:text-[5.2vw]">{p.name[locale]}</span>
+                          <span className="font-ui text-[1.15vw] uppercase tracking-[0.06em] text-berry max-md:text-[3.8vw]">
                             {price != null ? `${price} TL` : <SoonBadge />}
                           </span>
                         </span>
@@ -194,7 +194,7 @@ function ProductView({
         type="button"
         data-testid="kitchen-to-list"
         onClick={onList}
-        className={`self-start rounded-full px-[1vw] py-[0.3vw] font-ui text-[0.9vw] uppercase tracking-[0.12em] max-md:px-[3.5vw] max-md:py-[1.2vw] max-md:text-[3.2vw] ${action("light", "secondary")}`}
+        className={`self-start rounded-full px-[1vw] py-[0.3vw] font-ui text-[1.1vw] uppercase tracking-[0.12em] max-md:px-[3.5vw] max-md:py-[1.2vw] max-md:text-[3.6vw] ${action("light", "secondary")}`}
       >
         {t("kitchen.toList")}
       </button>
@@ -203,16 +203,16 @@ function ProductView({
         <Thumb product={product} locale={locale} className="aspect-square w-full self-start max-md:aspect-[16/10]" sizes="(max-width: 768px) 80vw, 300px" />
 
         <div className="flex flex-col gap-[0.8vw] max-md:gap-[3vw]">
-          <p className="text40 text-[1.1vw] normal-case tracking-normal max-md:text-[4.2vw]">{product.desc[locale]}</p>
-          <p data-testid="kitchen-price" className="font-pixel text-[0.75vw] uppercase tracking-wide max-md:text-[2.8vw]">
+          <p className="text40 text-[1.45vw] normal-case tracking-normal max-md:text-[4.6vw]">{product.desc[locale]}</p>
+          <p data-testid="kitchen-price" className="font-pixel text-[1.05vw] uppercase tracking-wide max-md:text-[3.6vw]">
             {price != null ? `${price} TL` : <SoonBadge />}
           </p>
-          <p className="font-ui text-[0.75vw] normal-case text-berry max-md:text-[2.8vw]">{disclaimer}</p>
+          <p className="font-ui text-[0.95vw] normal-case text-berry max-md:text-[3.2vw]">{disclaimer}</p>
 
           {ingredients.length > 0 && (
             <>
-              <h3 className="mt-[0.3vw] font-display text-[1.3vw] max-md:text-[5vw]">{tp("ingredients")}</h3>
-              <ul data-testid="kitchen-ingredients" className="flex flex-col gap-[0.2vw] text40 text-[1vw] max-md:gap-[1vw] max-md:text-[3.8vw]">
+              <h3 className="mt-[0.3vw] font-display text-[1.6vw] max-md:text-[5.6vw]">{tp("ingredients")}</h3>
+              <ul data-testid="kitchen-ingredients" className="flex flex-col gap-[0.3vw] text40 text-[1.3vw] max-md:gap-[1vw] max-md:text-[4.4vw]">
                 {ingredients.map((i) => (
                   <li key={i}>· {i}</li>
                 ))}
@@ -220,7 +220,7 @@ function ProductView({
             </>
           )}
 
-          <dl className="mt-[0.3vw] grid grid-cols-2 gap-x-[1vw] gap-y-[0.3vw] border-t border-berry/15 pt-[0.8vw] text40 text-[0.9vw] max-md:gap-y-[1.2vw] max-md:pt-[3vw] max-md:text-[3.2vw]">
+          <dl className="mt-[0.3vw] grid grid-cols-2 gap-x-[1vw] gap-y-[0.3vw] border-t border-berry/15 pt-[0.8vw] text40 text-[1.2vw] max-md:gap-y-[1.2vw] max-md:pt-[3vw] max-md:text-[3.8vw]">
             <dt className="text-berry">{tp("time")}</dt>
             <dd>{tp("minutes", { n: product.quick.time })}</dd>
             {product.category === "burgers" && (
@@ -240,7 +240,7 @@ function ProductView({
               type="button"
               data-testid="kitchen-add"
               onClick={onAdd}
-              className={`mt-[0.3vw] rounded-full px-[1.6vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.1em] max-md:px-[5vw] max-md:py-[3vw] max-md:text-[3.8vw] ${action("light")}`}
+              className={`mt-[0.3vw] rounded-full px-[1.6vw] py-[0.7vw] font-ui text-[1.3vw] uppercase tracking-[0.1em] max-md:px-[5vw] max-md:py-[3vw] max-md:text-[4.2vw] ${action("light")}`}
             >
               {tc("addToCart")}
             </button>
@@ -251,12 +251,12 @@ function ProductView({
               aria-disabled="true"
               data-testid="kitchen-add"
               title={tc("priceSoon")}
-              className={`mt-[0.3vw] cursor-not-allowed rounded-full px-[1.6vw] py-[0.7vw] font-ui text-[1.1vw] uppercase tracking-[0.1em] max-md:px-[5vw] max-md:py-[3vw] max-md:text-[3.8vw] ${disabledAction("light")}`}
+              className={`mt-[0.3vw] cursor-not-allowed rounded-full px-[1.6vw] py-[0.7vw] font-ui text-[1.3vw] uppercase tracking-[0.1em] max-md:px-[5vw] max-md:py-[3vw] max-md:text-[4.2vw] ${disabledAction("light")}`}
             >
               {tc("addToCart")}
             </button>
           )}
-          <p role="status" data-testid="kitchen-status" className="min-h-[1.2em] font-ui text-[0.95vw] uppercase tracking-[0.08em] text-berry max-md:text-[3.4vw]">
+          <p role="status" data-testid="kitchen-status" className="min-h-[1.2em] font-ui text-[1.1vw] uppercase tracking-[0.08em] text-berry max-md:text-[3.8vw]">
             {added ? t("kitchen.added") : ""}
             {inCart > 0 ? `${added ? " · " : ""}${t("kitchen.inCart", { n: inCart })}` : ""}
           </p>

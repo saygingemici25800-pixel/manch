@@ -30,6 +30,26 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **ANA SAYFA AÇILIŞI ARTIK ZONE'DAN (2026-11-15, kullanıcı: "zone'un içinden geniş açılı,
+  duvar yazısı ve Misu & Miyu görünen bir kare koy").** Hero'nun fotoğrafı (`hero-cook` /
+  `team-kitchen`) yerine salondan iki kare: masaüstü `hero-zone` (1920×1080) · mobil
+  `hero-zone-m` (1080×1920, portre FOV 80°). Kadraj sol koridordan: künye yazısı, iki maskot,
+  tabaklı burger tezgâhı ve asılı tabelalar. Üreteç `zone-still.mjs` (`--tp --vp --res`).
+  `hero-cook.{jpg,webp}` silindi (tek kullanıcısı hero'ydu); `team-kitchen` Zone tablosunda kalıyor.
+  · Zone karesi fotoğraftan **açık** (krem tavan): düz %45 bordo perde yerine %10 + üstte ve
+    altta degrade. Krem metnin ARKASINDAKİ en açık piksel ölçüldü: H1 **4.72** (masaüstü) /
+    **6.73** (mobil), alt metin **9.08**. İlk denemede düz perdeyle sahne fazla pembeydi,
+    ikinci denemede H1 1.96'ya düştü → üçüncüde degrade %62'ye uzatıldı.
+  · AVIF: mobil 750w **21.7 kB** (eski ≈20) · masaüstü 1920w **59.6 kB** (eski 32.8; masaüstü
+    LCP öğesi H1, ölçüm kapısı mobil)
+  · ⚠ Maskot çizimleri gelince iki kare yeniden üretilir (`zone-still.mjs` başındaki komutlar).
+- **Mutfak panosu yazıları büyüdü (2026-11-15, kullanıcı: "yazılar küçük").** Masaüstü ~%25–40,
+  mobil ~%10–15; kart 760 → 880 px. 1440/390'da yatay taşma yok, mutfak bekçisi 20/20.
+- ⚠ **`lab-check` dev'de satır 288'de çöküyor — ÖNCEDEN VAR (HEAD `2f9091c`'de de), bu turla
+  ilgisiz.** Sepet "fiyatlar güncellendi" diyip gönderi kapatıyor (sayfa fiyat imzası ≠
+  `/api/order-status`). **Canlıda YOK** (gerçek tarayıcıyla denendi: gönder etkin, imza
+  `174fm5` eşleşiyor). Ayrı görev olarak açıldı; çözülene kadar lab-check yeşil sayılmaz.
+
 - **CANLI ADRES DEĞİŞTİ: https://manch.sngdestek.com (2026-11-15, kullanıcı: "adresi kalıcı yap").**
   Sebep: bu bağlantıda **bütün `*.vercel.app` adresleri TLS el sıkışmasında kesiliyor**
   (`Connection reset by peer`, SNI'ye bakan engel — aynı IP'ye `vercel.com` adıyla 200 geliyor;
@@ -1633,6 +1653,8 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-15 | admin | Postgres yolu canlı veriye dokunmadan nasıl test edilir? | Bekçi depoyu doğrudan okuyor (çerezsiz istek depoyu değiştirmedi mi?); gerçek DB'de koşunca canlı tablolar kirlenirdi | Tablo öneki env'den (`ADMIN_PG_PREFIX`); bekçi `manchtest_` ile koşar, başta boşaltır, sonda **siler**; önek `manch_` verilirse koşmayı reddeder. Sonrasında `information_schema` ile tablo kalmadığı doğrulandı |
 | 2026-11-15 | canlı | Kullanıcı "siteyi açamıyorum" — panel, ana sayfa, API hepsi `000` | `*.vercel.app` adresleri bu ağda TLS SNI ile engelli: Client Hello'da `Connection reset by peer`. Aynı IP'ye `vercel.com` SNI'siyle 200, eski site ve Vercel'in örnek sitesi de engelli → ürün değil yol. `vercel curl` ve web-fetch ajanı da aynı ağdan çıktığı için doğrulayamadı | `manch.sngdestek.com` bağlandı (Vercel DNS), `NEXT_PUBLIC_SITE_URL` güncellendi. Kural 82 |
 | 2026-11-15 | mutfak | Burgerler tezgâhta **havada** duruyordu (kullanıcı ekran görüntüsü) | Kesit PNG/webp'lerin altında yüksekliğin %14–19'u kadar şeffaf pay var; sprite düzlemin alt kenarına göre konumlanıyordu. Kural 59 turu bunu "burger tezgâhın üstünde" diye geçmişti — ızgaranın siyahı boşluğu gölge gibi gösteriyordu | Pay alfadan ölçülüyor, kesit tabağa oturuyor. **Ders: şeffaf kenarlı sprite'ı yere oturtan şey düzlemin kenarı değil, görselin opak kenarıdır** — kare kadrajlı kesitlerde her zaman ölç |
+| 2026-11-15 | hero | Zone karesi hero'ya konunca krem başlık ve rozet okunmaz hâle geldi; düz perdeyi koyulaştırınca da sahne pembeye boğuldu | Zone render'ı fotoğraftan çok daha AÇIK (krem tavan, açık mavi duvar); eski %45 düz perde koyu fotoğrafa göre ayarlanmıştı | Perde %10 + üst/alt degrade. Kontrast, metin gizlenip arkasındaki EN AÇIK piksel okunarak ölçüldü (ortalama değil) — 4.72/6.73/9.08 |
+| 2026-11-15 | bekçi | `lab-check` checkout'ta çöktü; ilk şüphe bu turun değişikliğiydi | `git stash -u` ile HEAD'de koşuldu → aynı satırda düştü: önceden var. Canlıda gerçek tarayıcıyla sepet denendi → sorun yok | Ayrı göreve ayrıldı. **Ders: bir bekçi düşünce önce "benim değişikliğim mi?" sorusu stash ile cevaplanır**; sonra "müşteri etkileniyor mu?" canlıda gerçek yoldan |
 
 ---
 

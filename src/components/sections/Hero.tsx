@@ -3,8 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { JellyWave } from "@/components/motion/JellyWave";
 import { site } from "@/lib/site";
 
-const MOBILE = "/images/hero-cook.jpg";
-const DESKTOP = "/images/team-kitchen.jpg";
+/**
+ * Açılış karesi Zone'un içinden (2026-11-15, kullanıcı): geniş açı — arka duvardaki künye
+ * yazısı, iki maskot (oyuncu önde, NPC salonun dibinde) ve tabaklı burger tezgâhı.
+ * Üreteç `scripts/zone-still.mjs` (komutlar dosyanın başında); maskot çizimleri gelince
+ * aynı komutla yeniden üretilir, bu dosya değişmez.
+ */
+const MOBILE = "/images/hero-zone-m.jpg";
+const DESKTOP = "/images/hero-zone.jpg";
 /** next/image `deviceSizes` varsayılanından seçilmiş genişlikler. */
 const MOBILE_W = [640, 750, 1080] as const;
 const DESKTOP_W = [1200, 1920] as const;
@@ -18,7 +24,7 @@ const srcSet = (src: string, widths: readonly number[]) =>
  * R9 — tam ekran fotoğraf + hardal Modak başlık + dönen Misu&Miyu rozeti + alt kenarda jöle dalga.
  *
  * Kural 47: H1 **SplitText'e sokulmaz** (LCP adayı, animasyon LCP'yi geciktirir).
- * İki görsel, tek `<picture>`: mobilde dikey `hero-cook`, ≥768 px'de `team-kitchen`.
+ * İki görsel, tek `<picture>`: mobilde dikey `hero-zone-m`, ≥768 px'de yatay `hero-zone`.
  * İkisi de `priority` — her kırılımda yalnızca biri indirilir (media query ile seçilir),
  * bu yüzden iki formda da LCP bütçede kalır.
  */
@@ -47,7 +53,12 @@ export async function Hero() {
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </picture>
-        <div className="absolute inset-0 bg-berry/45" />
+        {/* Zone karesi fotoğraftan AÇIK (krem tavan, mavi duvar): düz %45 bordo perde krem
+            başlığı ve rozeti okutmuyordu. Ortası (künye + maskotlar + tezgâh) açık kalır,
+            metnin durduğu üst ve alt şeritler koyulaşır. */}
+        <div className="absolute inset-0 bg-berry/10" />
+        <div className="absolute inset-x-0 top-0 h-[34%] bg-linear-to-b from-berry/80 via-berry/45 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-[62%] bg-linear-to-t from-berry/95 via-berry/85 via-60% to-transparent" />
       </div>
 
       {/* dönen rozet */}

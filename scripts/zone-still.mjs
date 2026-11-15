@@ -12,6 +12,9 @@
 //   · lab HUD'ı gizlenir — ürün karesinde lab kromu olmaz.
 //
 // Kullanım: CHROME=<yol> node scripts/zone-still.mjs [--walk 26] [--out public/images/zone-hall]
+//   Ana sayfa hero karesi (2026-11-15, kullanıcı: "geniş açı, duvar yazısı + Misu & Miyu"):
+//   --tp -2.4,13 (yan koridordan, tezgâh sağda) · --vp 1920x1080 · --res 1920x1080
+//   Mobil dikey: --vp 900x1600 --res 1080x1920 (portrede FOV 80°, Kural 5.5.11 kararı ①)
 import { chromium } from "playwright-core";
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -25,7 +28,9 @@ const arg = (ad, varsayilan) => {
 };
 const WALK = Number(arg("walk", 26));
 const OUT = arg("out", "public/images/zone-hall");
-const W = 1600, H = 1200;
+const [W, H] = arg("vp", "1600x1200").split("x").map(Number);
+const [RW, RH] = arg("res", "1400x1050").split("x").map(Number);
+const TP = arg("tp", null)?.split(",").map(Number) ?? null;
 
 const br = await chromium.launch({ executablePath: process.env.CHROME });
 const p = await br.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
@@ -39,6 +44,9 @@ await kosul(p, () => {
   return document.querySelectorAll("canvas").length === 1 && (s?.meshes?.length ?? 0) > 10;
 }, null, 60000);
 await p.evaluate(() => document.fonts.ready);
+
+// İsteğe bağlı başlangıç noktası (dev kancası; yalnız lab'da var).
+if (TP) await p.evaluate(([x, z]) => window.__ZONE_TELEPORT__(x, z), TP);
 
 // İleri yürü: NPC ve künye kadrajda büyüsün. Süre KASITLI (Kural 75 `pencere()` istisnası).
 await p.keyboard.down("w");
@@ -71,6 +79,6 @@ const stat = await p.evaluate(() => {
 await br.close();
 
 await mkdir(dirname(OUT), { recursive: true });
-await sharp(png).resize(1400, 1050, { fit: "cover" }).jpeg({ quality: 82 }).toFile(`${OUT}.jpg`);
-await sharp(png).resize(1400, 1050, { fit: "cover" }).webp({ quality: 80 }).toFile(`${OUT}.webp`);
+await sharp(png).resize(RW, RH, { fit: "cover" }).jpeg({ quality: 82 }).toFile(`${OUT}.jpg`);
+await sharp(png).resize(RW, RH, { fit: "cover" }).webp({ quality: 80 }).toFile(`${OUT}.webp`);
 console.log(`✓ ${OUT}.{jpg,webp} — mesh ${stat.mesh} · karakter`, stat.char);
