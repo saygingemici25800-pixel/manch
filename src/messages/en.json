@@ -347,7 +347,16 @@
         "p2": "Monday to Thursday 08.30–23.30, Friday and Saturday until midnight. Just call to hold a table."
       }
     },
-    "srOnlyIntro": "The four stops in the MANCH Zone, without entering the scene:"
+    "srOnlyIntro": "The four stops in the MANCH Zone, without entering the scene:",
+    "kitchen": {
+      "kicker": "OPEN KITCHEN",
+      "tap": "TAP TO LOOK",
+      "inspect": "LOOK CLOSER",
+      "toList": "← LIST",
+      "listHint": "Tap a product to see what's inside.",
+      "added": "✓ Added to cart",
+      "inCart": "In cart: {n}"
+    }
   },
   "Order": {
     "intro": "Hi MANCH! I'd like to order:",

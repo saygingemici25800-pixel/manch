@@ -629,11 +629,23 @@ if (runs("scene")) {
     `${deg(angBefore).toFixed(0)}° → ${deg(afterSpam.cam.ang).toFixed(0)}°`);
 
   /* POV'da kamera gerçekten hedefe süzülüyor mu (spec 6.1) */
-  await page.keyboard.press("e");
-  await pencere(page, 2500);
-  const settled = await read(page);
   const menuFrame = { side: -1, z: -4 };
   const wantX = menuFrame.side * (7.2 - 0.12) - menuFrame.side * 3.25;
+  await page.keyboard.press("e");
+  /* Kural 75 (2026-11-15): burası bir DURUM beklemesiydi ama sabit 2.5 sn'lik pencereyle
+     yazılmıştı. POV geçişi kare başına lerp (`POV_LERP`), yani süresi kare hızına bağlı:
+     başsız tarayıcı ~21 fps'e düşünce kamera 2.5 sn'de hedefin 0.4 birim gerisinde kalıyor
+     ve kontrol son commit'te de düşüyordu (ürün değişmeden). Koşul: hedefe varana kadar,
+     tavanlı — yanlış hedefe giderse tavan dolar ve iddia yine düşer. */
+  await kosul(page, ([x, z]) => {
+    const c = window.__ZONE_STATS__?.().cam;
+    return !!c && Math.abs(c.x - x) < 0.15 && Math.abs(c.z - z) < 0.15;
+  }, [wantX, menuFrame.z], 10000);
+  /* Varmak yetmez, ORADA KALMALI: kamera başka bir hedefe giderken bu noktanın üstünden
+     geçebilir ve koşul o anı yakalar (sabotajla görüldü — yanlış hedef de "yerleşti"
+     diyordu). Ölçüm penceresi: 600 ms sonra hâlâ hedefte mi. */
+  await pencere(page, 600);
+  const settled = await read(page);
   ok(Math.abs(settled.cam.x - wantX) < 0.15 && Math.abs(settled.cam.z - menuFrame.z) < 0.15,
     "POV kamerası hedefe yerleşiyor (spec 6.1)",
     `kamera ${settled.cam.x},${settled.cam.z} · hedef ${wantX.toFixed(2)},${menuFrame.z}`);
@@ -874,6 +886,201 @@ if (runs("scene")) {
   await page.close();
 }
 
+/* ============================== 2b · açık mutfak ============================== */
+/* Karar 2026-11-15 (kullanıcı): salonun ortasında tezgâh, üç istasyon, ürüne dokununca
+   içerik. Her iddia ÇİFT YÖNLÜ kurulur (Kural 60): "tezgâh engelliyor" ancak aynı koşuda
+   "koridor engellemiyor" da gösterilirse bir şey kanıtlar — hep duran bozuk bir ölçüm de
+   "engelliyor" derdi. */
+if (runs("kitchen")) {
+  console.log("\n— açık mutfak");
+  const { page, errs, bad } = await openZone();
+  const tp = (x, z) => page.evaluate(({ x, z }) => window.__ZONE_TELEPORT__(x, z), { x, z });
+  const board = () =>
+    page.evaluate(() => {
+      const el = document.querySelector("[data-testid=kitchen-board]");
+      return el ? { view: el.dataset.view, station: el.dataset.station, product: el.dataset.product } : null;
+    });
+  const promptStation = () =>
+    page.evaluate(() => document.querySelector("[data-testid=kitchen-prompt]")?.dataset.station ?? null);
+
+  /* --- sahnede: 7 gerçek kesit, hepsi GÖRSELİYLE (yer tutucuda kalan yok) --- */
+  await kosul(page, () => {
+    const d = window.__ZONE_KITCHEN__?.dishes() ?? {};
+    return Object.keys(d).length === 7 && Object.values(d).every((v) => v === "image");
+  }, null, 20000);
+  const dishes = await page.evaluate(() => window.__ZONE_KITCHEN__?.dishes() ?? {});
+  ok(Object.keys(dishes).length === 7 && Object.values(dishes).every((v) => v === "image"),
+    "tezgâhta 7 burger kesiti var, yedisi de gerçek görselini aldı",
+    JSON.stringify(dishes));
+
+  /* --- çarpışma: tezgâhın ucuna düz yürüyen DURUR · koridorda yürüyen GEÇER --- */
+  await tp(0, 7);
+  await hold(page, "ArrowUp", 2600);
+  const blocked = (await read(page)).char;
+  await tp(3, 7);
+  await hold(page, "ArrowUp", 2600);
+  const free = (await read(page)).char;
+  ok(blocked.z >= 3.449 && blocked.z < 3.46 && Math.abs(blocked.x) < 0.01,
+    "tezgâhın ucuna düz yürüyen karakter tezgâhın önünde DURUYOR, kenara yaslanmış (içine girmiyor)",
+    `x ${blocked.x} z ${blocked.z}`);
+  ok(free.z < 0,
+    "aynı yürüyüş koridorda ENGELLENMİYOR (çift yönlü: ölçüm hep 'duruyor' demiyor)",
+    `z ${free.z}`);
+
+  /* --- kayma: çapraz yaklaşan durmaz, kenar boyunca kayar --- */
+  /* Başlangıç bilerek tezgâhın EKSENİNE yakın (x −1.2): çarpışma olmasaydı karakter
+     tezgâhın içinden ~0.35 sn geçerdi ve ara örnekler bunu görürdü. (İlk hâli x 0.3'ten
+     başlıyordu — çarpışma sabote edilince de geçti, çünkü o açıyla karakter tezgâha hiç
+     girmeden kenarı aşıyordu: düşemeyen iddia, Kural 77b.) */
+  await tp(-1.2, 5);
+  const path = await hold(page, ["ArrowUp", "ArrowRight"], 2200, 45);
+  const inside = path.filter((p) => Math.abs(p.char.x) < 1.49 && p.char.z < 3.449 && p.char.z > -9.449);
+  const slid = path.at(-1).char;
+  ok(inside.length === 0 && slid.z < 3 && slid.x >= 1.49,
+    "çapraz yaklaşan karakter tezgâhın kenarı boyunca kayıyor, hiçbir örnekte içine girmiyor",
+    `içeride ${inside.length}/${path.length} örnek · son x ${slid.x} z ${slid.z}`);
+
+  /* --- tezgâhın içine ışınlama yok --- */
+  await tp(0.2, -3);
+  const pushed = (await read(page)).char;
+  ok(Math.abs(pushed.x) >= 1.49, "tezgâhın içine ışınlanan en yakın kenarın dışına konuyor", `x ${pushed.x}`);
+
+  /* --- yakınlık: üç istasyon + koridorun dışı + tablo durma noktası --- */
+  const near = [];
+  for (const [x, z, want] of [[2, 0, "burgers"], [-2, -5, "sides"], [2, -8, "drinks"], [0, 4, "burgers"], [4.6, 0, null]]) {
+    await tp(x, z);
+    await pencere(page, 350);
+    const st = (await read(page)).nearStation;
+    const shown = await promptStation();
+    near.push({ at: `${x},${z}`, want, st, shown });
+  }
+  ok(near.every((n) => n.st === n.want && n.shown === n.want),
+    "istasyon yakınlığı ve prompt doğru (üç istasyon · tezgâh burnu · uzakta yok)",
+    near.map((n) => `${n.at}:${n.st}/${n.shown}`).join(" · "));
+  await tp(5.6, -4);
+  await pencere(page, 350);
+  const atFrame = await read(page);
+  ok(atFrame.nearFrame === "crew" && atFrame.nearStation === null && (await promptStation()) === null,
+    "tablo durma noktasında yalnız tablo promptu (mutfak promptu çakışmıyor)",
+    `frame ${atFrame.nearFrame} · station ${atFrame.nearStation}`);
+
+  await tp(2, 0);
+  await pencere(page, 350);
+  const promptText = await page.locator("[data-testid=kitchen-prompt]").innerText();
+  ok(/SMASH BURGERS/i.test(promptText) && /İNCELE/i.test(promptText) && !/kitchen\./.test(promptText),
+    "mutfak promptu metni i18n'den geliyor", JSON.stringify(promptText));
+
+  /* --- E ile liste: menünün TAMAMI üç istasyona dağılmış (28/28, tekrar yok) --- */
+  const seen = [];
+  for (const [x, z, id] of [[2, 0, "burgers"], [2, -5, "sides"], [2, -8, "drinks"]]) {
+    await tp(x, z);
+    await kosul(page, (want) => document.querySelector("[data-testid=kitchen-prompt]")?.dataset.station === want, id);
+    await page.keyboard.press("e");
+    await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.view === "list");
+    const b = await board();
+    const slugs = await page.$$eval("[data-testid=kitchen-item]", (els) => els.map((e) => e.dataset.slug));
+    seen.push({ id, open: b?.station === id, slugs });
+    await page.keyboard.press("Escape");
+    await kosul(page, () => !document.querySelector("[data-testid=kitchen-board]"));
+  }
+  const all = seen.flatMap((s) => s.slugs);
+  ok(seen.every((s) => s.open && s.slugs.length > 0) && all.length === 28 && new Set(all).size === 28,
+    "E tuşu istasyon listesini açıyor · üç liste menünün 28 ürününün TAMAMI, tekrar yok",
+    seen.map((s) => `${s.id}:${s.slugs.length}`).join(" · ") + ` = ${all.length} (tekil ${new Set(all).size})`);
+
+  /* --- Esc → odak İNCELE'ye döner (spec bölüm 10'un mutfak karşılığı) --- */
+  await kosul(page, () => document.activeElement?.dataset?.testid === "kitchen-enter", null, 3000);
+  ok(await page.evaluate(() => document.activeElement?.dataset?.testid === "kitchen-enter"),
+    "pano kapanınca odak İNCELE düğmesine dönüyor",
+    await page.evaluate(() => document.activeElement?.dataset?.testid ?? document.activeElement?.tagName));
+
+  /* --- gerçek fareyle kesite tıkla → o ürünün içeriği (ışın testi uçtan uca) --- */
+  await tp(2.6, 2);
+  await page.keyboard.down("ArrowLeft");
+  await pencere(page, 250);
+  await page.keyboard.up("ArrowLeft");
+  await pencere(page, 1500);
+  // Üstünde DOM katmanı (prompt vb.) olmayan ilk kesit: tıklama gerçekten tuvale gitsin.
+  const target = await page.evaluate(() => {
+    for (const slug of Object.keys(window.__ZONE_KITCHEN__.dishes())) {
+      const p = window.__ZONE_KITCHEN__.dishPoint(slug);
+      if (p && document.elementFromPoint(p.x, p.y)?.tagName === "CANVAS") return { slug, ...p };
+    }
+    return null;
+  });
+  if (target) await page.mouse.click(target.x, target.y);
+  await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.view === "product");
+  const clicked = await board();
+  ok(target && clicked?.view === "product" && clicked.product === target.slug,
+    "kesite FAREYLE tıklamak o ürünün detayını açıyor",
+    `hedef ${target?.slug ?? "kadrajda kesit yok"} → ${JSON.stringify(clicked)}`);
+  // Tıklama düşse de sonraki iddialar ölçülebilsin (sabotajda script yarıda kalmasın):
+  // pano store'dan açılır — ölçülen şey artık tıklama değil, panonun kendisi.
+  if (clicked?.view !== "product") {
+    await page.evaluate((s) => window.__ZONE__.getState().openKitchen("burgers", s), target?.slug ?? "classic-manch");
+    await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.view === "product");
+  }
+  const ing = await page.locator("[data-testid=kitchen-ingredients] li").count();
+  const priceText = await page.locator("[data-testid=kitchen-price]").innerText();
+  ok(ing >= 3 && /\d+\s*TL/.test(priceText), "detayda malzemeler ve fiyat var", `${ing} malzeme · ${priceText}`);
+
+  /* --- pano açıkken: hareket yok, joystick gizli, sahneye tıklama yeni pano açmıyor --- */
+  const before = (await read(page)).char;
+  await hold(page, "ArrowUp", 600);
+  const after = (await read(page)).char;
+  ok(before.x === after.x && before.z === after.z && (await page.locator("[data-testid=zone-joystick]").count()) === 0,
+    "pano açıkken karakter yürümüyor ve joystick gizli",
+    `z ${before.z} → ${after.z}`);
+
+  /* --- sepete ekle: TEK sepet (site sepeti) --- */
+  const addSlug = (await board())?.product;
+  const q0 = await page.evaluate((s) => window.__CART__.getState().lines.find((l) => l.slug === s)?.qty ?? 0, addSlug);
+  await page.locator("[data-testid=kitchen-add]").click();
+  await kosul(page, () => /Sepette/.test(document.querySelector("[data-testid=kitchen-status]")?.textContent ?? ""));
+  const q1 = await page.evaluate((s) => window.__CART__.getState().lines.find((l) => l.slug === s)?.qty ?? 0, addSlug);
+  const status = await page.locator("[data-testid=kitchen-status]").innerText();
+  // Metin CSS'te büyük harf: innerText "EKLENDİ" döner, `/i` Türkçe İ'yi i'ye katlamaz.
+  ok(q1 === q0 + 1 && /EKLEND/i.test(status), "SEPETE EKLE site sepetine yazıyor", `${q0} → ${q1} · "${status}"`);
+
+  /* --- liste ↔ ürün; fiyatsız ürün eklenemez (koşul veriden) --- */
+  await page.locator("[data-testid=kitchen-to-list]").click();
+  await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.view === "list");
+  ok((await board())?.view === "list", "← LİSTE ürün detayından istasyon listesine dönüyor");
+  await page.keyboard.press("Escape");
+  await kosul(page, () => !document.querySelector("[data-testid=kitchen-board]"));
+  await page.evaluate(() => window.__ZONE__.getState().openKitchen("drinks", "limonata"));
+  await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.product === "limonata");
+  const dis = await page.locator("[data-testid=kitchen-add]").evaluate((b) => b.disabled && b.getAttribute("aria-disabled") === "true");
+  ok(dis, "fiyatsız ürünün (limonata) SEPETE EKLE düğmesi devre dışı");
+  await page.keyboard.press("Escape");
+
+  /* --- sabotaja açık tabela yolu: tabelaya tıklamak istasyon listesini açar --- */
+  await tp(3.2, 2);
+  await page.keyboard.down("ArrowUp");
+  await pencere(page, 900);
+  await page.keyboard.up("ArrowUp");
+  await pencere(page, 1200);
+  const sign = await page.evaluate(() => {
+    for (const id of ["sides", "drinks", "burgers"]) {
+      const p = window.__ZONE_KITCHEN__.signPoint(id);
+      if (p && document.elementFromPoint(p.x, p.y)?.tagName === "CANVAS") return { id, ...p };
+    }
+    return null;
+  });
+  if (sign) await page.mouse.click(sign.x, sign.y);
+  await kosul(page, () => document.querySelector("[data-testid=kitchen-board]")?.dataset.view === "list");
+  const sb = await board();
+  ok(sign && sb?.view === "list" && sb.station === sign.id,
+    "asılı tabelaya tıklamak o istasyonun listesini açıyor",
+    `hedef ${sign?.id ?? "kadrajda tabela yok"} → ${JSON.stringify(sb)}`);
+  await page.keyboard.press("Escape");
+
+  const cleanErrs = errs.filter((e) => !/Download the React DevTools/.test(e));
+  ok(cleanErrs.length === 0, "mutfak: konsol temiz", cleanErrs.slice(0, 2).join(" | "));
+  ok(bad.length === 0, "mutfak: 4xx/5xx istek yok (Kural 53)", bad.slice(0, 3).join(" · "));
+  await page.close();
+}
+
 /* =========================== 3 · prefers-reduced-motion =========================== */
 if (runs("reduced")) {
   console.log("\n— reduced motion");
@@ -1037,6 +1244,10 @@ if (runs("gate")) {
     ok(inFrame.menu >= 99 && inFrame.crew >= 99,
       "portrede uzak tablolar TAM kadrajda (FOV_MAX 80 kararı)",
       `menu %${inFrame.menu} · crew %${inFrame.crew}`);
+    /* Kural 75 (2026-11-15): FOV yalnız tuval boyutu değişince yeniden türetilir; sabit
+       pencerede okununca dört tam koşudan birinde boyut oturmadan okundu (52.7°). FOV
+       geçici bir değerden geçmez — oturduğu değeri bekleyip okumak iddiayı zayıflatmaz. */
+    await kosul(portrait, () => Math.abs((window.__ZONE_STATS__?.().cam.fov ?? 0) - 80) < 0.01, null, 6000);
     const fov = await portrait.evaluate(() => window.__ZONE_STATS__().cam.fov);
     ok(Math.abs(fov - 80) < 0.01, "portrede dikey FOV tavanı 80°", `${fov}°`);
 

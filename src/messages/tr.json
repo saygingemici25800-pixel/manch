@@ -347,7 +347,16 @@
         "p2": "Pazartesiden perşembeye 08.30–23.30, cuma ve cumartesi gece yarısına kadar. Yer ayırtmak için aramanız yeterli."
       }
     },
-    "srOnlyIntro": "MANCH Zone'daki dört durak, sahneye girmeden:"
+    "srOnlyIntro": "MANCH Zone'daki dört durak, sahneye girmeden:",
+    "kitchen": {
+      "kicker": "AÇIK MUTFAK",
+      "tap": "DOKUN · İNCELE",
+      "inspect": "İNCELE",
+      "toList": "← LİSTE",
+      "listHint": "Bir ürüne dokun, içinde ne var gör.",
+      "added": "✓ Sepete eklendi",
+      "inCart": "Sepette: {n}"
+    }
   },
   "Order": {
     "intro": "Merhaba MANCH! Sipariş vermek istiyorum:",

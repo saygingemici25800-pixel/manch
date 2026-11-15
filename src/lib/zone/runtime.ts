@@ -14,6 +14,7 @@
 import { angLerp, smoothing, wantedAngle } from "@/lib/zone/angles";
 import type { CharView } from "@/lib/zone/capy";
 import { CHAR_BOUND_X, CHAR_TURN_BASE, SPEED, TURN_BASE, Z_MAX, Z_MIN } from "@/lib/zone/frames";
+import { pushOut, resolveKitchen } from "@/lib/zone/kitchen";
 
 export interface ZoneRuntime {
   /** Karakterin dünya konumu, baktığı yön ve yürüme fazı. */
@@ -129,8 +130,10 @@ export function resetRuntime() {
  * sürüyor; ölçülen şey yakınlık mantığı, yürüyüş değil.
  */
 export function teleport(x: number, z: number) {
-  runtime.char.x = clamp(x, -CHAR_BOUND_X, CHAR_BOUND_X);
-  runtime.char.z = clamp(z, Z_MIN, Z_MAX);
+  // Tezgâhın içine ışınlanılmaz: en yakın kenarın dışına konur.
+  const [px, pz] = pushOut(clamp(x, -CHAR_BOUND_X, CHAR_BOUND_X), clamp(z, Z_MIN, Z_MAX));
+  runtime.char.x = px;
+  runtime.char.z = pz;
 }
 
 /** `Footprints` her karede çağırır: bu karede basılacak iz varsa döner ve kuyruğu boşaltır. */
@@ -211,11 +214,18 @@ export function stepWorld(dt: number, reduced: boolean) {
   const { ix, iz, len } = readInput();
   const { char, cam } = runtime;
 
-  // yürüme: dünya eksenlerinde, salon sınırları içinde
+  // yürüme: dünya eksenlerinde, salon sınırları içinde, tezgâhın dışında
   const fromX = char.x;
   const fromZ = char.z;
-  char.x = clamp(char.x + ix * SPEED * dt, -CHAR_BOUND_X, CHAR_BOUND_X);
-  char.z = clamp(char.z + iz * SPEED * dt, Z_MIN, Z_MAX);
+  // Önce salon sınırı, sonra açık mutfak tezgâhı (eksen eksen: kenarı boyunca kayar).
+  const next = resolveKitchen(
+    fromX,
+    fromZ,
+    clamp(char.x + ix * SPEED * dt, -CHAR_BOUND_X, CHAR_BOUND_X),
+    clamp(char.z + iz * SPEED * dt, Z_MIN, Z_MAX),
+  );
+  char.x = next.x;
+  char.z = next.z;
   /** Bu karede GERÇEKTEN alınan yol. Duvara dayanınca girdi sürse de 0'dır. */
   const moved = Math.hypot(char.x - fromX, char.z - fromZ);
 

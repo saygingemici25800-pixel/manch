@@ -11,6 +11,9 @@ import { FramePrompt } from "@/components/zone/FramePrompt";
 import { Joystick } from "@/components/zone/Joystick";
 import { Frames } from "@/components/zone/Frames";
 import { Hall } from "@/components/zone/Hall";
+import { Kitchen } from "@/components/zone/Kitchen";
+import { KitchenBoard } from "@/components/zone/KitchenBoard";
+import { KitchenPrompt } from "@/components/zone/KitchenPrompt";
 import { Npc } from "@/components/zone/Npc";
 import { useFollowCamera } from "@/hooks/useFollowCamera";
 import { useZoneControls } from "@/hooks/useZoneControls";
@@ -20,6 +23,7 @@ import { mirrorFor, viewFor } from "@/lib/zone/character";
 import { CAMERA_FOV, CAM_DIST, CAM_HEIGHT } from "@/lib/zone/frames";
 import { CAM_START_ANG, CHAR_START, resetRuntime, resetZoneDebug, teleport, zoneRuntime } from "@/lib/zone/runtime";
 import { artSources, releaseArts } from "@/lib/zone/art";
+import { releaseDishes } from "@/lib/zone/dishes";
 import { releaseTextureSlots, textureLedger } from "@/lib/zone/textures";
 import { otherCharacter, useZoneStore, type Character as CharacterId } from "@/store/zone";
 import { colors } from "@/styles/tokens";
@@ -219,6 +223,8 @@ export function ZoneCanvas({ className, onReady }: { className?: string; onReady
       })(),
       arts: artSources(),
       nearFrame: useZoneStore.getState().nearFrame,
+      nearStation: useZoneStore.getState().nearStation,
+      kitchen: useZoneStore.getState().kitchen,
       zoneState: useZoneStore.getState().state,
       lastStepRot: zoneRuntime().debug.lastStepRot,
       peakSpread: zoneRuntime().debug.peakSpread,
@@ -276,8 +282,10 @@ export function ZoneCanvas({ className, onReady }: { className?: string; onReady
         <directionalLight color={colors.sky} intensity={0.35} position={[-6, 6, -8]} />
 
         <Hall />
+        <Kitchen />
         <Frames reduced={reduced} />
         <FramePrompt />
+        <KitchenPrompt />
         {/* Sıra önemli: `Character` simülasyon adımıdır (girdi → konum → İKİ açı),
             `FollowCamera` yalnızca o açıyı kamera konumuna çevirir. R3F `useFrame`
             aboneliklerini mount sırasına göre çalıştırır. */}
@@ -293,6 +301,7 @@ export function ZoneCanvas({ className, onReady }: { className?: string; onReady
           normal DOM'da doğru çalışır. */}
       <Joystick />
       <FrameBoard />
+      <KitchenBoard />
     </div>
   );
 }
@@ -312,6 +321,7 @@ function SceneDisposer({ onDispose }: { onDispose: () => void }) {
       // bırakılırlar. `trackTexture` çift `dispose()`'u bir kez sayar.
       releaseTextureSlots();
       releaseArts();
+      releaseDishes();
       if (liveScene === scene) liveScene = null;
       onDispose();
     };

@@ -38,7 +38,11 @@ export function useZoneControls() {
 
       pressKey(k);
       if (SCROLLERS.has(k)) e.preventDefault();
-      if (k === "e" && zone.nearFrame) zone.openFrame(zone.nearFrame);
+      if (k === "e") {
+        // Tablo ve istasyon yakınlığı geometrik olarak çakışmaz (bkz. `STATION_REACH_X`).
+        if (zone.nearFrame) zone.openFrame(zone.nearFrame);
+        else if (zone.nearStation) zone.openKitchen(zone.nearStation);
+      }
     };
     const up = (e: KeyboardEvent) => releaseKey(e.key.toLowerCase());
 

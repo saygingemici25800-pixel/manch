@@ -30,6 +30,28 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
 
 ## 📍 DURUM
 
+- **ZONE'A AÇIK MUTFAK EKLENDİ (2026-11-15, kullanıcı: "ortasına uzunlamasına bir açık mutfak,
+  ürünlere tıklayınca içeriği gelsin" — istasyon seçeneği seçildi).** Kurallar **Kural 81**'de.
+  · Salonun ortasında alçak tezgâh (x ±1.05, z −9..3), üç istasyon: **SMASH BURGERS** (7 gerçek
+    kesit, zikzak) · **YANINDA** (patates kabı + sos kavanozları) · **İÇECEK & TATLI** (bardak +
+    tiramisu). Asılı tabelalar billboard. Kesite dokun → o ürün; tabelaya/nesneye dokun ya da
+    yanında dur + **İNCELE** / `E` → istasyon listesi → ürün. Liste **menünün 28/28 ürünü**.
+  · Ürün panosu: görsel · açıklama · etkin fiyat · malzemeler · hızlı detaylar · SEPETE EKLE
+    (tek sepet; fiyatsız ürün eklenemez). Pano açıkken hareket durur, Esc kapatır, odak İNCELE'ye döner.
+  · Karakter tezgâha **çarpar ve kenar boyunca kayar** (eksen eksen çözüm, kenara yaslanır).
+  · Bekçi: `zone-camera-check` yeni **`ONLY=kitchen`** bölümü **19/19**, beş koruma tek tek
+    sabotajla doğrulandı (çarpışma · ışınlama itmesi · fare tıklaması · 28 ürün · kayma).
+  · Tam koşu **124/124** (105 + 19) · `zone-leak` temiz, **canlı doku 21 → 32 sabit** (3 tabela +
+    bant + 7 kesit), kapalıyken 0 · Zone chunk **245.7 kB gz** (241.8'den; limit 260) · three ana
+    bundle'da YOK · `/tr` **219.6 kB gz** (219.4'ten +0.2, Zone deposu büyüdü — **pay 0.4 kB**) ·
+    `lab-check` 106/106 · `a11y` 60/60 · `tautoloji` 6/6 · `smoke` 32/32 (yerel prod) · lint+build temiz
+  · Gözle bakıldı (Kural 59): dev 1440/390 + **yerel prod'da ana sayfa → ZONE'A GİR yolu**
+    1440/390. İki kusur yakalandı (askı çubukları tabela yazısını kesiyordu · tek sıra burgerler
+    girişten kule gibiydi) — ikisi de düzeltildi.
+  · Yan iş — **iki eski bekçi oynaklığı giderildi** (ürün kusuru değil, son commit'te de vardı):
+    POV kamera yerleşmesi sabit pencerede bekleniyordu · portre FOV boyut oturmadan okunuyordu.
+  · ⚠ Redis/Vercel kurulumu (yönetim paneli) **kullanıcı isteğiyle ertelendi** — aşağıdaki maddede.
+
 - **YÖNETİM PANELİ `/admin` YAZILDI (2026-11-13, kullanıcı: "basit tut, yalnız işletme sahibi
   girsin").** Kurallar **Kural 80**'de. Kapsam: menü fiyatı · sipariş anlık aç/kapa · çalışma
   saati dışında otomatik kapalı (sepet görünür, yalnız GÖNDER kapalı, sebep yazar) · sipariş
@@ -1350,6 +1372,32 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
       fiyatın ilk yüklemede görünmesi, bayat sekme, satıştan kalkan ürün, kurcalanmış
       kayıtlar) · `scripts/hours-check.mjs` (saat sınırları, saf fonksiyon).
 
+81. **ZONE AÇIK MUTFAK (karar 2026-11-15, kullanıcı).** Salonun ortasında boydan boya alçak
+    tezgâh, üç istasyon; ürüne dokununca içeriği. Geometri `lib/zone/kitchen.ts` (saf — three
+    yok, menü yok), içerik `lib/zone/kitchen-stations.ts`, sahne `components/zone/Kitchen.tsx`,
+    klavye yolu `KitchenPrompt`, pano `KitchenBoard`.
+    · **İçerik menüden TÜRETİLİR**, slug listesi gömülmez: her ürün tam bir istasyonda
+      (burgers · fries+snacks+sauces+extras · drinks+dessert = 28/28). Tezgâhta 3D duran
+      yalnız **gerçek şeffaf kesiti olan** ürün (`image` `.png`); kesitsiz ürün sahte görselle
+      durmaz, listede yer alır. Yeni kesit `menu.ts`'e bağlanınca tezgâha kendiliğinden çıkar.
+    · **Alçak ve açık:** tezgâh 0.95, tabelalar 2.75'te asılı. Kamera 2.45'te; davlumbaz ya da
+      yüksek arka duvar karşı duvardaki tabloları saklar. Yükseltmeden önce gözle bak.
+    · **Çarpışma eksen eksen** (`resolveKitchen`): önce x, sonra z; engellenen eksende kenara
+      YASLANILIR (eski konumda kalınmaz — kare başına 0.23 birim, karakter kenardan rastgele
+      uzakta dururdu). Işınlama tezgâhın içine düşerse en yakın kenara itilir (`pushOut`).
+    · **Yakınlıklar çakışmaz:** istasyon |x| ≤ 3.0, tablo durma noktası tetiklemesi |x| > 3.0.
+      İkisi aynı anda prompt açamaz; `E` önce tabloya bakar.
+    · **Pano durumu `pov`, ama `pov` null + `kitchen` dolu:** POV'un bütün kuralları (hareket
+      durur, joystick ve tablo promptu gizlenir, Esc kapatır) yeniden yazılmadan geçerli;
+      kamera tabloya süzülmez. `closeFrame` mutfağı da kapatır. Yeni bir durum EKLENMEDİ —
+      `"pov"`a bakan altı yer kendiliğinden doğru davranıyor.
+    · Fiyat **yalnız `usePrices`'tan** (Kural 80); fiyatsız ürün eklenemez (koşul veriden).
+    · Kesit dokuları `lib/zone/dishes.ts` (art.ts kalıbı: önce yer tutucu, sonra webp ≈45 kB;
+      PNG 900 kB). Sahne kapanınca `releaseDishes()`; `zone-leak-check` sabit sayıyı ölçer.
+    · Dev kancası `__ZONE_KITCHEN__` (`dishPoint`/`signPoint` ekran noktası): bekçi **gerçek
+      fareyle** tıklar — ışın testi dahil uçtan uca; tıklanan noktada DOM katmanı olmadığı
+      `elementFromPoint` ile önce doğrulanır.
+
 ## 🧠 HATA GÜNLÜĞÜ
 
 | Tarih | Faz | Hata | Kök neden | Çözüm |
@@ -1536,6 +1584,12 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-13 | admin | Zincir komutu **hiç koşmadı** — zsh tek tırnak içindeki `\'`'yi kaçış saymadı, bütün satır ayrıştırma hatasıyla düştü | zsh'de tek tırnak içinde kaçış yok; ayrıca `${PIPESTATUS}` zsh'de boş (bash dizisi) → boru hattının kodları okunamıyordu | Çok satırlı düzenlemeler python heredoc'una (`<<'PY'`); çıkış kodu boru hattından değil komutun kendisinden okunur (Kural 77a). Hiçbir dosyanın değişmediği `git status` ile doğrulandı |
 | 2026-11-13 | admin | **Toplu sabotaj ZİNCİRLEME bozuldu** — dört koruma tek build'de sabote edilince biri ötekilerin kontrollerini düşürdü, script de H bölümünde çöktü; iki sabotaj hiç ölçülmedi | Çerezsiz action sabotajı depoyu gerçekten değiştirdi (siparişi açtı) → sonraki saat/durum kontrolleri o yüzden kırmızı yandı, sabotajın sebebi ayırt edilemedi | Her koruma **ayrı build'de, tek başına** sabote edildi; geçerlilik ölçütü "yalnız beklenen kontrol(ler) düştü". **Ders: sabotaj izole değilse kanıt değildir — düşen kontrolün sebebi okunabilmeli** (Kural 77b) |
 | 2026-11-13 | admin | `a11y` bekçisi iki kez **yanlış koşul** seçti: halka renk geçişi ortasında okundu (bordo→krem %18 → 1.52) · `/menu`'de `.emph` sayısını bekledi ama kapalı sepet çekmecesinin düğmeleri DOM'da hep durduğu için koşul ANINDA sağlandı (0 öğe) | Kural 75'in ikinci yüzü: koşul ürünün beklediği şey olmalı. FAZ B-2'nin dolgu↔kontur geçişi `transition-colors` getirdi, eski ölçüm bunu bilmiyordu; görünürlük ölçümü hit-test, koşul ise DOM varlığıydı | Halka: odaktaki öğenin `getAnimations()`'ı durana kadar · bölüm 5: **ölçümün kendi görünürlük tanımı** (kadrajda + hit-test). 60/60 ×4. **Ders: bekleme koşulu, ölçümle aynı tanımı kullanır** |
+| 2026-11-15 | mutfak | **Kayma kontrolü düşemiyordu** — çarpışma tamamen kaldırılınca da geçti | Çapraz yürüyüş x 0.3'ten başlıyordu; o açıyla karakter tezgâhın kenarını içine girmeden aşıyordu. İddia ("kenar boyunca kayıyor") çarpışmasız dünyada da doğruydu | Başlangıç tezgâhın eksenine yakın (x −1.2) ve **ara örneklerin hiçbiri içeride değil** şartı eklendi; sabotajda 8/50 örnek içeride → düşüyor. Kural 77b'nin birebir örneği: ilk sabotaj koşusu yakaladı |
+| 2026-11-15 | bekçi | `zone-camera-check` "POV kamerası hedefe yerleşiyor" **son commit'te de düşüyordu** (stash ile doğrulandı) | Durum beklemesi sabit 2.5 sn `pencere()` ile yazılmıştı (Kural 75 ihlali). POV geçişi kare başına lerp; başsız tarayıcı ~21 fps'e düşünce kamera hedefin 0.4 birim gerisinde kalıyordu | Koşula çevrildi — ama ilk hâli **sabotajlı yanlış hedefte de geçti**: kamera giderken o noktanın üstünden geçiyor, koşul o anı yakalıyordu. Şimdi "vardı" değil **"orada kaldı"**: koşul + 600 ms ölçüm penceresi + yeniden okuma. İki yönde doğrulandı. **Ders: koşul beklemesi geçici bir değerden geçebilen niceliklerde "oturdu mu" diye sorulur** |
+| 2026-11-15 | bekçi | "portrede dikey FOV tavanı 80°" dört tam koşudan birinde 52.7° okudu | FOV yalnız tuval boyutu değişince türetilir; sabit pencerede boyut oturmadan okundu | 80'e oturana kadar koşul (tavanlı). FOV geçici değerden geçmez — burada "vardı" beklemek iddiayı zayıflatmaz. `ONLY=gate` 3/3 temiz |
+| 2026-11-15 | mutfak | Tabela başlığı ("SMASH BURGERS") **iki kenardan kesik** çıktı | Sığdırma döngüsü `measureText().width` (ilerleme genişliği) ile ölçüyordu; Modak'ın harfleri ilerlemenin dışına taşıyor | Mürekkep kutusuyla ölçülür: `actualBoundingBoxLeft + actualBoundingBoxRight`. **Canvas'a yazılan display fontta genişlik `width` ile ölçülmez** |
+| 2026-11-15 | mutfak | Düzeltmeden sonra da tabelanın baş ve son harfi kesik göründü — bu kez **askı çubukları** yazının önünden geçiyordu | Askılar tabelanın MERKEZİNDEN tavana çizilmişti; tabelanın üst yarısını boydan boya kesiyorlardı. Otomatik hiçbir kontrol bakmıyor; **yalnız yerel prod gözle bakmada** görüldü (Kural 59) | Askı tabelanın üst kenarından başlıyor ve 1 cm geride. Aynı turda ikinci göz bulgusu: tek sırada dizili 7 burger girişten **kule** gibi görünüyordu → zikzak (±0.32) |
+| 2026-11-15 | bekçi | "SEPETE EKLE" kontrolü `/eklendi/i` ile düştü, metin doğruydu | Metin CSS'te `uppercase`: `innerText` "EKLENDİ" döner, JS `/i` bayrağı Türkçe **İ**'yi **i**'ye katlamaz | Desen `/EKLEND/i`. **Büyük harfli Türkçe metinde `/i` ile `ı/i/İ` içeren kelime aranmaz** — harfi dışarıda bırak ya da büyük yaz |
 
 ---
 

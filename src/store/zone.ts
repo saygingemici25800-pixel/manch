@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { FrameId } from "@/lib/zone/frames";
+import type { KitchenFace, StationId } from "@/lib/zone/kitchen";
 
 /**
  * Zone durum makinesi (spec bölüm 6).
@@ -29,6 +30,17 @@ interface ZoneStore {
    * `FramePrompt` yeniden mount olunca kendi GİR butonuna odağı alır ve temizler.
    */
   returnFocus: FrameId | null;
+  /** Açık mutfak: karakterin yanında durduğu istasyon ve tezgâhın hangi yüzünde olduğu. */
+  nearStation: StationId | null;
+  nearFace: KitchenFace;
+  /**
+   * Açık mutfak panosu. Açıkken durum `pov`'dur (hareket durur, joystick ve tablo promptu
+   * gizlenir, Esc kapatır — POV'un bütün kuralları aynen geçerli) ama `pov` **null**:
+   * kamera tabloya süzülmez, karakterin arkasında kalır. `product` null → istasyon listesi.
+   */
+  kitchen: { station: StationId; product: string | null } | null;
+  /** Mutfak panosu kapanınca odağın döneceği istasyon (prompt'un İNCELE butonu). */
+  kitchenReturn: StationId | null;
 
   /** "ZONE'A GİR" — karakter hatırlanıyorsa doğrudan yüklemeye geçer. */
   enter: () => void;
@@ -38,6 +50,12 @@ interface ZoneStore {
   setNearFrame: (id: FrameId | null) => void;
   openFrame: (id: FrameId) => void;
   clearReturnFocus: () => void;
+  setNearStation: (id: StationId | null, face: KitchenFace) => void;
+  /** İstasyon listesini (ya da `product` verilirse doğrudan ürünü) açar. */
+  openKitchen: (station: StationId, product?: string | null) => void;
+  /** Mutfak panosunda ürün ↔ liste geçişi. */
+  setKitchenProduct: (product: string | null) => void;
+  clearKitchenReturn: () => void;
   closeFrame: () => void;
   exit: () => void;
 }
@@ -59,6 +77,10 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
   pov: null,
   progress: 0,
   returnFocus: null,
+  nearStation: null,
+  nearFace: 0,
+  kitchen: null,
+  kitchenReturn: null,
 
   enter: () => {
     const remembered = readCharacter();
@@ -69,6 +91,9 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
       nearFrame: null,
       pov: null,
       returnFocus: null,
+      nearStation: null,
+      kitchen: null,
+      kitchenReturn: null,
     });
   },
 
@@ -93,10 +118,35 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
 
   clearReturnFocus: () => set({ returnFocus: null }),
 
-  /** POV'dan çıkış — `camAng` DEĞİŞMEMİŞ olmalı (spec 6.1), o kamera hook'unda tutulur. */
-  closeFrame: () => set({ state: "zone", pov: null }),
+  setNearStation: (nearStation, nearFace) => {
+    const s = get();
+    if (s.nearStation !== nearStation || s.nearFace !== nearFace) set({ nearStation, nearFace });
+  },
 
-  exit: () => set({ state: "closed", pov: null, nearFrame: null, progress: 0, returnFocus: null }),
+  openKitchen: (station, product = null) =>
+    set({ state: "pov", pov: null, kitchen: { station, product }, kitchenReturn: station }),
+
+  setKitchenProduct: (product) => {
+    const k = get().kitchen;
+    if (k) set({ kitchen: { station: k.station, product } });
+  },
+
+  clearKitchenReturn: () => set({ kitchenReturn: null }),
+
+  /** POV'dan çıkış — `camAng` DEĞİŞMEMİŞ olmalı (spec 6.1), o kamera hook'unda tutulur. */
+  closeFrame: () => set({ state: "zone", pov: null, kitchen: null }),
+
+  exit: () =>
+    set({
+      state: "closed",
+      pov: null,
+      nearFrame: null,
+      progress: 0,
+      returnFocus: null,
+      nearStation: null,
+      kitchen: null,
+      kitchenReturn: null,
+    }),
 }));
 
 /** Seçilmeyen maskot — salonun dibinde NPC olarak durur (spec 8.3). */

@@ -326,6 +326,82 @@ export function artPlaceholderTexture(title: string, kicker: string, waiting: st
   return tex(c, undefined, undefined, undefined, "art");
 }
 
+/* -------------------------------- açık mutfak -------------------------------- */
+
+/**
+ * İstasyon tabelası: bordo zemin, krem Modak başlık + küçük pixel alt satır.
+ * Çift yüzlü düzlemde değil, **billboard**'da kullanılır — her açıdan okunur.
+ * Yazılı doku: `fonts.ready` sonrası yeniden çizilir (spec 4.2), yuva anahtarı fontEpoch taşır.
+ */
+export function kitchenSignTexture(title: string, hint: string) {
+  const W = 640;
+  const H = 200;
+  const c = cv(W, H);
+  const x = c.getContext("2d")!;
+  x.fillStyle = C.berry;
+  x.beginPath();
+  x.roundRect(4, 4, W - 8, H - 8, 34);
+  x.fill();
+  x.strokeStyle = C.cream;
+  x.lineWidth = 6;
+  x.beginPath();
+  x.roundRect(16, 16, W - 32, H - 32, 26);
+  x.stroke();
+
+  x.fillStyle = C.cream;
+  x.textAlign = "center";
+  x.textBaseline = "middle";
+  let size = 82;
+  x.font = `400 ${size}px Modak, "Arial Black", sans-serif`;
+  // Genişlik `width` (ilerleme) ile değil MÜREKKEP kutusuyla ölçülür: Modak'ın harfleri
+  // ilerleme genişliğinin dışına taşıyor, `width`'e güvenince başlık iki kenardan kesiliyordu.
+  const ink = () => {
+    const m = x.measureText(title);
+    return m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+  };
+  while (ink() > W - 110 && size > 36) {
+    size -= 4;
+    x.font = `400 ${size}px Modak, "Arial Black", sans-serif`;
+  }
+  x.fillText(title, W / 2, 92);
+  x.font = '400 20px "Press Start 2P", monospace';
+  x.fillText(hint, W / 2, 158);
+  return tex(c, undefined, undefined, undefined, "kitchenSign");
+}
+
+/** Tezgâh yanındaki dama bandı (bordo/krem, yatay tekrar). */
+export function counterBandTexture(anisotropy?: number) {
+  const c = cv(64, 32);
+  const x = c.getContext("2d")!;
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 2; j++) {
+      x.fillStyle = (i + j) % 2 === 0 ? C.berry : C.cream;
+      x.fillRect(i * 16, j * 16, 16, 16);
+    }
+  }
+  const t = tex(c, undefined, undefined, anisotropy, "counterBand");
+  t.wrapS = THREE.RepeatWrapping;
+  t.magFilter = THREE.NearestFilter;
+  return t;
+}
+
+/** Burger kesiti gelmeden yer tutucu (Kural 7): krem halkalı bordo disk. */
+export function dishPlaceholderTexture() {
+  const c = cv(128, 128);
+  const x = c.getContext("2d")!;
+  x.clearRect(0, 0, 128, 128);
+  x.fillStyle = C.berry;
+  x.beginPath();
+  x.arc(64, 70, 46, 0, Math.PI * 2);
+  x.fill();
+  x.strokeStyle = C.cream;
+  x.lineWidth = 6;
+  x.beginPath();
+  x.arc(64, 70, 30, 0, Math.PI * 2);
+  x.stroke();
+  return tex(c, undefined, undefined, undefined, "dish");
+}
+
 /* ------------------------------ zemin decal'ları ----------------------------- */
 
 /** Ayak izi (spec 8.3) — 18'lik havuzda sönerek kullanılır. */
