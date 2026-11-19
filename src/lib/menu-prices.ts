@@ -1,9 +1,8 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-
 import { mergePrices, type PriceMap } from "@/lib/prices";
 import { getStore } from "@/lib/store";
+import { cachedStoreRead } from "@/lib/store/cached";
 
 export const PRICES_TAG = "menu-prices";
 
@@ -14,8 +13,10 @@ export const PRICES_TAG = "menu-prices";
  *
  * `{ expire: 0 }` BİLEREK: Next 16'nın önerdiği `"max"` profili değişiklikten sonraki ilk
  * isteğe **eski fiyatı** servis eder. Fiyatta kabul edilemez.
+ *
+ * Development'ta önbellek YOK, depo doğrudan okunur (Kural 83, `store/cached.ts`).
  */
-const readOverrides = unstable_cache(async () => getStore().getPrices(), ["menu-prices-v1"], { tags: [PRICES_TAG] });
+const readOverrides = cachedStoreRead(async () => getStore().getPrices(), ["menu-prices-v1"], { tags: [PRICES_TAG] });
 
 /**
  * HATA YUTULMAZ (çalışma anında). İlk yazımda Redis hatasında menu.ts fiyatlarına

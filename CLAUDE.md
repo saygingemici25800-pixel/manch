@@ -45,10 +45,9 @@ Bir faz bittiğinde: DURUM'u güncelle, fazın checkbox'larını işaretle, comm
   · ⚠ Maskot çizimleri gelince iki kare yeniden üretilir (`zone-still.mjs` başındaki komutlar).
 - **Mutfak panosu yazıları büyüdü (2026-11-15, kullanıcı: "yazılar küçük").** Masaüstü ~%25–40,
   mobil ~%10–15; kart 760 → 880 px. 1440/390'da yatay taşma yok, mutfak bekçisi 20/20.
-- ⚠ **`lab-check` dev'de satır 288'de çöküyor — ÖNCEDEN VAR (HEAD `2f9091c`'de de), bu turla
-  ilgisiz.** Sepet "fiyatlar güncellendi" diyip gönderi kapatıyor (sayfa fiyat imzası ≠
-  `/api/order-status`). **Canlıda YOK** (gerçek tarayıcıyla denendi: gönder etkin, imza
-  `174fm5` eşleşiyor). Ayrı görev olarak açıldı; çözülene kadar lab-check yeşil sayılmaz.
+- **`lab-check` checkout çöküşü çözüldü (2026-11-19, Kural 83).** Kök neden dev'e özgü bayat
+  `unstable_cache` girdisiydi (`admin-check`'in bıraktığı `truffle-fries: 500`); dev artık depoyu
+  önbelleksiz okur. Canlıyı etkilemiyordu. lab-check 3/3 yeşil (ayrıntı HATA GÜNLÜĞÜ).
 
 - **CANLI ADRES DEĞİŞTİ: https://manch.sngdestek.com (2026-11-15, kullanıcı: "adresi kalıcı yap").**
   Sebep: bu bağlantıda **bütün `*.vercel.app` adresleri TLS el sıkışmasında kesiliyor**
@@ -1456,6 +1455,25 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
       web-fetch ajanı da aynı ağdan çıktığı için vercel.app'e ulaşamaz — "site çöktü" sanılmaz.
     · Yeni bir proje/alt alan adı: `vercel domains add <alt>.sngdestek.com <proje>` (Vercel DNS,
       anında); ardından `NEXT_PUBLIC_SITE_URL` Production'da güncellenir + redeploy (Kural 57).
+83. **DEPO ÖNBELLEĞİ YALNIZ PRODUCTION'DA (karar 2026-11-19).** Depo okumaları
+    (`getEffectivePrices`, sipariş anahtarı) `src/lib/store/cached.ts#cachedStoreRead` ile
+    sarılır: production'da `unstable_cache` + etiket, development'ta **doğrudan depo**.
+    · Neden: dev deposu tek dosya (`.data/admin-store.json`), ona birden çok süreç yazar
+      (dev sunucusu, `admin-check`'in yerel prod sunucusu, bekçinin `depoSifirla()`'sı).
+      `revalidateTag` yalnız kendi sürecinin **bellekteki** etiket listesine yazar; dev
+      fetch-cache girdisi ise **diskte, 1 yıl geçerli** → başka süreç dosyayı değiştirince
+      dev girdisi sonsuza dek bayat, yeniden başlatma da kurtarmaz.
+    · `unstable_cache` anahtarı `cb.toString()` içerir; Turbopack içe aktarılan adı katmana
+      göre yazar (`[app-rsc]` / `[app-route]`) → **layout ile route handler AYRI girdi
+      okur.** Sayfa ile `/api/order-status`'un aynı değeri gördüğünü varsayan her mantık
+      (fiyat imzası, Kural 80) bu iki girdinin birlikte tazelenmesine dayanır. Production'da
+      tek yazıcı panel + kalıcı etiket geçersizleme bunu sağlar; depoya panel DIŞINDAN
+      (elle SQL) yazılırsa iki girdi ayrışabilir → elle yazımdan sonra redeploy.
+    · Belirti tanıma: sepet "Fiyatlar güncellendi — sepet yenileniyor…" deyip gönderi
+      kapalı tutuyorsa sayfanın `PriceProvider` tablosu ile `/api/order-status`
+      `pricesVersion`'ı karşılaştırılır (sayfa HTML'indeki `prices` → `priceVersion`).
+    · `lab-check` gönderi tıklamadan önce sipariş durumunu bekler ve "gönder etkin"i notuyla
+      birlikte kontrol eder — kapalı gönderde 30 sn'lik tıklama çöküşü yok.
 
 ## 🧠 HATA GÜNLÜĞÜ
 
@@ -1655,6 +1673,7 @@ billboard + aynalama + reduced-motion; `ONLY=math|scene|reduced` ile tek bölüm
 | 2026-11-15 | mutfak | Burgerler tezgâhta **havada** duruyordu (kullanıcı ekran görüntüsü) | Kesit PNG/webp'lerin altında yüksekliğin %14–19'u kadar şeffaf pay var; sprite düzlemin alt kenarına göre konumlanıyordu. Kural 59 turu bunu "burger tezgâhın üstünde" diye geçmişti — ızgaranın siyahı boşluğu gölge gibi gösteriyordu | Pay alfadan ölçülüyor, kesit tabağa oturuyor. **Ders: şeffaf kenarlı sprite'ı yere oturtan şey düzlemin kenarı değil, görselin opak kenarıdır** — kare kadrajlı kesitlerde her zaman ölç |
 | 2026-11-15 | hero | Zone karesi hero'ya konunca krem başlık ve rozet okunmaz hâle geldi; düz perdeyi koyulaştırınca da sahne pembeye boğuldu | Zone render'ı fotoğraftan çok daha AÇIK (krem tavan, açık mavi duvar); eski %45 düz perde koyu fotoğrafa göre ayarlanmıştı | Perde %10 + üst/alt degrade. Kontrast, metin gizlenip arkasındaki EN AÇIK piksel okunarak ölçüldü (ortalama değil) — 4.72/6.73/9.08 |
 | 2026-11-15 | bekçi | `lab-check` checkout'ta çöktü; ilk şüphe bu turun değişikliğiydi | `git stash -u` ile HEAD'de koşuldu → aynı satırda düştü: önceden var. Canlıda gerçek tarayıcıyla sepet denendi → sorun yok | Ayrı göreve ayrıldı. **Ders: bir bekçi düşünce önce "benim değişikliğim mi?" sorusu stash ile cevaplanır**; sonra "müşteri etkileniyor mu?" canlıda gerçek yoldan |
+| 2026-11-19 | bekçi | `lab-check` dev'de satır 288'de çöktü: gönder kapalı, not "Fiyatlar güncellendi — sepet yenileniyor…". Sayfa imzası `1be2aby`, `/api/order-status` `174fm5` (`x-test-now` ile de onsuz da — başlık ilgisiz) | Sayfa tablosunda `truffle-fries: 500` (menu.ts 260): `.next/dev/cache/fetch-cache/5e34…` (13 Kas.) `{"truffle-fries":500,"classic-manch":570}` = `admin-check` F bölümünün bıraktığı depo. `admin-check`'in prod sunucusu aynı `.data/admin-store.json`'a yazıp KENDİ etiketini geçersizledi; dev'in disk girdisi bayat kaldı (etiket listesi bellekte → yeniden başlatma kurtarmaz). `unstable_cache` anahtarı `cb.toString()` + Turbopack katman adı → layout ile route ayrı girdi okuyor, route'unki (15 Kas.) tazeydi. **Müşteri etkilenmez:** canlıda tek yazıcı panel, etiket geçersizleme kalıcı | `cachedStoreRead` (Kural 83): dev'de önbellek yok, depo doğrudan; prod aynı. `lab-check` gönderi tıklamadan önce sipariş durumunu bekleyip "gönder etkin"i notuyla kontrol eder (Kural 60: düzeltilmemiş sunucuda çöküş yerine bu kontrol düştü) |
 
 ---
 

@@ -1,11 +1,10 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-
 import { hoursWindow } from "@/lib/hours";
 import { combineStatus, type OrderStatus } from "@/lib/order/status-core";
 import { site } from "@/lib/site";
 import { getStore } from "@/lib/store";
+import { cachedStoreRead } from "@/lib/store/cached";
 
 export const ORDERING_TAG = "ordering";
 
@@ -14,9 +13,9 @@ export const ORDERING_TAG = "ordering";
  * Redis'e gitseydi biri ucu döverek Upstash kotasını tüketebilir, kota bitince de
  * anahtar okunamaz → "açık" sayılır ve sahibin "kapalı" kararı düşerdi (inceleme
  * 2026-11-13). Sahip düğmeye basınca `revalidateTag(ORDERING_TAG, { expire: 0 })` → anında.
- * Saat hesabı önbelleğin DIŞINDA, her istekte yapılır.
+ * Saat hesabı önbelleğin DIŞINDA, her istekte yapılır. Development'ta önbellek yok (Kural 83).
  */
-const readOrdering = unstable_cache(async () => getStore().getOrderingEnabled(), ["ordering-v1"], {
+const readOrdering = cachedStoreRead(async () => getStore().getOrderingEnabled(), ["ordering-v1"], {
   tags: [ORDERING_TAG],
   revalidate: 30,
 });

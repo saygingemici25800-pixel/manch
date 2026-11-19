@@ -285,8 +285,19 @@ t("demo bloğu sayısı", demos === 11, `${demos} blok`);
   // Çekmece DURSUN: `data-state=open` animasyonun başında yazılıyor, hareketli hedefe
   // tıklamak Playwright'ta "element is not stable" ile 30 sn'de çöküyordu.
   await sabit(q, "[data-testid=checkout]");
-  await q.locator("[data-testid=checkout]").click();
-  await kosul(q, () => typeof window.__OPENED__ === "string");
+  /* Kural 83 (2026-11-19): gönder kapalıysa tıklama 30 sn'de "element is not enabled" ile
+     ÇÖKÜYOR ve koşu sebebi söylemeden bitiyordu. Önce sipariş durumu gelsin (fiyat imzası
+     o cevapla karşılaştırılır), sonra gönderin açık olduğu SEBEBİYLE birlikte kontrol edilir;
+     kapalıysa tıklanmaz, aşağıdaki kontroller düzgünce düşer. */
+  await kosul(q, () => !!window.__ORDER_STATUS__?.getState().resp);
+  const gonder = await q.evaluate(() => ({
+    enabled: !document.querySelector("[data-testid=checkout]")?.hasAttribute("disabled"),
+    notice: document.querySelector("[data-testid=order-closed]")?.textContent?.trim() ?? null,
+    server: window.__ORDER_STATUS__?.getState().resp?.pricesVersion ?? null,
+  }));
+  t("Cart · gönder etkin (sayfa fiyat imzası = sunucu)", gonder.enabled, gonder.enabled ? `imza ${gonder.server}` : `not="${gonder.notice}" · sunucu imzası ${gonder.server}`);
+  if (gonder.enabled) await q.locator("[data-testid=checkout]").click();
+  await kosul(q, () => typeof window.__OPENED__ === "string").catch(() => {});
   const waHref = await q.evaluate(() => window.__OPENED__);
   const waOk = waHref && waHref.startsWith("https://wa.me/905054970748?text=");
   const waMsg = waHref ? decodeURIComponent(waHref.split("text=")[1] ?? "") : "";
